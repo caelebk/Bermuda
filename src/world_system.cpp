@@ -12,6 +12,9 @@
 
 #include "physics_system.hpp"
 
+// Movement speed (To be balanced later)
+#define SPEED_INC 2.0f
+
 // Game configuration
 
 // create the underwater world
@@ -168,8 +171,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
   for (Entity entity : registry.motions.entities) {
       Motion& motion = registry.motions.get(entity);
-      motion.position[0] += motion.velocity[0];
-      motion.position[1] += motion.velocity[1];
+      motion.position += motion.velocity;
   }
 
   // reduce window brightness if the salmon is dying
@@ -246,8 +248,6 @@ bool WorldSystem::is_over() const {
 void WorldSystem::on_key(int key, int, int action, int mod) {
     // Player movement attributes
     Motion& motion = registry.motions.get(player);
-    // Movement speed (To be balanced later)
-    float SPEED_INC = 2.0f;
 
   // Resetting game
   if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
