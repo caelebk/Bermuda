@@ -165,6 +165,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       return true;
     }
   }
+
+  for (Entity entity : registry.motions.entities) {
+      Motion& motion = registry.motions.get(entity);
+      motion.position[0] += motion.velocity[0];
+      motion.position[1] += motion.velocity[1];
+  }
+
   // reduce window brightness if the salmon is dying
   screen.darken_screen_factor = 1 - min_counter_ms / 3000;
   return true;
@@ -187,6 +194,9 @@ void WorldSystem::restart_game() {
 
   // Debugging for memory/component leaks
   registry.list_all_components();
+
+  player = createPlayer(renderer, { window_width_px / 2, window_height_px - 200 });
+  registry.colors.insert(player, { 1, 0.8f, 0.8f });
 }
 
 // Compute collisions between entities
@@ -234,6 +244,11 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
+    // Player movement attributes
+    Motion& motion = registry.motions.get(player);
+    // Movement speed (To be balanced later)
+    float SPEED_INC = 2.0f;
+
   // Resetting game
   if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
     int w, h;
@@ -243,11 +258,37 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   }
 
   // Debugging
-  if (key == GLFW_KEY_D) {
+  if (key == GLFW_KEY_G) {
     if (action == GLFW_RELEASE)
       debugging.in_debug_mode = false;
     else
       debugging.in_debug_mode = true;
+  }
+
+  // WASD Movement Keys
+  if (key == GLFW_KEY_W) {
+      if (action == GLFW_RELEASE)
+          motion.velocity[1] = 0;
+      else
+          motion.velocity[1] = -SPEED_INC;
+  }
+  if (key == GLFW_KEY_S) {
+      if (action == GLFW_RELEASE)
+          motion.velocity[1] = 0;
+      else
+          motion.velocity[1] = SPEED_INC;
+  }
+  if (key == GLFW_KEY_A) {
+      if (action == GLFW_RELEASE)
+          motion.velocity[0] = 0;
+      else
+          motion.velocity[0] = -SPEED_INC;
+  }
+  if (key == GLFW_KEY_D) {
+      if (action == GLFW_RELEASE)
+          motion.velocity[0] = 0;
+      else
+          motion.velocity[0] = SPEED_INC;
   }
 
   // Control the current speed with `<` `>`
