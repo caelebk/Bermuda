@@ -76,6 +76,39 @@ struct Mesh {
   std::vector<uint16_t> vertex_indices;
 };
 
+struct BoundingBox {
+    int minimum_x = INT_FAST8_MAX;
+    int maximum_x = INT_FAST8_MIN;
+    int minimum_y = INT_FAST8_MAX;
+    int maximum_y = INT_FAST8_MIN;
+};
+
+struct Position {
+  int x;
+  int y;
+
+  Position(int x, int y) : x(x), y(y) {};
+};
+
+struct Vector {
+  Position start;
+  Position end;
+
+  Vector(Position start, Position end) : start(start), end(end) {};
+};
+
+struct Space {
+  std::vector<Entity> boundaries;
+  std::vector<Entity> walls;
+  std::vector<Entity> doors;
+  
+  Space();
+};
+
+struct Adjacency {
+  std::vector<Entity> neighbours;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture

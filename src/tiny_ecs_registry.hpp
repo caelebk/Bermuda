@@ -10,8 +10,6 @@ class ECSRegistry
 	std::vector<ContainerInterface*> registry_list;
 
 public:
-	// Manually created list of all components this game has
-	// TODO: A1 add a LightUp component
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
@@ -24,11 +22,14 @@ public:
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
 
-	// constructor that adds all containers for looping over them
-	// IMPORTANT: Don't forget to add any newly added containers!
+	// level-related components
+	ComponentContainer<BoundingBox> bounding_boxes;
+	ComponentContainer<Vector> vectors;
+	ComponentContainer<Space> spaces;
+	ComponentContainer<Adjacency> adjacencies;
+
 	ECSRegistry()
 	{
-		// TODO: A1 add a LightUp component
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
@@ -40,6 +41,11 @@ public:
 		registry_list.push_back(&deadlys);
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
+
+		registry_list.push_back(&bounding_boxes);
+		registry_list.push_back(&vectors);
+		registry_list.push_back(&spaces);
+		registry_list.push_back(&adjacencies);
 	}
 
 	void clear_all_components() {

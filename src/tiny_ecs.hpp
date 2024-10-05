@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-// Unique identifyer for all entities
+// Unique identifier for all entities
 class Entity {
   unsigned int id;
   static unsigned int
@@ -72,6 +72,7 @@ public:
   template <typename... Args> Component &emplace(Entity e, Args &&...args) {
     return insert(e, Component(std::forward<Args>(args)...));
   };
+  
   template <typename... Args>
   Component &emplace_with_duplicates(Entity e, Args &&...args) {
     return insert(e, Component(std::forward<Args>(args)...), false);
