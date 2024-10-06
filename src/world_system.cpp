@@ -1,8 +1,8 @@
 // Header
 #include "world_system.hpp"
 #include "common.hpp"
-#include "player_factories.hpp"
 #include "tiny_ecs_registry.hpp"
+#include "world_init.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>
@@ -10,13 +10,16 @@
 #include <iostream>
 #include <sstream>
 
+#include "physics_system.hpp"
+
 // Movement speed (To be balanced later)
 #define SPEED_INC 2.0f
 
 // Game configuration
 
 // create the underwater world
-WorldSystem::WorldSystem() : points(0) {
+WorldSystem::WorldSystem()
+    : points(0) {
   // Seeding rng with random device
   rng = std::default_random_engine(std::random_device()());
 }
@@ -167,9 +170,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
   }
 
   for (Entity entity : registry.motions.entities) {
-    Motion &motion = registry.motions.get(entity);
-    Position &position = registry.positions.get(entity);
-    position.position += motion.velocity;
+      Motion& motion = registry.motions.get(entity);
+      motion.position += motion.velocity;
   }
 
   // reduce window brightness if the salmon is dying
@@ -195,9 +197,8 @@ void WorldSystem::restart_game() {
   // Debugging for memory/component leaks
   registry.list_all_components();
 
-  player =
-      createPlayer(renderer, {window_width_px / 2, window_height_px - 200});
-  registry.colors.insert(player, {1, 0.8f, 0.8f});
+  player = createPlayer(renderer, { window_width_px / 2, window_height_px - 200 });
+  registry.colors.insert(player, { 1, 0.8f, 0.8f });
 }
 
 // Compute collisions between entities
@@ -245,8 +246,8 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-  // Player movement attributes
-  Motion &motion = registry.motions.get(player);
+    // Player movement attributes
+    Motion& motion = registry.motions.get(player);
 
   // Resetting game
   if (action == GLFW_RELEASE && key == GLFW_KEY_R) {

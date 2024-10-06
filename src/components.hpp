@@ -1,12 +1,55 @@
 #pragma once
 #include "../ext/stb_image/stb_image.h"
 #include "common.hpp"
-#include "misc.hpp"
-
+#include <unordered_map>
 #include <vector>
+
+// Player component
+struct Player {};
+
+// anything that is deadly to the player
+struct Deadly {};
+
+// anything the player can pick up
+struct Consumable {};
+
+// All data relevant to the shape and motion of entities
+struct Motion {
+  vec2 position = {0, 0};
+  float angle = 0;
+  vec2 acceleration = {0, 0};
+  vec2 velocity = {0, 0};
+  vec2 scale = {10, 10};
+};
+
+// Stucture to store collision information
+struct Collision {
+  // Note, the first object is stored in the ECS container.entities
+  Entity other; // the second object involved in the collision
+  Collision(Entity &other) { this->other = other; };
+};
+
+// Data structure for toggling debug mode
+struct Debug {
+  bool in_debug_mode = 0;
+  bool in_freeze_mode = 0;
+};
+
+extern Debug debugging;
+
 // Sets the brightness of the screen
 struct ScreenState {
   float darken_screen_factor = -1;
+};
+
+// A struct to refer to debugging graphics in the ECS
+struct DebugComponent {
+  // Note, an empty struct has size 1
+};
+
+// A timer that will be associated to dying salmon
+struct DeathTimer {
+  float counter_ms = 3000;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl &
