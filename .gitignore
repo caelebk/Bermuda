@@ -5,6 +5,7 @@ cmake_install.cmake
 compile_commands.json
 .cache/
 ext/stb_image/project_path.hpp
+ext/project_path.hpp
 Makefile
 bermuda
 bermuda.exe
