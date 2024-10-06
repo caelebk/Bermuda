@@ -266,28 +266,28 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
   // WASD Movement Keys
   if (key == GLFW_KEY_W) {
-    if (action == GLFW_RELEASE)
-      motion.velocity[1] = 0;
-    else
-      motion.velocity[1] = -SPEED_INC;
+      if (action == GLFW_RELEASE)
+          motion.velocity.y = 0;
+      else
+          motion.velocity.y = -SPEED_INC;
   }
   if (key == GLFW_KEY_S) {
-    if (action == GLFW_RELEASE)
-      motion.velocity[1] = 0;
-    else
-      motion.velocity[1] = SPEED_INC;
+      if (action == GLFW_RELEASE)
+          motion.velocity.y = 0;
+      else
+          motion.velocity.y = SPEED_INC;
   }
   if (key == GLFW_KEY_A) {
-    if (action == GLFW_RELEASE)
-      motion.velocity[0] = 0;
-    else
-      motion.velocity[0] = -SPEED_INC;
+      if (action == GLFW_RELEASE)
+          motion.velocity.x = 0;
+      else
+          motion.velocity.x = -SPEED_INC;
   }
   if (key == GLFW_KEY_D) {
-    if (action == GLFW_RELEASE)
-      motion.velocity[0] = 0;
-    else
-      motion.velocity[0] = SPEED_INC;
+      if (action == GLFW_RELEASE)
+          motion.velocity.x = 0;
+      else
+          motion.velocity.x = SPEED_INC;
   }
 
   // Control the current speed with `<` `>`
