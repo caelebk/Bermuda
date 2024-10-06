@@ -20,27 +20,28 @@ class RenderSystem {
 	std::array<GLuint, texture_count> texture_gl_handles;
 	std::array<ivec2, texture_count> texture_dimensions;
 
+	// Cursor asset
+	GLFWimage cursorImageData;
+
 	// Make sure these paths remain in sync with the associated enumerators.
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SALMON, mesh_path("salmon.obj"))
 		  // specify meshes of other assets here
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
-			textures_path("green_fish.png"),
-			textures_path("eel.png") };
+			textures_path("player/player.png"),
+			};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
-		shader_path("egg"),
-		shader_path("salmon"),
 		shader_path("textured"),
-		shader_path("water") };
+		shader_path("water") 
+		};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
@@ -61,6 +62,9 @@ public:
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
 	void initializeGlGeometryBuffers();
+
+	void initializeGlCursor(std::string cursorImagePath);
+
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the wind
 	// shader

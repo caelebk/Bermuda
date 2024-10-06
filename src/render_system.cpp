@@ -4,9 +4,7 @@
 
 #include "tiny_ecs_registry.hpp"
 
-void RenderSystem::drawTexturedMesh(Entity entity,
-									const mat3 &projection)
-{
+void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection) {
 	Motion &motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
 	// specification for more info Incrementally updates transformation matrix,
@@ -67,36 +65,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
-	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON || render_request.used_effect == EFFECT_ASSET_ID::EGG)
-	{
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_color_loc = glGetAttribLocation(program, "in_color");
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)0);
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_color_loc);
-		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)sizeof(vec3));
-		gl_has_errors();
-
-		if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
-		{
-			// Light up?
-			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
-			assert(light_up_uloc >= 0);
-
-			// !!! TODO A1: set the light_up shader variable using glUniform1i,
-			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
-			gl_has_errors();
-		}
-	}
-	else
-	{
+	} else {
 		assert(false && "Type of render request not supported");
 	}
 
@@ -129,8 +98,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 // draw the intermediate texture to the screen, with some distortion to simulate
 // water
-void RenderSystem::drawToScreen()
-{
+void RenderSystem::drawToScreen() {
 	// Setting shaders
 	// get the water texture, sprite mesh, and program
 	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::WATER]);
@@ -187,8 +155,7 @@ void RenderSystem::drawToScreen()
 
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-void RenderSystem::draw()
-{
+void RenderSystem::draw() {
 	// Getting size of window
 	int w, h;
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
@@ -227,8 +194,7 @@ void RenderSystem::draw()
 	gl_has_errors();
 }
 
-mat3 RenderSystem::createProjectionMatrix()
-{
+mat3 RenderSystem::createProjectionMatrix() {
 	// Fake projection matrix, scales with respect to window coordinates
 	float left = 0.f;
 	float top = 0.f;

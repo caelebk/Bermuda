@@ -77,7 +77,7 @@ GLFWwindow *WorldSystem::create_window() {
 
   // Create the main window (for rendering, keyboard, and mouse input)
   window = glfwCreateWindow(window_width_px, window_height_px,
-                            "Salmon Game Assignment", nullptr, nullptr);
+                            "Bermuda", nullptr, nullptr);
   if (window == nullptr) {
     fprintf(stderr, "Failed to glfwCreateWindow");
     return nullptr;
@@ -268,27 +268,27 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   // WASD Movement Keys
   if (key == GLFW_KEY_W) {
       if (action == GLFW_RELEASE)
-          motion.velocity[1] = 0;
+          motion.velocity.y = 0;
       else
-          motion.velocity[1] = -SPEED_INC;
+          motion.velocity.y = -SPEED_INC;
   }
   if (key == GLFW_KEY_S) {
       if (action == GLFW_RELEASE)
-          motion.velocity[1] = 0;
+          motion.velocity.y = 0;
       else
-          motion.velocity[1] = SPEED_INC;
+          motion.velocity.y = SPEED_INC;
   }
   if (key == GLFW_KEY_A) {
       if (action == GLFW_RELEASE)
-          motion.velocity[0] = 0;
+          motion.velocity.x = 0;
       else
-          motion.velocity[0] = -SPEED_INC;
+          motion.velocity.x = -SPEED_INC;
   }
   if (key == GLFW_KEY_D) {
       if (action == GLFW_RELEASE)
-          motion.velocity[0] = 0;
+          motion.velocity.x = 0;
       else
-          motion.velocity[0] = SPEED_INC;
+          motion.velocity.x = SPEED_INC;
   }
 
   // Control the current speed with `<` `>`
