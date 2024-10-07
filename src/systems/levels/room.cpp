@@ -53,7 +53,7 @@ bool RoomBuilder::is_in_room(vec2& position) {
         }
     }
 
-    return left == 1 && right == 1 && up == 1 && down == 1;
+    return left && right && up && down;
 };
 
 /*
