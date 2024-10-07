@@ -21,8 +21,6 @@ struct Space {
   std::vector<Entity> boundaries;
   std::vector<Entity> walls;
   std::vector<Entity> doors;
-  
-  Space();
 };
 
 struct Adjacency {

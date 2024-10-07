@@ -7,5 +7,3 @@
 Door::Door(): Wall() {};
 
 Wall::Wall() {};
-
-Space::Space() {};

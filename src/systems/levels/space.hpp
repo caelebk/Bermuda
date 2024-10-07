@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <random>
 #include <memory>
 #include <string>
 #include <vector>
@@ -32,6 +33,8 @@ protected:
     virtual vec2 get_updated_down_position(int magnitude);
     virtual vec2 get_updated_right_position(int magnitude);
     virtual vec2 get_updated_left_position(int magnitude);
+
+    vec2 rejection_sample();
 public:
     T entity;
     std::unordered_map<std::string, Entity> doors;
@@ -43,8 +46,20 @@ public:
     virtual SpaceBuilder& right(int magnitude = 0);
     virtual SpaceBuilder& door(std::string s_id, int magnitude = 0);
 
+    /**
+    * Gets a list of vector representations of a room's walls.
+    */
     std::vector<Vector> get_wall_vectors();
+    /**
+    * Gets a list of vector representations of a room's doors.
+    */
     std::vector<Vector> get_door_vectors();
+
+    bool is_in_room(vec2& position);
+    /**
+    * Get a random position inside a space.
+    */
+    vec2 get_random_position();
 
     // virtual SpaceBuilder* rotate_right(int rotations);
     // virtual SpaceBuilder* rotate_left(int rotations);
@@ -166,4 +181,66 @@ std::vector<Vector> SpaceBuilder<T>::get_door_vectors() {
         vectors.push_back(registry.vectors.get(door));
     }
     return vectors;
+}
+
+template <typename T>
+bool SpaceBuilder<T>::is_in_room(vec2& position) {
+    // All well-formed rooms are rectilinear polygons. Therefore, if a point is inside a room, it must be bounded in all four
+    // directions by at least one wall.
+    bool left = false;
+    bool right = false;
+    bool up = false;
+    bool down = false;
+
+    
+    for (Entity& entity : registry.spaces.get(entity).boundaries) {
+        Vector& vector = registry.vectors.get(entity);
+        if ((!down or !up) and vector.start[1] == vector.end[1]) {
+            if (position[0] > std::min(vector.start[0], vector.end[0]) and position[0] < std::max(vector.start[0], vector.end[0])) {
+                if (position[1] > vector.start[1]) {
+                    down = true;
+                } else {
+                    up = true;
+                }
+            }
+        }
+
+        if ((!left or !right) and vector.start[0] == vector.end[0]) {
+            if (position.y > std::min(vector.start[1], vector.end[1]) and position.y < std::max(vector.start[1], vector.end[1])) {
+                if (position[0] > vector.start[0]) {
+                    left = true;
+                } else {
+                    right = true;
+                }
+            }
+        }
+    }
+
+    return left && right && up && down;
+};
+
+/*
+Returns a random vec2 inside a well-formed room's exact dimensions. 
+*/
+template <typename T>
+vec2 SpaceBuilder<T>::rejection_sample() {
+    SpaceBoundingBox& box = registry.bounding_boxes.get(entity);
+    std::random_device rd; 
+    std::mt19937 generate(rd()); 
+    // We generate random coordinates inside the bounding box. Theoretically, this could be slow if the bounding box's area is far larger than a room;
+    // think of a case like an 'L'-shaped room. Since randomized levels are only generated once, and we can always code level generation
+    // so that our rooms are 'decently' rectangular however, it should suffice.
+    std::uniform_int_distribution<> random_x_generator(box.minimum_x, box.maximum_x); 
+    std::uniform_int_distribution<> random_y_generator(box.minimum_y, box.maximum_y);
+    while (true) {
+        vec2 position = {random_x_generator(generate), random_y_generator(generate)};
+        if (is_in_room(position)) {
+            return position;
+        }
+    };
+};
+
+template <typename T>
+vec2 SpaceBuilder<T>::get_random_position() {
+    return rejection_sample();
 }
