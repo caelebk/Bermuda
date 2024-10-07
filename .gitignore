@@ -9,3 +9,4 @@ ext/stb_image/project_path.hpp
 Makefile
 bermuda
 bermuda.exe
+.vscode/
