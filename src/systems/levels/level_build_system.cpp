@@ -30,12 +30,12 @@ void level_builder_demo() {
     vec2 position = level_builder.room("room_1_with_doors").get_random_position();
     printf("random position: (%f,%f)\n", position[0], position[1]);
 
-    // And yes, this works on non-square rectilinear polygons as well.
-    level_builder.room("complex").up(10).right(4).door("n", 2).right(4).down(5).right(5).down(1).door("e", 3).down(1).left(15);
+    // And yes, this works on any non-square rectilinear space as well (rooms or hallways).
+    level_builder.hallway("complex").up(10).right(4).door("n", 2).right(4).down(5).right(5).down(1).door("e", 3).down(1).left(15);
     // This room looks like this: https://www.desmos.com/calculator/dmbdboji9g
     for (int i = 0; i < 50; i++) {
-        vec2 position = level_builder.room("complex").get_random_position();
-        // None of these should be outside the boundary of the room.
+        vec2 position = level_builder.hallway("complex").get_random_position();
+        // None of these should be outside the boundary of the hallway.
         printf("random position: (%f,%f)\n", position[0], position[1]);
     }
 
