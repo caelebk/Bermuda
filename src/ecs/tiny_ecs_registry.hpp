@@ -47,6 +47,12 @@ public:
   ComponentContainer<vec3> colors;
   ComponentContainer<ScreenState> screenStates;
 
+  // level related
+  ComponentContainer<SpaceBoundingBox> bounding_boxes;
+	ComponentContainer<Vector> vectors;
+	ComponentContainer<Space> spaces;
+	ComponentContainer<Adjacency> adjacencies;
+
   // other
   ComponentContainer<Consumable> consumables;
   ComponentContainer<DebugComponent> debugComponents;
@@ -76,6 +82,11 @@ public:
     registry_list.push_back(&renderRequests);
     registry_list.push_back(&screenStates);
     registry_list.push_back(&colors);
+    // level related
+    registry_list.push_back(&bounding_boxes);
+    registry_list.push_back(&vectors);
+    registry_list.push_back(&spaces);
+    registry_list.push_back(&adjacencies);
     // other
     registry_list.push_back(&debugComponents);
     registry_list.push_back(&consumables);
