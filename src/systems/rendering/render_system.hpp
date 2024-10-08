@@ -20,7 +20,7 @@ class RenderSystem {
 	std::array<GLuint, texture_count> texture_gl_handles;
 	std::array<ivec2, texture_count> texture_dimensions;
 
-	// Cursor asset
+	// Stored cursor asset
 	GLFWimage cursorImageData;
 
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -33,6 +33,10 @@ class RenderSystem {
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
 			textures_path("player/player.png"),
+			textures_path("player/harpoon_gun.png"),
+			textures_path("player/harpoon.png"),
+			textures_path("enemy/jellyfish.png"),
+			textures_path("enemy/fish.png"),
 			};
 
 	std::array<GLuint, effect_count> effects;

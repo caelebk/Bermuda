@@ -199,7 +199,11 @@ void RenderSystem::initializeGlGeometryBuffers()
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE, screen_vertices, screen_indices);
 }
 
-// Render Cursor Crosshair
+/********************************************************************************
+ * Load and Render Cursor Crosshair
+ *
+ * @param cursorImagePath: path to cursor texture file (PNG) 
+ ********************************************************************************/
 void RenderSystem::initializeGlCursor(std::string cursorImagePath) {
 	std::string path = cursorImagePath;
 	int dimension_x = 0;

@@ -27,6 +27,8 @@ public:
   // player related
   ComponentContainer<DeathTimer> deathTimers;
   ComponentContainer<Player> players;
+  ComponentContainer<PlayerWeapon> playerWeapons;
+  ComponentContainer<PlayerProjectile> playerProjectiles;
   ComponentContainer<Oxygen> oxygen;
 
   // enemy related
@@ -59,6 +61,8 @@ public:
     // player related
     registry_list.push_back(&deathTimers);
     registry_list.push_back(&players);
+    registry_list.push_back(&playerWeapons);
+    registry_list.push_back(&playerProjectiles);
     registry_list.push_back(&oxygen);
     // enemy related
     registry_list.push_back(&deadlys);

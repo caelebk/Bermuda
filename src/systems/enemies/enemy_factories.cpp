@@ -48,11 +48,11 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position) {
   auto &pos = registry.positions.emplace(entity);
   pos.angle = 0.f;
   pos.position = position;
-  pos.scale = {-JELLY_BB_WIDTH, JELLY_BB_HEIGHT};
+  pos.scale = JELLY_SCALE_FACTOR * JELLY_BOUNDING_BOX;
 
 
 
-  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::PLAYER, // Placeholder ID
+  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::JELLY, 
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
 
@@ -105,14 +105,14 @@ Entity createFishPos(RenderSystem *renderer, vec2 position) {
   auto &pos = registry.positions.emplace(entity);
   pos.angle = 0.f;
   pos.position = position;
-  pos.scale = {-FISH_BB_WIDTH, FISH_BB_HEIGHT};
+  pos.scale = FISH_SCALE_FACTOR * FISH_BOUNDING_BOX;
 
   // ai
   auto &wander = registry.wanders.emplace(entity);
 
   // TODO: add the room
 
-  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::PLAYER, // Placeholder ID
+  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::FISH, 
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
 

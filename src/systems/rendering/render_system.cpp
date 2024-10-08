@@ -176,15 +176,32 @@ void RenderSystem::draw() {
 							  // sprites back to front
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
-	// Draw all textured meshes that have a position and size component
-	for (Entity entity : registry.renderRequests.entities)
-	{
-		if (!registry.motions.has(entity))
-			continue;
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
-		drawTexturedMesh(entity, projection_2D);
+
+	//////////////////////////////////////////////////////////////////////////////////////
+	/*************************************************************************************
+	* Draw All Textured Meshes that have a Position and Size Component
+	*
+	* @details Order of for loops determines "depth" of render during overlap for now
+	*          Note, its not very efficient to access elements indirectly via the entity
+	*          albeit iterating through all Sprites in sequence. A good point to optimize
+	*************************************************************************************/
+	for (Entity player : registry.players.entities) {
+		if (registry.renderRequests.has(player))
+			drawTexturedMesh(player, projection_2D);
 	}
+	for (Entity projectile : registry.playerProjectiles.entities) {
+		if (registry.renderRequests.has(projectile))
+			drawTexturedMesh(projectile, projection_2D);
+	}
+	for (Entity weapon : registry.playerWeapons.entities) {
+		if (registry.renderRequests.has(weapon))
+			drawTexturedMesh(weapon, projection_2D);
+	}
+	for (Entity enemy : registry.deadlys.entities) {
+		if (registry.renderRequests.has(enemy))
+			drawTexturedMesh(enemy, projection_2D);
+	}
+	//////////////////////////////////////////////////////////////////////////////////////
 
 	// Truely render to the screen
 	drawToScreen();

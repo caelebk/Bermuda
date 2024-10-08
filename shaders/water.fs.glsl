@@ -10,19 +10,18 @@ layout(location = 0) out vec4 color;
 
 vec2 distort(vec2 uv) 
 {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE THE WATER DISTORTION HERE (you may want to try sin/cos)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	float distort_x_intensity = 0.002 * (-((2 * uv.x - 1) * (2 * uv.x - 1)) + 1);
+	float distort_y_intensity = 0.002 * (-((2 * uv.y - 1) * (2 * uv.y - 1)) + 1);
 
+	float x_offset_oscillator = distort_x_intensity * sin(10 * uv.x - 0.1 * time);
+	float y_offset_oscillator = distort_y_intensity * sin(10 * uv.y - 0.1 * time);
+
+	uv = vec2(uv.x + x_offset_oscillator, uv.y + y_offset_oscillator);
 	return uv;
 }
 
 vec4 color_shift(vec4 in_color) 
 {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE THE COLOR SHIFTING HERE (you may want to make it blue-ish)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 	return in_color;
 }
 
