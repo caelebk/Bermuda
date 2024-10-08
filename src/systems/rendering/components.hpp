@@ -59,27 +59,26 @@ struct Mesh {
  */
 
 enum class TEXTURE_ASSET_ID {
-  FISH = 0,
-  EEL = FISH + 1,
-  TEXTURE_COUNT = EEL + 1
+  PLAYER = 0,
+  GUN = PLAYER + 1,
+  HARPOON = GUN + 1,
+  JELLY = HARPOON + 1,
+  FISH = JELLY + 1,
+  TEXTURE_COUNT = FISH + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
   COLOURED = 0,
-  EGG = COLOURED + 1,
-  SALMON = EGG + 1,
-  TEXTURED = SALMON + 1,
+  TEXTURED = COLOURED + 1,
   WATER = TEXTURED + 1,
   EFFECT_COUNT = WATER + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-  SALMON = 0,
-  SPRITE = SALMON + 1,
-  EGG = SPRITE + 1,
-  DEBUG_LINE = EGG + 1,
+  SPRITE = 0,
+  DEBUG_LINE = SPRITE + 1,
   SCREEN_TRIANGLE = DEBUG_LINE + 1,
   GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };

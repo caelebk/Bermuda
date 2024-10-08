@@ -55,6 +55,8 @@ private:
 	RenderSystem* renderer;
 	float current_speed;
 	Entity player;
+	Entity player_weapon;
+	Entity player_projectile;
 
 	// music references
 	Mix_Music* background_music;
