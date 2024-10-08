@@ -41,12 +41,12 @@ void LevelBuilder::print_pair(std::pair<std::string, Entity> pair) {
     std::cout << "  walls: " << std::endl;
     for (auto& wall : space.walls) {
         Vector& vector = registry.vectors.get(wall);
-        printf("    (%f, %f), (%f, %f):\n", vector.start[0], vector.start[1], vector.end[0], vector.end[1]);
+        printf("    (%f, %f), (%f, %f):\n", vector.start.x, vector.start.y, vector.end.x, vector.end.y);
     }
     std::cout << "  doors:" << std::endl;
     for (auto& door : space.doors) {
         Vector& vector = registry.vectors.get(door);
-        printf("    (%f, %f), (%f, %f):\n", vector.start[0], vector.start[1], vector.end[0], vector.end[1]);
+        printf("    (%f, %f), (%f, %f):\n", vector.start.x, vector.start.y, vector.end.x, vector.end.y);
     }
     std::cout << "  connections:" << std::endl;
     Adjacency& adjacencies = registry.adjacencies.get(pair.second);

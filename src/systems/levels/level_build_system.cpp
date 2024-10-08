@@ -28,7 +28,7 @@ void level_builder_demo() {
 
     // You can also get a random position in a room.
     vec2 position = level_builder.room("room_1_with_doors").get_random_position();
-    printf("random position: (%f,%f)\n", position[0], position[1]);
+    printf("random position: (%f,%f)\n", position.x, position.y);
 
     // And yes, this works on any non-square rectilinear space as well (rooms or hallways).
     level_builder.hallway("complex").up(10).right(4).door("n", 2).right(4).down(5).right(5).down(1).door("e", 3).down(1).left(15);
@@ -36,7 +36,7 @@ void level_builder_demo() {
     for (int i = 0; i < 50; i++) {
         vec2 position = level_builder.hallway("complex").get_random_position();
         // None of these should be outside the boundary of the hallway.
-        printf("random position: (%f,%f)\n", position[0], position[1]);
+        printf("random position: (%f,%f)\n", position.x, position.y);
     }
 
     level_builder.print_rooms();
@@ -52,13 +52,13 @@ void how_to_get_walls_and_doors_demo() {
     std::vector<Vector> walls = level_builder.room("room_1").get_wall_vectors();
     std::cout << "walls: " << std::endl;
     for (auto& wall : walls) {
-        printf("(%f, %f) (%f, %f)\n", wall.start[0], wall.start[1], wall.end[0], wall.end[1]);
+        printf("(%f, %f) (%f, %f)\n", wall.start.x, wall.start.y, wall.end.x, wall.end.y);
     }
 
     // Ditto for doors.
     std::vector<Vector> doors = level_builder.room("room_1").get_door_vectors();
     std::cout << "doors: " << std::endl;
     for (auto& door : doors) {
-        printf("(%f, %f) (%f, %f)\n", door.start[0], door.start[1], door.end[0], door.end[1]);
+        printf("(%f, %f) (%f, %f)\n", door.start.x, door.start.y, door.end.x, door.end.y);
     }
 }

@@ -79,10 +79,10 @@ void SpaceBuilder<T>::new_entity(T entity) {
 template <typename T>
 void SpaceBuilder<T>::update_bounding_box(Vector& vector) {
     SpaceBoundingBox& bounding_box = registry.bounding_boxes.get(entity);
-    bounding_box.minimum_x = std::min(bounding_box.minimum_x, vector.end[0]);
-    bounding_box.maximum_x = std::max(bounding_box.maximum_x, vector.end[0]);   
-    bounding_box.minimum_y = std::min(bounding_box.minimum_y, vector.end[1]);
-    bounding_box.maximum_y = std::max(bounding_box.maximum_y, vector.end[1]);  
+    bounding_box.minimum_x = std::min(bounding_box.minimum_x, vector.end.x);
+    bounding_box.maximum_x = std::max(bounding_box.maximum_x, vector.end.x);   
+    bounding_box.minimum_y = std::min(bounding_box.minimum_y, vector.end.y);
+    bounding_box.maximum_y = std::max(bounding_box.maximum_y, vector.end.y);  
 };
 
 template <typename T>
@@ -105,22 +105,22 @@ SpaceBuilder<T>& SpaceBuilder<T>::add_wall(int magnitude) {
 
 template <typename T>
 vec2 SpaceBuilder<T>::get_updated_up_position(int magnitude) {
-    return {pointer[0], pointer[1] + magnitude};
+    return {pointer.x, pointer.y + magnitude};
 }
 
 template <typename T>
 vec2 SpaceBuilder<T>::get_updated_down_position(int magnitude) {
-    return {pointer[0], pointer[1] - magnitude};
+    return {pointer.x, pointer.y - magnitude};
 }
 
 template <typename T>
 vec2 SpaceBuilder<T>::get_updated_right_position(int magnitude) {
-    return {pointer[0] + magnitude, pointer[1]};
+    return {pointer.x + magnitude, pointer.y};
 }
 
 template <typename T>
 vec2 SpaceBuilder<T>::get_updated_left_position(int magnitude) {
-    return {pointer[0] - magnitude, pointer[1]};
+    return {pointer.x - magnitude, pointer.y};
 }
 
 template <typename T>
@@ -195,9 +195,9 @@ bool SpaceBuilder<T>::is_in_room(vec2& position) {
     
     for (Entity& entity : registry.spaces.get(entity).boundaries) {
         Vector& vector = registry.vectors.get(entity);
-        if ((!down or !up) and vector.start[1] == vector.end[1]) {
-            if (position[0] > std::min(vector.start[0], vector.end[0]) and position[0] < std::max(vector.start[0], vector.end[0])) {
-                if (position[1] > vector.start[1]) {
+        if ((!down or !up) and vector.start.y == vector.end.y) {
+            if (position.x > std::min(vector.start.x, vector.end.x) and position.x < std::max(vector.start.x, vector.end.x)) {
+                if (position.y > vector.start.y) {
                     down = true;
                 } else {
                     up = true;
@@ -205,9 +205,9 @@ bool SpaceBuilder<T>::is_in_room(vec2& position) {
             }
         }
 
-        if ((!left or !right) and vector.start[0] == vector.end[0]) {
-            if (position.y > std::min(vector.start[1], vector.end[1]) and position.y < std::max(vector.start[1], vector.end[1])) {
-                if (position[0] > vector.start[0]) {
+        if ((!left or !right) and vector.start.x == vector.end.x) {
+            if (position.y > std::min(vector.start.y, vector.end.y) and position.y < std::max(vector.start.y, vector.end.y)) {
+                if (position.x > vector.start.x) {
                     left = true;
                 } else {
                     right = true;
