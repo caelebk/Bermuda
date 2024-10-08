@@ -9,12 +9,17 @@
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
+#include "level_build_system.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
 
 // Entry point
 int main()
 {
+	// go to level_build_system.cpp to see demos for how to use the level module for testing:
+	level_builder_demo();
+	how_to_get_walls_and_doors_demo();
+
 	// Global systems
 	WorldSystem world;
 	RenderSystem renderer;
@@ -36,10 +41,10 @@ int main()
 	// variable timestep loop
 	auto t = Clock::now();
 	while (!world.is_over()) {
-		// Processes system messages, if this wasn't present the window would become unresponsive
+	// Processes system messages, if this wasn't present the window would become unresponsive
 		glfwPollEvents();
 
-		// Calculating elapsed times in milliseconds from the previous iteration
+	// Calculating elapsed times in milliseconds from the previous iteration
 		auto now = Clock::now();
 		float elapsed_ms =
 			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;

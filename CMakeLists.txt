@@ -42,6 +42,8 @@ file(
   src/systems/ai/*.hpp
   src/systems/enemies/*.cpp
   src/systems/enemies/*.hpp
+  src/systems/levels/*.cpp
+  src/systems/levels/*.hpp
   src/systems/map/*.cpp
   src/systems/map/*.hpp
   src/systems/oxygen/*.cpp
@@ -80,6 +82,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE src/systems/)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/abilities)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/ai)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/enemies)
+target_include_directories(${PROJECT_NAME} PRIVATE src/systems/levels)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/map)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/oxygen)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/physics)
