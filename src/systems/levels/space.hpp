@@ -195,8 +195,8 @@ bool SpaceBuilder<T>::is_in_room(vec2& position) {
     
     for (Entity& entity : registry.spaces.get(entity).boundaries) {
         Vector& vector = registry.vectors.get(entity);
-        if ((!down or !up) and vector.start.y == vector.end.y) {
-            if (position.x > std::min(vector.start.x, vector.end.x) and position.x < std::max(vector.start.x, vector.end.x)) {
+        if ((!down || !up) && vector.start.y == vector.end.y) {
+            if (position.x > std::min(vector.start.x, vector.end.x) && position.x < std::max(vector.start.x, vector.end.x)) {
                 if (position.y > vector.start.y) {
                     down = true;
                 } else {
@@ -205,8 +205,8 @@ bool SpaceBuilder<T>::is_in_room(vec2& position) {
             }
         }
 
-        if ((!left or !right) and vector.start.x == vector.end.x) {
-            if (position.y > std::min(vector.start.y, vector.end.y) and position.y < std::max(vector.start.y, vector.end.y)) {
+        if ((!left || !right) && vector.start.x == vector.end.x) {
+            if (position.y > std::min(vector.start.y, vector.end.y) && position.y < std::max(vector.start.y, vector.end.y)) {
                 if (position.x > vector.start.x) {
                     left = true;
                 } else {
