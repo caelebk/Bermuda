@@ -56,14 +56,15 @@ Entity createLoadedGun(RenderSystem *renderer, vec2 playerPosition, int projecti
 
   // Setting initial position values
   Position& position = registry.positions.emplace(entity);
-  position.position = playerPosition + GUN_RELATIVE_POS_FROM_PLAYER; // TODO: REMOVE GUN_RELATIVE_POS_FROM_PLAYER once Gun position/angle
-  position.angle = 0.f;                                              //       is updated accordingly based on corresponding Player
   position.scale = GUN_SCALE_FACTOR * GUN_BOUNDING_BOX;
 
   // Setting initial motion values
   Motion &motion = registry.motions.emplace(entity); // TODO: REMOVE once Gun position/angle is updated accordingly based on corresponding Player
   motion.velocity = {0.f, 0.f};
   motion.acceleration = {0, 0};
+
+  DamageOnTouch& oxyCost = registry.damageTouch.emplace(entity);
+  oxyCost.damage = HARPOON_GUN_OXYGEN_COST;
 
   // Make Weapon
   PlayerWeapon &weapon = registry.playerWeapons.emplace(entity);
@@ -100,8 +101,6 @@ Entity loadHarpoon(RenderSystem *renderer, vec2 gunPosition) {
 
   // Setting initial positon values
   Position& position = registry.positions.emplace(entity);
-  position.position = gunPosition + HARPOON_RELATIVE_POS_FROM_GUN;   // TODO: REMOVE HARPOON_RELATIVE_POS_FROM_GUN once Harpoon position/angle
-  position.angle = 0.f;                                              //       is updated accordingly based on corresponding Gun
   position.scale = HARPOON_SCALE_FACTOR * HARPOON_BOUNDING_BOX;
 
   // Setting initial motion values

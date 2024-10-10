@@ -28,6 +28,7 @@ Entity createPlayer(RenderSystem *renderer, vec2 pos, int projectile);
 #define GUN_SCALE_FACTOR vec2(0.7f)
 #define GUN_BOUNDING_BOX vec2(60.f, 32.f)
 #define GUN_RELATIVE_POS_FROM_PLAYER vec2(40.f, 0.f)
+#define HARPOON_GUN_OXYGEN_COST 25.f
 
 Entity createLoadedGun(RenderSystem *renderer, vec2 ammoPosition, int projectile);
 

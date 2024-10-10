@@ -5,6 +5,7 @@
 #include "enemy_factories.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "oxygen_system.hpp"
+#include "physics_system.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>
@@ -92,8 +93,12 @@ GLFWwindow *WorldSystem::create_window() {
   auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1) {
     ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_move({_0, _1});
   };
+  auto mouse_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) {
+    ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2);
+  };
   glfwSetKeyCallback(window, key_redirect);
   glfwSetCursorPosCallback(window, cursor_pos_redirect);
+  glfwSetMouseButtonCallback(window, mouse_redirect);
 
   //////////////////////////////////////
   // Loading music and sounds with SDL
@@ -156,6 +161,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     next_oxygen_deplete = PLAYER_OXYGEN_DEPLETE_TIME_MS;
     depleteOxygen(player);
   }
+
+  // Update gun and harpoon angle
+  updateWepProjPos(mouse_pos, player, player_weapon, player_projectile);
+  
 
   float min_counter_ms = 3000.f;
   for (Entity entity : registry.deathTimers.entities) {
@@ -260,9 +269,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   // Player movement attributes
   Motion &player_motion = registry.motions.get(player);
 
-  Motion &player_weapon_motion = registry.motions.get(player_weapon);          // TODO: REMOVE once movement is fully implemented and Gun position updates w/ Player
-  Motion &player_projectile_motion = registry.motions.get(player_projectile);  // TODO: REMOVE once movement is fully implemented and Harpoon position updates w/ Gun
-
   // Resetting game
   if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
     int w, h;
@@ -283,57 +289,33 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   if (key == GLFW_KEY_W) {
       if (action == GLFW_RELEASE) {
         player_motion.velocity.y = 0;
-
-        player_weapon_motion.velocity.y = 0;                                   // TODO: REMOVE once movement is fully implemented and Gun position updates w/ Player
-        player_projectile_motion.velocity.y = 0;                               // TODO: REMOVE once movement is fully implemented and Harpoon position updates w/ Gun
       }
       else {
         player_motion.velocity.y = -SPEED_INC;
-
-        player_weapon_motion.velocity.y = -SPEED_INC;                          // TODO: REMOVE once movement is fully implemented and Gun position updates w/ Player
-        player_projectile_motion.velocity.y = -SPEED_INC;                      // TODO: REMOVE once movement is fully implemented and Harpoon position updates w/ Gun
       }
   }
   if (key == GLFW_KEY_S) {
       if (action == GLFW_RELEASE) {
         player_motion.velocity.y = 0;
-
-        player_weapon_motion.velocity.y = 0;
-        player_projectile_motion.velocity.y = 0;
       }
       else {
         player_motion.velocity.y = SPEED_INC;
-
-        player_weapon_motion.velocity.y = SPEED_INC;                           // TODO: REMOVE once movement is fully implemented and Gun position updates w/ Player
-        player_projectile_motion.velocity.y = SPEED_INC;                       // TODO: REMOVE once movement is fully implemented and Harpoon position updates w/ Gun
       }
   }
   if (key == GLFW_KEY_A) {
       if (action == GLFW_RELEASE) {
         player_motion.velocity.x = 0;
-
-        player_weapon_motion.velocity.x = 0;                                   // TODO: REMOVE once movement is fully implemented and Gun position updates w/ Player
-        player_projectile_motion.velocity.x = 0;                               // TODO: REMOVE once movement is fully implemented and Harpoon position updates w/ Gun
       }
       else {
         player_motion.velocity.x = -SPEED_INC;
-
-        player_weapon_motion.velocity.x = -SPEED_INC;                          // TODO: REMOVE once movement is fully implemented and Gun position updates w/ Player
-        player_projectile_motion.velocity.x = -SPEED_INC;                      // TODO: REMOVE once movement is fully implemented and Harpoon position updates w/ Gun
       }
   }
   if (key == GLFW_KEY_D) {
       if (action == GLFW_RELEASE) {
         player_motion.velocity.x = 0;
-
-        player_weapon_motion.velocity.x = 0;                                   // TODO: REMOVE once movement is fully implemented and Gun position updates w/ Player
-        player_projectile_motion.velocity.x = 0;                               // TODO: REMOVE once movement is fully implemented and Harpoon position updates w/ Gun
       }
       else {
         player_motion.velocity.x = SPEED_INC;
-
-        player_weapon_motion.velocity.x = SPEED_INC;                           // TODO: REMOVE once movement is fully implemented and Gun position updates w/ Player
-        player_projectile_motion.velocity.x = SPEED_INC;                       // TODO: REMOVE once movement is fully implemented and Harpoon position updates w/ Gun
       }
   }
 
@@ -351,6 +333,17 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   current_speed = fmax(0.f, current_speed);
 }
 
+// Mouse click callback
+void WorldSystem::on_mouse_click(int button, int action, int mods) {
+    // Shooting the projectile
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS && registry.playerProjectiles.get(player_projectile).is_loaded) {
+            setFiredProjVelo(player_projectile);
+            consumeOxygen(player, player_weapon);
+        }
+    }
+}
+
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
-  (vec2) mouse_position; // dummy to avoid compiler warning
+    mouse_pos = mouse_position;
 }

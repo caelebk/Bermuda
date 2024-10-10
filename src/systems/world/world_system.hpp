@@ -40,6 +40,7 @@ public:
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
+	void on_mouse_click(int button, int action, int mods);
 	void on_mouse_move(vec2 pos);
 
 	// restart level
@@ -59,6 +60,7 @@ private:
 	Entity player_weapon;
 	Entity player_projectile;
 	Entity oxygen_tank;
+	vec2 mouse_pos;
 
 	// music references
 	Mix_Music* background_music;

@@ -22,6 +22,12 @@ void Transform::translate(vec2 offset)
 	mat = mat * T;
 }
 
+vec2 calculate_pos_vec(float length, vec2 orig_pos, float angle, vec2 offset) {
+	// SohCahToa - Sine calculates y, cosine calculates x, length is hypoteneuse
+	vec2 length_vec = { length * cos(angle), length * sin(angle) };
+	return orig_pos + length_vec + offset;
+}
+
 bool gl_has_errors()
 {
 	GLenum error = glGetError();

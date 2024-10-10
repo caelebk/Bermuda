@@ -46,4 +46,8 @@ struct Transform {
 	void translate(vec2 offset);
 };
 
+// Given an origin position, angle, and length, calculate position of second object relative to the origin
+// x_offset and y_offset just adds the value to the result
+vec2 calculate_pos_vec(float length, vec2 orig_pos, float angle, vec2 offset = {0,0});
+
 bool gl_has_errors();

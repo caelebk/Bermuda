@@ -15,6 +15,9 @@
 #include "physics.hpp"
 #include "player.hpp"
 
+// Net Projectile Speed (To be balanced later)
+#define HARPOON_SPEED 5.0f
+
 // A simple physics system that moves rigid bodies and checks for collision
 class PhysicsSystem
 {
@@ -25,3 +28,7 @@ public:
 	{
 	}
 };
+
+void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon, Entity player_projectile);
+
+void setFiredProjVelo(Entity player_projectile);
