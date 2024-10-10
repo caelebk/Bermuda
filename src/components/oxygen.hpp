@@ -1,5 +1,8 @@
 #pragma once
 
-struct Oxygen {
+struct Oxygen
+{
+  float capacity;
   float level;
+  float rate;
 };

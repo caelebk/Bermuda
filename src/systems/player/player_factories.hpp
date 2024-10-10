@@ -7,16 +7,18 @@
 #include "abilities.hpp"
 #include "physics.hpp"
 #include "player.hpp"
-#include "tiny_ecs.hpp"
 
 
 
 //////////////////////////////////////////////////////////////
 // Player
 //////////////////////////////////////////////////////////////
-#define PLAYER_OXYGEN 1000.0
 #define PLAYER_SCALE_FACTOR vec2(0.7f)
 #define PLAYER_BOUNDING_BOX vec2(42.f, 64.f) // vec2(PNG_width, PNG_height)
+#define PLAYER_OXYGEN 1000.f
+#define PLAYER_OXYGEN_BOUNDING_BOX vec2(20.f, 150.f) // TODO: update to actual values
+#define PLAYER_OXYGEN_RATE 10.f
+#define PLAYER_OXYGEN_DEPLETE_TIME_MS 3000.f // to be balanced later
 
 Entity createPlayer(RenderSystem *renderer, vec2 pos, int projectile);
 

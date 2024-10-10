@@ -4,6 +4,7 @@
 #include "player_factories.hpp"
 #include "enemy_factories.hpp"
 #include "tiny_ecs_registry.hpp"
+#include "oxygen_system.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>
@@ -17,7 +18,7 @@
 // Game configuration
 
 // create the underwater world
-WorldSystem::WorldSystem() : points(0) {
+WorldSystem::WorldSystem() : points(0), next_oxygen_deplete(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
   // Seeding rng with random device
   rng = std::default_random_engine(std::random_device()());
 }
@@ -149,6 +150,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
   assert(registry.screenStates.components.size() <= 1);
   ScreenState &screen = registry.screenStates.components[0];
 
+  // Deplete oxygen when it is time...
+  next_oxygen_deplete -= elapsed_ms_since_last_update;
+  if (next_oxygen_deplete < 0) {
+    next_oxygen_deplete = PLAYER_OXYGEN_DEPLETE_TIME_MS;
+    depleteOxygen(player);
+  }
+
   float min_counter_ms = 3000.f;
   for (Entity entity : registry.deathTimers.entities) {
     // progress timer
@@ -201,6 +209,7 @@ void WorldSystem::restart_game() {
   player_projectile = getPlayerProjectile(player);
   createJellyPos(renderer, {window_width_px - 450, window_height_px - 250}); // TODO: REMOVE once enemy spawning fully implemented
   createFishPos(renderer, {window_width_px - 450, window_height_px - 300});  // TODO: REMOVE once enemy spawning fully implemented
+  oxygen_tank = createOxygenTank(renderer, {20, window_height_px - 20}); // TODO: figure out oxygen tank position
 }
 
 // Compute collisions between entities

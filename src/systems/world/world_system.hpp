@@ -54,9 +54,11 @@ private:
 	// Game state
 	RenderSystem* renderer;
 	float current_speed;
+	float next_oxygen_deplete;
 	Entity player;
 	Entity player_weapon;
 	Entity player_projectile;
+	Entity oxygen_tank;
 
 	// music references
 	Mix_Music* background_music;
