@@ -44,3 +44,9 @@
    [this]() {                                                                  \
      createFishPos(renderer, {window_width_px - 550, window_height_px - 700}); \
    }}
+
+#define TEMP3                                                                  \
+  {                                                                            \
+      createJellyPos, createJellyPos, createJellyPos,                          \
+      createJellyPos, createJellyPos,                                          \
+  }

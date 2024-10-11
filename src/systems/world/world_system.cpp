@@ -371,16 +371,18 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 }
 
 void WorldSystem::spawn_enemies_fixed() {
-  execute_config(TEMP1);
-  execute_config_rand(0.5, TEMP2);
+  // execute_config(TEMP1);
+  // execute_config_rand(0.5, TEMP2);
 }
 
 void WorldSystem::spawn_enemies_rand() {
-  auto curr_room =
-      level_builder.room(ROOM_ONE); // TODO: until bob gets his shit together
-  for (int i = 0; i < 10; i++) {
-    vec2 p = curr_room.get_random_position();
-    createJellyPos(renderer, p);
-    createFishPos(renderer, p);
-  }
+  auto curr_room = level_builder.room(ROOM_ONE);
+  execute_config_rand(TEMP3, curr_room, renderer);
+  // auto curr_room =
+  //     level_builder.room(ROOM_ONE); // TODO: until bob gets his shit together
+  // for (int i = 0; i < 10; i++) {
+  //   vec2 p = curr_room.get_random_position();
+  //   createJellyPos(renderer, p);
+  //   createFishPos(renderer, p);
+  // }
 }
