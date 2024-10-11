@@ -52,6 +52,7 @@ public:
 	ComponentContainer<Vector> vectors;
 	ComponentContainer<Space> spaces;
 	ComponentContainer<Adjacency> adjacencies;
+  ComponentContainer<ActiveWall> activeWalls;
 
   // other
   ComponentContainer<Consumable> consumables;
@@ -87,6 +88,7 @@ public:
     registry_list.push_back(&vectors);
     registry_list.push_back(&spaces);
     registry_list.push_back(&adjacencies);
+    registry_list.push_back(&activeWalls);
     // other
     registry_list.push_back(&debugComponents);
     registry_list.push_back(&consumables);

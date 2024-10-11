@@ -35,6 +35,7 @@ class RenderSystem {
 			textures_path("player/player.png"),
 			textures_path("player/harpoon_gun.png"),
 			textures_path("player/harpoon.png"),
+			textures_path("map_non_interactable/solid_colour_wall.png"),
 			textures_path("enemy/jellyfish.png"),
 			textures_path("enemy/fish.png"),
 			};

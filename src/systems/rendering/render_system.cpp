@@ -185,9 +185,17 @@ void RenderSystem::draw() {
 	*          Note, its not very efficient to access elements indirectly via the entity
 	*          albeit iterating through all Sprites in sequence. A good point to optimize
 	*************************************************************************************/
+	for (Entity wall : registry.activeWalls.entities) {
+		if (registry.renderRequests.has(wall))
+			drawTexturedMesh(wall, projection_2D);
+	}
 	for (Entity player : registry.players.entities) {
 		if (registry.renderRequests.has(player))
 			drawTexturedMesh(player, projection_2D);
+	}
+	for (Entity enemy : registry.deadlys.entities) {
+		if (registry.renderRequests.has(enemy))
+			drawTexturedMesh(enemy, projection_2D);
 	}
 	for (Entity projectile : registry.playerProjectiles.entities) {
 		if (registry.renderRequests.has(projectile))
@@ -196,10 +204,6 @@ void RenderSystem::draw() {
 	for (Entity weapon : registry.playerWeapons.entities) {
 		if (registry.renderRequests.has(weapon))
 			drawTexturedMesh(weapon, projection_2D);
-	}
-	for (Entity enemy : registry.deadlys.entities) {
-		if (registry.renderRequests.has(enemy))
-			drawTexturedMesh(enemy, projection_2D);
 	}
 	//////////////////////////////////////////////////////////////////////////////////////
 

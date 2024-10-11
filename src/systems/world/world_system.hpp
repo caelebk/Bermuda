@@ -12,6 +12,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "level.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -54,6 +55,7 @@ private:
 
 	// Game state
 	RenderSystem* renderer;
+	LevelBuilder level_builder;
 	float current_speed;
 	float next_oxygen_deplete;
 	Entity player;

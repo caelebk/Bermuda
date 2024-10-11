@@ -26,3 +26,5 @@ struct Space {
 struct Adjacency {
   std::vector<Entity> neighbours;
 };
+
+struct ActiveWall {};

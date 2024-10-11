@@ -6,10 +6,10 @@ struct PlayerProjectile {
 
 // Weapon component
 struct PlayerWeapon {
-    Entity projectile;
+  Entity projectile;
 };
 
 // Player component
 struct Player {
-    Entity weapon;
+  Entity weapon;
 };

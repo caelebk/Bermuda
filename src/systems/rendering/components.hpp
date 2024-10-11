@@ -62,7 +62,8 @@ enum class TEXTURE_ASSET_ID {
   PLAYER = 0,
   GUN = PLAYER + 1,
   HARPOON = GUN + 1,
-  JELLY = HARPOON + 1,
+  WALL = HARPOON + 1,
+  JELLY = WALL + 1,
   FISH = JELLY + 1,
   TEXTURE_COUNT = FISH + 1
 };

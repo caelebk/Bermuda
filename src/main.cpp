@@ -16,10 +16,6 @@ using Clock = std::chrono::high_resolution_clock;
 // Entry point
 int main()
 {
-	// go to level_build_system.cpp to see demos for how to use the level module for testing:
-	level_builder_demo();
-	how_to_get_walls_and_doors_demo();
-
 	// Global systems
 	WorldSystem world;
 	RenderSystem renderer;
