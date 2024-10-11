@@ -1,9 +1,9 @@
 // Header
 #include "world_system.hpp"
 #include "common.hpp"
+#include "config/level_spawn.hpp"
 #include "enemy_factories.hpp"
 #include "level_spawn.hpp"
-#include "levels/spawning.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "audio_system.hpp"
@@ -219,8 +219,9 @@ void WorldSystem::restart_game() {
   // Debugging for memory/component leaks
   registry.list_all_components();
 
-  level_builder.room(ROOM_ONE)
-      .activate_room(); // TODO: change based on which room entered
+  // TODO: Change based on which room entered
+  auto curr_room = level_builder.room(ROOM_ONE);
+  curr_room.activate_room();
 
   player = createPlayer(renderer, {window_width_px / 2 - 140, window_height_px - 140}); // TODO: get player spawn position
   player_weapon = getPlayerWeapon(player);
@@ -368,21 +369,4 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
   mouse_pos = mouse_position;
-}
-
-void WorldSystem::spawn_enemies_fixed() {
-  // execute_config(TEMP1);
-  // execute_config_rand(0.5, TEMP2);
-}
-
-void WorldSystem::spawn_enemies_rand() {
-  auto curr_room = level_builder.room(ROOM_ONE);
-  execute_config_rand(TEMP3, curr_room, renderer);
-  // auto curr_room =
-  //     level_builder.room(ROOM_ONE); // TODO: until bob gets his shit together
-  // for (int i = 0; i < 10; i++) {
-  //   vec2 p = curr_room.get_random_position();
-  //   createJellyPos(renderer, p);
-  //   createFishPos(renderer, p);
-  // }
 }
