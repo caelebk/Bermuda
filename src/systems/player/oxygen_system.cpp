@@ -1,5 +1,6 @@
 #include "oxygen_system.hpp"
 #include "player_factories.hpp"
+#include "enemy_factories.hpp"
 #include "tiny_ecs_registry.hpp"
 
 /**
@@ -51,30 +52,6 @@ float getOxygenLevel(Entity entity)
     }
     auto &oxygen = registry.oxygen.get(entity);
     return oxygen.level;
-}
-
-/**
- * @brief sets the oxygen capacity of an entity
- * TODO: confirm if this is necessary since health bars may use this not the player
- *
- * @param capacity - the new capacity of the entity
- * @return true if the capacity is valid, false otherwise
- */
-bool setOxygenCapacity(Entity entity, float capacity)
-{
-    if (!registry.oxygen.has(entity))
-    {
-        return false;
-    }
-
-    auto &oxygen = registry.oxygen.get(entity);
-    if (capacity <= 0)
-    {
-        return false;
-    }
-    oxygen.capacity = capacity;
-    oxygen.level = capacity;
-    return true;
 }
 
 /**

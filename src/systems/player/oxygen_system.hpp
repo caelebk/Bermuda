@@ -11,9 +11,6 @@ Entity createOxygenTank(RenderSystem *renderer, vec2 pos);
 // get oxygen level
 float getOxygenLevel(Entity entity);
 
-// set oxygen capacity
-bool setOxygenCapacity(Entity entity, float capacity);
-
 // deplete oxygen (passive consumption over time)
 void depleteOxygen(Entity entity);
 

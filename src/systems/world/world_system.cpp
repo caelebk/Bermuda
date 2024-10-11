@@ -216,9 +216,12 @@ void WorldSystem::restart_game() {
   player = createPlayer(renderer, {window_width_px / 2, window_height_px - 200}, HARPOON_PROJECTILE); // TODO: get player spawn position
   player_weapon = getPlayerWeapon(player);
   player_projectile = getPlayerProjectile(player);
-  createJellyPos(renderer, {window_width_px - 450, window_height_px - 250}); // TODO: REMOVE once enemy spawning fully implemented
-  createFishPos(renderer, {window_width_px - 450, window_height_px - 300});  // TODO: REMOVE once enemy spawning fully implemented
   oxygen_tank = createOxygenTank(renderer, {20, window_height_px - 20}); // TODO: figure out oxygen tank position
+
+  Entity jelly = createJellyPos(renderer, {window_width_px - 450, window_height_px - 250}); // TODO: REMOVE once enemy spawning fully implemented
+  createJellyHealthBar(renderer, jelly); // TODO: REMOVE once enemy spawning fully implemented
+  Entity fish = createFishPos(renderer, {window_width_px - 450, window_height_px - 300});  // TODO: REMOVE once enemy spawning fully implemented
+  createFishHealthBar(renderer, fish); // TODO: REMOVE once enemy spawning fully implemented
 }
 
 // Compute collisions between entities
