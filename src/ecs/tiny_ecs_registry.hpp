@@ -39,6 +39,9 @@ public:
   ComponentContainer<Deadly> deadlys;
   ComponentContainer<DamageOnTouch> damageTouch;
 
+  // buff/debuff related
+  ComponentContainer<Stunned> stunned;
+
   // ai related
   ComponentContainer<Wander> wanders;
 

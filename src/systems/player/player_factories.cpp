@@ -12,11 +12,11 @@ Entity createPlayer(RenderSystem *renderer, vec2 pos) {
   auto entity = Entity();
 
   // Store a reference to the potentially re-used mesh object
-  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(entity, &mesh);
 
   // Setting initial position values
-  Position& position = registry.positions.emplace(entity);
+  Position &position = registry.positions.emplace(entity);
   position.position = pos;
   position.angle = 0.f;
   position.scale = PLAYER_SCALE_FACTOR * PLAYER_BOUNDING_BOX;
@@ -33,14 +33,17 @@ Entity createPlayer(RenderSystem *renderer, vec2 pos) {
 	Player &player = registry.players.emplace(entity);
   player.weapon = createLoadedGun(renderer, position.position, HARPOON_PROJECTILE);
 
+  auto &oxygen = registry.oxygen.emplace(entity);
+  oxygen.capacity = PLAYER_OXYGEN;
+  oxygen.level = PLAYER_OXYGEN;
+  oxygen.rate = PLAYER_OXYGEN_RATE;
+
   // Request Render
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::PLAYER,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
-    
-	return entity;
+  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::PLAYER,
+                                          EFFECT_ASSET_ID::TEXTURED,
+                                          GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
 }
 
 /********************************************************************************
@@ -50,19 +53,22 @@ Entity createPlayer(RenderSystem *renderer, vec2 pos) {
  * @param playerPosition: position of corresponding Player
  * @param projectile: projectile to start with (Ex. HARPOON_PROJECTILE)
  ********************************************************************************/
-Entity createLoadedGun(RenderSystem *renderer, vec2 playerPosition, int projectile) {
+Entity createLoadedGun(RenderSystem *renderer, vec2 playerPosition,
+                       int projectile) {
   auto entity = Entity();
 
   // Store a reference to the potentially re-used mesh object
-  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(entity, &mesh);
 
   // Setting initial position values
-  Position& position = registry.positions.emplace(entity);
+  Position &position = registry.positions.emplace(entity);
   position.scale = GUN_SCALE_FACTOR * GUN_BOUNDING_BOX;
 
   // Setting initial motion values
-  Motion &motion = registry.motions.emplace(entity); // TODO: REMOVE once Gun position/angle is updated accordingly based on corresponding Player
+  Motion &motion = registry.motions.emplace(
+      entity); // TODO: REMOVE once Gun position/angle is updated accordingly
+               // based on corresponding Player
   motion.velocity = {0.f, 0.f};
   motion.acceleration = {0, 0};
 
@@ -71,8 +77,8 @@ Entity createLoadedGun(RenderSystem *renderer, vec2 playerPosition, int projecti
 
   // Make Weapon
   PlayerWeapon &weapon = registry.playerWeapons.emplace(entity);
-  switch(projectile) {
-    case HARPOON_PROJECTILE:
+  switch (projectile) {
+  case HARPOON_PROJECTILE:
     weapon.projectile = loadHarpoon(renderer, position.position);
     break;
 
@@ -80,13 +86,11 @@ Entity createLoadedGun(RenderSystem *renderer, vec2 playerPosition, int projecti
   }
 
   // Request Render
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::GUN,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::GUN,
+                                          EFFECT_ASSET_ID::TEXTURED,
+                                          GEOMETRY_BUFFER_ID::SPRITE});
 
-	return entity;
+  return entity;
 }
 
 /********************************************************************************
@@ -99,18 +103,19 @@ Entity loadHarpoon(RenderSystem *renderer, vec2 gunPosition) {
   auto entity = Entity();
 
   // Store a reference to the potentially re-used mesh object
-  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(entity, &mesh);
 
   // Setting initial positon values
-  Position& position = registry.positions.emplace(entity);
+  Position &position = registry.positions.emplace(entity);
   position.scale = HARPOON_SCALE_FACTOR * HARPOON_BOUNDING_BOX;
 
   // Add collisions
   Collidable & collidable = registry.collidables.emplace(entity);
 
   // Setting initial motion values
-  // Motion will be used when acting as a projectile and is not loaded into a Gun
+  // Motion will be used when acting as a projectile and is not loaded into a
+  // Gun
   Motion &motion = registry.motions.emplace(entity);
   motion.velocity = {0.f, 0.f};
   motion.acceleration = {0, 0};
@@ -130,7 +135,12 @@ Entity loadHarpoon(RenderSystem *renderer, vec2 gunPosition) {
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
-	return entity;
+  // Request Render
+  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::HARPOON,
+                                          EFFECT_ASSET_ID::TEXTURED,
+                                          GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
 }
 
 /********************************************************************************
@@ -194,7 +204,7 @@ void createOxygenTank(RenderSystem *renderer, Entity &player, vec2 pos)
  *
  * @param player
  ********************************************************************************/
-Entity &getPlayerWeapon(Entity& player) {
+Entity &getPlayerWeapon(Entity &player) {
   return registry.players.get(player).weapon;
 }
 
@@ -203,7 +213,7 @@ Entity &getPlayerWeapon(Entity& player) {
  *
  * @param player
  ********************************************************************************/
-Entity &getPlayerProjectile(Entity& player) {
+Entity &getPlayerProjectile(Entity &player) {
   Entity &player_weapon = getPlayerWeapon(player);
   return registry.playerWeapons.get(player_weapon).projectile;
 }

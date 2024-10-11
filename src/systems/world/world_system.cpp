@@ -1,15 +1,15 @@
 // Header
 #include "world_system.hpp"
 #include "common.hpp"
-#include "levels/spawning.hpp"
-#include "player_factories.hpp"
 #include "enemy_factories.hpp"
-#include "tiny_ecs_registry.hpp"
+#include "level_spawn.hpp"
+#include "levels/spawning.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "audio_system.hpp"
+#include "player_factories.hpp"
 #include "spawning.hpp"
-#include "level_spawn.hpp"
+#include "tiny_ecs_registry.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>
@@ -21,13 +21,24 @@
 // Game configuration
 
 // create the underwater world
-WorldSystem::WorldSystem() : points(0), next_oxygen_deplete(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
+WorldSystem::WorldSystem()
+    : points(0), next_oxygen_deplete(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
   // Seeding rng with random device
   rng = std::default_random_engine(std::random_device()());
 }
 
-WorldSystem::~WorldSystem()
-{
+WorldSystem::~WorldSystem() {
+
+  // destroy music components
+  if (background_music != nullptr)
+    Mix_FreeMusic(background_music);
+  if (salmon_dead_sound != nullptr)
+    Mix_FreeChunk(salmon_dead_sound);
+  if (salmon_eat_sound != nullptr)
+    Mix_FreeChunk(salmon_eat_sound);
+
+  Mix_CloseAudio();
+
   // Destroy all created components
   registry.clear_all_components();
 
@@ -36,24 +47,20 @@ WorldSystem::~WorldSystem()
 }
 
 // Debugging
-namespace
-{
-  void glfw_err_cb(int error, const char *desc)
-  {
-    fprintf(stderr, "%d: %s", error, desc);
-  }
+namespace {
+void glfw_err_cb(int error, const char *desc) {
+  fprintf(stderr, "%d: %s", error, desc);
+}
 } // namespace
 
 // World initialization
 // Note, this has a lot of OpenGL specific things, could be moved to the
 // renderer
-GLFWwindow *WorldSystem::create_window()
-{
+GLFWwindow *WorldSystem::create_window() {
   ///////////////////////////////////////
   // Initialize GLFW
   glfwSetErrorCallback(glfw_err_cb);
-  if (!glfwInit())
-  {
+  if (!glfwInit()) {
     fprintf(stderr, "Failed to initialize GLFW");
     return nullptr;
   }
@@ -72,10 +79,9 @@ GLFWwindow *WorldSystem::create_window()
   glfwWindowHint(GLFW_RESIZABLE, 0);
 
   // Create the main window (for rendering, keyboard, and mouse input)
-  window = glfwCreateWindow(window_width_px, window_height_px,
-                            "Bermuda", nullptr, nullptr);
-  if (window == nullptr)
-  {
+  window = glfwCreateWindow(window_width_px, window_height_px, "Bermuda",
+                            nullptr, nullptr);
+  if (window == nullptr) {
     fprintf(stderr, "Failed to glfwCreateWindow");
     return nullptr;
   }
@@ -84,16 +90,14 @@ GLFWwindow *WorldSystem::create_window()
   // Input is handled using GLFW, for more info see
   // http://www.glfw.org/docs/latest/input_guide.html
   glfwSetWindowUserPointer(window, this);
-  auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3)
-  {
+  auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3) {
     ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3);
   };
-  auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1)
-  {
+  auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1) {
     ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_move({_0, _1});
   };
-  auto mouse_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) {
-    ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2);
+  auto mouse_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2) {
+    ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2);
   };
   glfwSetKeyCallback(window, key_redirect);
   glfwSetCursorPosCallback(window, cursor_pos_redirect);
@@ -102,8 +106,7 @@ GLFWwindow *WorldSystem::create_window()
   return window;
 }
 
-void WorldSystem::init(RenderSystem *renderer_arg)
-{
+void WorldSystem::init(RenderSystem *renderer_arg) {
   this->renderer = renderer_arg;
 
   // Build All Pre-Designed Rooms
@@ -143,22 +146,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
   // Update gun and harpoon angle
   updateWepProjPos(mouse_pos, player, player_weapon, player_projectile);
-  
 
   float min_counter_ms = 3000.f;
-  for (Entity entity : registry.deathTimers.entities)
-  {
+  for (Entity entity : registry.deathTimers.entities) {
     // progress timer
     DeathTimer &counter = registry.deathTimers.get(entity);
     counter.counter_ms -= elapsed_ms_since_last_update;
-    if (counter.counter_ms < min_counter_ms)
-    {
+    if (counter.counter_ms < min_counter_ms) {
       min_counter_ms = counter.counter_ms;
     }
 
     // restart the game once the death timer expired
-    if (counter.counter_ms < 0)
-    {
+    if (counter.counter_ms < 0) {
       registry.deathTimers.remove(entity);
       screen.darken_screen_factor = 0;
       restart_game();
@@ -199,8 +198,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 }
 
 // Reset the world state to its initial state
-void WorldSystem::restart_game()
-{
+void WorldSystem::restart_game() {
   // Debugging for memory/component leaks
   registry.list_all_components();
   printf("Restarting\n");
@@ -221,7 +219,8 @@ void WorldSystem::restart_game()
   // Debugging for memory/component leaks
   registry.list_all_components();
 
-  level_builder.room(ROOM_ONE).activate_room(); // TODO: change based on which room entered
+  level_builder.room(ROOM_ONE)
+      .activate_room(); // TODO: change based on which room entered
 
   player = createPlayer(renderer, {window_width_px / 2 - 140, window_height_px - 140}); // TODO: get player spawn position
   player_weapon = getPlayerWeapon(player);
@@ -235,14 +234,12 @@ void WorldSystem::restart_game()
 }
 
 // Should the game be over ?
-bool WorldSystem::is_over() const
-{
+bool WorldSystem::is_over() const {
   return bool(glfwWindowShouldClose(window));
 }
 
 // On key callback
-void WorldSystem::on_key(int key, int, int action, int mod)
-{
+void WorldSystem::on_key(int key, int, int action, int mod) {
   // Player movement attributes
   Player& keys = registry.players.get(player);
 
@@ -250,8 +247,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
   Oxygen &player_oxygen = registry.oxygen.get(player);
 
   // Resetting game
-  if (action == GLFW_RELEASE && key == GLFW_KEY_R)
-  {
+  if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
     int w, h;
     glfwGetWindowSize(window, &w, &h);
 
@@ -259,24 +255,23 @@ void WorldSystem::on_key(int key, int, int action, int mod)
   }
 
   // Debugging
-  if (key == GLFW_KEY_G)
-  {
+  if (key == GLFW_KEY_G) {
     if (action == GLFW_RELEASE)
       debugging.in_debug_mode = false;
     else
       debugging.in_debug_mode = true;
   }
 
-  // TODO: REMOVE temporary key input to switch between rooms (facilitate collision testing)
-  if (key == GLFW_KEY_1)
-  {
+  // TODO: REMOVE temporary key input to switch between rooms (facilitate
+  // collision testing)
+  if (key == GLFW_KEY_1) {
     if (action == GLFW_PRESS)
       level_builder.room(ROOM_ONE).activate_room();
   }
 
-  // TODO: REMOVE temporary key input to switch between rooms (facilitate collision testing)
-  if (key == GLFW_KEY_2)
-  {
+  // TODO: REMOVE temporary key input to switch between rooms (facilitate
+  // collision testing)
+  if (key == GLFW_KEY_2) {
     if (action == GLFW_PRESS)
       level_builder.room(ROOM_TWO).activate_room();
   }
@@ -345,14 +340,12 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
   // Control the current speed with `<` `>`
   if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&
-      key == GLFW_KEY_COMMA)
-  {
+      key == GLFW_KEY_COMMA) {
     current_speed -= 0.1f;
     printf("Current speed = %f\n", current_speed);
   }
   if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&
-      key == GLFW_KEY_PERIOD)
-  {
+      key == GLFW_KEY_PERIOD) {
     current_speed += 0.1f;
     printf("Current speed = %f\n", current_speed);
   }
@@ -370,8 +363,24 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
             }
         }
     }
+  }
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
-    mouse_pos = mouse_position;
+  mouse_pos = mouse_position;
+}
+
+void WorldSystem::spawn_enemies_fixed() {
+  execute_config(TEMP1);
+  execute_config_rand(0.5, TEMP2);
+}
+
+void WorldSystem::spawn_enemies_rand() {
+  auto curr_room =
+      level_builder.room(ROOM_ONE); // TODO: until bob gets his shit together
+  for (int i = 0; i < 10; i++) {
+    vec2 p = curr_room.get_random_position();
+    createJellyPos(renderer, p);
+    createFishPos(renderer, p);
+  }
 }

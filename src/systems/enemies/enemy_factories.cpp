@@ -60,6 +60,8 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position)
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
 
+  createJellyHealthBar(renderer, entity);
+
   return entity;
 }
 
@@ -184,6 +186,7 @@ Entity createFishPos(RenderSystem *renderer, vec2 position)
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
 
+  createFishHealthBar(renderer, entity);
   return entity;
 }
 

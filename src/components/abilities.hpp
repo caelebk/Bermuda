@@ -1,5 +1,8 @@
 #pragma once
 
 struct Stun {
-  float duration;
+  float duration = 3000;
+};
+
+struct Stunned {
 };
