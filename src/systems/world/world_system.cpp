@@ -1,12 +1,15 @@
 // Header
 #include "world_system.hpp"
 #include "common.hpp"
+#include "levels/spawning.hpp"
 #include "player_factories.hpp"
 #include "enemy_factories.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "audio_system.hpp"
+#include "spawning.hpp"
+#include "level_spawn.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>

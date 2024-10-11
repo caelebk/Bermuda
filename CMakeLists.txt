@@ -34,6 +34,8 @@ file(
   SOURCE_FILES
   src/ecs/*.cpp
   src/ecs/*.hpp
+  src/config/*.cpp
+  src/config/*.hpp
   src/systems/*.cpp
   src/systems/*.hpp
   src/systems/abilities/*.cpp
@@ -81,6 +83,7 @@ endif()
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 target_include_directories(${PROJECT_NAME} PRIVATE src/ecs/)
+target_include_directories(${PROJECT_NAME} PRIVATE src/config/)
 target_include_directories(${PROJECT_NAME} PRIVATE src/components/)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/abilities)
