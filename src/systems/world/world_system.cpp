@@ -14,8 +14,6 @@
 #include <iostream>
 #include <sstream>
 
-// Movement speed (To be balanced later)
-#define SPEED_INC 2.0f
 
 // Game configuration
 
@@ -118,6 +116,9 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
+  // Calculate 't value': time loop / loop duration
+  float lerp = elapsed_ms_since_last_update / LOOP_DURATION;
+
   // Updating window title with points
   std::stringstream title_ss;
   title_ss << "Points: " << points;
@@ -163,11 +164,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     }
   }
 
+  // Set player acceleration (If player is alive)
+  if (!registry.deathTimers.has(player)) {
+      setPlayerAcceleration(player);
+  }
+  else {
+      registry.motions.get(player).acceleration = { 0.f,0.f };
+  }
+
+  // Apply Water friction
+  applyWaterFriction(player);
+
+  // Update player velocity with lerp
+  calculatePlayerVelocity(player, lerp);
+
+  // Update Entity positions with lerp
   for (Entity entity : registry.motions.entities)
   {
     Motion &motion = registry.motions.get(entity);
     Position &position = registry.positions.get(entity);
-    position.position += motion.velocity;
+    position.position += motion.velocity * lerp;
   }
 
   // reduce window brightness if the player is dying
@@ -251,7 +267,8 @@ bool WorldSystem::is_over() const
 void WorldSystem::on_key(int key, int, int action, int mod)
 {
   // Player movement attributes
-  Motion &player_motion = registry.motions.get(player);
+  Motion& player_motion = registry.motions.get(player);
+  Player& keys = registry.players.get(player);
 
   // Resetting game
   if (action == GLFW_RELEASE && key == GLFW_KEY_R)
@@ -294,36 +311,50 @@ void WorldSystem::on_key(int key, int, int action, int mod)
   }
 
   // WASD Movement Keys
-  if (key == GLFW_KEY_W) {
-      if (action == GLFW_RELEASE) {
-        player_motion.velocity.y = 0;
+  if (!registry.deathTimers.has(player)) {
+      if (key == GLFW_KEY_W) {
+          if (action == GLFW_RELEASE) {
+              keys.upHeld = false;
+          }
+          else {
+              keys.upHeld = true;
+          }
       }
-      else {
-        player_motion.velocity.y = -SPEED_INC;
+      if (key == GLFW_KEY_S) {
+          if (action == GLFW_RELEASE) {
+              keys.downHeld = false;
+          }
+          else {
+              keys.downHeld = true;
+          }
+      }
+      if (key == GLFW_KEY_A) {
+          if (action == GLFW_RELEASE) {
+              keys.leftHeld = false;
+          }
+          else {
+              keys.leftHeld = true;
+          }
+      }
+      if (key == GLFW_KEY_D) {
+          if (action == GLFW_RELEASE) {
+              keys.rightHeld = false;
+          }
+          else {
+              keys.rightHeld = true;
+          }
       }
   }
-  if (key == GLFW_KEY_S) {
-      if (action == GLFW_RELEASE) {
-        player_motion.velocity.y = 0;
+
+  // Dashing (In case shift is held)
+  if (key == GLFW_KEY_LEFT_SHIFT) {
+      if (action == GLFW_PRESS) {
+          registry.players.get(player).dashing = true;
+          registry.oxygen.get(oxygen_tank).rate = PLAYER_OXYGEN_RATE * 3;
       }
-      else {
-        player_motion.velocity.y = SPEED_INC;
-      }
-  }
-  if (key == GLFW_KEY_A) {
-      if (action == GLFW_RELEASE) {
-        player_motion.velocity.x = 0;
-      }
-      else {
-        player_motion.velocity.x = -SPEED_INC;
-      }
-  }
-  if (key == GLFW_KEY_D) {
-      if (action == GLFW_RELEASE) {
-        player_motion.velocity.x = 0;
-      }
-      else {
-        player_motion.velocity.x = SPEED_INC;
+      else if (action == GLFW_RELEASE) {
+          registry.players.get(player).dashing = false;
+          registry.oxygen.get(oxygen_tank).rate = PLAYER_OXYGEN_RATE;
       }
   }
 
@@ -348,8 +379,10 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
     // Shooting the projectile
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS && registry.playerProjectiles.get(player_projectile).is_loaded) {
-            setFiredProjVelo(player_projectile);
-            consumeOxygen(player, player_weapon);
+            if (!registry.deathTimers.has(player)) {
+                setFiredProjVelo(player_projectile);
+                consumeOxygen(player, player_weapon);
+            }
         }
     }
 }

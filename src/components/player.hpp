@@ -12,4 +12,11 @@ struct PlayerWeapon {
 // Player component
 struct Player {
   Entity weapon;
+
+  // Controls
+  bool upHeld = false;
+  bool downHeld = false;
+  bool leftHeld = false;
+  bool rightHeld = false;
+  bool dashing = false;
 };

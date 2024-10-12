@@ -16,7 +16,21 @@
 #include "player.hpp"
 
 // Net Projectile Speed (To be balanced later)
-#define HARPOON_SPEED 5.0f
+#define HARPOON_SPEED 100.0f
+
+// Max velocity (To be balanced later)
+#define MAX_PLAYER_SPEED 20.f
+#define MAX_DASH_SPEED MAX_PLAYER_SPEED*2
+
+// NOTE: WATER_FRICTION SHOULD ALWAYS BE SMALLER THAN PLAYER_ACCELERATION
+
+// Velocity given by pressing movement keys (To be balanced later)
+#define PLAYER_ACCELERATION 20.f
+#define DASH_ACCELERATION PLAYER_ACCELERATION*2
+
+// Acceleration applies on player by force of friction
+#define WATER_FRICTION 10.f
+
 
 // A simple physics system that moves rigid bodies and checks for collision
 class PhysicsSystem
@@ -32,3 +46,9 @@ public:
 void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon, Entity player_projectile);
 
 void setFiredProjVelo(Entity player_projectile);
+
+void setPlayerAcceleration(Entity player);
+
+void calculatePlayerVelocity(Entity player, float lerp);
+
+void applyWaterFriction(Entity entity);

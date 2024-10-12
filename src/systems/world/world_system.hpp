@@ -10,6 +10,9 @@
 #include "render_system.hpp"
 #include "level.hpp"
 
+// Loop Duration 
+#define LOOP_DURATION 500.f
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
