@@ -12,4 +12,4 @@
  * @param elapsed_ms_since_last_update 
  * @return true if the player is dead, false otherwise
  */
-bool update_death(float elapsed_ms_since_last_update, ScreenState& screen);
+bool update_death(float elapsed_ms_since_last_update);

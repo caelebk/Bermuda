@@ -2,6 +2,7 @@
 #include "world_system.hpp"
 #include "common.hpp"
 #include "death.hpp"
+#include "debuff.hpp"
 #include "enemy_factories.hpp"
 #include "level_spawn.hpp"
 #include "oxygen_system.hpp"
@@ -140,7 +141,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
   // Processing the player state
   ////////////////////////////////////////////////////////
   assert(registry.screenStates.components.size() <= 1);
-  ScreenState &screen = registry.screenStates.components[0];
+
+  update_debuffs(elapsed_ms_since_last_update);
 
   // Deplete oxygen when it is time...
   oxygen_timer =
@@ -154,7 +156,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
   ////////////////////////////////////////////////////////
 
   // handle death of entities
-  if (update_death(elapsed_ms_since_last_update, screen)) {
+  if (update_death(elapsed_ms_since_last_update)) {
     restart_game();
     return true;
   }
@@ -176,6 +178,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
   // Update Entity positions with lerp
   for (Entity entity : registry.motions.entities)
   {
+  // TODO: move when collisions are done
+  for (Entity entity : registry.motions.entities) {
+    if (!debuff_entity_can_move(entity)) {
+      continue;
+    }
     Motion &motion = registry.motions.get(entity);
     Position &position = registry.positions.get(entity);
     position.position += motion.velocity * lerp;
