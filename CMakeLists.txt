@@ -50,6 +50,8 @@ file(
   src/systems/oxygen/*.hpp
   src/systems/physics/*.cpp
   src/systems/physics/*.hpp
+  src/systems/audio/*.cpp
+  src/systems/audio/*.hpp
   src/systems/player/*.cpp
   src/systems/player/*.hpp
   src/systems/rendering/*.cpp
@@ -87,6 +89,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE src/systems/map)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/oxygen)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/physics)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/player)
+target_include_directories(${PROJECT_NAME} PRIVATE src/systems/audio)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/rendering)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/world)
 target_include_directories(${PROJECT_NAME} PRIVATE src/util)

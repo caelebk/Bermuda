@@ -2,6 +2,7 @@
 #include "physics_system.hpp"
 #include "physics.hpp"
 #include "player_factories.hpp"
+#include "audio_system.hpp"
 
 // Returns the local bounding coordinates scaled by the current size of the
 // entity
@@ -92,5 +93,5 @@ void setFiredProjVelo(Entity player_projectile) {
     proj.is_loaded = false;
     float angle = registry.positions.get(player_projectile).angle;
     registry.motions.get(player_projectile).velocity = { HARPOON_SPEED * cos(angle), HARPOON_SPEED * sin(angle) };
-    
+    registry.sounds.insert(player_projectile, Sound(blast_sound));
 }

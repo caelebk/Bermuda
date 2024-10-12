@@ -12,6 +12,7 @@
 #include "physics.hpp"
 #include "player.hpp"
 #include "tiny_ecs.hpp"
+#include "audio.hpp"
 
 class ECSRegistry {
   // Callbacks to remove a particular or all entities in the system
@@ -54,6 +55,10 @@ public:
 	ComponentContainer<Adjacency> adjacencies;
   ComponentContainer<ActiveWall> activeWalls;
 
+  // audio related
+  ComponentContainer<Sound> sounds;
+  ComponentContainer<Music> musics;
+
   // other
   ComponentContainer<Consumable> consumables;
   ComponentContainer<DebugComponent> debugComponents;
@@ -89,6 +94,9 @@ public:
     registry_list.push_back(&spaces);
     registry_list.push_back(&adjacencies);
     registry_list.push_back(&activeWalls);
+    // audio related
+    registry_list.push_back(&sounds);
+    registry_list.push_back(&musics);
     // other
     registry_list.push_back(&debugComponents);
     registry_list.push_back(&consumables);

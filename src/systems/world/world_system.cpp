@@ -6,6 +6,7 @@
 #include "tiny_ecs_registry.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
+#include "audio_system.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>
@@ -26,16 +27,6 @@ WorldSystem::WorldSystem() : points(0), next_oxygen_deplete(PLAYER_OXYGEN_DEPLET
 
 WorldSystem::~WorldSystem()
 {
-
-  // destroy music components
-  if (background_music != nullptr)
-    Mix_FreeMusic(background_music);
-  if (salmon_dead_sound != nullptr)
-    Mix_FreeChunk(salmon_dead_sound);
-  if (salmon_eat_sound != nullptr)
-    Mix_FreeChunk(salmon_eat_sound);
-
-  Mix_CloseAudio();
 
   // Destroy all created components
   registry.clear_all_components();
@@ -108,45 +99,12 @@ GLFWwindow *WorldSystem::create_window()
   glfwSetCursorPosCallback(window, cursor_pos_redirect);
   glfwSetMouseButtonCallback(window, mouse_redirect);
 
-  //////////////////////////////////////
-  // Loading music and sounds with SDL
-  //////////////////////////////////////
-  if (SDL_Init(SDL_INIT_AUDIO) < 0)
-  {
-    fprintf(stderr, "Failed to initialize SDL Audio");
-    return nullptr;
-  }
-  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1)
-  {
-    fprintf(stderr, "Failed to open audio device");
-    return nullptr;
-  }
-
-  background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
-  salmon_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
-  salmon_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
-
-  if (background_music == nullptr || salmon_dead_sound == nullptr ||
-      salmon_eat_sound == nullptr)
-  {
-    fprintf(stderr,
-            "Failed to load sounds\n %s\n %s\n %s\n make sure the data "
-            "directory is present",
-            audio_path("music.wav").c_str(),
-            audio_path("death_sound.wav").c_str(),
-            audio_path("eat_sound.wav").c_str());
-    return nullptr;
-  }
-
   return window;
 }
 
 void WorldSystem::init(RenderSystem *renderer_arg)
 {
   this->renderer = renderer_arg;
-  // Playing background music indefinitely
-  Mix_PlayMusic(background_music, -1);
-  fprintf(stderr, "Loaded music\n");
 
   // Build All Pre-Designed Rooms
   level_builder = LevelBuilder();
@@ -250,30 +208,20 @@ void WorldSystem::restart_game()
 }
 
 // Compute collisions between entities
-void WorldSystem::handle_collisions()
-{
-  // Loop over all collisions detected by the physics system
+void WorldSystem::handle_collisions() {
   auto &collisionsRegistry = registry.collisions;
-  for (uint i = 0; i < collisionsRegistry.components.size(); i++)
-  {
-    // The entity and its collider
+  for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
     Entity entity = collisionsRegistry.entities[i];
     Entity entity_other = collisionsRegistry.components[i].other;
 
-    // for now, we are only interested in collisions that involve the player
-    if (registry.players.has(entity))
-    {
+    if (registry.players.has(entity)) {
       // Player& player = registry.players.get(entity);
 
       // Checking Player - Deadly collisions
-      if (registry.deadlys.has(entity_other))
-      {
-        // initiate death unless already dying
-        if (!registry.deathTimers.has(entity))
-        {
-          // Scream, reset timer, and make the player sink
+      if (registry.deadlys.has(entity_other)) {
+        if (!registry.deathTimers.has(entity)) {
+          registry.sounds.insert(entity, Sound(death_sound));
           registry.deathTimers.emplace(entity);
-          Mix_PlayChannel(-1, salmon_dead_sound, 0);
         }
       }
       // Checking Player - Eatable collisions
@@ -283,14 +231,13 @@ void WorldSystem::handle_collisions()
         {
           // chew, count points, and set the LightUp timer
           registry.remove_all_components_of(entity_other);
-          Mix_PlayChannel(-1, salmon_eat_sound, 0);
+          registry.sounds.insert(entity, Sound(eat_sound));
           ++points;
         }
       }
     }
   }
 
-  // Remove all collisions from this simulation step
   registry.collisions.clear();
 }
 
@@ -322,6 +269,14 @@ void WorldSystem::on_key(int key, int, int action, int mod)
       debugging.in_debug_mode = false;
     else
       debugging.in_debug_mode = true;
+  }
+
+  //Music swap
+  if (key == GLFW_KEY_M) {
+    registry.musics.insert(Entity(), Music(background_music2));
+  }
+  if (key == GLFW_KEY_N) {
+    registry.musics.insert(Entity(), Music(background_music));
   }
 
   // TODO: REMOVE temporary key input to switch between rooms (facilitate collision testing)
