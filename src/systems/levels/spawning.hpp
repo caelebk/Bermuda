@@ -67,3 +67,11 @@ void execute_config_fixed(const std::vector<std::function<void()>> &funcs);
  */
 void execute_config_fixed_rand(float chance,
                                const std::vector<std::function<void()>> &funcs);
+
+
+/**
+ * @brief removes all drops and enemies from the level
+ *
+ * @return true if success
+ */
+bool remove_all_entities();

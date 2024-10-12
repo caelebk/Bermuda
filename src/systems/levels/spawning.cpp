@@ -1,4 +1,5 @@
 #include "spawning.hpp"
+#include "tiny_ecs_registry.hpp"
 
 /**
  * @brief executes a config used to generate things in a level
@@ -28,4 +29,17 @@ void execute_config_fixed_rand(float chance,
       func();
     }
   }
+}
+
+bool remove_all_entities() {
+  for (const Entity &e: registry.deadlys.entities) {
+    registry.remove_all_components_of(e);
+  }
+  registry.deadlys.clear();
+
+  for (const Entity &e: registry.consumables.entities) {
+    registry.remove_all_components_of(e);
+  }
+  registry.consumables.clear();
+  return true;
 }

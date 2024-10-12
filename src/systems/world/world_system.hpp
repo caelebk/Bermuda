@@ -53,7 +53,7 @@ private:
 	RenderSystem* renderer;
 	LevelBuilder level_builder;
 	float current_speed;
-	float next_oxygen_deplete;
+	float oxygen_timer;
 	Entity player;
 	Entity player_weapon;
 	Entity player_projectile;

@@ -10,7 +10,7 @@
  * @return true - if the entity wasn't stunning the player (so the player isn't constantly being damaged)
  */
 bool handle_stun(Entity enemy, Entity player) {
-  if (registry.stun.has(enemy)) {
+  if (registry.stuns.has(enemy)) {
     if (!registry.stunned.has(player)) {
       registry.stunned.emplace(player);
     }

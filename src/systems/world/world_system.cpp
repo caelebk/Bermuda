@@ -1,15 +1,17 @@
 // Header
 #include "world_system.hpp"
 #include "common.hpp"
-#include "config/level_spawn.hpp"
+#include "death.hpp"
 #include "enemy_factories.hpp"
 #include "level_spawn.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "audio_system.hpp"
+#include "player_controls.hpp"
 #include "player_factories.hpp"
 #include "spawning.hpp"
 #include "tiny_ecs_registry.hpp"
+#include "player_physics.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>
@@ -17,12 +19,13 @@
 #include <iostream>
 #include <sstream>
 
-
+/////////////////////////////////////////////////////////////
 // Game configuration
+/////////////////////////////////////////////////////////////
 
 // create the underwater world
 WorldSystem::WorldSystem()
-    : points(0), next_oxygen_deplete(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
+    : points(0), oxygen_timer(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
   // Seeding rng with random device
   rng = std::default_random_engine(std::random_device()());
 }
@@ -126,43 +129,34 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
   // Updating window title with points
   std::stringstream title_ss;
-  title_ss << "Points: " << points;
+  title_ss << "Bermuda - Points: " << points;
   glfwSetWindowTitle(window, title_ss.str().c_str());
 
   // Remove debug info from the last step
   while (registry.debugComponents.entities.size() > 0)
     registry.remove_all_components_of(registry.debugComponents.entities.back());
 
+  ////////////////////////////////////////////////////////
   // Processing the player state
+  ////////////////////////////////////////////////////////
   assert(registry.screenStates.components.size() <= 1);
   ScreenState &screen = registry.screenStates.components[0];
 
   // Deplete oxygen when it is time...
-  next_oxygen_deplete -= elapsed_ms_since_last_update;
-  if (next_oxygen_deplete < 0) {
-    next_oxygen_deplete = PLAYER_OXYGEN_DEPLETE_TIME_MS;
-    depleteOxygen(player);
-  }
+  oxygen_timer =
+      oxygen_drain(player, oxygen_timer, elapsed_ms_since_last_update);
 
   // Update gun and harpoon angle
   updateWepProjPos(mouse_pos, player, player_weapon, player_projectile);
 
-  float min_counter_ms = 3000.f;
-  for (Entity entity : registry.deathTimers.entities) {
-    // progress timer
-    DeathTimer &counter = registry.deathTimers.get(entity);
-    counter.counter_ms -= elapsed_ms_since_last_update;
-    if (counter.counter_ms < min_counter_ms) {
-      min_counter_ms = counter.counter_ms;
-    }
+  ////////////////////////////////////////////////////////
+  // Processing general entity state
+  ////////////////////////////////////////////////////////
 
-    // restart the game once the death timer expired
-    if (counter.counter_ms < 0) {
-      registry.deathTimers.remove(entity);
-      screen.darken_screen_factor = 0;
-      restart_game();
-      return true;
-    }
+  // handle death of entities
+  if (update_death(elapsed_ms_since_last_update, screen)) {
+    restart_game();
+    return true;
   }
 
   // Set player acceleration (If player is alive)
@@ -192,17 +186,23 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     }
   }
 
-  // reduce window brightness if the player is dying
-  screen.darken_screen_factor = 1 - min_counter_ms / 3000;
   return true;
 }
 
-// Reset the world state to its initial state
+/**
+ * @brief Reset the world state to its initial state
+ */
 void WorldSystem::restart_game() {
-  // Debugging for memory/component leaks
+
+  /////////////////////////////////////////////
+  // Debugging
+  /////////////////////////////////////////////
   registry.list_all_components();
   printf("Restarting\n");
 
+  /////////////////////////////////////////////
+  // World Reset
+  /////////////////////////////////////////////
   // Reset the game speed
   current_speed = 1.f;
 
@@ -219,6 +219,11 @@ void WorldSystem::restart_game() {
   // Debugging for memory/component leaks
   registry.list_all_components();
 
+  remove_all_entities();
+
+  /////////////////////////////////////////////
+  // World Generation
+  /////////////////////////////////////////////
   // TODO: Change based on which room entered
   auto curr_room = level_builder.room(ROOM_ONE);
   curr_room.activate_room();
@@ -234,12 +239,22 @@ void WorldSystem::restart_game() {
   createFishHealthBar(renderer, fish);                                                          // TODO: REMOVE once enemy spawning fully implemented                                                        // TODO: REMOVE once enemy spawning fully implemented
 }
 
-// Should the game be over ?
+/**
+ * @brief Returns whether the game be over ?
+ *
+ * @return True if over, false if not
+ */
 bool WorldSystem::is_over() const {
   return bool(glfwWindowShouldClose(window));
 }
 
-// On key callback
+/**
+ * @brief On key callback
+ *
+ * @param key 
+ * @param action 
+ * @param mod 
+ */
 void WorldSystem::on_key(int key, int, int action, int mod) {
   // Player movement attributes
   Player& keys = registry.players.get(player);
@@ -247,6 +262,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   // Player oxygen attributes
   Oxygen &player_oxygen = registry.oxygen.get(player);
 
+  /////////////////////////////////////
+  // Menu
+  /////////////////////////////////////
   // Resetting game
   if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
     int w, h;
@@ -255,7 +273,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     restart_game();
   }
 
+  /////////////////////////////////////
   // Debugging
+  /////////////////////////////////////
   if (key == GLFW_KEY_G) {
     if (action == GLFW_RELEASE)
       debugging.in_debug_mode = false;
@@ -351,9 +371,21 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     printf("Current speed = %f\n", current_speed);
   }
   current_speed = fmax(0.f, current_speed);
+
+
+  /////////////////////////////////////
+  // Player
+  /////////////////////////////////////
+  player_movement(key, action, mod, player);
 }
 
-// Mouse click callback
+/**
+ * @brief Mouse click callback
+ *
+ * @param button 
+ * @param action 
+ * @param mods 
+ */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
     // Shooting the projectile
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
