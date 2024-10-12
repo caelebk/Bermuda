@@ -38,6 +38,7 @@ public:
   // enemy related
   ComponentContainer<Deadly> deadlys;
   ComponentContainer<DamageOnTouch> damageTouch;
+  ComponentContainer<AttackCD> attackCD;
 
   // buff/debuff related
   ComponentContainer<Stunned> stunned;
@@ -56,10 +57,11 @@ public:
 
   // level related
   ComponentContainer<SpaceBoundingBox> bounding_boxes;
-	ComponentContainer<Vector> vectors;
-	ComponentContainer<Space> spaces;
-	ComponentContainer<Adjacency> adjacencies;
+  ComponentContainer<Vector> vectors;
+  ComponentContainer<Space> spaces;
+  ComponentContainer<Adjacency> adjacencies;
   ComponentContainer<ActiveWall> activeWalls;
+  ComponentContainer<Interactable> interactable;
 
   // status related
   ComponentContainer<LowOxygen> lowOxygen;
@@ -90,10 +92,12 @@ public:
     // enemy related
     registry_list.push_back(&deadlys);
     registry_list.push_back(&damageTouch);
+    registry_list.push_back(&attackCD);
     // ai related
     registry_list.push_back(&wanders);
     // abilities related
     registry_list.push_back(&stuns);
+    registry_list.push_back(&stunned);
     // render related
     registry_list.push_back(&meshPtrs);
     registry_list.push_back(&renderRequests);
@@ -110,6 +114,7 @@ public:
     // audio related
     registry_list.push_back(&sounds);
     registry_list.push_back(&musics);
+    registry_list.push_back(&interactable);
     // other
     registry_list.push_back(&debugComponents);
     registry_list.push_back(&consumables);

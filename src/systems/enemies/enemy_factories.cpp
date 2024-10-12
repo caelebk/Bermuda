@@ -7,20 +7,6 @@
 // Jellyfish
 /////////////////////////////////////////////////////////////////
 /**
- * @brief creates a jellyfish in a room
-  // TODO: add the room as arg as well
- *
- * @param renderer
- * @param randPos - function that returns a random position in a room
- * @return entity id if successful, -1 otherwise
- */
-Entity createJellyRoom(RenderSystem *renderer, vec2 (*randPos)(void))
-{
-  vec2 pos = randPos();
-  return createFishPos(renderer, pos);
-}
-
-/**
  * @brief creates a fish at a specific position
  *
  * @param renderer
@@ -29,7 +15,7 @@ Entity createJellyRoom(RenderSystem *renderer, vec2 (*randPos)(void))
  */
 Entity createJellyPos(RenderSystem *renderer, vec2 position)
 {
-  // Reserve en entity
+  // Reserve an entity
   auto entity = Entity();
 
   // Store a reference to the potentially re-used mesh object
@@ -37,11 +23,17 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position)
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy
-  auto &deadly = registry.deadlys.emplace(entity);
+  registry.deadlys.emplace(entity);
 
   // Add stats
   auto &damage = registry.damageTouch.emplace(entity);
-  damage.amount = JELLY_DAMAGE;
+  damage.damage = JELLY_DAMAGE;
+  auto &oxygen = registry.oxygen.emplace(entity);
+  oxygen.level = JELLY_OXYGEN;
+  oxygen.capacity = JELLY_OXYGEN;
+
+  auto &attackCD = registry.attackCD.emplace(entity);
+  attackCD.attack_spd = JELLY_ATK_SPD;
 
   // add abilities
   auto &stun = registry.stuns.emplace(entity);
@@ -60,7 +52,7 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position)
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
 
-  createJellyHealthBar(renderer, entity);
+  // createJellyHealthBar(renderer, entity);
 
   return entity;
 }
@@ -130,20 +122,6 @@ void createJellyHealthBar(RenderSystem *renderer, Entity &enemy)
 // Fish
 /////////////////////////////////////////////////////////////////
 /**
- * @brief creates a fish in a room
-  // TODO: add the room as arg as well
- *
- * @param renderer
- * @param randPos - function that returns a random position in a room
- * @return
- */
-Entity createFishRoom(RenderSystem *renderer, vec2 (*randPos)(void))
-{
-  vec2 pos = randPos();
-  return createFishPos(renderer, pos);
-}
-
-/**
  * @brief creates a fish at a specific position
  *
  * @param renderer
@@ -152,7 +130,7 @@ Entity createFishRoom(RenderSystem *renderer, vec2 (*randPos)(void))
  */
 Entity createFishPos(RenderSystem *renderer, vec2 position)
 {
-  // Reserve en entity
+  // Reserve an entity
   auto entity = Entity();
 
   // Store a reference to the potentially re-used mesh object
@@ -160,9 +138,16 @@ Entity createFishPos(RenderSystem *renderer, vec2 position)
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  auto &deadly = registry.deadlys.emplace(entity);
+  registry.deadlys.emplace(entity);
   auto &damage = registry.damageTouch.emplace(entity);
   damage.amount = FISH_DAMAGE;
+  damage.damage = FISH_DAMAGE;
+
+  auto &oxygen = registry.oxygen.emplace(entity);
+  oxygen.level = FISH_OXYGEN;
+  oxygen.capacity = FISH_OXYGEN;
+  auto &attackCD = registry.attackCD.emplace(entity);
+  attackCD.attack_spd = FISH_ATK_SPD;
 
   // Initialize the position, scale, and physics components
   auto &motion = registry.motions.emplace(entity);
@@ -186,7 +171,7 @@ Entity createFishPos(RenderSystem *renderer, vec2 position)
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
 
-  createFishHealthBar(renderer, entity);
+  // createFishHealthBar(renderer, entity);
   return entity;
 }
 

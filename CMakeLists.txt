@@ -47,6 +47,8 @@ file(
   src/systems/ai/*.hpp
   src/systems/entities/*.hpp
   src/systems/entities/*.cpp
+  src/systems/consumables/*.hpp
+  src/systems/consumables/*.cpp
   src/systems/enemies/*.cpp
   src/systems/enemies/*.hpp
   src/systems/levels/*.cpp
@@ -103,6 +105,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE src/systems/audio)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/rendering)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/world)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/entities)
+target_include_directories(${PROJECT_NAME} PRIVATE src/systems/consumables)
 target_include_directories(${PROJECT_NAME} PRIVATE src/util)
 
 # Added this so policy CMP0065 doesn't scream

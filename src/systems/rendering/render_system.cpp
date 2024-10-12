@@ -215,8 +215,15 @@ void RenderSystem::draw()
 		if (registry.renderRequests.has(enemy))
 			drawTexturedMesh(enemy, projection_2D);
 	}
-	for (Entity projectile : registry.playerProjectiles.entities)
-	{
+	for (Entity consumable : registry.consumables.entities) {
+		if (registry.renderRequests.has(consumable))
+			drawTexturedMesh(consumable, projection_2D);
+	}
+	for (Entity interactable : registry.interactable.entities) {
+		if (registry.renderRequests.has(interactable))
+			drawTexturedMesh(interactable, projection_2D);
+	}
+	for (Entity projectile : registry.playerProjectiles.entities) {
 		if (registry.renderRequests.has(projectile))
 			drawTexturedMesh(projectile, projection_2D);
 	}

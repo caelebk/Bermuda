@@ -1,18 +1,23 @@
 // Header
 #include "world_system.hpp"
 #include "common.hpp"
+#include "consumable_factories.hpp"
+#include "consumable_utils.hpp"
 #include "death.hpp"
 #include "debuff.hpp"
 #include "enemy_factories.hpp"
+#include "enemy_util.hpp"
 #include "level_spawn.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "audio_system.hpp"
 #include "player_controls.hpp"
 #include "player_factories.hpp"
+#include "player_physics.hpp"
+#include "map_factories.hpp"
+#include "map_util.hpp"
 #include "spawning.hpp"
 #include "tiny_ecs_registry.hpp"
-#include "player_physics.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>
@@ -143,6 +148,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
   assert(registry.screenStates.components.size() <= 1);
 
   update_debuffs(elapsed_ms_since_last_update);
+  update_attack(elapsed_ms_since_last_update);
 
   // Deplete oxygen when it is time...
   oxygen_timer =
@@ -227,6 +233,7 @@ void WorldSystem::restart_game() {
   registry.list_all_components();
 
   remove_all_entities();
+  registry.list_all_components();
 
   /////////////////////////////////////////////
   // World Generation
@@ -258,9 +265,9 @@ bool WorldSystem::is_over() const {
 /**
  * @brief On key callback
  *
- * @param key 
- * @param action 
- * @param mod 
+ * @param key
+ * @param action
+ * @param mod
  */
 void WorldSystem::on_key(int key, int, int action, int mod) {
   // Player movement attributes
@@ -379,7 +386,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   }
   current_speed = fmax(0.f, current_speed);
 
-
   /////////////////////////////////////
   // Player
   /////////////////////////////////////
@@ -389,9 +395,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 /**
  * @brief Mouse click callback
  *
- * @param button 
- * @param action 
- * @param mods 
+ * @param button
+ * @param action
+ * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
     // Shooting the projectile

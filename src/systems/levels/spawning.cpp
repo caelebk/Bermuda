@@ -32,14 +32,21 @@ void execute_config_fixed_rand(float chance,
 }
 
 bool remove_all_entities() {
-  for (const Entity &e: registry.deadlys.entities) {
-    registry.remove_all_components_of(e);
+  while (registry.motions.entities.size() > 0) {
+    registry.remove_all_components_of(registry.motions.entities.back());
   }
-  registry.deadlys.clear();
 
-  for (const Entity &e: registry.consumables.entities) {
-    registry.remove_all_components_of(e);
+  while (registry.deadlys.entities.size() > 0) {
+    registry.remove_all_components_of(registry.deadlys.entities.back());
   }
-  registry.consumables.clear();
+
+  while (registry.consumables.entities.size() > 0) {
+    registry.remove_all_components_of(registry.consumables.entities.back());
+  }
+
+  while (registry.interactable.entities.size() > 0) {
+    registry.remove_all_components_of(registry.interactable.entities.back());
+  }
+
   return true;
 }

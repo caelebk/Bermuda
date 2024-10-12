@@ -2,6 +2,7 @@
 #include "debuff.hpp"
 #include "abilities.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <iostream>
 
 /**
  * @brief adds stunned to the player if the player isn't already stunned and the
@@ -14,6 +15,7 @@
 bool handle_stun(Entity enemy, Entity player) {
   if (registry.stuns.has(enemy)) {
     if (!registry.stunned.has(player)) {
+      std::cout << "Stunned!" << std::endl;
       Stun &stun = registry.stuns.get(enemy);
       Stunned &stunned = registry.stunned.emplace(player);
       stunned.duration = stun.duration;

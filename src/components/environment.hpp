@@ -28,3 +28,5 @@ struct Adjacency {
 };
 
 struct ActiveWall {};
+
+struct Interactable {};
