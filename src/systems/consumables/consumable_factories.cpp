@@ -21,7 +21,7 @@ Entity createOxygenTankPos(RenderSystem *renderer, vec2 position) {
 
   // make consumable
   registry.consumables.emplace(entity);
-  // registry.collidables.emplace(entity);
+  registry.collidables.emplace(entity);
 
   // Add stats
   auto &damage = registry.damageTouch.emplace(entity);

@@ -21,7 +21,7 @@ Entity createGeyserPos(RenderSystem *renderer, vec2 position) {
 
   // make consumable
   registry.interactable.emplace(entity);
-  // registry.collidables.emplace(entity);
+  registry.collidables.emplace(entity);
 
   // Add stats
   auto &damage = registry.damageTouch.emplace(entity);
