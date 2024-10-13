@@ -72,7 +72,7 @@ bool update_debuffs(float elapsed_ms_since_last_update) {
  * @param player 
  * @return 
  */
-bool handle_debuffs(Entity enemy, Entity player) {
+bool handle_debuffs(Entity player, Entity enemy) {
   bool success = true;
 
   success &= handle_stun(enemy, player);

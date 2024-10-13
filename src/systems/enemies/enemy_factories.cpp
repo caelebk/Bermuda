@@ -13,8 +13,7 @@
  * @param position
  * @return
  */
-Entity createJellyPos(RenderSystem *renderer, vec2 position)
-{
+Entity createJellyPos(RenderSystem *renderer, vec2 position) {
   // Reserve an entity
   auto entity = Entity();
 
@@ -27,10 +26,7 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position)
 
   // Add stats
   auto &damage = registry.damageTouch.emplace(entity);
-  damage.damage = JELLY_DAMAGE;
-  auto &oxygen = registry.oxygen.emplace(entity);
-  oxygen.level = JELLY_OXYGEN;
-  oxygen.capacity = JELLY_OXYGEN;
+  damage.amount = JELLY_DAMAGE;
 
   auto &attackCD = registry.attackCD.emplace(entity);
   attackCD.attack_spd = JELLY_ATK_SPD;
@@ -45,7 +41,7 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position)
   pos.position = position;
   pos.scale = JELLY_SCALE_FACTOR * JELLY_BOUNDING_BOX;
 
-  //add collisions
+  // add collisions
   registry.collidables.emplace(entity);
 
   registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::JELLY,
@@ -64,12 +60,11 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position)
  * @param enemy - assumed to be a jellyfish
  * @return
  */
-void createJellyHealthBar(RenderSystem *renderer, Entity &enemy)
-{
+void createJellyHealthBar(RenderSystem *renderer, Entity &enemy) {
   // Check if enemy has a position component
-  if (!registry.positions.has(enemy))
-  {
-    std::cerr << "Error: Entity does not have a position component" << std::endl;
+  if (!registry.positions.has(enemy)) {
+    std::cerr << "Error: Entity does not have a position component"
+              << std::endl;
     return;
   }
 
@@ -87,7 +82,11 @@ void createJellyHealthBar(RenderSystem *renderer, Entity &enemy)
 
   // Setting initial positon values
   Position &position = registry.positions.emplace(jellyOxygenBar);
-  position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
+  position.position =
+      enemyPos.position -
+      vec2(0.f, enemyPos.scale.y / 2 +
+                    ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP
+                                       // should be, update to proper position
   position.angle = 0.f;
   position.scale = JELLY_HEALTH_SCALE * JELLY_HEALTH_BOUNDING_BOX;
   position.originalScale = JELLY_HEALTH_SCALE * JELLY_HEALTH_BOUNDING_BOX;
@@ -107,16 +106,13 @@ void createJellyHealthBar(RenderSystem *renderer, Entity &enemy)
 
   // TODO: change to proper texture
   registry.renderRequests.insert(
-      jellyOxygenBar,
-      {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
-       EFFECT_ASSET_ID::TEXTURED,
-       GEOMETRY_BUFFER_ID::SPRITE});
+      jellyOxygenBar, {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
+                       EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
 
-  registry.renderRequests.insert(
-      jellyBackgroundBar,
-      {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR,
-       EFFECT_ASSET_ID::TEXTURED,
-       GEOMETRY_BUFFER_ID::SPRITE});
+  registry.renderRequests.insert(jellyBackgroundBar,
+                                 {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR,
+                                  EFFECT_ASSET_ID::TEXTURED,
+                                  GEOMETRY_BUFFER_ID::SPRITE});
 }
 /////////////////////////////////////////////////////////////////
 // Fish
@@ -128,8 +124,7 @@ void createJellyHealthBar(RenderSystem *renderer, Entity &enemy)
  * @param position
  * @return
  */
-Entity createFishPos(RenderSystem *renderer, vec2 position)
-{
+Entity createFishPos(RenderSystem *renderer, vec2 position) {
   // Reserve an entity
   auto entity = Entity();
 
@@ -141,11 +136,7 @@ Entity createFishPos(RenderSystem *renderer, vec2 position)
   registry.deadlys.emplace(entity);
   auto &damage = registry.damageTouch.emplace(entity);
   damage.amount = FISH_DAMAGE;
-  damage.damage = FISH_DAMAGE;
 
-  auto &oxygen = registry.oxygen.emplace(entity);
-  oxygen.level = FISH_OXYGEN;
-  oxygen.capacity = FISH_OXYGEN;
   auto &attackCD = registry.attackCD.emplace(entity);
   attackCD.attack_spd = FISH_ATK_SPD;
 
@@ -159,9 +150,9 @@ Entity createFishPos(RenderSystem *renderer, vec2 position)
   pos.position = position;
   pos.scale = FISH_SCALE_FACTOR * FISH_BOUNDING_BOX;
 
-  //add collisions
+  // add collisions
   registry.collidables.emplace(entity);
-  
+
   // ai
   auto &wander = registry.wanders.emplace(entity);
 
@@ -182,12 +173,11 @@ Entity createFishPos(RenderSystem *renderer, vec2 position)
  * @param enemy - assumed to be a fish
  * @return
  */
-void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
-{
+void createFishHealthBar(RenderSystem *renderer, Entity &enemy) {
   // Check if enemy has a position component
-  if (!registry.positions.has(enemy))
-  {
-    std::cerr << "Error: Entity does not have a position component" << std::endl;
+  if (!registry.positions.has(enemy)) {
+    std::cerr << "Error: Entity does not have a position component"
+              << std::endl;
     return;
   }
 
@@ -205,7 +195,11 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 
   // Setting initial positon values
   Position &position = registry.positions.emplace(fishOxygenBar);
-  position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
+  position.position =
+      enemyPos.position -
+      vec2(0.f, enemyPos.scale.y / 2 +
+                    ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP
+                                       // should be, update to proper position
   position.angle = 0.f;
   position.scale = FISH_HEALTH_SCALE * FISH_HEALTH_BOUNDING_BOX;
   position.originalScale = FISH_HEALTH_SCALE * FISH_HEALTH_BOUNDING_BOX;
@@ -225,16 +219,13 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 
   // TODO: change to proper texture
   registry.renderRequests.insert(
-      fishOxygenBar,
-      {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
-       EFFECT_ASSET_ID::TEXTURED,
-       GEOMETRY_BUFFER_ID::SPRITE});
+      fishOxygenBar, {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
+                      EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
 
-  registry.renderRequests.insert(
-      fishBackgroundBar,
-      {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR,
-       EFFECT_ASSET_ID::TEXTURED,
-       GEOMETRY_BUFFER_ID::SPRITE});
+  registry.renderRequests.insert(fishBackgroundBar,
+                                 {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR,
+                                  EFFECT_ASSET_ID::TEXTURED,
+                                  GEOMETRY_BUFFER_ID::SPRITE});
 }
 
 /////////////////////////////////////////////////////////////////
@@ -253,8 +244,8 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 //     // Check if enemy has a position component
 //     if (!registry.positions.has(enemy))
 //     {
-//         std::cerr << "Error: Entity does not have a position component" << std::endl;
-//         return -1;
+//         std::cerr << "Error: Entity does not have a position component" <<
+//         std::endl; return -1;
 //     }
 
 //     auto entity = Entity();
@@ -268,9 +259,10 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 
 //     // Setting initial positon values
 //     Position &position = registry.positions.emplace(entity);
-//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
-//     position.angle = 0.f;
-//     position.scale = SHARK_OXYGEN_SCALE;
+//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 +
+//     ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update
+//     to proper position position.angle = 0.f; position.scale =
+//     SHARK_OXYGEN_SCALE;
 
 //     // Set health bar
 //     auto &health = registry.oxygen.emplace(entity);
@@ -304,8 +296,8 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 //     // Check if enemy has a position component
 //     if (!registry.positions.has(enemy))
 //     {
-//         std::cerr << "Error: Entity does not have a position component" << std::endl;
-//         return -1;
+//         std::cerr << "Error: Entity does not have a position component" <<
+//         std::endl; return -1;
 //     }
 
 //     auto entity = Entity();
@@ -319,9 +311,10 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 
 //     // Setting initial positon values
 //     Position &position = registry.positions.emplace(entity);
-//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
-//     position.angle = 0.f;
-//     position.scale = OCTOPUS_OXYGEN_SCALE;
+//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 +
+//     ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update
+//     to proper position position.angle = 0.f; position.scale =
+//     OCTOPUS_OXYGEN_SCALE;
 
 //     // Set health bar
 //     auto &health = registry.oxygen.emplace(entity);
@@ -355,8 +348,8 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 //     // Check if enemy has a position component
 //     if (!registry.positions.has(enemy))
 //     {
-//         std::cerr << "Error: Entity does not have a position component" << std::endl;
-//         return -1;
+//         std::cerr << "Error: Entity does not have a position component" <<
+//         std::endl; return -1;
 //     }
 
 //     auto entity = Entity();
@@ -370,9 +363,10 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 
 //     // Setting initial positon values
 //     Position &position = registry.positions.emplace(entity);
-//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
-//     position.angle = 0.f;
-//     position.scale = KRAB_OXYGEN_SCALE;
+//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 +
+//     ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update
+//     to proper position position.angle = 0.f; position.scale =
+//     KRAB_OXYGEN_SCALE;
 
 //     // Set health bar
 //     auto &health = registry.oxygen.emplace(entity);
@@ -406,8 +400,8 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 //     // Check if enemy has a position component
 //     if (!registry.positions.has(enemy))
 //     {
-//         std::cerr << "Error: Entity does not have a position component" << std::endl;
-//         return -1;
+//         std::cerr << "Error: Entity does not have a position component" <<
+//         std::endl; return -1;
 //     }
 
 //     auto entity = Entity();
@@ -421,9 +415,10 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 
 //     // Setting initial positon values
 //     Position &position = registry.positions.emplace(entity);
-//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
-//     position.angle = 0.f;
-//     position.scale = SEA_MINE_OXYGEN_SCALE;
+//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 +
+//     ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update
+//     to proper position position.angle = 0.f; position.scale =
+//     SEA_MINE_OXYGEN_SCALE;
 
 //     // Set health bar
 //     auto &health = registry.oxygen.emplace(entity);
@@ -457,8 +452,8 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 //     // Check if enemy has a position component
 //     if (!registry.positions.has(enemy))
 //     {
-//         std::cerr << "Error: Entity does not have a position component" << std::endl;
-//         return -1;
+//         std::cerr << "Error: Entity does not have a position component" <<
+//         std::endl; return -1;
 //     }
 
 //     auto entity = Entity();
@@ -472,9 +467,10 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 
 //     // Setting initial positon values
 //     Position &position = registry.positions.emplace(entity);
-//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
-//     position.angle = 0.f;
-//     position.scale = MERPERSON_OXYGEN_SCALE;
+//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 +
+//     ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update
+//     to proper position position.angle = 0.f; position.scale =
+//     MERPERSON_OXYGEN_SCALE;
 
 //     // Set health bar
 //     auto &health = registry.oxygen.emplace(entity);
@@ -508,8 +504,8 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 //     // Check if enemy has a position component
 //     if (!registry.positions.has(enemy))
 //     {
-//         std::cerr << "Error: Entity does not have a position component" << std::endl;
-//         return -1;
+//         std::cerr << "Error: Entity does not have a position component" <<
+//         std::endl; return -1;
 //     }
 
 //     auto entity = Entity();
@@ -523,9 +519,10 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 
 //     // Setting initial positon values
 //     Position &position = registry.positions.emplace(entity);
-//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
-//     position.angle = 0.f;
-//     position.scale = TENTACLE_OXYGEN_SCALE;
+//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 +
+//     ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update
+//     to proper position position.angle = 0.f; position.scale =
+//     TENTACLE_OXYGEN_SCALE;
 
 //     // Set health bar
 //     auto &health = registry.oxygen.emplace(entity);
@@ -559,8 +556,8 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 //     // Check if enemy has a position component
 //     if (!registry.positions.has(enemy))
 //     {
-//         std::cerr << "Error: Entity does not have a position component" << std::endl;
-//         return -1;
+//         std::cerr << "Error: Entity does not have a position component" <<
+//         std::endl; return -1;
 //     }
 
 //     auto entity = Entity();
@@ -574,9 +571,10 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 
 //     // Setting initial positon values
 //     Position &position = registry.positions.emplace(entity);
-//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
-//     position.angle = 0.f;
-//     position.scale = SERPENT_OXYGEN_SCALE;
+//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 +
+//     ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update
+//     to proper position position.angle = 0.f; position.scale =
+//     SERPENT_OXYGEN_SCALE;
 
 //     // Set health bar
 //     auto &health = registry.oxygen.emplace(entity);

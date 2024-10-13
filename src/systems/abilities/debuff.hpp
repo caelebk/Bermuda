@@ -8,4 +8,4 @@ bool debuff_entity_can_move(Entity &entity);
 
 bool update_debuffs(float elapsed_ms_since_last_update);
 
-bool handle_debuffs(Entity enemy, Entity player);
+bool handle_debuffs(Entity player, Entity enemy);

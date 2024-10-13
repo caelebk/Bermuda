@@ -14,7 +14,7 @@ bool handle_consumable_collisions(Entity &player, Entity &consumable) {
   // TODO: add more affects M2+
 
   // will add oxygen to the player if it exists
-  consumeOxygen(player, consumable);
+  modifyOxygen(player, consumable);
   registry.remove_all_components_of(consumable);
 
   return true;

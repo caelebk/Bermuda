@@ -13,7 +13,7 @@ bool handle_interactable_collisions(Entity &player, Entity &interactable) {
   // TODO: add more affects M2+
 
   // will add oxygen to the player if it exists
-  consumeOxygen(player, interactable);
+  modifyOxygen(player, interactable);
 
   return true;
 }

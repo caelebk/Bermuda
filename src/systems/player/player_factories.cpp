@@ -29,14 +29,10 @@ Entity createPlayer(RenderSystem *renderer, vec2 pos) {
   motion.velocity = {0.f, 0.f};
   motion.acceleration = {0, 0};
 
-	// Make Player and Harpoon Gun
-	Player &player = registry.players.emplace(entity);
-  player.weapon = createLoadedGun(renderer, position.position, HARPOON_PROJECTILE);
-
-  auto &oxygen = registry.oxygen.emplace(entity);
-  oxygen.capacity = PLAYER_OXYGEN;
-  oxygen.level = PLAYER_OXYGEN;
-  oxygen.rate = PLAYER_OXYGEN_RATE;
+  // Make Player and Harpoon Gun
+  Player &player = registry.players.emplace(entity);
+  player.weapon =
+      createLoadedGun(renderer, position.position, HARPOON_PROJECTILE);
 
   // Request Render
   registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::PLAYER,
@@ -72,7 +68,7 @@ Entity createLoadedGun(RenderSystem *renderer, vec2 playerPosition,
   motion.velocity = {0.f, 0.f};
   motion.acceleration = {0, 0};
 
-  DamageOnTouch& oxyCost = registry.damageTouch.emplace(entity);
+  DamageOnTouch &oxyCost = registry.damageTouch.emplace(entity);
   oxyCost.amount = HARPOON_GUN_OXYGEN_COST;
 
   // Make Weapon
@@ -111,7 +107,7 @@ Entity loadHarpoon(RenderSystem *renderer, vec2 gunPosition) {
   position.scale = HARPOON_SCALE_FACTOR * HARPOON_BOUNDING_BOX;
 
   // Add collisions
-  Collidable & collidable = registry.collidables.emplace(entity);
+  Collidable &collidable = registry.collidables.emplace(entity);
 
   // Setting initial motion values
   // Motion will be used when acting as a projectile and is not loaded into a
@@ -122,18 +118,12 @@ Entity loadHarpoon(RenderSystem *renderer, vec2 gunPosition) {
 
   // Make Projectile
   PlayerProjectile &projectile = registry.playerProjectiles.emplace(entity);
-  // Status: projectile is currently loaded and position/angle should be updated accordingly based on corresponding Gun
-  projectile.is_loaded = true; 
+  // Status: projectile is currently loaded and position/angle should be updated
+  // accordingly based on corresponding Gun
+  projectile.is_loaded = true;
 
-  DamageOnTouch& oxyCost = registry.damageTouch.emplace(entity);
+  DamageOnTouch &oxyCost = registry.damageTouch.emplace(entity);
   oxyCost.amount = HARPOON_GUN_OXYGEN_COST;
-	
-  // Request Render
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::HARPOON,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
 
   // Request Render
   registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::HARPOON,
@@ -151,52 +141,51 @@ Entity loadHarpoon(RenderSystem *renderer, vec2 gunPosition) {
  * @param pos - determines position of oxygen tank on screen
  * @return created oxygen tank
  ********************************************************************************/
-void createOxygenTank(RenderSystem *renderer, Entity &player, vec2 pos)
-{
-    auto playerOxygenBar = Entity();
-    auto playerBackgroundBar = Entity();
+void createOxygenTank(RenderSystem *renderer, Entity &player, vec2 pos) {
+  auto playerOxygenBar = Entity();
+  auto playerBackgroundBar = Entity();
 
-    // Store a reference to the potentially re-used mesh object
-    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-    registry.meshPtrs.emplace(playerOxygenBar, &mesh);
-    registry.meshPtrs.emplace(playerBackgroundBar, &mesh);
+  // Store a reference to the potentially re-used mesh object
+  Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(playerOxygenBar, &mesh);
+  registry.meshPtrs.emplace(playerBackgroundBar, &mesh);
 
-    // Initialize the position, scale, and physics components
-    auto &posComp = registry.positions.emplace(playerOxygenBar);
-    posComp.angle = 0.f;
-    posComp.position = pos;
-    posComp.scale = PLAYER_OXYGEN_SCALE_FACTOR * PLAYER_OXYGEN_BOUNDING_BOX;
-    posComp.originalScale = PLAYER_OXYGEN_SCALE_FACTOR * PLAYER_OXYGEN_BOUNDING_BOX;
+  // Initialize the position, scale, and physics components
+  auto &posComp = registry.positions.emplace(playerOxygenBar);
+  posComp.angle = 0.f;
+  posComp.position = pos;
+  posComp.scale = PLAYER_OXYGEN_SCALE_FACTOR * PLAYER_OXYGEN_BOUNDING_BOX;
+  posComp.originalScale =
+      PLAYER_OXYGEN_SCALE_FACTOR * PLAYER_OXYGEN_BOUNDING_BOX;
 
-    auto &backgroundPos = registry.positions.emplace(playerBackgroundBar);
-    backgroundPos.angle = 0.f;
-    backgroundPos.position = pos;
-    backgroundPos.scale = PLAYER_OXYGEN_TANK_SCALE_FACTOR * PLAYER_OXYGEN_BOUNDING_BOX;
+  auto &backgroundPos = registry.positions.emplace(playerBackgroundBar);
+  backgroundPos.angle = 0.f;
+  backgroundPos.position = pos;
+  backgroundPos.scale =
+      PLAYER_OXYGEN_TANK_SCALE_FACTOR * PLAYER_OXYGEN_BOUNDING_BOX;
 
-    // Add Oxygen Meter to Player HUD (Order Matters for Rendering)
-    registry.playerHUD.emplace(playerBackgroundBar);
-    registry.playerHUD.emplace(playerOxygenBar);
+  // Add Oxygen Meter to Player HUD (Order Matters for Rendering)
+  registry.playerHUD.emplace(playerBackgroundBar);
+  registry.playerHUD.emplace(playerOxygenBar);
 
-    // the player uses the default oxygen values
-    auto &oxygen = registry.oxygen.emplace(player);
-    oxygen.capacity = PLAYER_OXYGEN;
-    oxygen.level = PLAYER_OXYGEN;
-    oxygen.rate = PLAYER_OXYGEN_RATE;
-    oxygen.oxygenBar = playerOxygenBar;
-    oxygen.backgroundBar = playerBackgroundBar;
+  // the player uses the default oxygen values
+  auto &oxygen = registry.oxygen.emplace(player);
+  oxygen.capacity = PLAYER_OXYGEN;
+  oxygen.level = PLAYER_OXYGEN;
+  oxygen.rate = PLAYER_OXYGEN_RATE;
+  oxygen.oxygenBar = playerOxygenBar;
+  oxygen.backgroundBar = playerBackgroundBar;
 
-    // TODO: change to proper texture
-    registry.renderRequests.insert(
-        playerOxygenBar,
-        {TEXTURE_ASSET_ID::PLAYER_OXYGEN_BAR,
-         EFFECT_ASSET_ID::TEXTURED_OXYGEN,
-         GEOMETRY_BUFFER_ID::SPRITE});
+  // TODO: change to proper texture
+  registry.renderRequests.insert(playerOxygenBar,
+                                 {TEXTURE_ASSET_ID::PLAYER_OXYGEN_BAR,
+                                  EFFECT_ASSET_ID::TEXTURED_OXYGEN,
+                                  GEOMETRY_BUFFER_ID::SPRITE});
 
-    registry.renderRequests.insert(
-        playerBackgroundBar,
-        {TEXTURE_ASSET_ID::PLAYER_OXYGEN_TANK,
-         EFFECT_ASSET_ID::TEXTURED,
-         GEOMETRY_BUFFER_ID::SPRITE});
+  registry.renderRequests.insert(playerBackgroundBar,
+                                 {TEXTURE_ASSET_ID::PLAYER_OXYGEN_TANK,
+                                  EFFECT_ASSET_ID::TEXTURED,
+                                  GEOMETRY_BUFFER_ID::SPRITE});
 }
 
 /********************************************************************************

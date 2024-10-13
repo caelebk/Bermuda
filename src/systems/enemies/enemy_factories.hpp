@@ -27,9 +27,8 @@ void createJellyHealthBar(RenderSystem *renderer, Entity &enemy);
 //////////////////////////////////////////////////////////////
 #define FISH_MS 20.0
 #define FISH_DAMAGE 5.0
-#define FISH_SCALE_FACTOR vec2(0.4f)
 #define FISH_ATK_SPD 1000.0
-#define FISH_SCALE_FACTOR vec2(0.5f)
+#define FISH_SCALE_FACTOR vec2(0.4f)
 #define FISH_BOUNDING_BOX vec2(108.f, 77.f)
 #define FISH_HEALTH 1.0 // one shot
 #define FISH_HEALTH_SCALE vec2(1.4f)

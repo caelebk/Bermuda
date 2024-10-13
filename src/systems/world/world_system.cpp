@@ -1,5 +1,6 @@
 // Header
 #include "world_system.hpp"
+#include "audio_system.hpp"
 #include "common.hpp"
 #include "consumable_factories.hpp"
 #include "consumable_utils.hpp"
@@ -8,14 +9,13 @@
 #include "enemy_factories.hpp"
 #include "enemy_util.hpp"
 #include "level_spawn.hpp"
+#include "map_factories.hpp"
+#include "map_util.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
-#include "audio_system.hpp"
 #include "player_controls.hpp"
 #include "player_factories.hpp"
 #include "player_physics.hpp"
-#include "map_factories.hpp"
-#include "map_util.hpp"
 #include "spawning.hpp"
 #include "tiny_ecs_registry.hpp"
 
@@ -37,17 +37,6 @@ WorldSystem::WorldSystem()
 }
 
 WorldSystem::~WorldSystem() {
-
-  // destroy music components
-  if (background_music != nullptr)
-    Mix_FreeMusic(background_music);
-  if (salmon_dead_sound != nullptr)
-    Mix_FreeChunk(salmon_dead_sound);
-  if (salmon_eat_sound != nullptr)
-    Mix_FreeChunk(salmon_eat_sound);
-
-  Mix_CloseAudio();
-
   // Destroy all created components
   registry.clear_all_components();
 
@@ -128,8 +117,7 @@ void WorldSystem::init(RenderSystem *renderer_arg) {
 }
 
 // Update our game world
-bool WorldSystem::step(float elapsed_ms_since_last_update)
-{
+bool WorldSystem::step(float elapsed_ms_since_last_update) {
   // Calculate 't value': time loop / loop duration
   float lerp = elapsed_ms_since_last_update / LOOP_DURATION;
 
@@ -163,17 +151,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
   // handle death of entities
   if (update_death(elapsed_ms_since_last_update)) {
+    registry.motions.get(player).acceleration = {0.f, 0.f};
     restart_game();
     return true;
   }
 
   // Set player acceleration (If player is alive)
-  if (!registry.deathTimers.has(player)) {
-      setPlayerAcceleration(player);
-  }
-  else {
-      registry.motions.get(player).acceleration = { 0.f,0.f };
-  }
+  setPlayerAcceleration(player);
 
   // Apply Water friction
   applyWaterFriction(player);
@@ -182,9 +166,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
   calculatePlayerVelocity(player, lerp);
 
   // Update Entity positions with lerp
-  for (Entity entity : registry.motions.entities)
-  {
-  // TODO: move when collisions are done
   for (Entity entity : registry.motions.entities) {
     if (!debuff_entity_can_move(entity)) {
       continue;
@@ -192,13 +173,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     Motion &motion = registry.motions.get(entity);
     Position &position = registry.positions.get(entity);
     position.position += motion.velocity * lerp;
-    if (registry.oxygen.has(entity) && entity != player)
-    {
+    if (registry.oxygen.has(entity) && entity != player) {
       // make sure health bars follow moving enemies
       updateHealthBarAndEnemyPos(entity);
     }
   }
-
   return true;
 }
 
@@ -224,14 +203,11 @@ void WorldSystem::restart_game() {
   // that would be more cumbersome
   for (Entity entity : registry.oxygen.entities) {
     registry.remove_all_components_of(registry.oxygen.get(entity).oxygenBar);
-    registry.remove_all_components_of(registry.oxygen.get(entity).backgroundBar);
+    registry.remove_all_components_of(
+        registry.oxygen.get(entity).backgroundBar);
   }
-  while (registry.motions.entities.size() > 0)
-    registry.remove_all_components_of(registry.motions.entities.back());
 
   // Debugging for memory/component leaks
-  registry.list_all_components();
-
   remove_all_entities();
   registry.list_all_components();
 
@@ -242,15 +218,24 @@ void WorldSystem::restart_game() {
   auto curr_room = level_builder.room(ROOM_ONE);
   curr_room.activate_room();
 
-  player = createPlayer(renderer, {window_width_px / 2 - 140, window_height_px - 140}); // TODO: get player spawn position
+  player = createPlayer(
+      renderer, {window_width_px / 2 - 140,
+                 window_height_px - 140}); // TODO: get player spawn position
   player_weapon = getPlayerWeapon(player);
   player_projectile = getPlayerProjectile(player);
-  createOxygenTank(renderer, player, {47.5, window_height_px / 2}); // TODO: figure out oxygen tank position
+  createOxygenTank(
+      renderer, player,
+      {47.5, window_height_px / 2}); // TODO: figure out oxygen tank position
 
-  Entity jelly = createJellyPos(renderer, {window_width_px - 200, window_height_px / 2 - 150}); // TODO: REMOVE once enemy spawning fully implemented
-  createJellyHealthBar(renderer, jelly);                                                        // TODO: REMOVE once enemy spawning fully implemented
-  Entity fish = createFishPos(renderer, {window_width_px / 2 + 190, window_height_px - 300});   // TODO: REMOVE once enemy spawning fully implemented
-  createFishHealthBar(renderer, fish);                                                          // TODO: REMOVE once enemy spawning fully implemented                                                        // TODO: REMOVE once enemy spawning fully implemented
+  /////////////////////////////////////////////
+  // Enemy + Drops
+  /////////////////////////////////////////////
+  // spawn at random places in the room
+  execute_config_rand(LVL_1_RAND_POS, curr_room, renderer);
+  execute_config_rand_chance(LVL_1_RAND_POS, curr_room, renderer, 0.5);
+
+  // spawn at fixed positions in the room
+  execute_config_fixed(LVL_1_FIXED);
 }
 
 /**
@@ -270,12 +255,6 @@ bool WorldSystem::is_over() const {
  * @param mod
  */
 void WorldSystem::on_key(int key, int, int action, int mod) {
-  // Player movement attributes
-  Player& keys = registry.players.get(player);
-
-  // Player oxygen attributes
-  Oxygen &player_oxygen = registry.oxygen.get(player);
-
   /////////////////////////////////////
   // Menu
   /////////////////////////////////////
@@ -312,65 +291,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   }
 
   // ESC to close game
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-  {
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
 
-  //Music swap
+  // Music swap
   if (key == GLFW_KEY_M) {
     registry.musics.insert(Entity(), Music(background_music2));
   }
   if (key == GLFW_KEY_N) {
     registry.musics.insert(Entity(), Music(background_music));
-  }
-
-  // WASD Movement Keys
-  if (!registry.deathTimers.has(player)) {
-      if (key == GLFW_KEY_W) {
-          if (action == GLFW_RELEASE) {
-              keys.upHeld = false;
-          }
-          else {
-              keys.upHeld = true;
-          }
-      }
-      if (key == GLFW_KEY_S) {
-          if (action == GLFW_RELEASE) {
-              keys.downHeld = false;
-          }
-          else {
-              keys.downHeld = true;
-          }
-      }
-      if (key == GLFW_KEY_A) {
-          if (action == GLFW_RELEASE) {
-              keys.leftHeld = false;
-          }
-          else {
-              keys.leftHeld = true;
-          }
-      }
-      if (key == GLFW_KEY_D) {
-          if (action == GLFW_RELEASE) {
-              keys.rightHeld = false;
-          }
-          else {
-              keys.rightHeld = true;
-          }
-      }
-  }
-
-  // Dashing (In case shift is held)
-  if (key == GLFW_KEY_LEFT_SHIFT) {
-      if (action == GLFW_PRESS) {
-          registry.players.get(player).dashing = true;
-          player_oxygen.rate = PLAYER_OXYGEN_RATE * 3;
-      }
-      else if (action == GLFW_RELEASE) {
-          registry.players.get(player).dashing = false;
-          player_oxygen.rate = PLAYER_OXYGEN_RATE;
-      }
   }
 
   // Control the current speed with `<` `>`
@@ -400,14 +330,14 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-    // Shooting the projectile
-    if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        if (action == GLFW_PRESS && registry.playerProjectiles.get(player_projectile).is_loaded) {
-            if (!registry.deathTimers.has(player)) {
-                setFiredProjVelo(player_projectile);
-                modifyOxygen(player, player_weapon);
-            }
-        }
+  // Shooting the projectile
+  if (button == GLFW_MOUSE_BUTTON_LEFT) {
+    if (action == GLFW_PRESS &&
+        registry.playerProjectiles.get(player_projectile).is_loaded) {
+      if (!registry.deathTimers.has(player)) {
+        setFiredProjVelo(player_projectile);
+        modifyOxygen(player, player_weapon);
+      }
     }
   }
 }

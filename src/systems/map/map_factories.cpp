@@ -21,10 +21,11 @@ Entity createGeyserPos(RenderSystem *renderer, vec2 position) {
 
   // make consumable
   registry.interactable.emplace(entity);
+  // registry.collidables.emplace(entity);
 
   // Add stats
   auto &damage = registry.damageTouch.emplace(entity);
-  damage.damage = GEYSER_QTY;
+  damage.amount = GEYSER_QTY;
   auto &attackCD = registry.attackCD.emplace(entity);
   attackCD.attack_spd = GEYSER_RATE_MS;
 
