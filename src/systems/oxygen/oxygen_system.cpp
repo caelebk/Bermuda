@@ -87,6 +87,11 @@ bool isDeadAfterChange(Oxygen &oxygen, float amount) {
 void checkAndRenderOxygen(Entity &entity, Oxygen &oxygen, float amount) {
   checkOxygenLevel(entity); // TODO: consider adding at end of function
 
+  // no change needed if we are already at capacity
+  if (oxygen.level == oxygen.capacity) {
+    return;
+  }
+
   // modify oxygen bar
   if (registry.positions.has(oxygen.oxygenBar) &&
       registry.positions.has(oxygen.backgroundBar)) {
@@ -112,8 +117,7 @@ void checkAndRenderOxygen(Entity &entity, Oxygen &oxygen, float amount) {
  * accordingly
  */
 void checkOxygenLevel(Entity &entity) {
-  if (registry.oxygen.has(entity) &&
-      registry.players.has(entity)) { // TODO: REMOVE second cond if we want
+  if (registry.oxygen.has(entity)) { // TODO: REMOVE second cond if we want
     auto &oxygen =
         registry.oxygen.get(entity); // enemy health to change colours
 

@@ -36,5 +36,9 @@
   }
 
 #define LVL_1_RAND_POS                                                         \
-  {createJellyPos, createJellyPos,      createJellyPos,      createJellyPos,   \
-   createJellyPos, createOxygenTankPos, createOxygenTankPos, createGeyserPos}
+  {                                                                            \
+      createJellyPos,      createJellyPos,  createJellyPos,                    \
+      createJellyPos,      createJellyPos,  createOxygenTankPos,               \
+      createOxygenTankPos, createGeyserPos, createGeyserPos,                   \
+      createGeyserPos,     createGeyserPos, createGeyserPos,                   \
+  }

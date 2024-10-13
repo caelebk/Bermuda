@@ -48,7 +48,7 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position) {
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
 
-  // createJellyHealthBar(renderer, entity);
+  createJellyHealthBar(renderer, entity);
 
   return entity;
 }
@@ -154,7 +154,7 @@ Entity createFishPos(RenderSystem *renderer, vec2 position) {
   registry.collidables.emplace(entity);
 
   // ai
-  auto &wander = registry.wanders.emplace(entity);
+  // auto &wander = registry.wanders.emplace(entity);
 
   // TODO: add the room
 
@@ -162,7 +162,7 @@ Entity createFishPos(RenderSystem *renderer, vec2 position) {
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
 
-  // createFishHealthBar(renderer, entity);
+  createFishHealthBar(renderer, entity);
   return entity;
 }
 

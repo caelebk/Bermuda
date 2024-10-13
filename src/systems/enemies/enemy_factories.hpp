@@ -14,7 +14,7 @@
 #define JELLY_STUN_MS 2000.0
 #define JELLY_SCALE_FACTOR vec2(1.4f)
 #define JELLY_BOUNDING_BOX vec2(24.f, 24.f) // vec2(PNG_width, PNG_height)
-#define JELLY_HEALTH 10.0
+#define JELLY_HEALTH 50.0 // two shot to show workin
 #define JELLY_HEALTH_SCALE vec2(1.4f)
 #define JELLY_HEALTH_BAR_SCALE vec2(1.5f)
 #define JELLY_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)

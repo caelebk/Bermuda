@@ -1,8 +1,10 @@
 #include "death.hpp"
 #include "debuff.hpp"
+#include "tiny_ecs_registry.hpp"
 
 bool update_death(float elapsed_ms_since_last_update) {
   for (Entity entity : registry.deathTimers.entities) {
+
     // progress timer
     DeathTimer &counter = registry.deathTimers.get(entity);
     counter.counter_ms -= elapsed_ms_since_last_update;
@@ -12,6 +14,8 @@ bool update_death(float elapsed_ms_since_last_update) {
       registry.deathTimers.remove(entity);
       if (registry.players.has(entity)) {
         return true;
+      } else {
+        registry.remove_all_components_of(entity);
       }
     }
   }

@@ -276,16 +276,13 @@ void PhysicsSystem::resolveWallCollisions(Entity wall, Entity other) {
 
 void PhysicsSystem::resolvePlayerProjCollisions(Entity player_proj,
                                                 Entity other) {
-  DamageOnTouch &proj_dmg = registry.damageTouch.get(player_proj);
   Motion &player_proj_motion = registry.motions.get(player_proj);
   PlayerProjectile &player_proj_comp =
       registry.playerProjectiles.get(player_proj);
 
   // Player Projectile - Enemy
   if (registry.deadlys.has(other)) {
-    Oxygen &enemy_oxygen = registry.oxygen.get(other);
-    enemy_oxygen.level -= proj_dmg.amount;
-
+    modifyOxygen(other, player_proj);
     player_proj_motion.velocity = vec2(0.0, 0.0);
     player_proj_comp.is_loaded = true;
   }
