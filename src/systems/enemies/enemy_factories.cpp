@@ -53,6 +53,9 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position)
   pos.position = position;
   pos.scale = JELLY_SCALE_FACTOR * JELLY_BOUNDING_BOX;
 
+  //add collisions
+  registry.collidables.emplace(entity);
+
   registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::JELLY,
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
@@ -169,6 +172,9 @@ Entity createFishPos(RenderSystem *renderer, vec2 position)
   pos.position = position;
   pos.scale = FISH_SCALE_FACTOR * FISH_BOUNDING_BOX;
 
+  //add collisions
+  registry.collidables.emplace(entity);
+  
   // ai
   auto &wander = registry.wanders.emplace(entity);
 

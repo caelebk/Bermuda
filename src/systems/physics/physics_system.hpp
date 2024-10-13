@@ -35,6 +35,14 @@
 // A simple physics system that moves rigid bodies and checks for collision
 class PhysicsSystem
 {
+
+private:
+	void collision_detection();
+	void collision_resolution();
+	void collision_resolution_debug_info(Entity entity, Entity entity_other);
+	void resolvePlayerCollisions(Entity player, Entity other);
+	void resolveWallCollisions(Entity wall, Entity other);
+	void resolvePlayerProjCollisions(Entity player_proj, Entity other);
 public:
 	void step(float elapsed_ms);
 

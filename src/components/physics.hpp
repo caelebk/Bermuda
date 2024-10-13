@@ -9,6 +9,10 @@ struct Position {
   vec2 originalScale = {10, 10};
 };
 
+struct Collidable {
+
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion {
   vec2 acceleration = {0, 0};

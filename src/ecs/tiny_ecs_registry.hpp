@@ -25,6 +25,7 @@ public:
   ComponentContainer<Motion> motions;
   ComponentContainer<Position> positions;
   ComponentContainer<Collision> collisions;
+  ComponentContainer<Collidable> collidables;
 
   // player related
   ComponentContainer<DeathTimer> deathTimers;
@@ -75,6 +76,7 @@ public:
     registry_list.push_back(&motions);
     registry_list.push_back(&collisions);
     registry_list.push_back(&positions);
+    registry_list.push_back(&collidables);
     // player related
     registry_list.push_back(&deathTimers);
     registry_list.push_back(&players);

@@ -25,7 +25,6 @@ WorldSystem::WorldSystem() : points(0), next_oxygen_deplete(PLAYER_OXYGEN_DEPLET
 
 WorldSystem::~WorldSystem()
 {
-
   // Destroy all created components
   registry.clear_all_components();
 
@@ -230,49 +229,6 @@ void WorldSystem::restart_game()
   createJellyHealthBar(renderer, jelly);                                                        // TODO: REMOVE once enemy spawning fully implemented
   Entity fish = createFishPos(renderer, {window_width_px / 2 + 190, window_height_px - 300});   // TODO: REMOVE once enemy spawning fully implemented
   createFishHealthBar(renderer, fish);                                                          // TODO: REMOVE once enemy spawning fully implemented                                                        // TODO: REMOVE once enemy spawning fully implemented
-}
-
-// Compute collisions between entities
-void WorldSystem::handle_collisions()
-{
-  // Loop over all collisions detected by the physics system
-  auto &collisionsRegistry = registry.collisions;
-  for (uint i = 0; i < collisionsRegistry.components.size(); i++)
-  {
-    // The entity and its collider
-    Entity entity = collisionsRegistry.entities[i];
-    Entity entity_other = collisionsRegistry.components[i].other;
-
-    // for now, we are only interested in collisions that involve the player
-    if (registry.players.has(entity))
-    {
-      // Player& player = registry.players.get(entity);
-
-      // Checking Player - Deadly collisions
-      if (registry.deadlys.has(entity_other))
-      {
-        // initiate death unless already dying
-        if (!registry.deathTimers.has(entity))
-        {
-          // Scream, reset timer, and make the player sink
-          registry.deathTimers.emplace(entity);
-        }
-      }
-      // Checking Player - Eatable collisions
-      else if (registry.consumables.has(entity_other))
-      {
-        if (!registry.deathTimers.has(entity))
-        {
-          // chew, count points, and set the LightUp timer
-          registry.remove_all_components_of(entity_other);
-          registry.sounds.insert(entity, Sound(eat_sound));
-          ++points;
-        }
-      }
-    }
-  }
-
-  registry.collisions.clear();
 }
 
 // Should the game be over ?

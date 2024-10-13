@@ -4,74 +4,268 @@
 #include "player_factories.hpp"
 #include "audio_system.hpp"
 
-// Returns the local bounding coordinates scaled by the current size of the
-// entity
-vec2 get_bounding_box(const Position& position) {
-	// abs is to avoid negative scale due to the facing direction.
-	return { abs(position.scale.x), abs(position.scale.y) };
+// Returns the local bounding coordinates scaled by entity size
+vec2 get_bounding_box(const Position &position) {
+  return {abs(position.scale.x), abs(position.scale.y)};
 }
 
-// This is a SUPER APPROXIMATE check that puts a circle around the bounding
-// boxes and sees if the center point of either object is inside the other's
-// bounding-box-circle. You can surely implement a more accurate detection
-bool collides(const Position& position1, const Position& position2) {
-	vec2 dp = position1.position - position2.position;
-	float dist_squared = dot(dp, dp);
-	const vec2 other_bonding_box = get_bounding_box(position1) / 2.f;
-	const float other_r_squared = dot(other_bonding_box, other_bonding_box);
-	const vec2 my_bonding_box = get_bounding_box(position2) / 2.f;
-	const float my_r_squared = dot(my_bonding_box, my_bonding_box);
-	const float r_squared = max(other_r_squared, my_r_squared);
-	if (dist_squared < r_squared)
-		return true;
-	return false;
+bool circle_collides(const Position &position1, const Position &position2) {
+  vec2 dp = position1.position - position2.position;
+  float dist_squared = dot(dp, dp);
+  const vec2 other_bonding_box = get_bounding_box(position1) / 2.f;
+  const float other_r_squared = dot(other_bonding_box, other_bonding_box);
+  const vec2 my_bonding_box = get_bounding_box(position2) / 2.f;
+  const float my_r_squared = dot(my_bonding_box, my_bonding_box);
+  const float r_squared = max(other_r_squared, my_r_squared);
+  if (dist_squared < r_squared)
+    return true;
+  return false;
+}
+
+// Axis-Aligned Bounding Box Collision detection.
+bool box_collides(const Position &position1, const Position &position2) {
+  vec2 bounding_box1 = get_bounding_box(position1);
+  float horizontal_dist_box1 = (bounding_box1.x) / 2.0f;
+  float vertical_dist_box1 = (bounding_box1.y) / 2.0f;
+
+  float left_bound_box1 = position1.position.x - horizontal_dist_box1;
+  float right_bound_box1 = position1.position.x + horizontal_dist_box1;
+  float top_bound_box1 = position1.position.y - vertical_dist_box1;
+  float bot_bound_box1 = position1.position.y + vertical_dist_box1;
+
+  vec2 bounding_box2 = get_bounding_box(position2);
+  float horizontal_dist_box2 = (bounding_box2.x) / 2.0f;
+  float vertical_dist_box2 = (bounding_box2.y) / 2.0f;
+
+  float left_bound_box2 = position2.position.x - horizontal_dist_box2;
+  float right_bound_box2 = position2.position.x + horizontal_dist_box2;
+  float top_bound_box2 = position2.position.y - vertical_dist_box2;
+  float bot_bound_box2 = position2.position.y + vertical_dist_box2;
+
+  bool vertical_overlap = top_bound_box1 < bot_bound_box2;
+  bool vertical_overlap2 = top_bound_box2 < bot_bound_box1;
+  bool horizontal_overlap = left_bound_box1 < right_bound_box2;
+  bool horizontal_overlap2 = left_bound_box2 < right_bound_box1;
+
+  return vertical_overlap && vertical_overlap2 && horizontal_overlap && horizontal_overlap2;
 }
 
 void PhysicsSystem::step(float elapsed_ms) {
-	// Move fish based on how much time has passed, this is to (partially) avoid
-	// having entities move at different speed based on the machine.
-	auto& motion_registry = registry.motions;
-	auto& position_registry = registry.positions;
-	for (uint i = 0; i < motion_registry.size(); i++) {
-		Entity entity = motion_registry.entities[i];
-		Motion& motion = motion_registry.get(entity);
-		Position& position = position_registry.get(entity);
+  auto &motion_registry = registry.motions;
+  auto &position_registry = registry.positions;
+  for (uint i = 0; i < motion_registry.size(); i++) {
+    Entity entity = motion_registry.entities[i];
+    Motion &motion = motion_registry.get(entity);
+    Position &position = position_registry.get(entity);
 
 		float step_seconds = elapsed_ms / 1000.f;
 		vec2 distance = (motion.velocity) * step_seconds;
 		position.position += distance;
 	}
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE EGG UPDATES HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  collision_detection();
+  collision_resolution();
+}
 
-	// Check for collisions between all moving entities
-	ComponentContainer<Position>& position_container = registry.positions;
-	for (uint i = 0; i < position_container.components.size(); i++) {
-		Position& position_i = position_container.components[i];
-		Entity entity_i = position_container.entities[i];
+// Collision Detection System
+void PhysicsSystem::collision_detection() {
+  ComponentContainer<Position> &position_container = registry.positions;
+  for (uint i = 0; i < position_container.components.size(); i++) {
+    Position &position_i = position_container.components[i];
+    Entity entity_i = position_container.entities[i];
 
-		// note starting j at i+1 to compare all (i,j) pairs only once (and to not
-		// compare with itself)
-		for (uint j = i + 1; j < position_container.components.size(); j++) {
-			Position& position_j = position_container.components[j];
-			if (collides(position_i, position_j)) {
-				Entity entity_j = position_container.entities[j];
-				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert
-				// muliple collisions for the same entity
-				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-			}
-		}
-	}
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE EGG collisions HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    for (uint j = i + 1; j < position_container.components.size(); j++) {
+      Position &position_j = position_container.components[j];
+      Entity entity_j = position_container.entities[j];
+      
+      /********** Collisions to Ignore *************/
+
+      //no collision component
+      if (!registry.collidables.has(entity_i) || !registry.collidables.has(entity_j)) {
+        continue;
+      }
+
+      //wall to wall
+      if(registry.activeWalls.has(entity_i) && registry.activeWalls.has(entity_j)) {
+        continue;
+      }
+
+      //enemy to enemy
+      if(registry.deadlys.has(entity_i) && registry.deadlys.has(entity_j)) {
+        continue;
+      }
+
+      //player <-> player projectile
+      bool player_to_playerproj = registry.players.has(entity_i) && registry.playerProjectiles.has(entity_j);
+      bool playerproj_to_player = registry.playerProjectiles.has(entity_i) && registry.players.has(entity_j);
+
+      if (player_to_playerproj || playerproj_to_player) {
+        continue;
+      }
+      
+      //loaded harpoon should not collide
+      bool loaded_playerproj_i = registry.playerProjectiles.has(entity_i) && registry.playerProjectiles.get(entity_i).is_loaded;
+      bool loaded_playerproj_j = registry.playerProjectiles.has(entity_j) && registry.playerProjectiles.get(entity_j).is_loaded;
+
+      if (loaded_playerproj_i || loaded_playerproj_j) {
+        continue;
+      }
+
+      // None of the above, then properly detect collisions.
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+      }
+    }
+  }
+}
+
+void PhysicsSystem::collision_resolution_debug_info(Entity entity, Entity entity_other) {
+  printf("Entity:\n");
+  registry.list_all_components_of(entity);
+  printf("Entity Other:\n");
+  registry.list_all_components_of(entity_other);
+  
+  if (registry.players.has(entity)) {
+    printf("Player -");
+    if (registry.activeWalls.has(entity_other)) {
+      printf("Wall\n");
+    } else if (registry.consumables.has(entity_other)) {
+      printf("Eat\n");
+    } else if (registry.deadlys.has(entity_other)) {
+      printf("Deadly\n");
+    } else if (registry.players.has(entity_other)) {
+      printf("Player\n");
+    } else if (registry.playerWeapons.has(entity_other)) {
+      printf("Player Weap\n");
+    } else if (registry.oxygen.has(entity_other)) {
+      printf("Oxygen\n");
+    } else if (registry.playerProjectiles.has(entity_other)) {
+      printf("Player Projectile\n");
+    }
+  }
+}
+
+void PhysicsSystem::collision_resolution() {
+    auto &collisionsRegistry = registry.collisions;
+    for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+      Entity entity = collisionsRegistry.entities[i];
+      Entity entity_other = collisionsRegistry.components[i].other;
+
+    //collision_resolution_debug_info(entity, entity_other);
+
+    // Player Collision Handling
+    if (registry.players.has(entity)) {
+      resolvePlayerCollisions(entity, entity_other);
+    }
+
+    // Wall Collision Handling
+    if (registry.activeWalls.has(entity)) {
+      resolveWallCollisions(entity, entity_other);
+    }
+
+    // Player Projectile Collision Handling  
+    if (registry.playerProjectiles.has(entity)) {
+      resolvePlayerProjCollisions(entity, entity_other);
+    }
+
+    // Remove all collisions from this simulation step
+    registry.collisions.clear();
+  }
+}
+
+void PhysicsSystem::resolvePlayerCollisions(Entity player, Entity other) {
+
+  // Player - Enemy
+  if (registry.deadlys.has(other)) {
+      DamageOnTouch& enemy_damage = registry.damageTouch.get(other);
+
+    Oxygen& player_oxygen = registry.oxygen.get(player);
+    player_oxygen.level -= enemy_damage.amount;
+
+    registry.sounds.insert(player, Sound(death_sound));
+    if (!registry.deathTimers.has(player) && player_oxygen.level <= 0.0f) {
+      registry.deathTimers.emplace(player);
+    }
+  }
+
+  //Player - Consumable
+  if (registry.consumables.has(other)) {
+    if (!registry.deathTimers.has(player)) {
+      registry.remove_all_components_of(other);
+      registry.sounds.insert(player, Sound(eat_sound));
+    }
+  }
+}
+
+void PhysicsSystem::resolveWallCollisions(Entity wall, Entity other) {
+  Motion& other_motion = registry.motions.get(other);
+  //Wall - Player
+  if (registry.players.has(other)) {
+    Position & wall_position = registry.positions.get(wall);
+    Position & player_position = registry.positions.get(other);
+
+    vec2 bounding_box1 = get_bounding_box(wall_position);
+    float horizontal_dist_wall = (bounding_box1.x) / 2.0f;
+    float vertical_dist_wall = (bounding_box1.y) / 2.0f;
+
+    float left_bound_wall = wall_position.position.x - horizontal_dist_wall;
+    float right_bound_wall = wall_position.position.x + horizontal_dist_wall;
+    float top_bound_wall = wall_position.position.y - vertical_dist_wall;
+    float bot_bound_wall = wall_position.position.y + vertical_dist_wall;
+
+    vec2 bounding_box2 = get_bounding_box(player_position);
+    float horizontal_dist_player = (bounding_box2.x) / 2.0f;
+    float vertical_dist_player = (bounding_box2.y) / 2.0f;
+
+    float left_bound_player = player_position.position.x - horizontal_dist_player;
+    float right_bound_player = player_position.position.x + horizontal_dist_player;
+    float top_bound_player = player_position.position.y - vertical_dist_player;
+    float bot_bound_player = player_position.position.y + vertical_dist_player;
+
+    float players_right_overlaps_left_wall = (right_bound_player - left_bound_wall);
+    float players_left_overlaps_right_wall = (right_bound_wall - left_bound_player);
+    float players_bot_overlaps_top_wall = (bot_bound_player - top_bound_wall);
+    float players_top_overlaps_bot_wall = (bot_bound_wall - top_bound_player);
+
+    float overlapX = min(players_right_overlaps_left_wall, players_left_overlaps_right_wall);
+    float overlapY = min(players_bot_overlaps_top_wall, players_top_overlaps_bot_wall);
+    if (overlapX < overlapY) {
+      overlapX = (player_position.position.x < wall_position.position.x) ? -1 * overlapX : overlapX;
+      player_position.position.x += overlapX;
+    } else {
+      overlapY = (player_position.position.y < wall_position.position.y) ? -1 * overlapY : overlapY;
+      player_position.position.y += overlapY;
+    }
+    other_motion.velocity = vec2(0.0f, 0.0f);
+  }
+
+  //Wall - Projectile
+  if (registry.playerProjectiles.has(other)) {
+    other_motion.velocity = vec2(0.0, 0.0);
+    registry.playerProjectiles.get(other).is_loaded = true;
+  }
+
+  //Wall - Enemy
+  if (registry.deadlys.has(other)) {
+    other_motion.velocity = other_motion.velocity * -1.0f;
+  }
+}
+
+void PhysicsSystem::resolvePlayerProjCollisions(Entity player_proj, Entity other) {
+  DamageOnTouch& proj_dmg = registry.damageTouch.get(player_proj);
+  Motion& player_proj_motion = registry.motions.get(player_proj);
+  PlayerProjectile& player_proj_comp = registry.playerProjectiles.get(player_proj);
+
+  //Player Projectile - Enemy
+  if (registry.deadlys.has(other)) {
+    Oxygen &enemy_oxygen = registry.oxygen.get(other);
+    enemy_oxygen.level -= proj_dmg.amount;
+
+    player_proj_motion.velocity = vec2(0.0, 0.0);
+    player_proj_comp.is_loaded = true;
+  }
 }
 
 void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon, Entity player_projectile) {

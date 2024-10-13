@@ -21,6 +21,9 @@ Entity createPlayer(RenderSystem *renderer, vec2 pos) {
   position.angle = 0.f;
   position.scale = PLAYER_SCALE_FACTOR * PLAYER_BOUNDING_BOX;
 
+  // Add collisions
+  registry.collidables.emplace(entity);
+
   // Setting initial motion values
   Motion &motion = registry.motions.emplace(entity);
   motion.velocity = {0.f, 0.f};
@@ -103,6 +106,9 @@ Entity loadHarpoon(RenderSystem *renderer, vec2 gunPosition) {
   Position& position = registry.positions.emplace(entity);
   position.scale = HARPOON_SCALE_FACTOR * HARPOON_BOUNDING_BOX;
 
+  // Add collisions
+  Collidable & collidable = registry.collidables.emplace(entity);
+
   // Setting initial motion values
   // Motion will be used when acting as a projectile and is not loaded into a Gun
   Motion &motion = registry.motions.emplace(entity);
@@ -113,6 +119,9 @@ Entity loadHarpoon(RenderSystem *renderer, vec2 gunPosition) {
   PlayerProjectile &projectile = registry.playerProjectiles.emplace(entity);
   // Status: projectile is currently loaded and position/angle should be updated accordingly based on corresponding Gun
   projectile.is_loaded = true; 
+
+  DamageOnTouch& oxyCost = registry.damageTouch.emplace(entity);
+  oxyCost.amount = HARPOON_GUN_OXYGEN_COST;
 	
   // Request Render
 	registry.renderRequests.insert(
