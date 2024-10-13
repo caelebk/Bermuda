@@ -8,7 +8,7 @@
  * @param pos: position to spawn player
  * @param projectile: projectile to start with (Ex. HARPOON_PROJECTILE)
  ********************************************************************************/
-Entity createPlayer(RenderSystem *renderer, vec2 pos, int projectile) {
+Entity createPlayer(RenderSystem *renderer, vec2 pos) {
   auto entity = Entity();
 
   // Store a reference to the potentially re-used mesh object
@@ -26,9 +26,9 @@ Entity createPlayer(RenderSystem *renderer, vec2 pos, int projectile) {
   motion.velocity = {0.f, 0.f};
   motion.acceleration = {0, 0};
 
-	// Make Player
+	// Make Player and Harpoon Gun
 	Player &player = registry.players.emplace(entity);
-  player.weapon = createLoadedGun(renderer, position.position, projectile);
+  player.weapon = createLoadedGun(renderer, position.position, HARPOON_PROJECTILE);
 
   // Request Render
 	registry.renderRequests.insert(
@@ -64,7 +64,7 @@ Entity createLoadedGun(RenderSystem *renderer, vec2 playerPosition, int projecti
   motion.acceleration = {0, 0};
 
   DamageOnTouch& oxyCost = registry.damageTouch.emplace(entity);
-  oxyCost.damage = HARPOON_GUN_OXYGEN_COST;
+  oxyCost.amount = HARPOON_GUN_OXYGEN_COST;
 
   // Make Weapon
   PlayerWeapon &weapon = registry.playerWeapons.emplace(entity);
@@ -122,6 +122,62 @@ Entity loadHarpoon(RenderSystem *renderer, vec2 gunPosition) {
 			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
+}
+
+/********************************************************************************
+ * @brief creates an oxygen tank for the player
+ * TODO: change render request insertion
+ *
+ * @param renderer
+ * @param pos - determines position of oxygen tank on screen
+ * @return created oxygen tank
+ ********************************************************************************/
+void createOxygenTank(RenderSystem *renderer, Entity &player, vec2 pos)
+{
+    auto playerOxygenBar = Entity();
+    auto playerBackgroundBar = Entity();
+
+    // Store a reference to the potentially re-used mesh object
+    Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+    registry.meshPtrs.emplace(playerOxygenBar, &mesh);
+    registry.meshPtrs.emplace(playerBackgroundBar, &mesh);
+
+    // Initialize the position, scale, and physics components
+    auto &posComp = registry.positions.emplace(playerOxygenBar);
+    posComp.angle = 0.f;
+    posComp.position = pos;
+    posComp.scale = PLAYER_OXYGEN_SCALE_FACTOR * PLAYER_OXYGEN_BOUNDING_BOX;
+    posComp.originalScale = PLAYER_OXYGEN_SCALE_FACTOR * PLAYER_OXYGEN_BOUNDING_BOX;
+
+    auto &backgroundPos = registry.positions.emplace(playerBackgroundBar);
+    backgroundPos.angle = 0.f;
+    backgroundPos.position = pos;
+    backgroundPos.scale = PLAYER_OXYGEN_TANK_SCALE_FACTOR * PLAYER_OXYGEN_BOUNDING_BOX;
+
+    // Add Oxygen Meter to Player HUD (Order Matters for Rendering)
+    registry.playerHUD.emplace(playerBackgroundBar);
+    registry.playerHUD.emplace(playerOxygenBar);
+
+    // the player uses the default oxygen values
+    auto &oxygen = registry.oxygen.emplace(player);
+    oxygen.capacity = PLAYER_OXYGEN;
+    oxygen.level = PLAYER_OXYGEN;
+    oxygen.rate = PLAYER_OXYGEN_RATE;
+    oxygen.oxygenBar = playerOxygenBar;
+    oxygen.backgroundBar = playerBackgroundBar;
+
+    // TODO: change to proper texture
+    registry.renderRequests.insert(
+        playerOxygenBar,
+        {TEXTURE_ASSET_ID::PLAYER_OXYGEN_BAR,
+         EFFECT_ASSET_ID::TEXTURED_OXYGEN,
+         GEOMETRY_BUFFER_ID::SPRITE});
+
+    registry.renderRequests.insert(
+        playerBackgroundBar,
+        {TEXTURE_ASSET_ID::PLAYER_OXYGEN_TANK,
+         EFFECT_ASSET_ID::TEXTURED,
+         GEOMETRY_BUFFER_ID::SPRITE});
 }
 
 /********************************************************************************

@@ -1,10 +1,12 @@
 // internal
 #include "render_system.hpp"
+#include "oxygen_system.hpp"
 #include <SDL.h>
 
 #include "tiny_ecs_registry.hpp"
 
-void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection) {
+void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection)
+{
 	Position &position = registry.positions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
 	// specification for more info Incrementally updates transformation matrix,
@@ -13,8 +15,6 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection) {
 	transform.translate(position.position);
 	transform.rotate(position.angle);
 	transform.scale(position.scale);
-	// !!! TODO A1: add rotation to the chain of transformations, mind the order
-	// of transformations
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest &render_request = registry.renderRequests.get(entity);
@@ -37,7 +37,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection) {
 	gl_has_errors();
 
 	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
+	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED || render_request.used_effect == EFFECT_ASSET_ID::TEXTURED_OXYGEN)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
@@ -55,6 +55,17 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection) {
 			(void *)sizeof(
 				vec3)); // note the stride to skip the preceeding vertex position
 
+		if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED_OXYGEN)
+		{
+			GLuint time_uloc = glGetUniformLocation(program, "time");
+			GLuint is_low_oxygen_uloc = glGetUniformLocation(program, "is_low_oxygen");
+			gl_has_errors();
+			glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+			glUniform1i(is_low_oxygen_uloc, registry.lowOxygen.has(entity)); 
+			
+			gl_has_errors();
+		}
+
 		// Enabling and binding texture to slot 0
 		glActiveTexture(GL_TEXTURE0);
 		gl_has_errors();
@@ -65,7 +76,9 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection) {
 
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
-	} else {
+	}
+	else
+	{
 		assert(false && "Type of render request not supported");
 	}
 
@@ -98,7 +111,8 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3 &projection) {
 
 // draw the intermediate texture to the screen, with some distortion to simulate
 // water
-void RenderSystem::drawToScreen() {
+void RenderSystem::drawToScreen()
+{
 	// Setting shaders
 	// get the water texture, sprite mesh, and program
 	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::WATER]);
@@ -155,7 +169,8 @@ void RenderSystem::drawToScreen() {
 
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-void RenderSystem::draw() {
+void RenderSystem::draw()
+{
 	// Getting size of window
 	int w, h;
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
@@ -179,31 +194,53 @@ void RenderSystem::draw() {
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	/*************************************************************************************
-	* Draw All Textured Meshes that have a Position and Size Component
-	*
-	* @details Order of for loops determines "depth" of render during overlap for now
-	*          Note, its not very efficient to access elements indirectly via the entity
-	*          albeit iterating through all Sprites in sequence. A good point to optimize
-	*************************************************************************************/
-	for (Entity wall : registry.activeWalls.entities) {
+	 * Draw All Textured Meshes that have a Position and Size Component
+	 *
+	 * @details Order of for loops determines "depth" of render during overlap for now
+	 *          Note, its not very efficient to access elements indirectly via the entity
+	 *          albeit iterating through all Sprites in sequence. A good point to optimize
+	 *************************************************************************************/
+	for (Entity wall : registry.activeWalls.entities)
+	{
 		if (registry.renderRequests.has(wall))
 			drawTexturedMesh(wall, projection_2D);
 	}
-	for (Entity player : registry.players.entities) {
+	for (Entity player : registry.players.entities)
+	{
 		if (registry.renderRequests.has(player))
 			drawTexturedMesh(player, projection_2D);
 	}
-	for (Entity enemy : registry.deadlys.entities) {
+	for (Entity enemy : registry.deadlys.entities)
+	{
 		if (registry.renderRequests.has(enemy))
 			drawTexturedMesh(enemy, projection_2D);
 	}
-	for (Entity projectile : registry.playerProjectiles.entities) {
+	for (Entity projectile : registry.playerProjectiles.entities)
+	{
 		if (registry.renderRequests.has(projectile))
 			drawTexturedMesh(projectile, projection_2D);
 	}
-	for (Entity weapon : registry.playerWeapons.entities) {
+	for (Entity weapon : registry.playerWeapons.entities)
+	{
 		if (registry.renderRequests.has(weapon))
 			drawTexturedMesh(weapon, projection_2D);
+	}
+	for (Entity enemy : registry.deadlys.entities)
+	{
+		if (registry.oxygen.has(enemy))
+		{
+			Oxygen &enemyOxygen = registry.oxygen.get(enemy);
+			if (registry.renderRequests.has(enemyOxygen.backgroundBar) && registry.renderRequests.has(enemyOxygen.oxygenBar))
+			{
+				drawTexturedMesh(enemyOxygen.backgroundBar, projection_2D);
+				drawTexturedMesh(enemyOxygen.oxygenBar, projection_2D);
+			}
+		}
+	}
+	for (Entity playerHUDElement : registry.playerHUD.entities)
+	{
+		if (registry.renderRequests.has(playerHUDElement))
+			drawTexturedMesh(playerHUDElement, projection_2D);
 	}
 	//////////////////////////////////////////////////////////////////////////////////////
 
@@ -215,14 +252,15 @@ void RenderSystem::draw() {
 	gl_has_errors();
 }
 
-mat3 RenderSystem::createProjectionMatrix() {
+mat3 RenderSystem::createProjectionMatrix()
+{
 	// Fake projection matrix, scales with respect to window coordinates
 	float left = 0.f;
 	float top = 0.f;
 
 	gl_has_errors();
-	float right = (float) window_width_px;
-	float bottom = (float) window_height_px;
+	float right = (float)window_width_px;
+	float bottom = (float)window_height_px;
 
 	float sx = 2.f / (right - left);
 	float sy = 2.f / (top - bottom);

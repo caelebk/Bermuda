@@ -41,9 +41,7 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position)
 
   // Add stats
   auto &damage = registry.damageTouch.emplace(entity);
-  damage.damage = JELLY_DAMAGE;
-  auto &oxygen = registry.oxygen.emplace(entity);
-  oxygen.level = JELLY_OXYGEN;
+  damage.amount = JELLY_DAMAGE;
 
   // add abilities
   auto &stun = registry.stuns.emplace(entity);
@@ -67,59 +65,61 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position)
  *
  * @param renderer
  * @param enemy - assumed to be a jellyfish
- * @return entity id if successful, -1 otherwise
+ * @return
  */
-int createJellyHealthBar(RenderSystem *renderer, Entity enemy)
+void createJellyHealthBar(RenderSystem *renderer, Entity &enemy)
 {
   // Check if enemy has a position component
   if (!registry.positions.has(enemy))
   {
     std::cerr << "Error: Entity does not have a position component" << std::endl;
-    return -1;
+    return;
   }
 
-  auto entity = Entity();
-  auto background = Entity();
+  // Create oxygen and background bar
+  auto jellyOxygenBar = Entity();
+  auto jellyBackgroundBar = Entity();
 
   // Store a reference to the potentially re-used mesh object
   Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-  registry.meshPtrs.emplace(entity, &mesh);
-  registry.meshPtrs.emplace(background, &mesh);
+  registry.meshPtrs.emplace(jellyOxygenBar, &mesh);
+  registry.meshPtrs.emplace(jellyBackgroundBar, &mesh);
 
   // Get position of enemy
   Position &enemyPos = registry.positions.get(enemy);
 
   // Setting initial positon values
-  Position &position = registry.positions.emplace(entity);
+  Position &position = registry.positions.emplace(jellyOxygenBar);
   position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
   position.angle = 0.f;
-  position.scale = JELLY_OXYGEN_SCALE;
+  position.scale = JELLY_HEALTH_SCALE * JELLY_HEALTH_BOUNDING_BOX;
+  position.originalScale = JELLY_HEALTH_SCALE * JELLY_HEALTH_BOUNDING_BOX;
 
-  Position &backgroundPos = registry.positions.emplace(background);
+  Position &backgroundPos = registry.positions.emplace(jellyBackgroundBar);
   backgroundPos.position = position.position;
   backgroundPos.angle = 0.f;
-  backgroundPos.scale = JELLY_OXYGEN_SCALE;
+  backgroundPos.scale = JELLY_HEALTH_BAR_SCALE * JELLY_HEALTH_BOUNDING_BOX;
 
   // Set health bar
-  auto &oxygen = registry.oxygen.emplace(entity);
-  oxygen.capacity = JELLY_OXYGEN;
-  oxygen.level = JELLY_OXYGEN;
-  oxygen.rate = 0.f;
+  auto &jellyOxygen = registry.oxygen.emplace(enemy);
+  jellyOxygen.capacity = JELLY_HEALTH;
+  jellyOxygen.level = JELLY_HEALTH;
+  jellyOxygen.rate = 0.f;
+  jellyOxygen.oxygenBar = jellyOxygenBar;
+  jellyOxygen.backgroundBar = jellyBackgroundBar;
 
   // TODO: change to proper texture
   registry.renderRequests.insert(
-      entity,
-      {TEXTURE_ASSET_ID::TEXTURE_COUNT,
+      jellyOxygenBar,
+      {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
        EFFECT_ASSET_ID::TEXTURED,
        GEOMETRY_BUFFER_ID::SPRITE});
 
   registry.renderRequests.insert(
-      background,
-      {TEXTURE_ASSET_ID::TEXTURE_COUNT,
+      jellyBackgroundBar,
+      {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR,
        EFFECT_ASSET_ID::TEXTURED,
        GEOMETRY_BUFFER_ID::SPRITE});
-
-  return entity.operator unsigned int();
 }
 /////////////////////////////////////////////////////////////////
 // Fish
@@ -157,10 +157,7 @@ Entity createFishPos(RenderSystem *renderer, vec2 position)
   // make enemy and damage
   auto &deadly = registry.deadlys.emplace(entity);
   auto &damage = registry.damageTouch.emplace(entity);
-  damage.damage = FISH_DAMAGE;
-
-  auto &oxygen = registry.oxygen.emplace(entity);
-  oxygen.level = FISH_OXYGEN;
+  damage.amount = FISH_DAMAGE;
 
   // Initialize the position, scale, and physics components
   auto &motion = registry.motions.emplace(entity);
@@ -189,59 +186,61 @@ Entity createFishPos(RenderSystem *renderer, vec2 position)
  *
  * @param renderer
  * @param enemy - assumed to be a fish
- * @return entity id if successful, -1 otherwise
+ * @return
  */
-int createFishHealthBar(RenderSystem *renderer, Entity enemy)
+void createFishHealthBar(RenderSystem *renderer, Entity &enemy)
 {
   // Check if enemy has a position component
   if (!registry.positions.has(enemy))
   {
     std::cerr << "Error: Entity does not have a position component" << std::endl;
-    return -1;
+    return;
   }
 
-  auto entity = Entity();
-  auto background = Entity();
+  // Create oxygen and background bar
+  auto fishOxygenBar = Entity();
+  auto fishBackgroundBar = Entity();
 
   // Store a reference to the potentially re-used mesh object
   Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-  registry.meshPtrs.emplace(entity, &mesh);
-  registry.meshPtrs.emplace(background, &mesh);
+  registry.meshPtrs.emplace(fishOxygenBar, &mesh);
+  registry.meshPtrs.emplace(fishBackgroundBar, &mesh);
 
   // Get position of enemy
   Position &enemyPos = registry.positions.get(enemy);
 
   // Setting initial positon values
-  Position &position = registry.positions.emplace(entity);
+  Position &position = registry.positions.emplace(fishOxygenBar);
   position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update to proper position
   position.angle = 0.f;
-  position.scale = FISH_OXYGEN_SCALE;
+  position.scale = FISH_HEALTH_SCALE * FISH_HEALTH_BOUNDING_BOX;
+  position.originalScale = FISH_HEALTH_SCALE * FISH_HEALTH_BOUNDING_BOX;
 
-  Position &backgroundPos = registry.positions.emplace(background);
+  Position &backgroundPos = registry.positions.emplace(fishBackgroundBar);
   backgroundPos.position = position.position;
   backgroundPos.angle = 0.f;
-  backgroundPos.scale = FISH_OXYGEN_SCALE;
+  backgroundPos.scale = FISH_HEALTH_BAR_SCALE * FISH_HEALTH_BOUNDING_BOX;
 
   // Set health bar
-  auto &oxygen = registry.oxygen.emplace(entity);
-  oxygen.capacity = FISH_OXYGEN;
-  oxygen.level = FISH_OXYGEN;
+  auto &oxygen = registry.oxygen.emplace(enemy);
+  oxygen.capacity = FISH_HEALTH;
+  oxygen.level = FISH_HEALTH;
   oxygen.rate = 0.f;
+  oxygen.oxygenBar = fishOxygenBar;
+  oxygen.backgroundBar = fishBackgroundBar;
 
   // TODO: change to proper texture
   registry.renderRequests.insert(
-      entity,
-      {TEXTURE_ASSET_ID::TEXTURE_COUNT,
+      fishOxygenBar,
+      {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
        EFFECT_ASSET_ID::TEXTURED,
        GEOMETRY_BUFFER_ID::SPRITE});
 
   registry.renderRequests.insert(
-      background,
-      {TEXTURE_ASSET_ID::TEXTURE_COUNT,
+      fishBackgroundBar,
+      {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR,
        EFFECT_ASSET_ID::TEXTURED,
        GEOMETRY_BUFFER_ID::SPRITE});
-
-  return entity.operator unsigned int();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -280,7 +279,7 @@ int createFishHealthBar(RenderSystem *renderer, Entity enemy)
 //     position.scale = SHARK_OXYGEN_SCALE;
 
 //     // Set health bar
-//     auto &oxygen = registry.oxygen.emplace(entity);
+//     auto &health = registry.oxygen.emplace(entity);
 //     oxygen.capacity = SHARK_OXYGEN;
 //     oxygen.level = SHARK_OXYGEN;
 //     oxygen.rate = 0.f;
@@ -331,7 +330,7 @@ int createFishHealthBar(RenderSystem *renderer, Entity enemy)
 //     position.scale = OCTOPUS_OXYGEN_SCALE;
 
 //     // Set health bar
-//     auto &oxygen = registry.oxygen.emplace(entity);
+//     auto &health = registry.oxygen.emplace(entity);
 //     oxygen.capacity = OCTOPUS_OXYGEN;
 //     oxygen.level = OCTOPUS_OXYGEN;
 //     oxygen.rate = 0.f;
@@ -382,7 +381,7 @@ int createFishHealthBar(RenderSystem *renderer, Entity enemy)
 //     position.scale = KRAB_OXYGEN_SCALE;
 
 //     // Set health bar
-//     auto &oxygen = registry.oxygen.emplace(entity);
+//     auto &health = registry.oxygen.emplace(entity);
 //     oxygen.capacity = KRAB_OXYGEN;
 //     oxygen.level = KRAB_OXYGEN;
 //     oxygen.rate = 0.f;
@@ -433,7 +432,7 @@ int createFishHealthBar(RenderSystem *renderer, Entity enemy)
 //     position.scale = SEA_MINE_OXYGEN_SCALE;
 
 //     // Set health bar
-//     auto &oxygen = registry.oxygen.emplace(entity);
+//     auto &health = registry.oxygen.emplace(entity);
 //     oxygen.capacity = SEA_MINE_OXYGEN;
 //     oxygen.level = SEA_MINE_OXYGEN;
 //     oxygen.rate = 0.f;
@@ -484,7 +483,7 @@ int createFishHealthBar(RenderSystem *renderer, Entity enemy)
 //     position.scale = MERPERSON_OXYGEN_SCALE;
 
 //     // Set health bar
-//     auto &oxygen = registry.oxygen.emplace(entity);
+//     auto &health = registry.oxygen.emplace(entity);
 //     oxygen.capacity = MERPERSON_OXYGEN;
 //     oxygen.level = MERPERSON_OXYGEN;
 //     oxygen.rate = 0.f;
@@ -535,7 +534,7 @@ int createFishHealthBar(RenderSystem *renderer, Entity enemy)
 //     position.scale = TENTACLE_OXYGEN_SCALE;
 
 //     // Set health bar
-//     auto &oxygen = registry.oxygen.emplace(entity);
+//     auto &health = registry.oxygen.emplace(entity);
 //     oxygen.capacity = TENTACLE_OXYGEN;
 //     oxygen.level = TENTACLE_OXYGEN;
 //     oxygen.rate = 0.f;
@@ -586,7 +585,7 @@ int createFishHealthBar(RenderSystem *renderer, Entity enemy)
 //     position.scale = SERPENT_OXYGEN_SCALE;
 
 //     // Set health bar
-//     auto &oxygen = registry.oxygen.emplace(entity);
+//     auto &health = registry.oxygen.emplace(entity);
 //     oxygen.capacity = SERPENT_OXYGEN;
 //     oxygen.level = SERPENT_OXYGEN;
 //     oxygen.rate = 0.f;

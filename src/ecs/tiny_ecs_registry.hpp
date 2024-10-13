@@ -13,6 +13,7 @@
 #include "player.hpp"
 #include "tiny_ecs.hpp"
 #include "audio.hpp"
+#include "status.hpp"
 
 class ECSRegistry {
   // Callbacks to remove a particular or all entities in the system
@@ -31,6 +32,7 @@ public:
   ComponentContainer<PlayerWeapon> playerWeapons;
   ComponentContainer<PlayerProjectile> playerProjectiles;
   ComponentContainer<Oxygen> oxygen;
+  ComponentContainer<PlayerHUD> playerHUD;
 
   // enemy related
   ComponentContainer<Deadly> deadlys;
@@ -55,6 +57,9 @@ public:
 	ComponentContainer<Adjacency> adjacencies;
   ComponentContainer<ActiveWall> activeWalls;
 
+  // status related
+  ComponentContainer<LowOxygen> lowOxygen;
+
   // audio related
   ComponentContainer<Sound> sounds;
   ComponentContainer<Music> musics;
@@ -76,6 +81,7 @@ public:
     registry_list.push_back(&playerWeapons);
     registry_list.push_back(&playerProjectiles);
     registry_list.push_back(&oxygen);
+    registry_list.push_back(&playerHUD);
     // enemy related
     registry_list.push_back(&deadlys);
     registry_list.push_back(&damageTouch);
@@ -94,6 +100,8 @@ public:
     registry_list.push_back(&spaces);
     registry_list.push_back(&adjacencies);
     registry_list.push_back(&activeWalls);
+    // status related
+    registry_list.push_back(&lowOxygen);
     // audio related
     registry_list.push_back(&sounds);
     registry_list.push_back(&musics);

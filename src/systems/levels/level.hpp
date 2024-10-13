@@ -21,37 +21,37 @@
  * NOTE: Rooms will have a standard 20 x 10 overall shape
  */
 
-#define X_1U (window_width_px) / 21.3333f // One Room Building Unit in the X Direction
-#define X_2U 2 * X_1U
-#define X_3U 3 * X_1U
-#define X_4U 4 * X_1U
-#define X_5U 5 * X_1U
-#define X_6U 6 * X_1U
-#define X_7U 7 * X_1U
-#define X_8U 8 * X_1U
-#define X_9U 9 * X_1U
-#define X_10U 10 * X_1U
-#define X_11U 11 * X_1U
-#define X_12U 12 * X_1U
-#define X_13U 13 * X_1U
-#define X_14U 14 * X_1U
-#define X_15U 15 * X_1U
-#define X_16U 16 * X_1U
-#define X_17U 17 * X_1U
-#define X_18U 18 * X_1U
-#define X_19U 19 * X_1U
-#define X_20U 20 * X_1U
+#define X_1U (window_width_px) / 22.f // One Room Building Unit in the X Direction
+#define X_2U 2.f * X_1U
+#define X_3U 3.f * X_1U
+#define X_4U 4.f * X_1U
+#define X_5U 5.f * X_1U
+#define X_6U 6.f * X_1U
+#define X_7U 7.f * X_1U
+#define X_8U 8.f * X_1U
+#define X_9U 9.f * X_1U
+#define X_10U 10.f * X_1U
+#define X_11U 11.f * X_1U
+#define X_12U 12.f * X_1U
+#define X_13U 13.f * X_1U
+#define X_14U 14.f * X_1U
+#define X_15U 15.f * X_1U
+#define X_16U 16.f * X_1U
+#define X_17U 17.f * X_1U
+#define X_18U 18.f * X_1U
+#define X_19U 19.f * X_1U
+#define X_20U 20.f * X_1U
 
 #define Y_1U (window_height_px) / 12.f // One Room Building Unit in the Y Direction
-#define Y_2U 2 * Y_1U
-#define Y_3U 3 * Y_1U
-#define Y_4U 4 * Y_1U
-#define Y_5U 5 * Y_1U
-#define Y_6U 6 * Y_1U
-#define Y_7U 7 * Y_1U
-#define Y_8U 8 * Y_1U
-#define Y_9U 9 * Y_1U
-#define Y_10U 10 * Y_1U
+#define Y_2U 2.f * Y_1U
+#define Y_3U 3.f * Y_1U
+#define Y_4U 4.f * Y_1U
+#define Y_5U 5.f * Y_1U
+#define Y_6U 6.f * Y_1U
+#define Y_7U 7.f * Y_1U
+#define Y_8U 8.f * Y_1U
+#define Y_9U 9.f * Y_1U
+#define Y_10U 10.f * Y_1U
 
 /**
  * A high-level OOP to ECS wrapper API that deals with level construction. Currently, it allows you to easily edit components such as

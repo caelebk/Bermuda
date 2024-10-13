@@ -60,7 +60,6 @@ private:
 	Entity player;
 	Entity player_weapon;
 	Entity player_projectile;
-	Entity oxygen_tank;
 	vec2 mouse_pos;
 
 	// C++ random number generator

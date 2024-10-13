@@ -3,7 +3,7 @@
 struct Deadly {};
 
 struct DamageOnTouch {
-  float damage;
+  float amount;
 };
 
 

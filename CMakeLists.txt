@@ -54,6 +54,8 @@ file(
   src/systems/audio/*.hpp
   src/systems/player/*.cpp
   src/systems/player/*.hpp
+  src/systems/oxygen/*.cpp
+  src/systems/oxygen/*.hpp
   src/systems/rendering/*.cpp
   src/systems/rendering/*.hpp
   src/systems/world/*.cpp

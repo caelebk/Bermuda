@@ -9,7 +9,7 @@
 
 #include "tiny_ecs_registry.hpp"
 
-#define ROOM_ORIGIN_POS vec2(0.667f * (window_width_px) / 21.3333f, (window_height_px) / 12.f) // Position of Room Origin (Top-Left Corner)
+#define ROOM_ORIGIN_POS vec2(1.75f * (window_width_px) / 22.f, 0.25f * (window_height_px) / 12.f) // Position of Room Origin (Top-Left Corner)
 #define WALL_THICKNESS 16.f
 
 struct Wall : Entity
