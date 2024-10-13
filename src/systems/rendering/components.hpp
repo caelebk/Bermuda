@@ -69,7 +69,9 @@ enum class TEXTURE_ASSET_ID {
   WALL = ENEMY_OXYGEN_BAR + 1,
   JELLY = WALL + 1,
   FISH = JELLY + 1,
-  TEXTURE_COUNT = FISH + 1
+  OXYGEN_TANK = FISH + 1,
+  GEYSER = OXYGEN_TANK + 1,
+  TEXTURE_COUNT = GEYSER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

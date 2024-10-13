@@ -11,6 +11,9 @@ set(CMAKE_CXX_STANDARD 14)
 # nice hierarchichal structure in MSVC
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# nice for lsp
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Find OS
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(IS_OS_MAC 1)
@@ -34,12 +37,18 @@ file(
   SOURCE_FILES
   src/ecs/*.cpp
   src/ecs/*.hpp
+  src/config/*.cpp
+  src/config/*.hpp
   src/systems/*.cpp
   src/systems/*.hpp
   src/systems/abilities/*.cpp
   src/systems/abilities/*.hpp
   src/systems/ai/*.cpp
   src/systems/ai/*.hpp
+  src/systems/entities/*.hpp
+  src/systems/entities/*.cpp
+  src/systems/consumables/*.hpp
+  src/systems/consumables/*.cpp
   src/systems/enemies/*.cpp
   src/systems/enemies/*.hpp
   src/systems/levels/*.cpp
@@ -81,6 +90,7 @@ endif()
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 target_include_directories(${PROJECT_NAME} PRIVATE src/ecs/)
+target_include_directories(${PROJECT_NAME} PRIVATE src/config/)
 target_include_directories(${PROJECT_NAME} PRIVATE src/components/)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/abilities)
@@ -94,6 +104,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE src/systems/player)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/audio)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/rendering)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/world)
+target_include_directories(${PROJECT_NAME} PRIVATE src/systems/entities)
+target_include_directories(${PROJECT_NAME} PRIVATE src/systems/consumables)
 target_include_directories(${PROJECT_NAME} PRIVATE src/util)
 
 # Added this so policy CMP0065 doesn't scream

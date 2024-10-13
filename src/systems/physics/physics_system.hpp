@@ -60,3 +60,5 @@ void setPlayerAcceleration(Entity player);
 void calculatePlayerVelocity(Entity player, float lerp);
 
 void applyWaterFriction(Entity entity);
+
+bool box_collides(const Position &position1, const Position &position2);

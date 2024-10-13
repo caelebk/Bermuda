@@ -25,3 +25,6 @@ void checkOxygenLevel(Entity &entity);
 
 // updates position of enemy and associated health bar
 void updateHealthBarAndEnemyPos(Entity &enemy);
+
+float oxygen_drain(Entity player, float oxygen_deplete_timer,
+                   float elapsed_ms_since_last_update);

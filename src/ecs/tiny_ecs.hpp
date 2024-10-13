@@ -19,6 +19,8 @@ public:
     // Note, indices of already deleted entities arent re-used in this simple
     // implementation.
   }
+  Entity(unsigned int custom_id) : id(custom_id) {}
+
   operator unsigned int() {
     return id;
   } // this enables automatic casting to int
@@ -72,7 +74,7 @@ public:
   template <typename... Args> Component &emplace(Entity e, Args &&...args) {
     return insert(e, Component(std::forward<Args>(args)...));
   };
-  
+
   template <typename... Args>
   Component &emplace_with_duplicates(Entity e, Args &&...args) {
     return insert(e, Component(std::forward<Args>(args)...), false);
