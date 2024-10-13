@@ -40,8 +40,6 @@ public:
   ComponentContainer<DamageOnTouch> damageTouch;
   ComponentContainer<AttackCD> attackCD;
 
-  // buff/debuff related
-  ComponentContainer<Stunned> stunned;
 
   // ai related
   ComponentContainer<Wander> wanders;
@@ -65,6 +63,7 @@ public:
 
   // status related
   ComponentContainer<LowOxygen> lowOxygen;
+  ComponentContainer<Stunned> stunned;
 
   // audio related
   ComponentContainer<Sound> sounds;
