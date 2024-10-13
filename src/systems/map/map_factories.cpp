@@ -1,6 +1,46 @@
 #include "map_factories.hpp"
-#include <iostream>
+#include "physics_system.hpp"
 
+/////////////////////////////////////////////////////////////////
+// Util
+/////////////////////////////////////////////////////////////////
+/**
+ * @brief Checks whether or not the spawn is valid or invalid based on spawn
+ * collisons The entity should already have the position attached
+ *
+ * @param entity - enemy to check
+ * @return true if valid, false otherwise
+ */
+static bool checkSpawnCollisions(Entity entity) {
+  if (!registry.positions.has(entity)) {
+    return false;
+  }
+  const Position &enemyPos = registry.positions.get(entity);
+
+  // Entities can't spawn in walls
+  for (Entity wall : registry.activeWalls.entities) {
+    if (!registry.positions.has(wall)) {
+      continue;
+    }
+    const Position wallPos = registry.positions.get(wall);
+    if (box_collides(enemyPos, wallPos)) {
+      return false;
+    }
+  }
+
+  // Entities can't spawn in interactables
+  for (Entity interactable : registry.interactable.entities) {
+    if (!registry.positions.has(interactable)) {
+      continue;
+    }
+    const Position interactablePos = registry.positions.get(interactable);
+    if (box_collides(enemyPos, interactablePos)) {
+      return false;
+    }
+  }
+
+  return true;
+}
 /////////////////////////////////////////////////////////////////
 // Oxygen Tank
 /////////////////////////////////////////////////////////////////

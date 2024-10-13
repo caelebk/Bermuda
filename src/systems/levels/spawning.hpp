@@ -24,8 +24,11 @@ void execute_config_rand(
         &funcs,
     SpaceBuilder<T> &space_builder, RenderSystem *renderer) {
   for (const auto &func : funcs) {
-    vec2 loc = space_builder.get_random_position();
-    func(renderer, loc); // Call each function
+    vec2 loc;
+    do {
+      loc = space_builder.get_random_position();
+    } while ((unsigned int)func(renderer, loc) ==
+             0); // Call each function until spawn is successful
   }
 }
 
@@ -46,8 +49,10 @@ void execute_config_rand_chance(
   std::uniform_real_distribution<float> uniform_dist; // number between 0..1
   for (const auto &func : funcs) {
     if (chance >= uniform_dist(rng)) {
-      vec2 loc = space_builder.get_random_position();
-      func(renderer, loc); // Call each function
+      vec2 loc;
+      do {
+        loc = space_builder.get_random_position();
+      } while ((unsigned int)func(renderer, loc) == 0); // Call each function until spawn is successful
     }
   }
 }

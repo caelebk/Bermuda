@@ -1,7 +1,62 @@
 #include "enemy_factories.hpp"
+#include "physics.hpp"
+#include "physics_system.hpp"
+#include "space.hpp"
 #include "tiny_ecs_registry.hpp"
 
 #include <iostream>
+
+/////////////////////////////////////////////////////////////////
+// Util
+/////////////////////////////////////////////////////////////////
+/**
+ * @brief Checks whether or not the spawn is valid or invalid based on spawn
+ * collisons The entity should already have the position attached
+ *
+ * @param entity - enemy to check
+ * @return true if valid, false otherwise
+ */
+static bool checkSpawnCollisions(Entity entity) {
+  if (!registry.positions.has(entity)) {
+    return false;
+  }
+  const Position &enemyPos = registry.positions.get(entity);
+
+  // Entities can't spawn in walls
+  for (Entity wall : registry.activeWalls.entities) {
+    if (!registry.positions.has(wall)) {
+      continue;
+    }
+    const Position wallPos = registry.positions.get(wall);
+    if (box_collides(enemyPos, wallPos)) {
+      return false;
+    }
+  }
+
+  // Entities can't spawn in other enemies
+  for (Entity deadly : registry.deadlys.entities) {
+    if (!registry.positions.has(deadly)) {
+      continue;
+    }
+    const Position deadlyPos = registry.positions.get(deadly);
+    if (box_collides(enemyPos, deadlyPos)) {
+      return false;
+    }
+  }
+
+  // Entities can't spawn in interactables
+  for (Entity interactable : registry.interactable.entities) {
+    if (!registry.positions.has(interactable)) {
+      continue;
+    }
+    const Position interactablePos = registry.positions.get(interactable);
+    if (box_collides(enemyPos, interactablePos)) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 /////////////////////////////////////////////////////////////////
 // Jellyfish
@@ -11,11 +66,22 @@
  *
  * @param renderer
  * @param position
- * @return
+ * @return the entity if successful, 0 otherwise
  */
 Entity createJellyPos(RenderSystem *renderer, vec2 position) {
   // Reserve an entity
   auto entity = Entity();
+
+  auto &pos = registry.positions.emplace(entity);
+  pos.angle = 0.f;
+  pos.position = position;
+  pos.scale = JELLY_SCALE_FACTOR * JELLY_BOUNDING_BOX;
+
+  if (!checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
 
   // Store a reference to the potentially re-used mesh object
   Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -36,10 +102,6 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position) {
   stun.duration = JELLY_STUN_MS;
 
   // physics and pos
-  auto &pos = registry.positions.emplace(entity);
-  pos.angle = 0.f;
-  pos.position = position;
-  pos.scale = JELLY_SCALE_FACTOR * JELLY_BOUNDING_BOX;
 
   // add collisions
   registry.collidables.emplace(entity);
@@ -128,6 +190,16 @@ Entity createFishPos(RenderSystem *renderer, vec2 position) {
   // Reserve an entity
   auto entity = Entity();
 
+  auto &pos = registry.positions.emplace(entity);
+  pos.angle = 0.f;
+  pos.position = position;
+  pos.scale = FISH_SCALE_FACTOR * FISH_BOUNDING_BOX;
+  if (!checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
   // Store a reference to the potentially re-used mesh object
   Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(entity, &mesh);
@@ -144,11 +216,6 @@ Entity createFishPos(RenderSystem *renderer, vec2 position) {
   auto &motion = registry.motions.emplace(entity);
   motion.velocity = {-FISH_MS, 0};
   motion.acceleration = {0, 0};
-
-  auto &pos = registry.positions.emplace(entity);
-  pos.angle = 0.f;
-  pos.position = position;
-  pos.scale = FISH_SCALE_FACTOR * FISH_BOUNDING_BOX;
 
   // add collisions
   registry.collidables.emplace(entity);
