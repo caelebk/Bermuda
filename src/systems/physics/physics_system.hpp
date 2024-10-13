@@ -4,6 +4,8 @@
 #include "tiny_ecs.hpp"
 #include "components.hpp"
 #include "tiny_ecs_registry.hpp"
+#include "player_factories.hpp"
+#include "audio_system.hpp"
 
 #include "abilities.hpp"
 #include "ai.hpp"
@@ -37,12 +39,6 @@ class PhysicsSystem
 {
 
 private:
-	void collision_detection();
-	void collision_resolution();
-	void collision_resolution_debug_info(Entity entity, Entity entity_other);
-	void resolvePlayerCollisions(Entity player, Entity other);
-	void resolveWallCollisions(Entity wall, Entity other);
-	void resolvePlayerProjCollisions(Entity player_proj, Entity other);
 public:
 	void step(float elapsed_ms);
 
@@ -60,5 +56,3 @@ void setPlayerAcceleration(Entity player);
 void calculatePlayerVelocity(Entity player, float lerp);
 
 void applyWaterFriction(Entity entity);
-
-bool box_collides(const Position &position1, const Position &position2);

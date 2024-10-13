@@ -1,5 +1,5 @@
 #include "map_factories.hpp"
-#include "physics_system.hpp"
+#include "collision_system.hpp"
 
 /////////////////////////////////////////////////////////////////
 // Util
@@ -88,16 +88,3 @@ Entity createGeyserPos(RenderSystem *renderer, vec2 position) {
 
   return entity;
 }
-  // physics and pos
-  auto &pos = registry.positions.emplace(entity);
-  pos.angle = 0.f;
-  pos.position = position;
-  pos.scale = GEYSER_SCALE_FACTOR * GEYSER_BOUNDING_BOX;
-
-  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::GEYSER,
-                                          EFFECT_ASSET_ID::TEXTURED,
-                                          GEOMETRY_BUFFER_ID::SPRITE});
-
-  return entity;
-}
-

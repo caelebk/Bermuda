@@ -164,6 +164,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
   // Update player velocity with lerp
   calculatePlayerVelocity(player, lerp);
 
+  check_bounds();
+
   // Update Entity positions with lerp
   for (Entity entity : registry.motions.entities) {
     if (!debuff_entity_can_move(entity)) {
@@ -178,6 +180,32 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     }
   }
   return true;
+}
+
+//Temporary
+void WorldSystem::check_bounds() {
+  Position& player_position = registry.positions.get(player);
+  Position& player_proj_position = registry.positions.get(player_projectile);
+  PlayerProjectile& player_proj = registry.playerProjectiles.get(player_projectile);
+  float vertical = player_position.scale.y / 2.0f;
+  float horizontal = player_position.scale.x / 2.0f;
+
+  if (player_position.position.x + horizontal > window_width_px) {
+    player_position.position.x = window_width_px - horizontal;
+  }
+  if (player_position.position.x - horizontal < 0) {
+    player_position.position.x = + horizontal;
+  }
+  if (player_position.position.y + vertical > window_height_px) {
+    player_position.position.y = window_height_px - vertical;
+  }
+  if (player_position.position.y - vertical < 0) {
+    player_position.position.y = vertical;
+  }
+  if (player_proj_position.position.x > window_width_px || player_proj_position.position.x < 0 || 
+      player_proj_position.position.y > window_height_px || player_proj_position.position.y < 0) {
+    player_proj.is_loaded = true;
+  }
 }
 
 /**

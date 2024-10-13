@@ -59,6 +59,8 @@ file(
   src/systems/oxygen/*.hpp
   src/systems/physics/*.cpp
   src/systems/physics/*.hpp
+  src/systems/collisions/*.cpp
+  src/systems/collisions/*.hpp
   src/systems/audio/*.cpp
   src/systems/audio/*.hpp
   src/systems/player/*.cpp
@@ -100,6 +102,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE src/systems/levels)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/map)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/oxygen)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/physics)
+target_include_directories(${PROJECT_NAME} PRIVATE src/systems/collisions)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/player)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/audio)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/rendering)

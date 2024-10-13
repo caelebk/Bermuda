@@ -11,6 +11,7 @@
 #include "world_system.hpp"
 #include "level_build_system.hpp"
 #include "audio_system.hpp"
+#include "collision_system.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -22,6 +23,7 @@ int main()
 	RenderSystem renderer;
 	PhysicsSystem physics;
 	AudioSystem audios;
+	CollisionSystem collisions;
 
 	// Initializing window
 	GLFWwindow* window = world.create_window();
@@ -51,6 +53,7 @@ int main()
 
 		world.step(elapsed_ms);
 		physics.step(elapsed_ms);
+		collisions.step(elapsed_ms);
 		audios.step(elapsed_ms);
 		renderer.draw();
 	}
