@@ -25,8 +25,6 @@ void execute_config_rand(
     SpaceBuilder<T> &space_builder, RenderSystem *renderer) {
   for (const auto &func : funcs) {
     vec2 loc = space_builder.get_random_position();
-    loc.x *= X_1U;
-    loc.y *= Y_1U;
     func(renderer, loc); // Call each function
   }
 }

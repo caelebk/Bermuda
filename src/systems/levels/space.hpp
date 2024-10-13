@@ -367,6 +367,7 @@ vec2 SpaceBuilder<T>::rejection_sample()
         vec2 position = {random_x_generator(generate), random_y_generator(generate)};
         if (is_in_room(position))
         {
+            position += ROOM_ORIGIN_POS;
             return position;
         }
     };

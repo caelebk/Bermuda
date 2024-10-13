@@ -40,5 +40,4 @@
       createJellyPos,      createJellyPos,  createJellyPos,                    \
       createJellyPos,      createJellyPos,  createOxygenTankPos,               \
       createOxygenTankPos, createGeyserPos, createGeyserPos,                   \
-      createGeyserPos,     createGeyserPos, createGeyserPos,                   \
   }
