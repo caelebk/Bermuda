@@ -1,6 +1,35 @@
 #include "player_controls.hpp"
+#include "oxygen_system.hpp"
+#include "physics_system.hpp"
 #include "player_factories.hpp"
+#include "collision_system.hpp"
 
+/**
+ * @brief Checks whether or not the spawn is valid or invalid based on spawn
+ * collisons The entity should already have the position attached
+ *
+ * @param entity - weapon to check
+ * @return true if valid, false otherwise
+ */
+static bool checkWeaponCollisions(Entity entity) {
+  if (!registry.positions.has(entity)) {
+    return false;
+  }
+  const Position &entityPos = registry.positions.get(entity);
+
+  // Entities can't spawn in walls
+  for (Entity wall : registry.activeWalls.entities) {
+    if (!registry.positions.has(wall)) {
+      continue;
+    }
+    const Position wallPos = registry.positions.get(wall);
+    if (box_collides(entityPos, wallPos)) {
+      return false;
+    }
+  }
+
+  return true;
+}
 /**
  * @brief Handles player movement
  *
@@ -61,3 +90,29 @@ bool player_movement(int key, int action, int mod, Entity &player) {
 
   return true;
 }
+
+bool player_mouse(int button, int action, int mods, Entity &player,
+                  Entity &player_weapon, Entity &player_projectile) {
+  // Shooting the projectile
+  if (button == GLFW_MOUSE_BUTTON_LEFT) {
+    if (action == GLFW_PRESS &&
+        registry.playerProjectiles.get(player_projectile).is_loaded) {
+      if (registry.deathTimers.has(player)) {
+        return false;
+      }
+
+      if (!checkWeaponCollisions(player_projectile)) {
+        return false;
+      }
+
+      if (!checkWeaponCollisions(player_weapon)) {
+        return false;
+      }
+      setFiredProjVelo(player_projectile);
+      modifyOxygen(player, player_weapon);
+    }
+  }
+
+  return true;
+}
+
