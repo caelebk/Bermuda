@@ -15,7 +15,7 @@ static bool checkSpawnCollisions(Entity entity) {
   if (!registry.positions.has(entity)) {
     return false;
   }
-  const Position &enemyPos = registry.positions.get(entity);
+  const Position &entityPos = registry.positions.get(entity);
 
   // Entities can't spawn in walls
   for (Entity wall : registry.activeWalls.entities) {
@@ -23,7 +23,7 @@ static bool checkSpawnCollisions(Entity entity) {
       continue;
     }
     const Position wallPos = registry.positions.get(wall);
-    if (box_collides(enemyPos, wallPos)) {
+    if (box_collides(entityPos, wallPos)) {
       return false;
     }
   }
@@ -34,7 +34,7 @@ static bool checkSpawnCollisions(Entity entity) {
       continue;
     }
     const Position interactablePos = registry.positions.get(interactable);
-    if (box_collides(enemyPos, interactablePos)) {
+    if (box_collides(entityPos, interactablePos)) {
       return false;
     }
   }
@@ -42,10 +42,10 @@ static bool checkSpawnCollisions(Entity entity) {
   return true;
 }
 /////////////////////////////////////////////////////////////////
-// Oxygen Tank
+// Geyser
 /////////////////////////////////////////////////////////////////
 /**
- * @brief creates an oxygen tank at a specific position
+ * @brief creates a geyser tank at a specific position
  *
  * @param renderer
  * @param position
@@ -54,6 +54,17 @@ static bool checkSpawnCollisions(Entity entity) {
 Entity createGeyserPos(RenderSystem *renderer, vec2 position) {
   // Reserve an entity
   auto entity = Entity();
+
+  auto &pos = registry.positions.emplace(entity);
+  pos.angle = 0.f;
+  pos.position = position;
+  pos.scale = GEYSER_SCALE_FACTOR * GEYSER_BOUNDING_BOX;
+
+  if (!checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
 
   // Store a reference to the potentially re-used mesh object
   Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -69,6 +80,14 @@ Entity createGeyserPos(RenderSystem *renderer, vec2 position) {
   auto &attackCD = registry.attackCD.emplace(entity);
   attackCD.attack_spd = GEYSER_RATE_MS;
 
+  // physics and pos
+
+  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::GEYSER,
+                                          EFFECT_ASSET_ID::TEXTURED,
+                                          GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
   // physics and pos
   auto &pos = registry.positions.emplace(entity);
   pos.angle = 0.f;
