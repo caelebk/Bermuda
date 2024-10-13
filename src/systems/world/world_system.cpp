@@ -357,16 +357,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-  // Shooting the projectile
-  if (button == GLFW_MOUSE_BUTTON_LEFT) {
-    if (action == GLFW_PRESS &&
-        registry.playerProjectiles.get(player_projectile).is_loaded) {
-      if (!registry.deathTimers.has(player)) {
-        setFiredProjVelo(player_projectile);
-        modifyOxygen(player, player_weapon);
-      }
-    }
-  }
+  player_mouse(button, action, mods, player, player_weapon, player_projectile);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
