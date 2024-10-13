@@ -108,7 +108,8 @@ void checkAndRenderOxygen(Entity &entity, Oxygen &oxygen, float amount) {
       scaledAmount = scale;
     }
     scale -= scaledAmount;
-    position += scaledAmount / 2;
+    position =
+        (isPlayer) ? position + scaledAmount / 2 : position - scaledAmount / 2;
   }
 }
 

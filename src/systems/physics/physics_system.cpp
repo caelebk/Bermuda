@@ -98,6 +98,68 @@ void PhysicsSystem::collision_detection() {
         continue;
       }
 
+      // wall <-> interactable
+      if (registry.activeWalls.has(entity_i) &&
+          registry.interactable.has(entity_j)) {
+        continue;
+      }
+      if (registry.activeWalls.has(entity_j) &&
+          registry.interactable.has(entity_i)) {
+        continue;
+      }
+
+      // wall <-> consumable
+      if (registry.activeWalls.has(entity_i) &&
+          registry.consumables.has(entity_j)) {
+        continue;
+      }
+      if (registry.activeWalls.has(entity_j) &&
+          registry.consumables.has(entity_i)) {
+        continue;
+      }
+
+      // interactable <-> consumable
+      if (registry.interactable.has(entity_i) &&
+          registry.consumables.has(entity_j)) {
+        continue;
+      }
+      if (registry.interactable.has(entity_j) &&
+          registry.consumables.has(entity_i)) {
+        continue;
+      }
+
+      // interactable <-> interactable
+      if (registry.interactable.has(entity_j) &&
+          registry.consumables.has(entity_i)) {
+        continue;
+      }
+
+      // consumable <-> consumable
+      if (registry.interactable.has(entity_j) &&
+          registry.consumables.has(entity_i)) {
+        continue;
+      }
+
+      // enemy <-> consumable
+      if (registry.deadlys.has(entity_i) &&
+          registry.consumables.has(entity_j)) {
+        continue;
+      }
+      if (registry.deadlys.has(entity_j) &&
+          registry.consumables.has(entity_i)) {
+        continue;
+      }
+
+      // enemy <-> interactable
+      if (registry.deadlys.has(entity_i) &&
+          registry.interactable.has(entity_j)) {
+        continue;
+      }
+      if (registry.deadlys.has(entity_j) &&
+          registry.interactable.has(entity_i)) {
+        continue;
+      }
+
       // enemy to enemy
       if (registry.deadlys.has(entity_i) && registry.deadlys.has(entity_j)) {
         continue;

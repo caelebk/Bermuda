@@ -15,7 +15,6 @@
 #include "physics_system.hpp"
 #include "player_controls.hpp"
 #include "player_factories.hpp"
-#include "player_physics.hpp"
 #include "spawning.hpp"
 #include "tiny_ecs_registry.hpp"
 
