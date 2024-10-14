@@ -1,0 +1,28 @@
+Checks: >
+  -*,
+  google-*,
+  readability-*,
+  modernize-*,
+  performance-*,
+  bugprone-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  misc-*,
+  hicpp-* # Optional, for high-integrity checks
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'
+FormatStyle: google
+
+# Clang-Tidy-specific options (independent of Clang-Format):
+CheckOptions:
+  - key: readability/braces_around_statements.ShortStatementLines
+    value: 80
+  - key: readability/identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability/identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability/identifier-naming.VariableCase
+    value: lower_case
+  - key: readability/identifier-naming.ConstantCase
+    value: UPPER_CASE
+
