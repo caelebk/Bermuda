@@ -44,18 +44,18 @@
 
 #if !defined(_STDINT_H_) && (!defined(HAVE_STDINT_H) || !_HAVE_STDINT_H)
 #if defined(__GNUC__) || defined(__DMC__) || defined(__WATCOMC__)
-#define HAVE_STDINT_H	1
+#define HAVE_STDINT_H 1
 #elif defined(_MSC_VER)
-typedef signed __int8 int8_t;
-typedef unsigned __int8 uint8_t;
-typedef signed __int16 int16_t;
+typedef signed __int8    int8_t;
+typedef unsigned __int8  uint8_t;
+typedef signed __int16   int16_t;
 typedef unsigned __int16 uint16_t;
-typedef signed __int32 int32_t;
+typedef signed __int32   int32_t;
 typedef unsigned __int32 uint32_t;
-typedef signed __int64 int64_t;
+typedef signed __int64   int64_t;
 typedef unsigned __int64 uint64_t;
 #ifndef _UINTPTR_T_DEFINED
-#ifdef  _WIN64
+#ifdef _WIN64
 typedef unsigned __int64 uintptr_t;
 #else
 typedef unsigned int uintptr_t;
@@ -70,26 +70,26 @@ typedef unsigned int uintptr_t;
 #define LONG_PTR LONG
 #endif
 #else /* !__GNUC__ && !_MSC_VER */
-typedef signed char int8_t;
-typedef unsigned char uint8_t;
-typedef signed short int16_t;
-typedef unsigned short uint16_t;
-typedef signed int int32_t;
-typedef unsigned int uint32_t;
-typedef signed long long int64_t;
+typedef signed char        int8_t;
+typedef unsigned char      uint8_t;
+typedef signed short       int16_t;
+typedef unsigned short     uint16_t;
+typedef signed int         int32_t;
+typedef unsigned int       uint32_t;
+typedef signed long long   int64_t;
 typedef unsigned long long uint64_t;
 #ifndef _SIZE_T_DEFINED_
 #define _SIZE_T_DEFINED_
-typedef unsigned int size_t;
+typedef unsigned int       size_t;
 #endif
-typedef unsigned int uintptr_t;
+typedef unsigned int       uintptr_t;
 #endif /* __GNUC__ || _MSC_VER */
 #endif /* !_STDINT_H_ && !HAVE_STDINT_H */
 
 #ifdef _WIN64
-# define SIZEOF_VOIDP 8
+#define SIZEOF_VOIDP 8
 #else
-# define SIZEOF_VOIDP 4
+#define SIZEOF_VOIDP 4
 #endif
 
 /* Useful headers */
@@ -162,43 +162,43 @@ typedef unsigned int uintptr_t;
 #define HAVE__FSEEKI64 1
 
 /* Enable various audio drivers */
-#define SDL_AUDIO_DRIVER_XAUDIO2	1
-#define SDL_AUDIO_DRIVER_DISK	1
-#define SDL_AUDIO_DRIVER_DUMMY	1
+#define SDL_AUDIO_DRIVER_XAUDIO2 1
+#define SDL_AUDIO_DRIVER_DISK 1
+#define SDL_AUDIO_DRIVER_DUMMY 1
 
 /* Enable various input drivers */
 #if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
 #define SDL_JOYSTICK_DISABLED 1
-#define SDL_HAPTIC_DISABLED	1
+#define SDL_HAPTIC_DISABLED 1
 #else
 #define SDL_JOYSTICK_XINPUT 1
-#define SDL_HAPTIC_XINPUT   1
+#define SDL_HAPTIC_XINPUT 1
 #endif
 
 /* Enable various shared object loading systems */
-#define SDL_LOADSO_WINDOWS	1
+#define SDL_LOADSO_WINDOWS 1
 
 /* Enable various threading systems */
 #if (NTDDI_VERSION >= NTDDI_WINBLUE)
-#define SDL_THREAD_WINDOWS  1
+#define SDL_THREAD_WINDOWS 1
 #else
 /* WinRT on Windows 8.0 and Windows Phone 8.0 don't support CreateThread() */
-#define SDL_THREAD_STDCPP   1
+#define SDL_THREAD_STDCPP 1
 #endif
 
 /* Enable various timer systems */
-#define SDL_TIMER_WINDOWS	1
+#define SDL_TIMER_WINDOWS 1
 
 /* Enable various video drivers */
-#define SDL_VIDEO_DRIVER_WINRT	1
-#define SDL_VIDEO_DRIVER_DUMMY  1
+#define SDL_VIDEO_DRIVER_WINRT 1
+#define SDL_VIDEO_DRIVER_DUMMY 1
 
 /* Enable OpenGL ES 2.0 (via a modified ANGLE library) */
 #define SDL_VIDEO_OPENGL_ES2 1
 #define SDL_VIDEO_OPENGL_EGL 1
 
 /* Enable appropriate renderer(s) */
-#define SDL_VIDEO_RENDER_D3D11  1
+#define SDL_VIDEO_RENDER_D3D11 1
 
 #if SDL_VIDEO_OPENGL_ES2
 #define SDL_VIDEO_RENDER_OGL_ES2 1
@@ -209,7 +209,7 @@ typedef unsigned int uintptr_t;
 
 /* Enable assembly routines (Win64 doesn't have inline asm) */
 #ifndef _WIN64
-#define SDL_ASSEMBLY_ROUTINES	1
+#define SDL_ASSEMBLY_ROUTINES 1
 #endif
 
 #endif /* SDL_config_winrt_h_ */

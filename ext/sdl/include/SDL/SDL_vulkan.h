@@ -29,7 +29,6 @@
 #define SDL_vulkan_h_
 
 #include "SDL_video.h"
-
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -43,8 +42,11 @@ extern "C" {
 #ifndef NO_SDL_VULKAN_TYPEDEFS
 #define VK_DEFINE_HANDLE(object) typedef struct object##_T* object;
 
-#if defined(__LP64__) || defined(_WIN64) || defined(__x86_64__) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
-#define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object) typedef struct object##_T *object;
+#if defined(__LP64__) || defined(_WIN64) || defined(__x86_64__) || \
+    defined(_M_X64) || defined(__ia64) || defined(_M_IA64) ||      \
+    defined(__aarch64__) || defined(__powerpc64__)
+#define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object) \
+  typedef struct object##_T* object;
 #else
 #define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object) typedef uint64_t object;
 #endif
@@ -54,7 +56,7 @@ VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkSurfaceKHR)
 
 #endif /* !NO_SDL_VULKAN_TYPEDEFS */
 
-typedef VkInstance SDL_vulkanInstance;
+typedef VkInstance   SDL_vulkanInstance;
 typedef VkSurfaceKHR SDL_vulkanSurface; /* for compatibility with Tizen */
 
 /**
@@ -100,7 +102,7 @@ typedef VkSurfaceKHR SDL_vulkanSurface; /* for compatibility with Tizen */
  *  \sa SDL_Vulkan_GetVkGetInstanceProcAddr()
  *  \sa SDL_Vulkan_UnloadLibrary()
  */
-extern DECLSPEC int SDLCALL SDL_Vulkan_LoadLibrary(const char *path);
+extern DECLSPEC int SDLCALL SDL_Vulkan_LoadLibrary(const char* path);
 
 /**
  *  \brief Get the address of the \c vkGetInstanceProcAddr function.
@@ -108,7 +110,7 @@ extern DECLSPEC int SDLCALL SDL_Vulkan_LoadLibrary(const char *path);
  *  \note This should be called after either calling SDL_Vulkan_LoadLibrary
  *        or creating an SDL_Window with the SDL_WINDOW_VULKAN flag.
  */
-extern DECLSPEC void *SDLCALL SDL_Vulkan_GetVkGetInstanceProcAddr(void);
+extern DECLSPEC void* SDLCALL SDL_Vulkan_GetVkGetInstanceProcAddr(void);
 
 /**
  *  \brief Unload the Vulkan loader library previously loaded by
@@ -159,11 +161,10 @@ extern DECLSPEC void SDLCALL SDL_Vulkan_UnloadLibrary(void);
  *  {
  *      VK_EXT_DEBUG_REPORT_EXTENSION_NAME, // example additional extension
  *  };
- *  size_t additionalExtensionsCount = sizeof(additionalExtensions) / sizeof(additionalExtensions[0]);
- *  size_t extensionCount = count + additionalExtensionsCount;
- *  const char **names = malloc(sizeof(const char *) * extensionCount);
- *  if(!names)
- *      handle_error();
+ *  size_t additionalExtensionsCount = sizeof(additionalExtensions) /
+ * sizeof(additionalExtensions[0]); size_t extensionCount = count +
+ * additionalExtensionsCount; const char **names = malloc(sizeof(const char *) *
+ * extensionCount); if(!names) handle_error();
  *
  *  // get names of required extensions
  *  if(!SDL_Vulkan_GetInstanceExtensions(window, &count, names))
@@ -187,9 +188,7 @@ extern DECLSPEC void SDLCALL SDL_Vulkan_UnloadLibrary(void);
  *  \sa SDL_Vulkan_CreateSurface()
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_Vulkan_GetInstanceExtensions(
-														SDL_Window *window,
-														unsigned int *pCount,
-														const char **pNames);
+    SDL_Window* window, unsigned int* pCount, const char** pNames);
 
 /**
  *  \brief Create a Vulkan rendering surface for a window.
@@ -221,9 +220,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_Vulkan_GetInstanceExtensions(
  *  \sa SDL_Vulkan_GetInstanceExtensions()
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_Vulkan_CreateSurface(
-												SDL_Window *window,
-												VkInstance instance,
-												VkSurfaceKHR* surface);
+    SDL_Window* window, VkInstance instance, VkSurfaceKHR* surface);
 
 /**
  *  \brief Get the size of a window's underlying drawable in pixels (for use
@@ -243,10 +240,10 @@ extern DECLSPEC SDL_bool SDLCALL SDL_Vulkan_CreateSurface(
  *  \sa SDL_GetWindowSize()
  *  \sa SDL_CreateWindow()
  */
-extern DECLSPEC void SDLCALL SDL_Vulkan_GetDrawableSize(SDL_Window * window,
-                                                        int *w, int *h);
+extern DECLSPEC void SDLCALL SDL_Vulkan_GetDrawableSize(SDL_Window* window,
+                                                        int* w, int* h);
 
-/* @} *//* Vulkan support functions */
+/* @} */ /* Vulkan support functions */
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

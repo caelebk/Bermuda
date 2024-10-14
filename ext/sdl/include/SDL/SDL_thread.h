@@ -28,13 +28,12 @@
  *  Header for the SDL thread management routines.
  */
 
-#include "SDL_stdinc.h"
 #include "SDL_error.h"
+#include "SDL_stdinc.h"
 
 /* Thread synchronization primitives */
 #include "SDL_atomic.h"
 #include "SDL_mutex.h"
-
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -57,16 +56,16 @@ typedef unsigned int SDL_TLSID;
  *  \note On many systems you require special privileges to set high priority.
  */
 typedef enum {
-    SDL_THREAD_PRIORITY_LOW,
-    SDL_THREAD_PRIORITY_NORMAL,
-    SDL_THREAD_PRIORITY_HIGH
+  SDL_THREAD_PRIORITY_LOW,
+  SDL_THREAD_PRIORITY_NORMAL,
+  SDL_THREAD_PRIORITY_HIGH
 } SDL_ThreadPriority;
 
 /**
  *  The function passed to SDL_CreateThread().
  *  It is passed a void* user context parameter and returns an int.
  */
-typedef int (SDLCALL * SDL_ThreadFunction) (void *data);
+typedef int(SDLCALL* SDL_ThreadFunction)(void* data);
 
 #if defined(__WIN32__) && !defined(HAVE_LIBC)
 /**
@@ -92,27 +91,32 @@ typedef int (SDLCALL * SDL_ThreadFunction) (void *data);
 #define SDL_PASSED_BEGINTHREAD_ENDTHREAD
 #include <process.h> /* _beginthreadex() and _endthreadex() */
 
-typedef uintptr_t(__cdecl * pfnSDL_CurrentBeginThread)
-                   (void *, unsigned, unsigned (__stdcall *func)(void *),
-                    void * /*arg*/, unsigned, unsigned * /* threadID */);
-typedef void (__cdecl * pfnSDL_CurrentEndThread) (unsigned code);
+typedef uintptr_t(__cdecl* pfnSDL_CurrentBeginThread)(
+    void*, unsigned, unsigned(__stdcall* func)(void*), void* /*arg*/, unsigned,
+    unsigned* /* threadID */);
+typedef void(__cdecl* pfnSDL_CurrentEndThread)(unsigned code);
 
 /**
  *  Create a thread.
  */
-extern DECLSPEC SDL_Thread *SDLCALL
-SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data,
+extern DECLSPEC SDL_Thread* SDLCALL
+SDL_CreateThread(SDL_ThreadFunction fn, const char* name, void* data,
                  pfnSDL_CurrentBeginThread pfnBeginThread,
-                 pfnSDL_CurrentEndThread pfnEndThread);
+                 pfnSDL_CurrentEndThread   pfnEndThread);
 
 /**
  *  Create a thread.
  */
 #if defined(SDL_CreateThread) && SDL_DYNAMIC_API
 #undef SDL_CreateThread
-#define SDL_CreateThread(fn, name, data) SDL_CreateThread_REAL(fn, name, data, (pfnSDL_CurrentBeginThread)_beginthreadex, (pfnSDL_CurrentEndThread)_endthreadex)
+#define SDL_CreateThread(fn, name, data)                           \
+  SDL_CreateThread_REAL(fn, name, data,                            \
+                        (pfnSDL_CurrentBeginThread)_beginthreadex, \
+                        (pfnSDL_CurrentEndThread)_endthreadex)
 #else
-#define SDL_CreateThread(fn, name, data) SDL_CreateThread(fn, name, data, (pfnSDL_CurrentBeginThread)_beginthreadex, (pfnSDL_CurrentEndThread)_endthreadex)
+#define SDL_CreateThread(fn, name, data)                                      \
+  SDL_CreateThread(fn, name, data, (pfnSDL_CurrentBeginThread)_beginthreadex, \
+                   (pfnSDL_CurrentEndThread)_endthreadex)
 #endif
 
 #elif defined(__OS2__)
@@ -126,17 +130,23 @@ SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data,
 #else
 #include <stdlib.h>
 #endif
-typedef int (*pfnSDL_CurrentBeginThread)(void (*func)(void *), void *, unsigned, void * /*arg*/);
+typedef int (*pfnSDL_CurrentBeginThread)(void (*func)(void*), void*, unsigned,
+                                         void* /*arg*/);
 typedef void (*pfnSDL_CurrentEndThread)(void);
-extern DECLSPEC SDL_Thread *SDLCALL
-SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data,
+extern DECLSPEC SDL_Thread* SDLCALL
+SDL_CreateThread(SDL_ThreadFunction fn, const char* name, void* data,
                  pfnSDL_CurrentBeginThread pfnBeginThread,
-                 pfnSDL_CurrentEndThread pfnEndThread);
+                 pfnSDL_CurrentEndThread   pfnEndThread);
 #if defined(SDL_CreateThread) && SDL_DYNAMIC_API
 #undef SDL_CreateThread
-#define SDL_CreateThread(fn, name, data) SDL_CreateThread_REAL(fn, name, data, (pfnSDL_CurrentBeginThread)_beginthread, (pfnSDL_CurrentEndThread)_endthread)
+#define SDL_CreateThread(fn, name, data)                         \
+  SDL_CreateThread_REAL(fn, name, data,                          \
+                        (pfnSDL_CurrentBeginThread)_beginthread, \
+                        (pfnSDL_CurrentEndThread)_endthread)
 #else
-#define SDL_CreateThread(fn, name, data) SDL_CreateThread(fn, name, data, (pfnSDL_CurrentBeginThread)_beginthread, (pfnSDL_CurrentEndThread)_endthread)
+#define SDL_CreateThread(fn, name, data)                                    \
+  SDL_CreateThread(fn, name, data, (pfnSDL_CurrentBeginThread)_beginthread, \
+                   (pfnSDL_CurrentEndThread)_endthread)
 #endif
 
 #else
@@ -159,8 +169,9 @@ SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data,
  *    it (truncate, etc), but the original string contents will be available
  *    from SDL_GetThreadName().
  */
-extern DECLSPEC SDL_Thread *SDLCALL
-SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data);
+extern DECLSPEC SDL_Thread* SDLCALL SDL_CreateThread(SDL_ThreadFunction fn,
+                                                     const char*        name,
+                                                     void*              data);
 
 #endif
 
@@ -171,7 +182,7 @@ SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data);
  *  memory, not to be free()'d by the caller, and remains valid until the
  *  specified thread is cleaned up by SDL_WaitThread().
  */
-extern DECLSPEC const char *SDLCALL SDL_GetThreadName(SDL_Thread *thread);
+extern DECLSPEC const char* SDLCALL SDL_GetThreadName(SDL_Thread* thread);
 
 /**
  *  Get the thread identifier for the current thread.
@@ -183,7 +194,7 @@ extern DECLSPEC SDL_threadID SDLCALL SDL_ThreadID(void);
  *
  *  Equivalent to SDL_ThreadID() if the specified thread is NULL.
  */
-extern DECLSPEC SDL_threadID SDLCALL SDL_GetThreadID(SDL_Thread * thread);
+extern DECLSPEC SDL_threadID SDLCALL SDL_GetThreadID(SDL_Thread* thread);
 
 /**
  *  Set the priority for the current thread
@@ -208,7 +219,7 @@ extern DECLSPEC int SDLCALL SDL_SetThreadPriority(SDL_ThreadPriority priority);
  *
  *  It is safe to pass NULL to this function; it is a no-op.
  */
-extern DECLSPEC void SDLCALL SDL_WaitThread(SDL_Thread * thread, int *status);
+extern DECLSPEC void SDLCALL SDL_WaitThread(SDL_Thread* thread, int* status);
 
 /**
  *  A thread may be "detached" to signify that it should not remain until
@@ -236,17 +247,18 @@ extern DECLSPEC void SDLCALL SDL_WaitThread(SDL_Thread * thread, int *status);
  *
  *  It is safe to pass NULL to this function; it is a no-op.
  */
-extern DECLSPEC void SDLCALL SDL_DetachThread(SDL_Thread * thread);
+extern DECLSPEC void SDLCALL SDL_DetachThread(SDL_Thread* thread);
 
 /**
- *  \brief Create an identifier that is globally visible to all threads but refers to data that is thread-specific.
+ *  \brief Create an identifier that is globally visible to all threads but
+ * refers to data that is thread-specific.
  *
  *  \return The newly created thread local storage identifier, or 0 on error
  *
  *  \code
  *  static SDL_SpinLock tls_lock;
  *  static SDL_TLSID thread_local_storage;
- * 
+ *
  *  void SetMyThreadData(void *value)
  *  {
  *      if (!thread_local_storage) {
@@ -258,7 +270,7 @@ extern DECLSPEC void SDLCALL SDL_DetachThread(SDL_Thread * thread);
  *      }
  *      SDL_TLSSet(thread_local_storage, value, 0);
  *  }
- *  
+ *
  *  void *GetMyThreadData(void)
  *  {
  *      return SDL_TLSGet(thread_local_storage);
@@ -271,31 +283,35 @@ extern DECLSPEC void SDLCALL SDL_DetachThread(SDL_Thread * thread);
 extern DECLSPEC SDL_TLSID SDLCALL SDL_TLSCreate(void);
 
 /**
- *  \brief Get the value associated with a thread local storage ID for the current thread.
+ *  \brief Get the value associated with a thread local storage ID for the
+ * current thread.
  *
  *  \param id The thread local storage ID
  *
- *  \return The value associated with the ID for the current thread, or NULL if no value has been set.
+ *  \return The value associated with the ID for the current thread, or NULL if
+ * no value has been set.
  *
  *  \sa SDL_TLSCreate()
  *  \sa SDL_TLSSet()
  */
-extern DECLSPEC void * SDLCALL SDL_TLSGet(SDL_TLSID id);
+extern DECLSPEC void* SDLCALL SDL_TLSGet(SDL_TLSID id);
 
 /**
- *  \brief Set the value associated with a thread local storage ID for the current thread.
+ *  \brief Set the value associated with a thread local storage ID for the
+ * current thread.
  *
  *  \param id The thread local storage ID
  *  \param value The value to associate with the ID for the current thread
- *  \param destructor A function called when the thread exits, to free the value.
+ *  \param destructor A function called when the thread exits, to free the
+ * value.
  *
  *  \return 0 on success, -1 on error
  *
  *  \sa SDL_TLSCreate()
  *  \sa SDL_TLSGet()
  */
-extern DECLSPEC int SDLCALL SDL_TLSSet(SDL_TLSID id, const void *value, void (SDLCALL *destructor)(void*));
-
+extern DECLSPEC int SDLCALL SDL_TLSSet(SDL_TLSID id, const void* value,
+                                       void(SDLCALL* destructor)(void*));
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
