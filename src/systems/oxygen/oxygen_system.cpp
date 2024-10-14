@@ -1,50 +1,42 @@
 #include "oxygen_system.hpp"
+
+#include <iostream>
+
+#include "audio_system.hpp"
 #include "enemy_factories.hpp"
 #include "player_factories.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "world_system.hpp"
-#include "audio_system.hpp"
-
-#include <iostream>
 
 /**
  * @brief reduces player's oxygen from idle/basic movement, registers death
  * NOTE: Possibly modified for damage over time in the future
  */
-void depleteOxygen(Entity &entity)
-{
-  if (registry.oxygen.has(entity))
-  {
-    auto &oxygen = registry.oxygen.get(entity);
+void depleteOxygen(Entity& entity) {
+  if (registry.oxygen.has(entity)) {
+    auto& oxygen = registry.oxygen.get(entity);
 
-    if (isDeadAfterChange(oxygen, oxygen.rate))
-    {
-      if (!registry.deathTimers.has(entity))
-      {
+    if (isDeadAfterChange(oxygen, oxygen.rate)) {
+      if (!registry.deathTimers.has(entity)) {
         if (registry.players.has(entity)) {
-            registry.deathTimers.insert(entity, {4000.f});
+          registry.deathTimers.insert(entity, {4000.f});
         } else {
-            registry.deathTimers.emplace(entity);
+          registry.deathTimers.emplace(entity);
         }
 
         // play death sound if player
-        if (registry.players.has(entity))
-        {
+        if (registry.players.has(entity)) {
           registry.sounds.insert(Entity(), Sound(death_sound));
           registry.sounds.insert(Entity(), Sound(flat_line_sound));
         }
       }
     }
     checkAndRenderOxygen(entity, oxygen, oxygen.rate);
-    if (registry.players.has(entity) && !registry.deathTimers.has(entity))
-    {
+    if (registry.players.has(entity) && !registry.deathTimers.has(entity)) {
       registry.sounds.insert(Entity(), Sound(deplete_audio));
-      if (registry.lowOxygen.has(oxygen.oxygenBar))
-      {
+      if (registry.lowOxygen.has(oxygen.oxygenBar)) {
         registry.sounds.insert(Entity(), Sound(fast_heart_audio));
-      }
-      else
-      {
+      } else {
         registry.sounds.insert(Entity(), Sound(slow_heart_audio));
       }
     }
@@ -67,25 +59,21 @@ void depleteOxygen(Entity &entity)
  * @param affector - affector's amount is positive if damaging, negative if
  * refilling
  */
-void modifyOxygen(Entity &entity, Entity &affector)
-{
-  if (!registry.oxygen.has(entity) || !registry.damageTouch.has(affector))
-  {
+void modifyOxygen(Entity& entity, Entity& affector) {
+  if (!registry.oxygen.has(entity) || !registry.damageTouch.has(affector)) {
     return;
   }
 
-  if (registry.attackCD.has(affector))
-  {
-    auto &attackCD = registry.attackCD.get(affector);
-    if (attackCD.attack_cd > 0.f)
-    {
+  if (registry.attackCD.has(affector)) {
+    auto& attackCD = registry.attackCD.get(affector);
+    if (attackCD.attack_cd > 0.f) {
       return;
     }
     attackCD.attack_cd = attackCD.attack_spd;
   }
 
-  auto &oxygen = registry.oxygen.get(entity);
-  auto &oxygenChange = registry.damageTouch.get(affector);
+  auto& oxygen       = registry.oxygen.get(entity);
+  auto& oxygenChange = registry.damageTouch.get(affector);
 
   // Render Oxygen Meter Before Oxygen Level Values Change
   if (oxygen.level - oxygenChange.amount > oxygen.capacity) {
@@ -93,11 +81,9 @@ void modifyOxygen(Entity &entity, Entity &affector)
   } else {
     checkAndRenderOxygen(entity, oxygen, oxygenChange.amount);
   }
-  
-  if (isDeadAfterChange(oxygen, oxygenChange.amount))
-  {
-    if (!registry.deathTimers.has(entity))
-    {
+
+  if (isDeadAfterChange(oxygen, oxygenChange.amount)) {
+    if (!registry.deathTimers.has(entity)) {
       if (registry.players.has(entity)) {
         registry.deathTimers.insert(entity, {4000.f});
       } else {
@@ -105,19 +91,17 @@ void modifyOxygen(Entity &entity, Entity &affector)
       }
 
       // play death sound if player
-      if (registry.players.has(entity))
-      {
+      if (registry.players.has(entity)) {
         registry.sounds.insert(Entity(), Sound(death_sound));
       }
     }
     // return if enemy; we don't render an enemy with 0 health
-    if (registry.deadlys.has(entity))
-      return;
+    if (registry.deadlys.has(entity)) return;
   }
 
   // play hurt sound if player is damaged AND not dead
-  if (registry.players.has(entity) && !registry.playerWeapons.has(affector) && !registry.deathTimers.has(entity) && oxygenChange.amount >= 0)
-  {
+  if (registry.players.has(entity) && !registry.playerWeapons.has(affector) &&
+      !registry.deathTimers.has(entity) && oxygenChange.amount >= 0) {
     registry.sounds.insert(Entity(), Sound(hurt_sound));
   }
 }
@@ -125,12 +109,10 @@ void modifyOxygen(Entity &entity, Entity &affector)
 // helper for entity taking damage from affector
 // NOTE: amount is POSITIVE if damaging, NEGATIVE if refilling
 // return true if entity dies, false otherwise
-bool isDeadAfterChange(Oxygen &oxygen, float amount)
-{
+bool isDeadAfterChange(Oxygen& oxygen, float amount) {
   oxygen.level = min(oxygen.level - amount, oxygen.capacity);
 
-  if (oxygen.level <= 0)
-  {
+  if (oxygen.level <= 0) {
     oxygen.level = 0;
     return true;
   }
@@ -138,25 +120,22 @@ bool isDeadAfterChange(Oxygen &oxygen, float amount)
 }
 
 // helper for checking and rendering oxygen bar
-void checkAndRenderOxygen(Entity &entity, Oxygen &oxygen, float amount)
-{
-  checkOxygenLevel(entity); // TODO: consider adding at end of function
+void checkAndRenderOxygen(Entity& entity, Oxygen& oxygen, float amount) {
+  checkOxygenLevel(entity);  // TODO: consider adding at end of function
 
   // modify oxygen bar
   if (registry.positions.has(oxygen.oxygenBar) &&
-      registry.positions.has(oxygen.backgroundBar))
-  {
-    auto &oxygenBarPos = registry.positions.get(oxygen.oxygenBar);
-    bool isPlayer = registry.players.has(entity);
+      registry.positions.has(oxygen.backgroundBar)) {
+    auto& oxygenBarPos = registry.positions.get(oxygen.oxygenBar);
+    bool  isPlayer     = registry.players.has(entity);
     float scaledAmount =
         (isPlayer) ? (amount / oxygen.capacity) * oxygenBarPos.originalScale.y
                    : (amount / oxygen.capacity) * oxygenBarPos.originalScale.x;
-    float &scale = (isPlayer) ? oxygenBarPos.scale.y : oxygenBarPos.scale.x;
-    float &position =
+    float& scale = (isPlayer) ? oxygenBarPos.scale.y : oxygenBarPos.scale.x;
+    float& position =
         (isPlayer) ? oxygenBarPos.position.y : oxygenBarPos.position.x;
 
-    if (scale - scaledAmount < 0)
-    { // prevent negative scaling
+    if (scale - scaledAmount < 0) {  // prevent negative scaling
       scaledAmount = scale;
     }
     scale -= scaledAmount;
@@ -169,24 +148,17 @@ void checkAndRenderOxygen(Entity &entity, Oxygen &oxygen, float amount)
  * @brief checks if player oxygen is low and adds/removes lowOxygen component
  * accordingly
  */
-void checkOxygenLevel(Entity &entity)
-{
-  if (registry.oxygen.has(entity))
-  { // TODO: REMOVE second cond if we want
-    auto &oxygen =
-        registry.oxygen.get(entity); // enemy health to change colours
+void checkOxygenLevel(Entity& entity) {
+  if (registry.oxygen.has(entity)) {  // TODO: REMOVE second cond if we want
+    auto& oxygen =
+        registry.oxygen.get(entity);  // enemy health to change colours
 
-    if (oxygen.level / oxygen.capacity <= LOW_OXYGEN_THRESHOLD)
-    {
-      if (!registry.lowOxygen.has(oxygen.oxygenBar))
-      {
+    if (oxygen.level / oxygen.capacity <= LOW_OXYGEN_THRESHOLD) {
+      if (!registry.lowOxygen.has(oxygen.oxygenBar)) {
         registry.lowOxygen.emplace(oxygen.oxygenBar);
       }
-    }
-    else
-    {
-      if (registry.lowOxygen.has(oxygen.oxygenBar))
-      {
+    } else {
+      if (registry.lowOxygen.has(oxygen.oxygenBar)) {
         registry.lowOxygen.remove(oxygen.oxygenBar);
       }
     }
@@ -197,15 +169,14 @@ void checkOxygenLevel(Entity &entity)
  * @brief update the position values of an enemy's health bar depending on enemy
  * position
  */
-void updateHealthBarAndEnemyPos(Entity &enemy)
-{
-  Position &enemyPos = registry.positions.get(enemy);
-  Oxygen &enemyOxygen =
-      registry.oxygen.get(enemy); // TODO: ensure no unexpected behaviour once
-                                  // collision handling is fully implemented
+void updateHealthBarAndEnemyPos(Entity& enemy) {
+  Position& enemyPos = registry.positions.get(enemy);
+  Oxygen&   enemyOxygen =
+      registry.oxygen.get(enemy);  // TODO: ensure no unexpected behaviour once
+                                   // collision handling is fully implemented
 
-  Position &oxygenBarPos = registry.positions.get(enemyOxygen.oxygenBar);
-  Position &backgroundBarPos =
+  Position& oxygenBarPos = registry.positions.get(enemyOxygen.oxygenBar);
+  Position& backgroundBarPos =
       registry.positions.get(enemyOxygen.backgroundBar);
 
   oxygenBarPos.position =
@@ -215,11 +186,9 @@ void updateHealthBarAndEnemyPos(Entity &enemy)
 }
 
 float oxygen_drain(Entity player, float oxygen_deplete_timer,
-                   float elapsed_ms_since_last_update)
-{
+                   float elapsed_ms_since_last_update) {
   oxygen_deplete_timer -= elapsed_ms_since_last_update;
-  if (oxygen_deplete_timer < 0)
-  {
+  if (oxygen_deplete_timer < 0) {
     depleteOxygen(player);
     return PLAYER_OXYGEN_DEPLETE_TIME_MS;
   }

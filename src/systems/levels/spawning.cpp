@@ -1,4 +1,5 @@
 #include "spawning.hpp"
+
 #include "tiny_ecs_registry.hpp"
 
 /**
@@ -6,9 +7,9 @@
  *
  * @param funcs - vector of functions to run
  */
-void execute_config_fixed(const std::vector<std::function<void()>> &funcs) {
-  for (const auto &func : funcs) {
-    func(); // Call each function
+void execute_config_fixed(const std::vector<std::function<void()>>& funcs) {
+  for (const auto& func : funcs) {
+    func();  // Call each function
   }
 }
 
@@ -20,11 +21,11 @@ void execute_config_fixed(const std::vector<std::function<void()>> &funcs) {
  * execuute
  * @param funcs - vector of functions to run
  */
-void execute_config_fixed_rand(float chance,
-                         const std::vector<std::function<void()>> &funcs) {
-  std::default_random_engine rng;
-  std::uniform_real_distribution<float> uniform_dist; // number between 0..1
-  for (const auto &func : funcs) {
+void execute_config_fixed_rand(
+    float chance, const std::vector<std::function<void()>>& funcs) {
+  std::default_random_engine            rng;
+  std::uniform_real_distribution<float> uniform_dist;  // number between 0..1
+  for (const auto& func : funcs) {
     if (chance >= uniform_dist(rng)) {
       func();
     }

@@ -1,8 +1,10 @@
 #include "map_util.hpp"
+
 #include "oxygen_system.hpp"
 
-bool handle_interactable_collisions(Entity &player, Entity &interactable) {
-  if (!registry.players.has(player) || !registry.interactable.has(interactable)) {
+bool handle_interactable_collisions(Entity& player, Entity& interactable) {
+  if (!registry.players.has(player) ||
+      !registry.interactable.has(interactable)) {
     return false;
   }
 

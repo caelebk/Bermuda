@@ -1,4 +1,5 @@
 #include "physics_system.hpp"
+
 #include "audio_system.hpp"
 #include "consumable_utils.hpp"
 #include "debuff.hpp"
@@ -6,38 +7,34 @@
 #include "oxygen_system.hpp"
 #include "physics.hpp"
 #include "player_factories.hpp"
-#include "oxygen_system.hpp"
-#include "audio_system.hpp"
 #include "tiny_ecs_registry.hpp"
 
-
-
 void PhysicsSystem::step(float elapsed_ms) {
-  auto &motion_registry = registry.motions;
-  auto &position_registry = registry.positions;
+  auto& motion_registry   = registry.motions;
+  auto& position_registry = registry.positions;
   for (uint i = 0; i < motion_registry.size(); i++) {
-    Entity entity = motion_registry.entities[i];
-    Motion &motion = motion_registry.get(entity);
-    Position &position = position_registry.get(entity);
+    Entity    entity   = motion_registry.entities[i];
+    Motion&   motion   = motion_registry.get(entity);
+    Position& position = position_registry.get(entity);
 
     float step_seconds = elapsed_ms / 1000.f;
-    vec2 distance = (motion.velocity) * step_seconds;
+    vec2  distance     = (motion.velocity) * step_seconds;
     position.position += distance;
   }
 }
 
 void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon,
                       Entity player_projectile) {
-  vec2 player_pos = registry.positions.get(player).position;
-  vec2 pos_cursor_vec = mouse_pos - player_pos;
-  float angle = atan2(pos_cursor_vec.y, pos_cursor_vec.x);
-  Position &weapon_pos = registry.positions.get(player_weapon);
-  Position &proj_pos = registry.positions.get(player_projectile);
-  weapon_pos.angle = angle;
-  weapon_pos.position = calculate_pos_vec(GUN_RELATIVE_POS_FROM_PLAYER.x,
-                                          player_pos, weapon_pos.angle);
+  vec2      player_pos     = registry.positions.get(player).position;
+  vec2      pos_cursor_vec = mouse_pos - player_pos;
+  float     angle          = atan2(pos_cursor_vec.y, pos_cursor_vec.x);
+  Position& weapon_pos     = registry.positions.get(player_weapon);
+  Position& proj_pos       = registry.positions.get(player_projectile);
+  weapon_pos.angle         = angle;
+  weapon_pos.position      = calculate_pos_vec(GUN_RELATIVE_POS_FROM_PLAYER.x,
+                                               player_pos, weapon_pos.angle);
   if (registry.playerProjectiles.get(player_projectile).is_loaded) {
-    proj_pos.angle = angle;
+    proj_pos.angle    = angle;
     proj_pos.position = calculate_pos_vec(
         HARPOON_RELATIVE_POS_FROM_GUN.x, weapon_pos.position, proj_pos.angle,
         {0.f, HARPOON_RELATIVE_POS_FROM_GUN.y});
@@ -45,17 +42,17 @@ void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon,
 }
 
 void setFiredProjVelo(Entity player_projectile) {
-  PlayerProjectile &proj = registry.playerProjectiles.get(player_projectile);
-  proj.is_loaded = false;
-  float angle = registry.positions.get(player_projectile).angle;
+  PlayerProjectile& proj = registry.playerProjectiles.get(player_projectile);
+  proj.is_loaded         = false;
+  float angle            = registry.positions.get(player_projectile).angle;
   registry.motions.get(player_projectile).velocity = {
       HARPOON_SPEED * cos(angle), HARPOON_SPEED * sin(angle)};
   registry.sounds.insert(player_projectile, Sound(blast_sound));
 }
 
 void setPlayerAcceleration(Entity player) {
-  Motion &motion = registry.motions.get(player);
-  Player &keys = registry.players.get(player);
+  Motion& motion      = registry.motions.get(player);
+  Player& keys        = registry.players.get(player);
   motion.acceleration = {0.f, 0.f};
 
   // If player is dashing, double acceleration
@@ -77,7 +74,7 @@ void setPlayerAcceleration(Entity player) {
 }
 
 void calculatePlayerVelocity(Entity player, float lerp) {
-  Motion &motion = registry.motions.get(player);
+  Motion& motion = registry.motions.get(player);
 
   if (!debuff_entity_can_move(player)) {
     motion.velocity = {0.f, 0.f};
@@ -114,7 +111,7 @@ void calculatePlayerVelocity(Entity player, float lerp) {
 }
 
 void applyWaterFriction(Entity entity) {
-  Motion &motion = registry.motions.get(entity);
+  Motion& motion = registry.motions.get(entity);
 
   // Water friction should accelerate in the opposite direction of the player's
   // velocity. If the player isn't moving, friction has no effect

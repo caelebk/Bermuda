@@ -1,10 +1,11 @@
 #include "enemy_factories.hpp"
-#include "physics.hpp"
-#include "collision_system.hpp"
-#include "space.hpp"
-#include "tiny_ecs_registry.hpp"
 
 #include <iostream>
+
+#include "collision_system.hpp"
+#include "physics.hpp"
+#include "space.hpp"
+#include "tiny_ecs_registry.hpp"
 
 /////////////////////////////////////////////////////////////////
 // Util
@@ -20,7 +21,7 @@ static bool checkSpawnCollisions(Entity entity) {
   if (!registry.positions.has(entity)) {
     return false;
   }
-  const Position &enemyPos = registry.positions.get(entity);
+  const Position& enemyPos = registry.positions.get(entity);
 
   // Entities can't spawn in walls
   for (Entity wall : registry.activeWalls.entities) {
@@ -68,14 +69,14 @@ static bool checkSpawnCollisions(Entity entity) {
  * @param position
  * @return the entity if successful, 0 otherwise
  */
-Entity createJellyPos(RenderSystem *renderer, vec2 position) {
+Entity createJellyPos(RenderSystem* renderer, vec2 position) {
   // Reserve an entity
   auto entity = Entity();
 
-  auto &pos = registry.positions.emplace(entity);
-  pos.angle = 0.f;
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = 0.f;
   pos.position = position;
-  pos.scale = JELLY_SCALE_FACTOR * JELLY_BOUNDING_BOX;
+  pos.scale    = JELLY_SCALE_FACTOR * JELLY_BOUNDING_BOX;
 
   if (!checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
@@ -84,21 +85,21 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position) {
   }
 
   // Store a reference to the potentially re-used mesh object
-  Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy
   registry.deadlys.emplace(entity);
 
   // Add stats
-  auto &damage = registry.damageTouch.emplace(entity);
+  auto& damage  = registry.damageTouch.emplace(entity);
   damage.amount = JELLY_DAMAGE;
 
-  auto &attackCD = registry.attackCD.emplace(entity);
+  auto& attackCD      = registry.attackCD.emplace(entity);
   attackCD.attack_spd = JELLY_ATK_SPD;
 
   // add abilities
-  auto &stun = registry.stuns.emplace(entity);
+  auto& stun    = registry.stuns.emplace(entity);
   stun.duration = JELLY_STUN_MS;
 
   // physics and pos
@@ -106,9 +107,9 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position) {
   // add collisions
   registry.collidables.emplace(entity);
 
-  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::JELLY,
-                                          EFFECT_ASSET_ID::TEXTURED,
-                                          GEOMETRY_BUFFER_ID::SPRITE});
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::JELLY, EFFECT_ASSET_ID::TEXTURED,
+               GEOMETRY_BUFFER_ID::SPRITE});
 
   createJellyHealthBar(renderer, entity);
 
@@ -122,7 +123,7 @@ Entity createJellyPos(RenderSystem *renderer, vec2 position) {
  * @param enemy - assumed to be a jellyfish
  * @return
  */
-void createJellyHealthBar(RenderSystem *renderer, Entity &enemy) {
+void createJellyHealthBar(RenderSystem* renderer, Entity& enemy) {
   // Check if enemy has a position component
   if (!registry.positions.has(enemy)) {
     std::cerr << "Error: Entity does not have a position component"
@@ -131,39 +132,39 @@ void createJellyHealthBar(RenderSystem *renderer, Entity &enemy) {
   }
 
   // Create oxygen and background bar
-  auto jellyOxygenBar = Entity();
+  auto jellyOxygenBar     = Entity();
   auto jellyBackgroundBar = Entity();
 
   // Store a reference to the potentially re-used mesh object
-  Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(jellyOxygenBar, &mesh);
   registry.meshPtrs.emplace(jellyBackgroundBar, &mesh);
 
   // Get position of enemy
-  Position &enemyPos = registry.positions.get(enemy);
+  Position& enemyPos = registry.positions.get(enemy);
 
   // Setting initial positon values
-  Position &position = registry.positions.emplace(jellyOxygenBar);
+  Position& position = registry.positions.emplace(jellyOxygenBar);
   position.position =
       enemyPos.position -
       vec2(0.f, enemyPos.scale.y / 2 +
-                    ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP
-                                       // should be, update to proper position
-  position.angle = 0.f;
-  position.scale = JELLY_HEALTH_SCALE * JELLY_HEALTH_BOUNDING_BOX;
+                    ENEMY_O2_BAR_GAP);  // TODO: guesstimate on where the HP
+                                        // should be, update to proper position
+  position.angle         = 0.f;
+  position.scale         = JELLY_HEALTH_SCALE * JELLY_HEALTH_BOUNDING_BOX;
   position.originalScale = JELLY_HEALTH_SCALE * JELLY_HEALTH_BOUNDING_BOX;
 
-  Position &backgroundPos = registry.positions.emplace(jellyBackgroundBar);
-  backgroundPos.position = position.position;
-  backgroundPos.angle = 0.f;
-  backgroundPos.scale = JELLY_HEALTH_BAR_SCALE * JELLY_HEALTH_BOUNDING_BOX;
+  Position& backgroundPos = registry.positions.emplace(jellyBackgroundBar);
+  backgroundPos.position  = position.position;
+  backgroundPos.angle     = 0.f;
+  backgroundPos.scale     = JELLY_HEALTH_BAR_SCALE * JELLY_HEALTH_BOUNDING_BOX;
 
   // Set health bar
-  auto &jellyOxygen = registry.oxygen.emplace(enemy);
-  jellyOxygen.capacity = JELLY_HEALTH;
-  jellyOxygen.level = JELLY_HEALTH;
-  jellyOxygen.rate = 0.f;
-  jellyOxygen.oxygenBar = jellyOxygenBar;
+  auto& jellyOxygen         = registry.oxygen.emplace(enemy);
+  jellyOxygen.capacity      = JELLY_HEALTH;
+  jellyOxygen.level         = JELLY_HEALTH;
+  jellyOxygen.rate          = 0.f;
+  jellyOxygen.oxygenBar     = jellyOxygenBar;
   jellyOxygen.backgroundBar = jellyBackgroundBar;
 
   // TODO: change to proper texture
@@ -171,10 +172,10 @@ void createJellyHealthBar(RenderSystem *renderer, Entity &enemy) {
       jellyOxygenBar, {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
                        EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
 
-  registry.renderRequests.insert(jellyBackgroundBar,
-                                 {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR,
-                                  EFFECT_ASSET_ID::TEXTURED,
-                                  GEOMETRY_BUFFER_ID::SPRITE});
+  registry.renderRequests.insert(
+      jellyBackgroundBar,
+      {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR, EFFECT_ASSET_ID::TEXTURED,
+       GEOMETRY_BUFFER_ID::SPRITE});
 }
 /////////////////////////////////////////////////////////////////
 // Fish
@@ -186,14 +187,14 @@ void createJellyHealthBar(RenderSystem *renderer, Entity &enemy) {
  * @param position
  * @return
  */
-Entity createFishPos(RenderSystem *renderer, vec2 position) {
+Entity createFishPos(RenderSystem* renderer, vec2 position) {
   // Reserve an entity
   auto entity = Entity();
 
-  auto &pos = registry.positions.emplace(entity);
-  pos.angle = 0.f;
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = 0.f;
   pos.position = position;
-  pos.scale = FISH_SCALE_FACTOR * FISH_BOUNDING_BOX;
+  pos.scale    = FISH_SCALE_FACTOR * FISH_BOUNDING_BOX;
   if (!checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
     registry.remove_all_components_of(entity);
@@ -201,20 +202,20 @@ Entity createFishPos(RenderSystem *renderer, vec2 position) {
   }
 
   // Store a reference to the potentially re-used mesh object
-  Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
   registry.deadlys.emplace(entity);
-  auto &damage = registry.damageTouch.emplace(entity);
+  auto& damage  = registry.damageTouch.emplace(entity);
   damage.amount = FISH_DAMAGE;
 
-  auto &attackCD = registry.attackCD.emplace(entity);
+  auto& attackCD      = registry.attackCD.emplace(entity);
   attackCD.attack_spd = FISH_ATK_SPD;
 
   // Initialize the position, scale, and physics components
-  auto &motion = registry.motions.emplace(entity);
-  motion.velocity = {-FISH_MS, 0};
+  auto& motion        = registry.motions.emplace(entity);
+  motion.velocity     = {-FISH_MS, 0};
   motion.acceleration = {0, 0};
 
   // add collisions
@@ -225,9 +226,9 @@ Entity createFishPos(RenderSystem *renderer, vec2 position) {
 
   // TODO: add the room
 
-  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::FISH,
-                                          EFFECT_ASSET_ID::TEXTURED,
-                                          GEOMETRY_BUFFER_ID::SPRITE});
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::FISH, EFFECT_ASSET_ID::TEXTURED,
+               GEOMETRY_BUFFER_ID::SPRITE});
 
   createFishHealthBar(renderer, entity);
   return entity;
@@ -240,7 +241,7 @@ Entity createFishPos(RenderSystem *renderer, vec2 position) {
  * @param enemy - assumed to be a fish
  * @return
  */
-void createFishHealthBar(RenderSystem *renderer, Entity &enemy) {
+void createFishHealthBar(RenderSystem* renderer, Entity& enemy) {
   // Check if enemy has a position component
   if (!registry.positions.has(enemy)) {
     std::cerr << "Error: Entity does not have a position component"
@@ -249,39 +250,39 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy) {
   }
 
   // Create oxygen and background bar
-  auto fishOxygenBar = Entity();
+  auto fishOxygenBar     = Entity();
   auto fishBackgroundBar = Entity();
 
   // Store a reference to the potentially re-used mesh object
-  Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(fishOxygenBar, &mesh);
   registry.meshPtrs.emplace(fishBackgroundBar, &mesh);
 
   // Get position of enemy
-  Position &enemyPos = registry.positions.get(enemy);
+  Position& enemyPos = registry.positions.get(enemy);
 
   // Setting initial positon values
-  Position &position = registry.positions.emplace(fishOxygenBar);
+  Position& position = registry.positions.emplace(fishOxygenBar);
   position.position =
       enemyPos.position -
       vec2(0.f, enemyPos.scale.y / 2 +
-                    ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP
-                                       // should be, update to proper position
-  position.angle = 0.f;
-  position.scale = FISH_HEALTH_SCALE * FISH_HEALTH_BOUNDING_BOX;
+                    ENEMY_O2_BAR_GAP);  // TODO: guesstimate on where the HP
+                                        // should be, update to proper position
+  position.angle         = 0.f;
+  position.scale         = FISH_HEALTH_SCALE * FISH_HEALTH_BOUNDING_BOX;
   position.originalScale = FISH_HEALTH_SCALE * FISH_HEALTH_BOUNDING_BOX;
 
-  Position &backgroundPos = registry.positions.emplace(fishBackgroundBar);
-  backgroundPos.position = position.position;
-  backgroundPos.angle = 0.f;
-  backgroundPos.scale = FISH_HEALTH_BAR_SCALE * FISH_HEALTH_BOUNDING_BOX;
+  Position& backgroundPos = registry.positions.emplace(fishBackgroundBar);
+  backgroundPos.position  = position.position;
+  backgroundPos.angle     = 0.f;
+  backgroundPos.scale     = FISH_HEALTH_BAR_SCALE * FISH_HEALTH_BOUNDING_BOX;
 
   // Set health bar
-  auto &oxygen = registry.oxygen.emplace(enemy);
-  oxygen.capacity = FISH_HEALTH;
-  oxygen.level = FISH_HEALTH;
-  oxygen.rate = 0.f;
-  oxygen.oxygenBar = fishOxygenBar;
+  auto& oxygen         = registry.oxygen.emplace(enemy);
+  oxygen.capacity      = FISH_HEALTH;
+  oxygen.level         = FISH_HEALTH;
+  oxygen.rate          = 0.f;
+  oxygen.oxygenBar     = fishOxygenBar;
   oxygen.backgroundBar = fishBackgroundBar;
 
   // TODO: change to proper texture
@@ -289,10 +290,10 @@ void createFishHealthBar(RenderSystem *renderer, Entity &enemy) {
       fishOxygenBar, {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
                       EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
 
-  registry.renderRequests.insert(fishBackgroundBar,
-                                 {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR,
-                                  EFFECT_ASSET_ID::TEXTURED,
-                                  GEOMETRY_BUFFER_ID::SPRITE});
+  registry.renderRequests.insert(
+      fishBackgroundBar,
+      {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR, EFFECT_ASSET_ID::TEXTURED,
+       GEOMETRY_BUFFER_ID::SPRITE});
 }
 
 /////////////////////////////////////////////////////////////////

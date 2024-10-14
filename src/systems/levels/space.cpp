@@ -1,9 +1,10 @@
-#include <iostream>
-#include <stdio.h>
-#include <typeinfo>
-
 #include "space.hpp"
 
-Door::Door(): Wall() {};
+#include <stdio.h>
 
-Wall::Wall() {};
+#include <iostream>
+#include <typeinfo>
+
+Door::Door() : Wall(){};
+
+Wall::Wall(){};

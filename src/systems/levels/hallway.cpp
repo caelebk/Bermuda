@@ -1,11 +1,11 @@
-#include <stdio.h>
-
 #include "hallway.hpp"
+
+#include <stdio.h>
 
 #include "tiny_ecs_registry.hpp"
 
-Hallway::Hallway() {};
+Hallway::Hallway(){};
 
-HallwayBuilder::HallwayBuilder(): SpaceBuilder<Hallway>() {
-    new_entity(Hallway());
+HallwayBuilder::HallwayBuilder() : SpaceBuilder<Hallway>() {
+  new_entity(Hallway());
 };

@@ -1,6 +1,8 @@
 #include "consumable_factories.hpp"
-#include "collision_system.hpp"
+
 #include <iostream>
+
+#include "collision_system.hpp"
 
 /////////////////////////////////////////////////////////////////
 // Util
@@ -16,7 +18,7 @@ static bool checkSpawnCollisions(Entity entity) {
   if (!registry.positions.has(entity)) {
     return false;
   }
-  const Position &enemyPos = registry.positions.get(entity);
+  const Position& enemyPos = registry.positions.get(entity);
 
   // Entities can't spawn in walls
   for (Entity wall : registry.activeWalls.entities) {
@@ -53,14 +55,14 @@ static bool checkSpawnCollisions(Entity entity) {
  * @param position
  * @return
  */
-Entity createOxygenTankPos(RenderSystem *renderer, vec2 position) {
+Entity createOxygenTankPos(RenderSystem* renderer, vec2 position) {
   // Reserve an entity
   auto entity = Entity();
 
-  auto &pos = registry.positions.emplace(entity);
-  pos.angle = 0.f;
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = 0.f;
   pos.position = position;
-  pos.scale = OXYGEN_TANK_SCALE_FACTOR * OXYGEN_TANK_BOUNDING_BOX;
+  pos.scale    = OXYGEN_TANK_SCALE_FACTOR * OXYGEN_TANK_BOUNDING_BOX;
 
   if (!checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
@@ -68,7 +70,7 @@ Entity createOxygenTankPos(RenderSystem *renderer, vec2 position) {
     return Entity(0);
   }
   // Store a reference to the potentially re-used mesh object
-  Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make consumable
@@ -76,14 +78,14 @@ Entity createOxygenTankPos(RenderSystem *renderer, vec2 position) {
   registry.collidables.emplace(entity);
 
   // Add stats
-  auto &damage = registry.damageTouch.emplace(entity);
+  auto& damage  = registry.damageTouch.emplace(entity);
   damage.amount = OXYGEN_TANK_QTY;
 
   // physics and pos
 
-  registry.renderRequests.insert(entity, {TEXTURE_ASSET_ID::OXYGEN_TANK,
-                                          EFFECT_ASSET_ID::TEXTURED,
-                                          GEOMETRY_BUFFER_ID::SPRITE});
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::OXYGEN_TANK, EFFECT_ASSET_ID::TEXTURED,
+               GEOMETRY_BUFFER_ID::SPRITE});
 
   return entity;
 }
