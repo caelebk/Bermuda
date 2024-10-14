@@ -83,17 +83,33 @@ void LevelBuilder::print_hallways()
 };
 
 /********************************************************************************
+ * @brief Build Pre-Designed Room 1 No Doors
+ ********************************************************************************/
+void LevelBuilder::buildRoomOne() // TODO: REMOVE AFTER M1
+{
+    room(ROOM_ONE).up(Y_10U).right(X_14U).down(Y_5U).right(X_6U).down(Y_5U).left(X_20U);
+};
+
+/********************************************************************************
+ * @brief Build Pre-Designed Room 2 No Doors
+ ********************************************************************************/
+void LevelBuilder::buildRoomTwo() // TODO: REMOVE AFTER M1
+{
+    room(ROOM_TWO).up(Y_10U).right(X_20U).down(Y_10U).left(X_20U);
+};
+
+/********************************************************************************
  * @brief Build Pre-Designed Room 1
  ********************************************************************************/
-void LevelBuilder::buildRoomOne()
-{
-    room(ROOM_ONE).up(Y_10U).right(X_6U).door("d1", X_2U).right(X_6U).down(Y_5U).right(X_6U).down(Y_1U).door("d2", Y_3U).down(Y_1U).left(X_20U);
-};
+// void LevelBuilder::buildRoomTwo()
+// {
+//     room(ROOM_ONE).up(Y_10U).right(X_6U).door("d1", X_2U).right(X_6U).down(Y_5U).right(X_6U).down(Y_1U).door("d2", Y_3U).down(Y_1U).left(X_20U);
+// };
 
 /********************************************************************************
  * @brief Build Pre-Designed Room 2
  ********************************************************************************/
-void LevelBuilder::buildRoomTwo()
-{
-    room(ROOM_TWO).up(Y_10U).right(X_20U).down(Y_4U).door("d3", Y_2U).down(Y_4U).left(X_20U);
-};
+// void LevelBuilder::buildRoomThree()
+// {
+//     room(ROOM_TWO).up(Y_10U).right(X_20U).down(Y_4U).door("d3", Y_2U).down(Y_4U).left(X_20U);
+// };

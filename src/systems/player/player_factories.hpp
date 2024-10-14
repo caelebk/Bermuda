@@ -19,8 +19,8 @@
 #define PLAYER_OXYGEN_SCALE_FACTOR vec2(0.7f)
 #define PLAYER_OXYGEN_TANK_SCALE_FACTOR vec2(0.8f)
 #define PLAYER_OXYGEN_BOUNDING_BOX vec2(100.f, 500.f) // TODO: update to actual values
-#define PLAYER_OXYGEN_RATE 10.f
-#define PLAYER_OXYGEN_DEPLETE_TIME_MS 3000.f // to be balanced later
+#define PLAYER_OXYGEN_RATE 3.f
+#define PLAYER_OXYGEN_DEPLETE_TIME_MS 1000.f // to be balanced later
 
 Entity createPlayer(RenderSystem *renderer, vec2 pos);
 

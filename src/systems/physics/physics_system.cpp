@@ -6,6 +6,7 @@
 #include "oxygen_system.hpp"
 #include "physics.hpp"
 #include "player_factories.hpp"
+#include "oxygen_system.hpp"
 #include "audio_system.hpp"
 #include "tiny_ecs_registry.hpp"
 

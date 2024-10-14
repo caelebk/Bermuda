@@ -53,6 +53,7 @@ private:
 	// Game state
 	RenderSystem* renderer;
 	LevelBuilder level_builder;
+	RoomBuilder curr_room;
 	float current_speed;
 	float oxygen_timer;
 	Entity player;

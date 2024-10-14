@@ -9,19 +9,17 @@
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
-class RenderSystem {
-  /**
-   * The following arrays store the assets the game will use. They are loaded
-   * at initialization and are assumed to not be modified by the render loop.
-   *
-   * Whenever possible, add to these lists instead of creating dynamic state
-   * it is easier to debug and faster to execute for the computer.
-   */
-  std::array<GLuint, texture_count> texture_gl_handles;
-  std::array<ivec2, texture_count> texture_dimensions;
-
-  // Stored cursor asset
-  GLFWimage cursorImageData;
+class RenderSystem
+{
+	/**
+	 * The following arrays store the assets the game will use. They are loaded
+	 * at initialization and are assumed to not be modified by the render loop.
+	 *
+	 * Whenever possible, add to these lists instead of creating dynamic state
+	 * it is easier to debug and faster to execute for the computer.
+	 */
+	std::array<GLuint, texture_count> texture_gl_handles;
+	std::array<ivec2, texture_count> texture_dimensions;
 
   // Make sure these paths remain in sync with the associated enumerators.
   // Associated id with .obj path
@@ -71,7 +69,7 @@ public:
 
   void initializeGlGeometryBuffers();
 
-  void initializeGlCursor(std::string cursorImagePath);
+	void initializeGlCursor();
 
   // Initialize the screen texture used as intermediate render target
   // The draw loop first renders to this texture, then it is used for the wind

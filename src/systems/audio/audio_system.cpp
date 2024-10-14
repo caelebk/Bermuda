@@ -30,10 +30,16 @@ AudioSystem::~AudioSystem() {
 */
 void AudioSystem::init_audio_maps() {
   music_map[background_music] = Mix_LoadMUS(audio_path("music.wav").c_str());
-  music_map[background_music2] = Mix_LoadMUS(audio_path("music2.wav").c_str());
+
   sound_map[death_sound] = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
   sound_map[eat_sound] = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
   sound_map[blast_sound] = Mix_LoadWAV(audio_path("blast_sound.wav").c_str());
+  sound_map[dash_sound] = Mix_LoadWAV(audio_path("dash.wav").c_str());
+  sound_map[flat_line_sound] = Mix_LoadWAV(audio_path("flatline.wav").c_str());
+  sound_map[hurt_sound] = Mix_LoadWAV(audio_path("hurt_sound.wav").c_str());
+  sound_map[deplete_audio] = Mix_LoadWAV(audio_path("deplete.wav").c_str());
+  sound_map[fast_heart_audio] = Mix_LoadWAV(audio_path("fastheart.wav").c_str());
+  sound_map[slow_heart_audio] = Mix_LoadWAV(audio_path("slowheart.wav").c_str());
 }
 
 void AudioSystem::init() {
@@ -68,7 +74,8 @@ void AudioSystem::init() {
 void AudioSystem::step(float elapsed_ms) {
     for (Entity entity : registry.sounds.entities) {
         Sound sound = registry.sounds.get(entity);
-        Mix_PlayChannel(-1, sound_map[sound.name], 0);
+        int channel = Mix_PlayChannelTimed(-1, sound_map[sound.name], 0, 4000);
+        Mix_Volume(channel, 64);
         registry.sounds.remove(entity);
     }
 

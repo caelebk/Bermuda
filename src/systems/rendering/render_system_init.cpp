@@ -64,7 +64,7 @@ bool RenderSystem::init(GLFWwindow *window_arg) {
   initializeGlTextures();
   initializeGlEffects();
   initializeGlGeometryBuffers();
-  initializeGlCursor(textures_path("cursors/crosshair_cursor.png"));
+  initializeGlCursor();
 
   return true;
 }
@@ -200,32 +200,11 @@ void RenderSystem::initializeGlGeometryBuffers() {
 }
 
 /********************************************************************************
- * Load and Render Cursor Crosshair
- *
- * @param cursorImagePath: path to cursor texture file (PNG)
+ * Standard Crosshair Cursor
  ********************************************************************************/
-void RenderSystem::initializeGlCursor(std::string cursorImagePath) {
-	// std::string path = cursorImagePath;
-	// int dimension_x = 0;
-	// int dimension_y = 0;
-	// stbi_uc* data;
-	// data = stbi_load(path.c_str(), &dimension_x, &dimension_y, NULL, 4);
-	// if (data == NULL)
-	// {
-	// 	const std::string message = "Could not load the cursor texture.\n";
-	// 	fprintf(stderr, "%s", message.c_str());
-	// 	assert(false);
-	// }
-
-	// cursorImageData.width = dimension_x;
-	// cursorImageData.height = dimension_y;
-	// cursorImageData.pixels = data;
-	// GLFWcursor* cursor = glfwCreateCursor(&cursorImageData, 0, 0);
-	// glfwSetCursor(window, cursor);
-	// stbi_image_free(data);
-
-	GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR); // Temporary Crosshair to prioritize alignment over aesthetics for testing
-	glfwSetCursor(window, cursor);										  // TODO: REMOVE initializeGLCursor once entity-based cursor is implemented
+void RenderSystem::initializeGlCursor() {
+  GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+  glfwSetCursor(window, cursor);
 }
 
 RenderSystem::~RenderSystem() {

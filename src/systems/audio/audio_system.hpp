@@ -15,10 +15,17 @@
 #define death_sound "death_sound"
 #define eat_sound "eat_sound"
 #define blast_sound "blast_sound"
+#define dash_sound "dash_sound"
+#define flat_line_sound "flat_line_sound"
+#define hurt_sound "hurt_sound"
+
+// background audio name definitions
+#define deplete_audio "deplete_audio"
+#define fast_heart_audio "fast_heart_audio"
+#define slow_heart_audio "slow_heart_audio"
 
 // music name definitions
 #define background_music "music"
-#define background_music2 "music2"
 
 class AudioSystem
 {

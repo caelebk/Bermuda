@@ -322,7 +322,6 @@ void CollisionSystem::routeInteractableCollisions(Entity interactable, Entity ot
 void CollisionSystem::resolvePlayerEnemyCollision(Entity player, Entity enemy) {
     handle_debuffs(player, enemy);
     modifyOxygen(player, enemy);
-    registry.sounds.insert(player, Sound(death_sound));
 }
 
 void CollisionSystem::resolvePlayerConsumableCollision(Entity player, Entity consumable) {

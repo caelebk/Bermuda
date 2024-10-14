@@ -223,7 +223,8 @@ void RenderSystem::draw()
 		if (registry.renderRequests.has(interactable))
 			drawTexturedMesh(interactable, projection_2D);
 	}
-	for (Entity projectile : registry.playerProjectiles.entities) {
+	for (Entity projectile : registry.playerProjectiles.entities)
+	{
 		if (registry.renderRequests.has(projectile))
 			drawTexturedMesh(projectile, projection_2D);
 	}
