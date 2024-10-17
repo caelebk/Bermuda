@@ -35,81 +35,80 @@
 #include "SDL.h"
 
 #if defined(__PSP__)
-#define DEFAULT_WINDOW_WIDTH  480
+#define DEFAULT_WINDOW_WIDTH 480
 #define DEFAULT_WINDOW_HEIGHT 272
 #else
-#define DEFAULT_WINDOW_WIDTH  640
+#define DEFAULT_WINDOW_WIDTH 640
 #define DEFAULT_WINDOW_HEIGHT 480
 #endif
 
-#define VERBOSE_VIDEO   0x00000001
-#define VERBOSE_MODES   0x00000002
-#define VERBOSE_RENDER  0x00000004
-#define VERBOSE_EVENT   0x00000008
-#define VERBOSE_AUDIO   0x00000010
+#define VERBOSE_VIDEO 0x00000001
+#define VERBOSE_MODES 0x00000002
+#define VERBOSE_RENDER 0x00000004
+#define VERBOSE_EVENT 0x00000008
+#define VERBOSE_AUDIO 0x00000010
 
-typedef struct
-{
-    /* SDL init flags */
-    char **argv;
-    Uint32 flags;
-    Uint32 verbose;
+typedef struct {
+  /* SDL init flags */
+  char** argv;
+  Uint32 flags;
+  Uint32 verbose;
 
-    /* Video info */
-    const char *videodriver;
-    int display;
-    const char *window_title;
-    const char *window_icon;
-    Uint32 window_flags;
-    int window_x;
-    int window_y;
-    int window_w;
-    int window_h;
-    int window_minW;
-    int window_minH;
-    int window_maxW;
-    int window_maxH;
-    int logical_w;
-    int logical_h;
-    float scale;
-    int depth;
-    int refresh_rate;
-    int num_windows;
-    SDL_Window **windows;
+  /* Video info */
+  const char*  videodriver;
+  int          display;
+  const char*  window_title;
+  const char*  window_icon;
+  Uint32       window_flags;
+  int          window_x;
+  int          window_y;
+  int          window_w;
+  int          window_h;
+  int          window_minW;
+  int          window_minH;
+  int          window_maxW;
+  int          window_maxH;
+  int          logical_w;
+  int          logical_h;
+  float        scale;
+  int          depth;
+  int          refresh_rate;
+  int          num_windows;
+  SDL_Window** windows;
 
-    /* Renderer info */
-    const char *renderdriver;
-    Uint32 render_flags;
-    SDL_bool skip_renderer;
-    SDL_Renderer **renderers;
-    SDL_Texture **targets;
+  /* Renderer info */
+  const char*    renderdriver;
+  Uint32         render_flags;
+  SDL_bool       skip_renderer;
+  SDL_Renderer** renderers;
+  SDL_Texture**  targets;
 
-    /* Audio info */
-    const char *audiodriver;
-    SDL_AudioSpec audiospec;
+  /* Audio info */
+  const char*   audiodriver;
+  SDL_AudioSpec audiospec;
 
-    /* GL settings */
-    int gl_red_size;
-    int gl_green_size;
-    int gl_blue_size;
-    int gl_alpha_size;
-    int gl_buffer_size;
-    int gl_depth_size;
-    int gl_stencil_size;
-    int gl_double_buffer;
-    int gl_accum_red_size;
-    int gl_accum_green_size;
-    int gl_accum_blue_size;
-    int gl_accum_alpha_size;
-    int gl_stereo;
-    int gl_multisamplebuffers;
-    int gl_multisamplesamples;
-    int gl_retained_backing;
-    int gl_accelerated;
-    int gl_major_version;
-    int gl_minor_version;
-    int gl_debug;
-    int gl_profile_mask;
+  /* GL settings */
+  int gl_red_size;
+  int gl_green_size;
+  int gl_blue_size;
+  int gl_alpha_size;
+  int gl_buffer_size;
+  int gl_depth_size;
+  int gl_stencil_size;
+  int gl_double_buffer;
+  int gl_accum_red_size;
+  int gl_accum_green_size;
+  int gl_accum_blue_size;
+  int gl_accum_alpha_size;
+  int gl_stereo;
+  int gl_multisamplebuffers;
+  int gl_multisamplesamples;
+  int gl_retained_backing;
+  int gl_accelerated;
+  int gl_major_version;
+  int gl_minor_version;
+  int gl_debug;
+  int gl_profile_mask;
 } SDLTest_CommonState;
 
 #include "begin_code.h"
@@ -124,11 +123,12 @@ extern "C" {
  * \brief Parse command line parameters and create common state.
  *
  * \param argv Array of command line parameters
- * \param flags Flags indicating which subsystem to initialize (i.e. SDL_INIT_VIDEO | SDL_INIT_AUDIO)
+ * \param flags Flags indicating which subsystem to initialize (i.e.
+ * SDL_INIT_VIDEO | SDL_INIT_AUDIO)
  *
  * \returns Returns a newly allocated common state object.
  */
-SDLTest_CommonState *SDLTest_CommonCreateState(char **argv, Uint32 flags);
+SDLTest_CommonState* SDLTest_CommonCreateState(char** argv, Uint32 flags);
 
 /**
  * \brief Process one common argument.
@@ -136,9 +136,10 @@ SDLTest_CommonState *SDLTest_CommonCreateState(char **argv, Uint32 flags);
  * \param state The common state describing the test window to create.
  * \param index The index of the argument to process in argv[].
  *
- * \returns The number of arguments processed (i.e. 1 for --fullscreen, 2 for --video [videodriver], or -1 on error.
+ * \returns The number of arguments processed (i.e. 1 for --fullscreen, 2 for
+ * --video [videodriver], or -1 on error.
  */
-int SDLTest_CommonArg(SDLTest_CommonState * state, int index);
+int SDLTest_CommonArg(SDLTest_CommonState* state, int index);
 
 /**
  * \brief Returns common usage information
@@ -147,7 +148,7 @@ int SDLTest_CommonArg(SDLTest_CommonState * state, int index);
  *
  * \returns String with usage information
  */
-const char *SDLTest_CommonUsage(SDLTest_CommonState * state);
+const char* SDLTest_CommonUsage(SDLTest_CommonState* state);
 
 /**
  * \brief Open test window.
@@ -156,7 +157,7 @@ const char *SDLTest_CommonUsage(SDLTest_CommonState * state);
  *
  * \returns True if initialization succeeded, false otherwise
  */
-SDL_bool SDLTest_CommonInit(SDLTest_CommonState * state);
+SDL_bool SDLTest_CommonInit(SDLTest_CommonState* state);
 
 /**
  * \brief Common event handler for test windows.
@@ -166,7 +167,8 @@ SDL_bool SDLTest_CommonInit(SDLTest_CommonState * state);
  * \param done Flag indicating we are done.
  *
  */
-void SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done);
+void SDLTest_CommonEvent(SDLTest_CommonState* state, SDL_Event* event,
+                         int* done);
 
 /**
  * \brief Close test window.
@@ -174,8 +176,7 @@ void SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *do
  * \param state The common state used to create test window.
  *
  */
-void SDLTest_CommonQuit(SDLTest_CommonState * state);
-
+void SDLTest_CommonQuit(SDLTest_CommonState* state);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

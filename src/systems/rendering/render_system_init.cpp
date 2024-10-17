@@ -1,10 +1,9 @@
 // internal
-#include "render_system.hpp"
-
 #include <array>
 #include <fstream>
 
 #include "../ext/stb_image/stb_image.h"
+#include "render_system.hpp"
 
 // This creates circular header inclusion, that is quite bad.
 #include "tiny_ecs_registry.hpp"
@@ -14,11 +13,11 @@
 #include <sstream>
 
 // World initialization
-bool RenderSystem::init(GLFWwindow *window_arg) {
+bool RenderSystem::init(GLFWwindow* window_arg) {
   this->window = window_arg;
 
   glfwMakeContextCurrent(window);
-  glfwSwapInterval(1); // vsync
+  glfwSwapInterval(1);  // vsync
 
   // Load OpenGL function pointers
   const int is_fine = gl3w_init();
@@ -35,13 +34,14 @@ bool RenderSystem::init(GLFWwindow *window_arg) {
   int frame_buffer_width_px, frame_buffer_height_px;
   glfwGetFramebufferSize(
       window, &frame_buffer_width_px,
-      &frame_buffer_height_px); // Note, this will be 2x the resolution given to
-                                // glfwCreateWindow on retina displays
+      &frame_buffer_height_px);  // Note, this will be 2x the resolution given
+                                 // to glfwCreateWindow on retina displays
   if (frame_buffer_width_px != window_width_px) {
-    printf("WARNING: retina display! "
-           "https://stackoverflow.com/questions/36672935/"
-           "why-retina-screen-coordinate-value-is-twice-the-value-of-pixel-"
-           "value\n");
+    printf(
+        "WARNING: retina display! "
+        "https://stackoverflow.com/questions/36672935/"
+        "why-retina-screen-coordinate-value-is-twice-the-value-of-pixel-"
+        "value\n");
     printf("glfwGetFramebufferSize = %d,%d\n", frame_buffer_width_px,
            frame_buffer_height_px);
     printf("window width_height = %d,%d\n", window_width_px, window_height_px);
@@ -73,10 +73,10 @@ void RenderSystem::initializeGlTextures() {
   glGenTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
 
   for (uint i = 0; i < texture_paths.size(); i++) {
-    const std::string &path = texture_paths[i];
-    ivec2 &dimensions = texture_dimensions[i];
+    const std::string& path       = texture_paths[i];
+    ivec2&             dimensions = texture_dimensions[i];
 
-    stbi_uc *data;
+    stbi_uc* data;
     data = stbi_load(path.c_str(), &dimensions.x, &dimensions.y, NULL, 4);
 
     if (data == NULL) {
@@ -97,7 +97,7 @@ void RenderSystem::initializeGlTextures() {
 
 void RenderSystem::initializeGlEffects() {
   for (uint i = 0; i < effect_paths.size(); i++) {
-    const std::string vertex_shader_name = effect_paths[i] + ".vs.glsl";
+    const std::string vertex_shader_name   = effect_paths[i] + ".vs.glsl";
     const std::string fragment_shader_name = effect_paths[i] + ".fs.glsl";
 
     bool is_valid = loadEffectFromFile(vertex_shader_name, fragment_shader_name,
@@ -108,8 +108,8 @@ void RenderSystem::initializeGlEffects() {
 
 // One could merge the following two functions as a template function...
 template <class T>
-void RenderSystem::bindVBOandIBO(GEOMETRY_BUFFER_ID gid,
-                                 std::vector<T> vertices,
+void RenderSystem::bindVBOandIBO(GEOMETRY_BUFFER_ID    gid,
+                                 std::vector<T>        vertices,
                                  std::vector<uint16_t> indices) {
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[(uint)gid]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(),
@@ -126,7 +126,7 @@ void RenderSystem::initializeGlMeshes() {
   for (uint i = 0; i < mesh_paths.size(); i++) {
     // Initialize meshes
     GEOMETRY_BUFFER_ID geom_index = mesh_paths[i].first;
-    std::string name = mesh_paths[i].second;
+    std::string        name       = mesh_paths[i].second;
     Mesh::loadFromOBJFile(name, meshes[(int)geom_index].vertices,
                           meshes[(int)geom_index].vertex_indices,
                           meshes[(int)geom_index].original_size);
@@ -165,10 +165,10 @@ void RenderSystem::initializeGlGeometryBuffers() {
 
   // Initialize debug line
   std::vector<ColoredVertex> line_vertices;
-  std::vector<uint16_t> line_indices;
+  std::vector<uint16_t>      line_indices;
 
   constexpr float depth = 0.5f;
-  constexpr vec3 red = {0.8, 0.1, 0.1};
+  constexpr vec3  red   = {0.8, 0.1, 0.1};
 
   // Corner points
   line_vertices = {
@@ -181,8 +181,8 @@ void RenderSystem::initializeGlGeometryBuffers() {
   // Two triangles
   line_indices = {0, 1, 3, 1, 2, 3};
 
-  int geom_index = (int)GEOMETRY_BUFFER_ID::DEBUG_LINE;
-  meshes[geom_index].vertices = line_vertices;
+  int geom_index                    = (int)GEOMETRY_BUFFER_ID::DEBUG_LINE;
+  meshes[geom_index].vertices       = line_vertices;
   meshes[geom_index].vertex_indices = line_indices;
   bindVBOandIBO(GEOMETRY_BUFFER_ID::DEBUG_LINE, line_vertices, line_indices);
 
@@ -236,9 +236,9 @@ bool RenderSystem::initScreenTexture() {
 
   int framebuffer_width, framebuffer_height;
   glfwGetFramebufferSize(
-      const_cast<GLFWwindow *>(window), &framebuffer_width,
-      &framebuffer_height); // Note, this will be 2x the resolution given to
-                            // glfwCreateWindow on retina displays
+      const_cast<GLFWwindow*>(window), &framebuffer_width,
+      &framebuffer_height);  // Note, this will be 2x the resolution given to
+                             // glfwCreateWindow on retina displays
 
   glGenTextures(1, &off_screen_render_buffer_color);
   glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
@@ -284,8 +284,8 @@ bool gl_compile_shader(GLuint shader) {
   return true;
 }
 
-bool loadEffectFromFile(const std::string &vs_path, const std::string &fs_path,
-                        GLuint &out_program) {
+bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path,
+                        GLuint& out_program) {
   // Opening files
   std::ifstream vs_is(vs_path);
   std::ifstream fs_is(fs_path);
@@ -302,10 +302,10 @@ bool loadEffectFromFile(const std::string &vs_path, const std::string &fs_path,
   fs_ss << fs_is.rdbuf();
   std::string vs_str = vs_ss.str();
   std::string fs_str = fs_ss.str();
-  const char *vs_src = vs_str.c_str();
-  const char *fs_src = fs_str.c_str();
-  GLsizei vs_len = (GLsizei)vs_str.size();
-  GLsizei fs_len = (GLsizei)fs_str.size();
+  const char* vs_src = vs_str.c_str();
+  const char* fs_src = fs_str.c_str();
+  GLsizei     vs_len = (GLsizei)vs_str.size();
+  GLsizei     fs_len = (GLsizei)fs_str.size();
 
   GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex, 1, &vs_src, &vs_len);

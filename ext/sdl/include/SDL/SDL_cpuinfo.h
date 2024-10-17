@@ -32,9 +32,11 @@
 
 /* Need to do this here because intrin.h has C++ code in it */
 /* Visual Studio 2005 has a bug where intrin.h conflicts with winnt.h */
-#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (defined(_M_IX86) || defined(_M_X64))
+#if defined(_MSC_VER) && (_MSC_VER >= 1500) && \
+    (defined(_M_IX86) || defined(_M_X64))
 #ifdef __clang__
-/* Many of the intrinsics SDL uses are not implemented by clang with Visual Studio */
+/* Many of the intrinsics SDL uses are not implemented by clang with Visual
+ * Studio */
 #undef __MMX__
 #undef __SSE__
 #undef __SSE2__
@@ -84,7 +86,7 @@ extern "C" {
  * The 64-bit PowerPC processors have a 128 byte cache line.
  * We'll use the larger value to be generally safe.
  */
-#define SDL_CACHELINE_SIZE  128
+#define SDL_CACHELINE_SIZE 128
 
 /**
  *  This function returns the number of CPU cores available.
@@ -163,7 +165,6 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasNEON(void);
  *  This function returns the amount of RAM configured in the system, in MB.
  */
 extern DECLSPEC int SDLCALL SDL_GetSystemRAM(void);
-
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

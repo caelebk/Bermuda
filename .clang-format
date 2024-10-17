@@ -1,0 +1,12 @@
+BasedOnStyle: Google
+IndentWidth: 2
+AccessModifierOffset: -3
+ColumnLimit: 80
+AllowShortFunctionsOnASingleLine: Empty
+DerivePointerAlignment: false
+PointerAlignment: Left
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+BreakBeforeBraces: Attach
+SpacesInParentheses: false
+SpaceBeforeParens: ControlStatements

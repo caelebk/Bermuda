@@ -1,8 +1,9 @@
 #include "player_controls.hpp"
+
+#include "collision_system.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "player_factories.hpp"
-#include "collision_system.hpp"
 
 /**
  * @brief Checks whether or not the spawn is valid or invalid based on spawn
@@ -15,7 +16,7 @@ static bool checkWeaponCollisions(Entity entity) {
   if (!registry.positions.has(entity)) {
     return false;
   }
-  const Position &entityPos = registry.positions.get(entity);
+  const Position& entityPos = registry.positions.get(entity);
 
   // Entities can't spawn in walls
   for (Entity wall : registry.activeWalls.entities) {
@@ -39,11 +40,11 @@ static bool checkWeaponCollisions(Entity entity) {
  * @param player
  * @return
  */
-bool player_movement(int key, int action, int mod, Entity &player) {
+bool player_movement(int key, int action, int mod, Entity& player) {
   // Player movement attributes
   // Player oxygen attributes
-  Player &keys = registry.players.get(player);
-  Oxygen &player_oxygen = registry.oxygen.get(player);
+  Player& keys          = registry.players.get(player);
+  Oxygen& player_oxygen = registry.oxygen.get(player);
 
   // WASD Movement Keys
   if (!registry.deathTimers.has(player)) {
@@ -79,22 +80,21 @@ bool player_movement(int key, int action, int mod, Entity &player) {
 
   // Dashing (In case shift is held)
   if (key == GLFW_KEY_LEFT_SHIFT) {
-      if (action == GLFW_PRESS) {
-          registry.players.get(player).dashing = true;
-          player_oxygen.rate = PLAYER_OXYGEN_RATE * 3;
-          registry.sounds.insert(Entity(), Sound(dash_sound));
-      }
-      else if (action == GLFW_RELEASE) {
-          registry.players.get(player).dashing = false;
-          player_oxygen.rate = PLAYER_OXYGEN_RATE;
-      }
+    if (action == GLFW_PRESS) {
+      registry.players.get(player).dashing = true;
+      player_oxygen.rate                   = PLAYER_OXYGEN_RATE * 3;
+      registry.sounds.insert(Entity(), Sound(dash_sound));
+    } else if (action == GLFW_RELEASE) {
+      registry.players.get(player).dashing = false;
+      player_oxygen.rate                   = PLAYER_OXYGEN_RATE;
+    }
   }
 
   return true;
 }
 
-bool player_mouse(int button, int action, int mods, Entity &player,
-                  Entity &player_weapon, Entity &player_projectile) {
+bool player_mouse(int button, int action, int mods, Entity& player,
+                  Entity& player_weapon, Entity& player_projectile) {
   // Shooting the projectile
   if (button == GLFW_MOUSE_BUTTON_LEFT) {
     if (action == GLFW_PRESS &&
@@ -117,4 +117,3 @@ bool player_mouse(int button, int action, int mods, Entity &player,
 
   return true;
 }
-
