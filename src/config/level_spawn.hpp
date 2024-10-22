@@ -39,5 +39,5 @@
   {                                                                            \
       createJellyPos,      createJellyPos,  createJellyPos,                    \
       createJellyPos,      createJellyPos,  createOxygenTankPos,               \
-      createOxygenTankPos, /* createGeyserPos, createGeyserPos, */             \
+      createOxygenTankPos,  createGeyserPos, createGeyserPos,                  \
   }

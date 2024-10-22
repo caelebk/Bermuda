@@ -61,128 +61,99 @@ void CollisionSystem::step(float elapsed_ms) {
   collision_resolution();
 }
 
-// Collision Detection System
+/***********************************
+Collision Detection (has precedence noted below)
+************************************/ 
 void CollisionSystem::collision_detection() {
-  ComponentContainer<Position>& position_container = registry.positions;
-  for (uint i = 0; i < position_container.components.size(); i++) {
-    Position& position_i = position_container.components[i];
-    Entity    entity_i   = position_container.entities[i];
+  ComponentContainer<Player>& player_container = registry.players;
+  ComponentContainer<PlayerProjectile>& playerproj_container = registry.playerProjectiles;
+  ComponentContainer<Deadly>& enemy_container = registry.deadlys;
+  ComponentContainer<ActiveWall>& wall_container = registry.activeWalls;
+  ComponentContainer<Consumable>& consumable_container = registry.consumables;
+  ComponentContainer<Interactable>& interactable_container = registry.interactable;
+  
+  //1. Detect player projectile collisions
+  for (uint i = 0; i < playerproj_container.components.size(); i++) {
+    Entity entity_i = playerproj_container.entities[i];
+    Position& position_i = registry.positions.get(entity_i);
 
-    for (uint j = i + 1; j < position_container.components.size(); j++) {
-      Position& position_j = position_container.components[j];
-      Entity    entity_j   = position_container.entities[j];
+    if (registry.playerProjectiles.get(entity_i).is_loaded) {
+      continue;
+    }
 
-      /********** Collisions to Ignore *************/
+    for (uint j = 0; j < enemy_container.size(); j++) {
+      Entity entity_j = enemy_container.entities[j];
+      Position& position_j = registry.positions.get(entity_j);
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+      }
+    }
 
-      // no collision component
-      if (!registry.collidables.has(entity_i) ||
-          !registry.collidables.has(entity_j)) {
-        continue;
+    for (uint j = 0; j < wall_container.size(); j++) {
+      Entity entity_j = wall_container.entities[j];
+      Position& position_j = registry.positions.get(entity_j);
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
       }
+    }
+  }
 
-      // they don't collide
-      if (!box_collides(position_i, position_j)) {
-        continue;
-      }
+  //2. Detect player collisions
+  for (uint i = 0; i < player_container.components.size(); i++) {
+    Entity entity_i = player_container.entities[i];
+    Position& position_i = registry.positions.get(entity_i);
 
-      // wall to wall
-      if (registry.activeWalls.has(entity_i) &&
-          registry.activeWalls.has(entity_j)) {
-        continue;
+    for (uint j = 0; j < enemy_container.size(); j++) {
+      Entity entity_j = enemy_container.entities[j];
+      Position& position_j = registry.positions.get(entity_j);
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
       }
+    }
 
-      // wall <-> interactable
-      if (registry.activeWalls.has(entity_i) &&
-          registry.interactable.has(entity_j)) {
-        continue;
+    for (uint j = 0; j < consumable_container.size(); j++) {
+      Entity entity_j = consumable_container.entities[j];
+      Position& position_j = registry.positions.get(entity_j);
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
       }
-      if (registry.activeWalls.has(entity_j) &&
-          registry.interactable.has(entity_i)) {
-        continue;
-      }
+    }
 
-      // wall <-> consumable
-      if (registry.activeWalls.has(entity_i) &&
-          registry.consumables.has(entity_j)) {
-        continue;
+    for (uint j = 0; j < interactable_container.size(); j++) {
+      Entity entity_j = interactable_container.entities[j];
+      Position& position_j = registry.positions.get(entity_j);
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
       }
-      if (registry.activeWalls.has(entity_j) &&
-          registry.consumables.has(entity_i)) {
-        continue;
-      }
+    }
+  }
 
-      // interactable <-> consumable
-      if (registry.interactable.has(entity_i) &&
-          registry.consumables.has(entity_j)) {
-        continue;
-      }
-      if (registry.interactable.has(entity_j) &&
-          registry.consumables.has(entity_i)) {
-        continue;
-      }
+  //3. Detect wall collisions
+  for (uint i = 0; i < wall_container.components.size(); i++) {
+    Entity entity_i = wall_container.entities[i];
+    Position& position_i = registry.positions.get(entity_i);
 
-      // interactable <-> interactable
-      if (registry.interactable.has(entity_j) &&
-          registry.consumables.has(entity_i)) {
-        continue;
+    for (uint j = 0; j < enemy_container.size(); j++) {
+      Entity entity_j = enemy_container.entities[j];
+      Position& position_j = registry.positions.get(entity_j);
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
       }
+    }
 
-      // consumable <-> consumable
-      if (registry.interactable.has(entity_j) &&
-          registry.consumables.has(entity_i)) {
-        continue;
+    for (uint j = 0; j < player_container.size(); j++) {
+      Entity entity_j = player_container.entities[j];
+      Position& position_j = registry.positions.get(entity_j);
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
       }
-
-      // enemy <-> consumable
-      if (registry.deadlys.has(entity_i) &&
-          registry.consumables.has(entity_j)) {
-        continue;
-      }
-      if (registry.deadlys.has(entity_j) &&
-          registry.consumables.has(entity_i)) {
-        continue;
-      }
-
-      // enemy <-> interactable
-      if (registry.deadlys.has(entity_i) &&
-          registry.interactable.has(entity_j)) {
-        continue;
-      }
-      if (registry.deadlys.has(entity_j) &&
-          registry.interactable.has(entity_i)) {
-        continue;
-      }
-
-      // enemy to enemy
-      if (registry.deadlys.has(entity_i) && registry.deadlys.has(entity_j)) {
-        continue;
-      }
-
-      // player <-> player projectile
-      bool player_to_playerproj = registry.players.has(entity_i) &&
-                                  registry.playerProjectiles.has(entity_j);
-      bool playerproj_to_player = registry.playerProjectiles.has(entity_i) &&
-                                  registry.players.has(entity_j);
-
-      if (player_to_playerproj || playerproj_to_player) {
-        continue;
-      }
-
-      // loaded harpoon should not collide
-      bool loaded_playerproj_i =
-          registry.playerProjectiles.has(entity_i) &&
-          registry.playerProjectiles.get(entity_i).is_loaded;
-      bool loaded_playerproj_j =
-          registry.playerProjectiles.has(entity_j) &&
-          registry.playerProjectiles.get(entity_j).is_loaded;
-
-      if (loaded_playerproj_i || loaded_playerproj_j) {
-        continue;
-      }
-
-      // None of the above, then proper collisions were detected.
-      registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-      registry.collisions.emplace_with_duplicates(entity_j, entity_i);
     }
   }
 }

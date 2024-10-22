@@ -234,8 +234,6 @@ template <typename T> void SpaceBuilder<T>::activate_room() {
     // Make Active Wall
     registry.activeWalls.emplace(wall);
 
-    // Make collidable
-    registry.collidables.emplace(wall);
 
     // Request Render
     registry.renderRequests.insert(wall, {TEXTURE_ASSET_ID::WALL,
@@ -251,9 +249,6 @@ template <typename T> void SpaceBuilder<T>::activate_room() {
  ********************************************************************************/
 template <typename T> void SpaceBuilder<T>::deactivate_current_room() {
   for (auto &wall : registry.activeWalls.entities) {
-    if (registry.collidables.has(wall)) {
-      registry.collidables.remove(wall);
-    }
     if (registry.positions.has(wall)) {
       registry.positions.remove(wall);
     }
