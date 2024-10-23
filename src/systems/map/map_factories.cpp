@@ -76,8 +76,8 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position) {
   registry.collidables.emplace(entity);
 
   // Add stats
-  auto& damage        = registry.damageTouch.emplace(entity);
-  damage.amount       = GEYSER_QTY;
+  auto& refill        = registry.oxygenModifiers.emplace(entity);
+  refill.amount       = GEYSER_QTY;
   auto& attackCD      = registry.attackCD.emplace(entity);
   attackCD.attack_spd = GEYSER_RATE_MS;
 

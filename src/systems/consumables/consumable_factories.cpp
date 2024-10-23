@@ -46,23 +46,23 @@ static bool checkSpawnCollisions(Entity entity) {
 }
 
 /////////////////////////////////////////////////////////////////
-// Oxygen Tank
+// Oxygen Canister
 /////////////////////////////////////////////////////////////////
 /**
- * @brief creates an oxygen tank at a specific position
+ * @brief creates an oxygen canister at a specific position
  *
  * @param renderer
  * @param position
  * @return
  */
-Entity createOxygenTankPos(RenderSystem* renderer, vec2 position) {
+Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position) {
   // Reserve an entity
   auto entity = Entity();
 
   auto& pos    = registry.positions.emplace(entity);
   pos.angle    = 0.f;
   pos.position = position;
-  pos.scale    = OXYGEN_TANK_SCALE_FACTOR * OXYGEN_TANK_BOUNDING_BOX;
+  pos.scale    = OXYGEN_CANISTER_SCALE_FACTOR * OXYGEN_CANISTER_BOUNDING_BOX;
 
   if (!checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
@@ -78,13 +78,13 @@ Entity createOxygenTankPos(RenderSystem* renderer, vec2 position) {
   registry.collidables.emplace(entity);
 
   // Add stats
-  auto& damage  = registry.damageTouch.emplace(entity);
-  damage.amount = OXYGEN_TANK_QTY;
+  auto& refill  = registry.oxygenModifiers.emplace(entity);
+  refill.amount = OXYGEN_CANISTER_QTY;
 
   // physics and pos
 
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::OXYGEN_TANK, EFFECT_ASSET_ID::TEXTURED,
+      entity, {TEXTURE_ASSET_ID::OXYGEN_CANISTER, EFFECT_ASSET_ID::TEXTURED,
                GEOMETRY_BUFFER_ID::SPRITE});
 
   return entity;

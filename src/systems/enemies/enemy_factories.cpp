@@ -92,7 +92,7 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position) {
   registry.deadlys.emplace(entity);
 
   // Add stats
-  auto& damage  = registry.damageTouch.emplace(entity);
+  auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = JELLY_DAMAGE;
 
   auto& attackCD      = registry.attackCD.emplace(entity);
@@ -207,7 +207,7 @@ Entity createFishPos(RenderSystem* renderer, vec2 position) {
 
   // make enemy and damage
   registry.deadlys.emplace(entity);
-  auto& damage  = registry.damageTouch.emplace(entity);
+  auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = FISH_DAMAGE;
 
   auto& attackCD      = registry.attackCD.emplace(entity);
