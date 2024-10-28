@@ -197,7 +197,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     position.position += motion.velocity * lerp;
     if (registry.oxygen.has(entity) && entity != player) {
       // make sure health bars follow moving enemies
-      updateHealthBarAndEnemyPos(entity);
+      updateEnemyHealthBarPos(entity);
     }
   }
   screen.darken_screen_factor = 1 - min_counter_ms / 3000;

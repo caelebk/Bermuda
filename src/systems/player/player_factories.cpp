@@ -66,8 +66,8 @@ Entity createLoadedGun(RenderSystem* renderer, vec2 playerPosition,
   motion.velocity     = {0.f, 0.f};
   motion.acceleration = {0, 0};
 
-  DamageOnTouch& oxyCost = registry.damageTouch.emplace(entity);
-  oxyCost.amount         = HARPOON_GUN_OXYGEN_COST;
+  OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
+  oxyCost.amount          = HARPOON_GUN_OXYGEN_COST;
 
   // Make Weapon
   PlayerWeapon& weapon = registry.playerWeapons.emplace(entity);
@@ -117,8 +117,8 @@ Entity loadHarpoon(RenderSystem* renderer, vec2 gunPosition) {
   // accordingly based on corresponding Gun
   projectile.is_loaded = true;
 
-  DamageOnTouch& oxyCost = registry.damageTouch.emplace(entity);
-  oxyCost.amount         = HARPOON_GUN_OXYGEN_COST;
+  OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
+  oxyCost.amount          = HARPOON_GUN_OXYGEN_COST;
 
   // Request Render
   registry.renderRequests.insert(

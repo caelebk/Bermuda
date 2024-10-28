@@ -9,34 +9,34 @@
 //////////////////////////////////////////////////////////////
 // JellyFish
 //////////////////////////////////////////////////////////////
-#define JELLY_DAMAGE 15.0
+#define JELLY_DAMAGE -15.0
 #define JELLY_ATK_SPD 1000.0
 #define JELLY_STUN_MS 2000.0
 #define JELLY_SCALE_FACTOR vec2(1.4f)
-#define JELLY_BOUNDING_BOX vec2(24.f, 24.f) // vec2(PNG_width, PNG_height)
-#define JELLY_HEALTH 50.0 // two shot to show workin
+#define JELLY_BOUNDING_BOX vec2(24.f, 24.f)  // vec2(PNG_width, PNG_height)
+#define JELLY_HEALTH 50.0                    // two shot to show workin
 #define JELLY_HEALTH_SCALE vec2(1.4f)
 #define JELLY_HEALTH_BAR_SCALE vec2(1.5f)
 #define JELLY_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 
-Entity createJellyPos(RenderSystem *renderer, vec2 position);
-void createJellyHealthBar(RenderSystem *renderer, Entity &enemy);
+Entity createJellyPos(RenderSystem* renderer, vec2 position);
+void   createJellyHealthBar(RenderSystem* renderer, Entity& enemy);
 
 //////////////////////////////////////////////////////////////
 // Fish
 //////////////////////////////////////////////////////////////
 #define FISH_MS 20.0
-#define FISH_DAMAGE 5.0
+#define FISH_DAMAGE -5.0
 #define FISH_ATK_SPD 1000.0
 #define FISH_SCALE_FACTOR vec2(0.4f)
 #define FISH_BOUNDING_BOX vec2(108.f, 77.f)
-#define FISH_HEALTH 1.0 // one shot
+#define FISH_HEALTH 1.0  // one shot
 #define FISH_HEALTH_SCALE vec2(1.4f)
 #define FISH_HEALTH_BAR_SCALE vec2(1.5f)
 #define FISH_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 
-Entity createFishPos(RenderSystem *renderer, vec2 position);
-void createFishHealthBar(RenderSystem *renderer, Entity &enemy);
+Entity createFishPos(RenderSystem* renderer, vec2 position);
+void   createFishHealthBar(RenderSystem* renderer, Entity& enemy);
 
 //////////////////////////////////////////////////////////////
 // Sharks
