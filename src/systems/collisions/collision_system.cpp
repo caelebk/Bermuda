@@ -164,25 +164,6 @@ void CollisionSystem::collision_resolution_debug_info(Entity entity,
   registry.list_all_components_of(entity);
   printf("Entity Other:\n");
   registry.list_all_components_of(entity_other);
-
-  if (registry.players.has(entity)) {
-    printf("Player -");
-    if (registry.activeWalls.has(entity_other)) {
-      printf("Wall\n");
-    } else if (registry.consumables.has(entity_other)) {
-      printf("Eat\n");
-    } else if (registry.deadlys.has(entity_other)) {
-      printf("Deadly\n");
-    } else if (registry.players.has(entity_other)) {
-      printf("Player\n");
-    } else if (registry.playerWeapons.has(entity_other)) {
-      printf("Player Weap\n");
-    } else if (registry.oxygen.has(entity_other)) {
-      printf("Oxygen\n");
-    } else if (registry.playerProjectiles.has(entity_other)) {
-      printf("Player Projectile\n");
-    }
-  }
 }
 
 void CollisionSystem::collision_resolution() {
