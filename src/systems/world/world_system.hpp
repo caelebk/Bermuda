@@ -60,8 +60,18 @@ private:
 	Entity player_weapon;
 	Entity player_projectile;
 	vec2 mouse_pos;
+  int wep_type;
+
+  // Consumable Entities
+  Entity harpoon;
+  Entity net;
+  Entity concussive;
+  Entity torpedo;
+  Entity shrimp;
 
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
 };
+
+extern bool paused;

@@ -33,7 +33,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos) {
   // Make Player and Harpoon Gun
   Player& player = registry.players.emplace(entity);
   player.weapon =
-      createLoadedGun(renderer, position.position, HARPOON_PROJECTILE);
+      createLoadedGun(renderer, position.position, int(PROJECTILES::HARPOON));
 
   // Request Render
   registry.renderRequests.insert(
@@ -75,8 +75,11 @@ Entity createLoadedGun(RenderSystem* renderer, vec2 playerPosition,
   // Make Weapon
   PlayerWeapon& weapon = registry.playerWeapons.emplace(entity);
   switch (projectile) {
-    case HARPOON_PROJECTILE:
+    case int(PROJECTILES::HARPOON):
       weapon.projectile = loadHarpoon(renderer, position.position);
+      break;
+    case int(PROJECTILES::NET):
+      weapon.projectile = loadNet(renderer);
       break;
 
       // TODO: Add other projectiles (i.e. nets, pistol shrimp, etc.)
@@ -122,6 +125,7 @@ Entity loadHarpoon(RenderSystem* renderer, vec2 gunPosition) {
   // Status: projectile is currently loaded and position/angle should be updated
   // accordingly based on corresponding Gun
   projectile.is_loaded = true;
+  projectile.type      = int(PROJECTILES::HARPOON);
 
   OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
   oxyCost.amount          = HARPOON_GUN_OXYGEN_COST;
@@ -130,6 +134,33 @@ Entity loadHarpoon(RenderSystem* renderer, vec2 gunPosition) {
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::HARPOON, EFFECT_ASSET_ID::TEXTURED,
                GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
+
+
+/********************************************************************************
+ * Create net entity
+ *
+ * @param renderer
+ * @param gunPosition: position of corresponding Player
+ ********************************************************************************/
+Entity loadNet(RenderSystem* renderer) {
+  auto entity = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // Make Projectile
+  PlayerProjectile& projectile = registry.playerProjectiles.emplace(entity);
+  // Status: projectile is currently loaded and position/angle should be updated
+  // accordingly based on corresponding Gun
+  projectile.is_loaded = true;
+  projectile.type      = int(PROJECTILES::NET);
+
+  OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
+  oxyCost.amount         = NET_OXYGEN_COST;
 
   return entity;
 }

@@ -8,4 +8,6 @@
 
 bool player_movement(int key, int action, int mod, Entity &player);
 
-bool player_mouse(int key, int action, int mod, Entity &player, Entity &player_weapon, Entity &project_projectile);
+bool player_mouse(int key, int action, int mod, Entity &player, Entity &player_weapon, Entity &project_projectile, Entity &default_wep);
+
+void swapWeps(Entity swapped, Entity swapper, int projectile);

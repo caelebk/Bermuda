@@ -32,6 +32,7 @@ class ECSRegistry {
   ComponentContainer<Player>           players;
   ComponentContainer<PlayerWeapon>     playerWeapons;
   ComponentContainer<PlayerProjectile> playerProjectiles;
+  ComponentContainer<Inventory>        inventory;
   ComponentContainer<PlayerHUD>        playerHUD;
 
   // enemy related
@@ -87,6 +88,7 @@ class ECSRegistry {
     registry_list.push_back(&players);
     registry_list.push_back(&playerWeapons);
     registry_list.push_back(&playerProjectiles);
+    registry_list.push_back(&inventory);
     registry_list.push_back(&playerHUD);
     // enemy related
     registry_list.push_back(&deadlys);

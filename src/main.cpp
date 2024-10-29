@@ -15,6 +15,8 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
+bool paused;
+
 // Entry point
 int main() {
   // Global systems
@@ -23,6 +25,9 @@ int main() {
   PhysicsSystem   physics;
   AudioSystem     audios;
   CollisionSystem collisions;
+
+  // TODO: Change this when pause menu is implemented
+  paused = false;
 
   // Initializing window
   GLFWwindow* window = world.create_window();

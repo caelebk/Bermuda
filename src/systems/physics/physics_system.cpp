@@ -10,7 +10,7 @@
 #include "tiny_ecs_registry.hpp"
 
 void PhysicsSystem::step(float elapsed_ms) {
-  auto& motion_registry   = registry.motions;
+  /*auto& motion_registry   = registry.motions;
   auto& position_registry = registry.positions;
   for (uint i = 0; i < motion_registry.size(); i++) {
     Entity    entity   = motion_registry.entities[i];
@@ -20,11 +20,11 @@ void PhysicsSystem::step(float elapsed_ms) {
     float step_seconds = elapsed_ms / 1000.f;
     vec2  distance     = (motion.velocity) * step_seconds;
     position.position += distance;
-  }
+  }*/
 }
 
 void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon,
-                      Entity player_projectile) {
+                      Entity player_projectile, int wep_type) {
   vec2      player_pos     = registry.positions.get(player).position;
   vec2      pos_cursor_vec = mouse_pos - player_pos;
   float     angle          = atan2(pos_cursor_vec.y, pos_cursor_vec.x);
@@ -34,10 +34,16 @@ void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon,
   weapon_pos.position      = calculate_pos_vec(GUN_RELATIVE_POS_FROM_PLAYER.x,
                                                player_pos, weapon_pos.angle);
   if (registry.playerProjectiles.get(player_projectile).is_loaded) {
+    vec2 relative_pos = HARPOON_RELATIVE_POS_FROM_GUN;
+    switch (wep_type) {
+      case ((int)PROJECTILES::NET):
+        relative_pos = NET_RELATIVE_POS_FROM_GUN;
+    }
+
     proj_pos.angle    = angle;
     proj_pos.position = calculate_pos_vec(
-        HARPOON_RELATIVE_POS_FROM_GUN.x, weapon_pos.position, proj_pos.angle,
-        {0.f, HARPOON_RELATIVE_POS_FROM_GUN.y});
+        relative_pos.x, weapon_pos.position, proj_pos.angle,
+        {0.f, relative_pos.y});
   }
 }
 

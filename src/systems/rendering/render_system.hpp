@@ -100,5 +100,7 @@ private:
   Entity screen_state_entity;
 };
 
+extern bool paused;
+
 bool loadEffectFromFile(const std::string &vs_path, const std::string &fs_path,
                         GLuint &out_program);

@@ -127,80 +127,83 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
   // Updating window title
   std::stringstream title_ss;
-  title_ss << "Bermuda";
+  title_ss << "Bermuda      FPS: "
+           << int(1000.f / elapsed_ms_since_last_update);
   glfwSetWindowTitle(window, title_ss.str().c_str());
 
   // Remove debug info from the last step
   while (registry.debugComponents.entities.size() > 0)
     registry.remove_all_components_of(registry.debugComponents.entities.back());
 
-  ////////////////////////////////////////////////////////
-  // Processing the player state
-  ////////////////////////////////////////////////////////
-  assert(registry.screenStates.components.size() <= 1);
-  ScreenState& screen = registry.screenStates.components[0];
+  if (!paused) {
+    ////////////////////////////////////////////////////////
+    // Processing the player state
+    ////////////////////////////////////////////////////////
+    assert(registry.screenStates.components.size() <= 1);
+    ScreenState& screen = registry.screenStates.components[0];
 
-  update_debuffs(elapsed_ms_since_last_update);
-  update_attack(elapsed_ms_since_last_update);
+    update_debuffs(elapsed_ms_since_last_update);
+    update_attack(elapsed_ms_since_last_update);
 
-  // Deplete oxygen when it is time...
-  oxygen_timer =
-      oxygen_drain(player, oxygen_timer, elapsed_ms_since_last_update);
+    // Deplete oxygen when it is time...
+    oxygen_timer =
+        oxygen_drain(player, oxygen_timer, elapsed_ms_since_last_update);
 
-  // Update gun and harpoon angle
-  updateWepProjPos(mouse_pos, player, player_weapon, player_projectile);
+    // Update gun and harpoon angle
+    updateWepProjPos(mouse_pos, player, player_weapon, player_projectile, wep_type);
 
-  float min_counter_ms = 4000.f;
-  for (Entity entity : registry.deathTimers.entities) {
-    // progress timer
-    DeathTimer& counter = registry.deathTimers.get(entity);
-    counter.counter_ms -= elapsed_ms_since_last_update;
-    if (counter.counter_ms < min_counter_ms && entity == player) {
-      min_counter_ms = counter.counter_ms;
-    }
+    float min_counter_ms = 4000.f;
+    for (Entity entity : registry.deathTimers.entities) {
+      // progress timer
+      DeathTimer& counter = registry.deathTimers.get(entity);
+      counter.counter_ms -= elapsed_ms_since_last_update;
+      if (counter.counter_ms < min_counter_ms && entity == player) {
+        min_counter_ms = counter.counter_ms;
+      }
 
-    // restart the game once the death timer expired
-    if (counter.counter_ms < 0) {
-      if (entity == player) {
-        registry.deathTimers.remove(entity);
-        screen.darken_screen_factor = 0;
-        restart_game();
-        return true;
-      } else {
-        registry.remove_all_components_of(entity);
+      // restart the game once the death timer expired
+      if (counter.counter_ms < 0) {
+        if (entity == player) {
+          registry.deathTimers.remove(entity);
+          screen.darken_screen_factor = 0;
+          restart_game();
+          return true;
+        } else {
+          registry.remove_all_components_of(entity);
+        }
       }
     }
-  }
 
-  // Set player acceleration (If player is alive)
-  if (!registry.deathTimers.has(player)) {
-    setPlayerAcceleration(player);
-  } else {
-    registry.motions.get(player).acceleration = {0.f, 0.f};
-  }
-
-  // Apply Water friction
-  applyWaterFriction(player);
-
-  // Update player velocity with lerp
-  calculatePlayerVelocity(player, lerp);
-
-  check_bounds();
-
-  // Update Entity positions with lerp
-  for (Entity entity : registry.motions.entities) {
-    if (!debuff_entity_can_move(entity)) {
-      continue;
+    // Set player acceleration (If player is alive)
+    if (!registry.deathTimers.has(player)) {
+      setPlayerAcceleration(player);
+    } else {
+      registry.motions.get(player).acceleration = {0.f, 0.f};
     }
-    Motion&   motion   = registry.motions.get(entity);
-    Position& position = registry.positions.get(entity);
-    position.position += motion.velocity * lerp;
-    if (registry.oxygen.has(entity) && entity != player) {
-      // make sure health bars follow moving enemies
-      updateEnemyHealthBarPos(entity);
+
+    // Apply Water friction
+    applyWaterFriction(player);
+
+    // Update player velocity with lerp
+    calculatePlayerVelocity(player, lerp);
+
+    check_bounds();
+
+    // Update Entity positions with lerp
+    for (Entity entity : registry.motions.entities) {
+      if (!debuff_entity_can_move(entity)) {
+        continue;
+      }
+      Motion&   motion   = registry.motions.get(entity);
+      Position& position = registry.positions.get(entity);
+      position.position += motion.velocity * lerp;
+      if (registry.oxygen.has(entity) && entity != player) {
+        // make sure health bars follow moving enemies
+        updateEnemyHealthBarPos(entity);
+      }
     }
+    screen.darken_screen_factor = 1 - min_counter_ms / 3000;
   }
-  screen.darken_screen_factor = 1 - min_counter_ms / 3000;
   return true;
 }
 
@@ -265,8 +268,15 @@ void WorldSystem::restart_game() {
   player = createPlayer(
       renderer,
       {130, window_height_px - 140});  // TODO: get player spawn position
+  registry.inventory.emplace(player);
   player_weapon     = getPlayerWeapon(player);
   player_projectile = getPlayerProjectile(player);
+  harpoon           = player_projectile;
+  wep_type          = (int)PROJECTILES::HARPOON;
+  net               = loadNet(renderer);
+
+  // TODO: make projectiles for the other consumables
+
   createOxygenTank(
       renderer, player,
       {47.5, window_height_px / 2});  // TODO: figure out oxygen tank position
@@ -300,44 +310,73 @@ bool WorldSystem::is_over() const {
  */
 void WorldSystem::on_key(int key, int, int action, int mod) {
   /////////////////////////////////////
-  // Menu
+  // Help / Pause
   /////////////////////////////////////
-  // Resetting game
-  if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-    int w, h;
-    glfwGetWindowSize(window, &w, &h);
-
-    restart_game();
-  }
-
-  /////////////////////////////////////
-  // Debugging
-  /////////////////////////////////////
-  if (key == GLFW_KEY_G) {
-    if (action == GLFW_RELEASE)
-      debugging.in_debug_mode = false;
-    else
-      debugging.in_debug_mode = true;
-  }
-
-  // TODO: REMOVE temporary key input to switch between rooms (facilitate
-  // collision testing)
-  if (key == GLFW_KEY_1) {
-    if (action == GLFW_PRESS && !(action == GLFW_REPEAT)) {
-      curr_room = level_builder.room(
-          ROOM_ONE);  // TODO: change based on which room entered
-      curr_room.activate_room();
-      restart_game();
+  // Toggling game pause
+  if (action == GLFW_RELEASE && key == GLFW_KEY_P) {
+    paused = !paused;
+    if (paused) {
+      depleteOxygen(player);
     }
   }
-  // TODO: REMOVE temporary key input to switch between rooms (facilitate
-  // collision testing)
-  if (key == GLFW_KEY_2) {
-    if (action == GLFW_PRESS && !(action == GLFW_REPEAT)) {
-      curr_room = level_builder.room(
-          ROOM_TWO);  // TODO: change based on which room entered
-      curr_room.activate_room();
+
+  if (!paused) {
+    /////////////////////////////////////
+    // Menu
+    /////////////////////////////////////
+    // Resetting game
+    if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
+      int w, h;
+      glfwGetWindowSize(window, &w, &h);
+
       restart_game();
+    }
+
+    /////////////////////////////////////
+    // Debugging
+    /////////////////////////////////////
+    if (key == GLFW_KEY_G) {
+      if (action == GLFW_RELEASE)
+        debugging.in_debug_mode = false;
+      else
+        debugging.in_debug_mode = true;
+    }
+
+    // TODO: REMOVE temporary key input to switch between rooms (facilitate
+    // collision testing)
+    if (key == GLFW_KEY_9) {
+      if (action == GLFW_PRESS && !(action == GLFW_REPEAT)) {
+        curr_room = level_builder.room(
+            ROOM_ONE);  // TODO: change based on which room entered
+        curr_room.activate_room();
+        restart_game();
+      }
+    }
+    // TODO: REMOVE temporary key input to switch between rooms (facilitate
+    // collision testing)
+    if (key == GLFW_KEY_0) {
+      if (action == GLFW_PRESS && !(action == GLFW_REPEAT)) {
+        curr_room = level_builder.room(
+            ROOM_TWO);  // TODO: change based on which room entered
+        curr_room.activate_room();
+        restart_game();
+      }
+    }
+
+    Inventory& inv = registry.inventory.get(player);
+
+    // Switch to harpoon gun
+    if (key == GLFW_KEY_1 && player_projectile != harpoon) {
+      swapWeps(player_projectile, harpoon, int(PROJECTILES::HARPOON));
+      player_projectile = harpoon;
+      wep_type          = (int)PROJECTILES::HARPOON;
+    }
+
+    // Switch to Net
+    if (key == GLFW_KEY_2 && inv.nets && player_projectile != net) {
+      swapWeps(player_projectile, net, int(PROJECTILES::NET));
+      player_projectile = net;
+      wep_type          = (int)PROJECTILES::NET;
     }
   }
 
@@ -348,12 +387,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
   // Control the current speed with `<` `>`
   if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&
-      key == GLFW_KEY_COMMA) {
+    key == GLFW_KEY_COMMA) {
     current_speed -= 0.1f;
     printf("Current speed = %f\n", current_speed);
   }
   if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&
-      key == GLFW_KEY_PERIOD) {
+    key == GLFW_KEY_PERIOD) {
     current_speed += 0.1f;
     printf("Current speed = %f\n", current_speed);
   }
@@ -363,6 +402,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   // Player
   /////////////////////////////////////
   player_movement(key, action, mod, player);
+  
 }
 
 /**
@@ -373,7 +413,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-  player_mouse(button, action, mods, player, player_weapon, player_projectile);
+  player_mouse(button, action, mods, player, player_weapon, player_projectile, harpoon);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {

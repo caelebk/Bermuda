@@ -47,7 +47,9 @@ public:
 	}
 };
 
-void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon, Entity player_projectile);
+extern bool paused;
+
+void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon, Entity player_projectile, int wep_type);
 
 void setFiredProjVelo(Entity player_projectile);
 

@@ -39,12 +39,32 @@ Entity createLoadedGun(RenderSystem* renderer, vec2 ammoPosition,
 //////////////////////////////////////////////////////////////
 // Load Harpoon
 //////////////////////////////////////////////////////////////
-#define HARPOON_PROJECTILE 0
 #define HARPOON_SCALE_FACTOR vec2(0.60f)
 #define HARPOON_BOUNDING_BOX vec2(64.f, 26.f)
 #define HARPOON_RELATIVE_POS_FROM_GUN vec2(20.f, -2.f)
 
 Entity loadHarpoon(RenderSystem* renderer, vec2 gunPosition);
+
+//////////////////////////////////////////////////////////////
+// Consumables
+//////////////////////////////////////////////////////////////
+// TODO: Change values based on Andy's sprite dimensions
+#define NET_SCALE_FACTOR vec2(0.60f)
+#define NET_BOUNDING_BOX vec2(64.f, 26.f)
+#define NET_RELATIVE_POS_FROM_GUN vec2(20.f, -2.f)
+#define NET_OXYGEN_COST 0.f
+
+Entity loadNet(RenderSystem* renderer);
+
+// Enum for weapon types
+enum class PROJECTILES {
+  HARPOON = 0,
+  NET = HARPOON + 1,
+  CONCUSSIVE = NET + 1,
+  TORPEDO = CONCUSSIVE + 1,
+  SHRIMP = TORPEDO + 1,
+  PROJ_COUNT = SHRIMP + 1
+};
 
 //////////////////////////////////////////////////////////////
 // Getters
