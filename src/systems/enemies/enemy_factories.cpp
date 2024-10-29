@@ -104,8 +104,7 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position) {
 
   // physics and pos
 
-  // add collisions
-  registry.collidables.emplace(entity);
+
 
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::JELLY, EFFECT_ASSET_ID::TEXTURED,
@@ -218,8 +217,6 @@ Entity createFishPos(RenderSystem* renderer, vec2 position) {
   motion.velocity     = {-FISH_MS, 0};
   motion.acceleration = {0, 0};
 
-  // add collisions
-  registry.collidables.emplace(entity);
 
   // ai
   // auto &wander = registry.wanders.emplace(entity);

@@ -75,7 +75,6 @@ Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position) {
 
   // make consumable
   registry.consumables.emplace(entity);
-  registry.collidables.emplace(entity);
 
   // Add stats
   auto& refill  = registry.oxygenModifiers.emplace(entity);

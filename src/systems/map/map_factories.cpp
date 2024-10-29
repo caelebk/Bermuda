@@ -73,7 +73,6 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position) {
 
   // make consumable
   registry.interactable.emplace(entity);
-  registry.collidables.emplace(entity);
 
   // Add stats
   auto& refill        = registry.oxygenModifiers.emplace(entity);

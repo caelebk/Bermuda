@@ -22,10 +22,9 @@ class ECSRegistry {
   public:
   // Manually created list of all components this game has
   // physics related
-  ComponentContainer<Motion>     motions;
-  ComponentContainer<Position>   positions;
-  ComponentContainer<Collision>  collisions;
-  ComponentContainer<Collidable> collidables;
+  ComponentContainer<Motion> motions;
+  ComponentContainer<Position> positions;
+  ComponentContainer<Collision> collisions;
 
   // player related
   ComponentContainer<DeathTimer>       deathTimers;
@@ -82,7 +81,6 @@ class ECSRegistry {
     registry_list.push_back(&motions);
     registry_list.push_back(&collisions);
     registry_list.push_back(&positions);
-    registry_list.push_back(&collidables);
     // player related
     registry_list.push_back(&deathTimers);
     registry_list.push_back(&players);

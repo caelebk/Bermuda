@@ -22,9 +22,6 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos) {
   position.angle     = 0.f;
   position.scale     = PLAYER_SCALE_FACTOR * PLAYER_BOUNDING_BOX;
 
-  // Add collisions
-  registry.collidables.emplace(entity);
-
   // Setting initial motion values
   Motion& motion      = registry.motions.emplace(entity);
   motion.velocity     = {0.f, 0.f};
@@ -109,9 +106,6 @@ Entity loadHarpoon(RenderSystem* renderer, vec2 gunPosition) {
   // Setting initial positon values
   Position& position = registry.positions.emplace(entity);
   position.scale     = HARPOON_SCALE_FACTOR * HARPOON_BOUNDING_BOX;
-
-  // Add collisions
-  Collidable& collidable = registry.collidables.emplace(entity);
 
   // Setting initial motion values
   // Motion will be used when acting as a projectile and is not loaded into a
