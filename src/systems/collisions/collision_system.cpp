@@ -1,4 +1,8 @@
 #include "collision_system.hpp"
+#include <cstdio>
+
+#include "enemy.hpp"
+#include "oxygen.hpp"
 
 // Returns the local bounding coordinates scaled by entity size
 vec2 get_bounding_box(const Position& position) {
@@ -63,18 +67,23 @@ void CollisionSystem::step(float elapsed_ms) {
 
 /***********************************
 Collision Detection (has precedence noted below)
-************************************/ 
+************************************/
 void CollisionSystem::collision_detection() {
-  ComponentContainer<Player>& player_container = registry.players;
-  ComponentContainer<PlayerProjectile>& playerproj_container = registry.playerProjectiles;
-  ComponentContainer<Deadly>& enemy_container = registry.deadlys;
-  ComponentContainer<ActiveWall>& wall_container = registry.activeWalls;
-  ComponentContainer<Consumable>& consumable_container = registry.consumables;
-  ComponentContainer<Interactable>& interactable_container = registry.interactable;
-  
-  //1. Detect player projectile collisions
+  ComponentContainer<Player>&           player_container = registry.players;
+  ComponentContainer<PlayerProjectile>& playerproj_container =
+      registry.playerProjectiles;
+  ComponentContainer<Deadly>&       enemy_container      = registry.deadlys;
+  ComponentContainer<ActiveWall>&   wall_container       = registry.activeWalls;
+  ComponentContainer<Consumable>&   consumable_container = registry.consumables;
+  ComponentContainer<Interactable>& interactable_container =
+      registry.interactable;
+
+  // 1. Detect player projectile collisions
   for (uint i = 0; i < playerproj_container.components.size(); i++) {
     Entity entity_i = playerproj_container.entities[i];
+    if (!registry.positions.has(entity_i)) {
+      continue;
+    }
     Position& position_i = registry.positions.get(entity_i);
 
     if (registry.playerProjectiles.get(entity_i).is_loaded) {
@@ -83,6 +92,10 @@ void CollisionSystem::collision_detection() {
 
     for (uint j = 0; j < enemy_container.size(); j++) {
       Entity entity_j = enemy_container.entities[j];
+      if (!registry.positions.has(entity_j)) {
+        continue;
+      }
+
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -92,6 +105,9 @@ void CollisionSystem::collision_detection() {
 
     for (uint j = 0; j < wall_container.size(); j++) {
       Entity entity_j = wall_container.entities[j];
+      if (!registry.positions.has(entity_j)) {
+        continue;
+      }
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -100,13 +116,27 @@ void CollisionSystem::collision_detection() {
     }
   }
 
-  //2. Detect player collisions
+  // 2. Detect player collisions
   for (uint i = 0; i < player_container.components.size(); i++) {
     Entity entity_i = player_container.entities[i];
+    if (!registry.positions.has(entity_i)) {
+      continue;
+    }
     Position& position_i = registry.positions.get(entity_i);
 
     for (uint j = 0; j < enemy_container.size(); j++) {
       Entity entity_j = enemy_container.entities[j];
+      if (!registry.positions.has(entity_j)) {
+        continue;
+      }
+
+      // don't detect the enemy collision if their attack is on cooldown
+      if (registry.modifyOxygenCd.has(entity_j)) {
+        ModifyOxygenCD& modifyOxygenCd = registry.modifyOxygenCd.get(entity_j);
+        if (modifyOxygenCd.curr_cd > 0.f) {
+          continue;
+        }
+      }
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -116,6 +146,9 @@ void CollisionSystem::collision_detection() {
 
     for (uint j = 0; j < consumable_container.size(); j++) {
       Entity entity_j = consumable_container.entities[j];
+      if (!registry.positions.has(entity_j)) {
+        continue;
+      }
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -125,6 +158,18 @@ void CollisionSystem::collision_detection() {
 
     for (uint j = 0; j < interactable_container.size(); j++) {
       Entity entity_j = interactable_container.entities[j];
+      if (!registry.positions.has(entity_j)) {
+        continue;
+      }
+
+      // don't detect the interactable collision if their attack is on cooldown
+      if (registry.modifyOxygenCd.has(entity_j)) {
+        ModifyOxygenCD& modifyOxygenCd = registry.modifyOxygenCd.get(entity_j);
+        if (modifyOxygenCd.curr_cd > 0.f) {
+          continue;
+        }
+      }
+
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -133,13 +178,24 @@ void CollisionSystem::collision_detection() {
     }
   }
 
-  //3. Detect wall collisions
+  // 3. Detect wall collisions
   for (uint i = 0; i < wall_container.components.size(); i++) {
     Entity entity_i = wall_container.entities[i];
+    if (!registry.positions.has(entity_i)) {
+      continue;
+    }
     Position& position_i = registry.positions.get(entity_i);
 
     for (uint j = 0; j < enemy_container.size(); j++) {
       Entity entity_j = enemy_container.entities[j];
+      if (!registry.positions.has(entity_j)) {
+        continue;
+      }
+
+      if (entity_i == entity_j) {
+        // TODO: this is a bit of a hack, crates are enemies that are walls
+        continue;
+      }
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -149,6 +205,9 @@ void CollisionSystem::collision_detection() {
 
     for (uint j = 0; j < player_container.size(); j++) {
       Entity entity_j = player_container.entities[j];
+      if (!registry.positions.has(entity_j)) {
+        continue;
+      }
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -179,14 +238,14 @@ void CollisionSystem::collision_resolution() {
       routePlayerCollisions(entity, entity_other);
     }
 
-    // Enemy Collision Handling
-    if (registry.deadlys.has(entity)) {
-      routeEnemyCollisions(entity, entity_other);
-    }
-
     // Wall Collision Handling
     if (registry.activeWalls.has(entity)) {
       routeWallCollisions(entity, entity_other);
+    }
+
+    // Enemy Collision Handling
+    if (registry.deadlys.has(entity)) {
+      routeEnemyCollisions(entity, entity_other);
     }
 
     // Player Projectile Collision Handling
@@ -220,7 +279,7 @@ void CollisionSystem::routePlayerCollisions(Entity player, Entity other) {
     resolvePlayerConsumableCollision(player, other);
   }
   if (registry.activeWalls.has(other)) {
-    resolveWallPlayerCollision(other, player);
+    resolveStopOnWall(other, player);
   }
   if (registry.interactable.has(other)) {
     resolvePlayerInteractableCollision(player, other);
@@ -245,7 +304,7 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
   }
 
   if (registry.players.has(other)) {
-    resolveWallPlayerCollision(wall, other);
+    resolveStopOnWall(wall, other);
   }
   if (registry.playerProjectiles.has(other)) {
     resolveWallPlayerProjCollision(wall, other);
@@ -333,19 +392,32 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
 }
 
 void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
+  if (!registry.motions.has(enemy) || !registry.positions.has(enemy)) {
+    return;
+  }
   Motion&   enemy_motion   = registry.motions.get(enemy);
   Position& enemy_position = registry.positions.get(enemy);
+  vec2      temp_velocity  = enemy_motion.velocity;
 
+  resolveStopOnWall(wall, enemy);
+
+  enemy_motion.velocity = temp_velocity;
+
+  // adjust enemy ai
   enemy_motion.velocity *= -1.0f;
-  enemy_position.scale.x *= -1.0f;
+
+  enemy_position.scale.x = abs(enemy_position.scale.x);
+  if (enemy_motion.velocity.x > 0) {
+    enemy_position.scale.x *= -1.0f;
+  }
 }
 
-void CollisionSystem::resolveWallPlayerCollision(Entity wall, Entity player) {
-  Motion& player_motion  = registry.motions.get(player);
-  player_motion.velocity = vec2(0.0f, 0.0f);
+void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
+  Motion& entity_motion  = registry.motions.get(entity);
+  entity_motion.velocity = vec2(0.0f, 0.0f);
 
   Position& wall_position   = registry.positions.get(wall);
-  Position& player_position = registry.positions.get(player);
+  Position& entity_position = registry.positions.get(entity);
 
   vec4 wall_bounds = get_bounds(wall_position);
 
@@ -354,44 +426,44 @@ void CollisionSystem::resolveWallPlayerCollision(Entity wall, Entity player) {
   float top_bound_wall   = wall_bounds[2];
   float bot_bound_wall   = wall_bounds[3];
 
-  vec4 player_bounds = get_bounds(player_position);
+  vec4 entity_bounds = get_bounds(entity_position);
 
-  float left_bound_player  = player_bounds[0];
-  float right_bound_player = player_bounds[1];
-  float top_bound_player   = player_bounds[2];
-  float bot_bound_player   = player_bounds[3];
+  float left_bound_entity  = entity_bounds[0];
+  float right_bound_entity = entity_bounds[1];
+  float top_bound_entity   = entity_bounds[2];
+  float bot_bound_entity   = entity_bounds[3];
 
-  float players_right_overlaps_left_wall =
-      (right_bound_player - left_bound_wall);
-  float players_left_overlaps_right_wall =
-      (right_bound_wall - left_bound_player);
-  float players_bot_overlaps_top_wall = (bot_bound_player - top_bound_wall);
-  float players_top_overlaps_bot_wall = (bot_bound_wall - top_bound_player);
+  float entitys_right_overlaps_left_wall =
+      (right_bound_entity - left_bound_wall);
+  float entitys_left_overlaps_right_wall =
+      (right_bound_wall - left_bound_entity);
+  float entitys_bot_overlaps_top_wall = (bot_bound_entity - top_bound_wall);
+  float entitys_top_overlaps_bot_wall = (bot_bound_wall - top_bound_entity);
 
   // We need to find the smallest overlap horizontally and verticallly to
   // determine where the overlap happened.
   float overlapX =
-      min(players_right_overlaps_left_wall, players_left_overlaps_right_wall);
+      min(entitys_right_overlaps_left_wall, entitys_left_overlaps_right_wall);
   float overlapY =
-      min(players_bot_overlaps_top_wall, players_top_overlaps_bot_wall);
+      min(entitys_bot_overlaps_top_wall, entitys_top_overlaps_bot_wall);
 
   // If the overlap in the X direction is smaller, it means that the collision
   // occured here. Vice versa for overlap in Y direction.
   if (overlapX < overlapY) {
     // Respective to the wall,
-    // If the player is on the left of the wall, then we need to push him left.
-    // If the player is on the right of the wall, we need to push him right.
-    overlapX = (player_position.position.x < wall_position.position.x)
+    // If the entity is on the left of the wall, then we need to push him left.
+    // If the entity is on the right of the wall, we need to push him right.
+    overlapX = (entity_position.position.x < wall_position.position.x)
                    ? -1 * overlapX
                    : overlapX;
-    player_position.position.x += overlapX;
+    entity_position.position.x += overlapX;
   } else {
     // Respective to the wall,
-    // If the player is above the wall, then we need to push up left.
-    // If the player is below the wall, then we need to push him down.
-    overlapY = (player_position.position.y < wall_position.position.y)
+    // If the entity is above the wall, then we need to push up left.
+    // If the entity is below the wall, then we need to push him down.
+    overlapY = (entity_position.position.y < wall_position.position.y)
                    ? -1 * overlapY
                    : overlapY;
-    player_position.position.y += overlapY;
+    entity_position.position.y += overlapY;
   }
 }

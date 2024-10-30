@@ -35,9 +35,14 @@
       },                                                                 \
   }
 
-#define LVL_1_RAND_POS                                                         \
-  {                                                                            \
-      createJellyPos,      createJellyPos,  createJellyPos,                    \
-      createJellyPos,      createJellyPos,  createOxygenCanisterPos,               \
-      createOxygenCanisterPos,  createGeyserPos, createGeyserPos,                  \
+#define LVL_1_RAND_POS                                                   \
+  {                                                                      \
+      createJellyPos,          createJellyPos,  createJellyPos,          \
+      createJellyPos,          createJellyPos,  createOxygenCanisterPos, \
+      createOxygenCanisterPos, createGeyserPos, createGeyserPos,         \
+      createCratePos,          createCratePos,  createCratePos,          \
+      createCratePos,          createCratePos,  createCratePos,          \
+      createFishPos,           createFishPos,   createFishPos,           \
+      createFishPos,           createFishPos,   createFishPos,           \
+      createSharkPos,          createSharkPos,  createSharkPos,          \
   }

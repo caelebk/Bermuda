@@ -57,8 +57,8 @@ private:
     //Wall <-> Player Projectile
     void resolveWallEnemyCollision(Entity wall, Entity enemy);
 
-    //Wall <-> Player
-    void resolveWallPlayerCollision(Entity wall, Entity player);
+    //Wall <-> Something that should stop on the wall
+    void resolveStopOnWall(Entity wall, Entity entity);
 
 public:
 	void step(float elapsed_ms);

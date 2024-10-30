@@ -36,7 +36,7 @@ class ECSRegistry {
 
   // enemy related
   ComponentContainer<Deadly>   deadlys;
-  ComponentContainer<AttackCD> attackCD;
+  ComponentContainer<ModifyOxygenCD> modifyOxygenCd;
 
   // oxygen related
   ComponentContainer<Oxygen>         oxygen;
@@ -72,6 +72,7 @@ class ECSRegistry {
 
   // other
   ComponentContainer<Consumable>     consumables;
+  ComponentContainer<Drop>     drops;
   ComponentContainer<DebugComponent> debugComponents;
 
   // constructor that adds all containers for looping over them
@@ -90,7 +91,7 @@ class ECSRegistry {
     registry_list.push_back(&playerHUD);
     // enemy related
     registry_list.push_back(&deadlys);
-    registry_list.push_back(&attackCD);
+    registry_list.push_back(&modifyOxygenCd);
     // oxygen related
     registry_list.push_back(&oxygen);
     registry_list.push_back(&oxygenModifiers);
@@ -117,6 +118,7 @@ class ECSRegistry {
     registry_list.push_back(&musics);
     registry_list.push_back(&interactable);
     // other
+    registry_list.push_back(&drops);
     registry_list.push_back(&debugComponents);
     registry_list.push_back(&consumables);
   }

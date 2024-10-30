@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "random.hpp"
 #include "render_system.hpp"
 #include "tiny_ecs.hpp"
 
@@ -26,11 +27,13 @@ void   createJellyHealthBar(RenderSystem* renderer, Entity& enemy);
 // Fish
 //////////////////////////////////////////////////////////////
 #define FISH_MS 20.0
-#define FISH_DAMAGE -5.0
+#define FISH_DAMAGE -10.0
 #define FISH_ATK_SPD 1000.0
 #define FISH_SCALE_FACTOR vec2(0.4f)
 #define FISH_BOUNDING_BOX vec2(108.f, 77.f)
 #define FISH_HEALTH 1.0  // one shot
+#define FISH_MIN_DIR_CD 1000 // random direction change cooldown so it looks more natural
+#define FISH_MAX_DIR_CD 8000
 #define FISH_HEALTH_SCALE vec2(1.4f)
 #define FISH_HEALTH_BAR_SCALE vec2(1.5f)
 #define FISH_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
@@ -42,10 +45,22 @@ void   createFishHealthBar(RenderSystem* renderer, Entity& enemy);
 // Sharks
 //////////////////////////////////////////////////////////////
 
-// #define SHARK_OXYGEN 75.0
-// #define SHARK_OXYGEN_SCALE vec2(250.f, 4.f)
+#define SHARK_MS 30.0
+#define SHARK_DAMAGE -20.0
+#define SHARK_ATK_SPD 1000.0
+#define SHARK_MIN_SCALE 0.6
+#define SHARK_MAX_SCALE 1.0
+#define SHARK_BOUNDING_BOX vec2(108.f, 77.f)
+#define SHARK_HEALTH 75.0  // three shot
+#define SHARK_MIN_DIR_CD 1000 // random direction change cooldown so it looks more natural
+#define SHARK_MAX_DIR_CD 8000
+#define SHARK_HEALTH_SCALE vec2(1.4f)
+#define SHARK_HEALTH_BAR_SCALE vec2(1.5f)
+#define SHARK_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 
-// int createSharkHealthBar(RenderSystem *renderer, Entity enemy);
+
+Entity createSharkPos(RenderSystem* renderer, vec2 position);
+void createSharkHealthBar(RenderSystem *renderer, Entity enemy);
 
 // //////////////////////////////////////////////////////////////
 // // Octopi

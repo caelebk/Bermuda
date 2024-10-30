@@ -8,6 +8,8 @@
 #include "physics.hpp"
 #include "player_factories.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <cstdio>
+#include <iostream>
 
 void PhysicsSystem::step(float elapsed_ms) {
   /*auto& motion_registry   = registry.motions;

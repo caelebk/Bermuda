@@ -150,7 +150,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         oxygen_drain(player, oxygen_timer, elapsed_ms_since_last_update);
 
     // Update gun and harpoon angle
-    updateWepProjPos(mouse_pos, player, player_weapon, player_projectile, wep_type);
+    updateWepProjPos(mouse_pos, player, player_weapon, player_projectile,
+                     wep_type);
 
     float min_counter_ms = 4000.f;
     for (Entity entity : registry.deathTimers.entities) {
@@ -168,6 +169,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
           screen.darken_screen_factor = 0;
           restart_game();
           return true;
+        } else if (registry.drops.has(entity) &&
+                   registry.positions.has(entity)) {
+          Drop&     drop = registry.drops.get(entity);
+          Position& pos  = registry.positions.get(entity);
+
+          auto fn     = drop.dropFn;
+          vec2 newPos = pos.position;
+          registry.remove_all_components_of(entity);
+
+          fn(renderer, newPos);
         } else {
           registry.remove_all_components_of(entity);
         }
@@ -177,7 +188,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     // Set player acceleration (If player is alive)
     if (!registry.deathTimers.has(player)) {
       setPlayerAcceleration(player);
-    } else {
+    } else if (registry.motions.has(player)){
       registry.motions.get(player).acceleration = {0.f, 0.f};
     }
 
@@ -253,8 +264,8 @@ void WorldSystem::restart_game() {
   current_speed = 1.f;
 
   // Remove all entities that we created
-  // All that have a motion, we could also iterate over all fish, eels, ... but
-  // that would be more cumbersome
+  // All that have a motion, we could also iterate over all fish, eels, ...
+  // but that would be more cumbersome
   for (Entity entity : registry.oxygen.entities) {
     registry.remove_all_components_of(registry.oxygen.get(entity).oxygenBar);
     registry.remove_all_components_of(
@@ -387,12 +398,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
   // Control the current speed with `<` `>`
   if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&
-    key == GLFW_KEY_COMMA) {
+      key == GLFW_KEY_COMMA) {
     current_speed -= 0.1f;
     printf("Current speed = %f\n", current_speed);
   }
   if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&
-    key == GLFW_KEY_PERIOD) {
+      key == GLFW_KEY_PERIOD) {
     current_speed += 0.1f;
     printf("Current speed = %f\n", current_speed);
   }
@@ -402,7 +413,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   // Player
   /////////////////////////////////////
   player_movement(key, action, mod, player);
-  
 }
 
 /**
@@ -413,7 +423,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-  player_mouse(button, action, mods, player, player_weapon, player_projectile, harpoon);
+  player_mouse(button, action, mods, player, player_weapon, player_projectile,
+               harpoon);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {

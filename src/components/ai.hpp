@@ -6,5 +6,6 @@ struct DeathTimer {
 
 // Will wander aimlessly
 struct Wander {
-
+  float active_dir_cd = 0;
+  float change_dir_cd = 0;
 };

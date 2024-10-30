@@ -1,4 +1,5 @@
 
+#include "ai_system.hpp"
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
 
@@ -22,6 +23,7 @@ int main() {
   // Global systems
   WorldSystem     world;
   RenderSystem    renderer;
+  AISystem        ai;
   PhysicsSystem   physics;
   AudioSystem     audios;
   CollisionSystem collisions;
@@ -59,6 +61,7 @@ int main() {
     t = now;
 
     world.step(elapsed_ms);
+    ai.step(elapsed_ms);
     physics.step(elapsed_ms);
     collisions.step(elapsed_ms);
     audios.step(elapsed_ms);

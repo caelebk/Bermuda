@@ -135,7 +135,6 @@ bool player_mouse(int button, int action, int mods, Entity& player,
 void swapWeps(Entity swapped, Entity swapper, int projectile) {
   registry.motions.remove(swapped);
   registry.positions.remove(swapped);
-  registry.collidables.remove(swapped);
   registry.renderRequests.remove(swapped);
   registry.playerProjectiles.get(swapped).is_loaded = true;
 
@@ -152,9 +151,6 @@ void swapWeps(Entity swapped, Entity swapper, int projectile) {
   // Setting initial positon values
   Position& position = registry.positions.emplace(swapper);
   position.scale     = scale;
-
-  // Add collisions
-  Collidable& collidable = registry.collidables.emplace(swapper);
 
   // Setting initial motion values
   // Motion will be used when acting as a projectile and is not loaded into a

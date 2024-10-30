@@ -3,7 +3,9 @@
 #include <iostream>
 
 #include "collision_system.hpp"
+#include "components.hpp"
 #include "physics.hpp"
+#include "random.hpp"
 #include "space.hpp"
 #include "tiny_ecs_registry.hpp"
 
@@ -95,8 +97,8 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position) {
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = JELLY_DAMAGE;
 
-  auto& attackCD      = registry.attackCD.emplace(entity);
-  attackCD.attack_spd = JELLY_ATK_SPD;
+  auto& modifyOxygenCd      = registry.modifyOxygenCd.emplace(entity);
+  modifyOxygenCd.default_cd = JELLY_ATK_SPD;
 
   // add abilities
   auto& stun    = registry.stuns.emplace(entity);
@@ -209,8 +211,8 @@ Entity createFishPos(RenderSystem* renderer, vec2 position) {
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = FISH_DAMAGE;
 
-  auto& attackCD      = registry.attackCD.emplace(entity);
-  attackCD.attack_spd = FISH_ATK_SPD;
+  auto& modifyOxygenCd      = registry.modifyOxygenCd.emplace(entity);
+  modifyOxygenCd.default_cd = FISH_ATK_SPD;
 
   // Initialize the position, scale, and physics components
   auto& motion        = registry.motions.emplace(entity);
@@ -219,13 +221,20 @@ Entity createFishPos(RenderSystem* renderer, vec2 position) {
 
 
   // ai
-  // auto &wander = registry.wanders.emplace(entity);
+  auto& wander         = registry.wanders.emplace(entity);
+  wander.active_dir_cd = 0;  // immediately picks a new direction
+  wander.change_dir_cd = getRandInt(FISH_MIN_DIR_CD, FISH_MAX_DIR_CD);
 
   // TODO: add the room
+  TEXTURE_ASSET_ID fish_textures[5] = {
+      TEXTURE_ASSET_ID::FISH0, TEXTURE_ASSET_ID::FISH1, TEXTURE_ASSET_ID::FISH2,
+      TEXTURE_ASSET_ID::FISH3, TEXTURE_ASSET_ID::FISH4};
+
+  TEXTURE_ASSET_ID fish_texture = fish_textures[getRandInt(0, 4)];
 
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::FISH, EFFECT_ASSET_ID::TEXTURED,
-               GEOMETRY_BUFFER_ID::SPRITE});
+      entity,
+      {fish_texture, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
 
   createFishHealthBar(renderer, entity);
   return entity;
@@ -296,54 +305,121 @@ void createFishHealthBar(RenderSystem* renderer, Entity& enemy) {
 /////////////////////////////////////////////////////////////////
 // Sharks
 /////////////////////////////////////////////////////////////////
+/**
+ * @brief creates a shark at a specific position sharks
+ *
+ * Sharks will be created with a random size
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createSharkPos(RenderSystem* renderer, vec2 position) {
+  // Reserve an entity
+  auto entity             = Entity();
+  vec2 SHARK_SCALE_FACTOR = vec2(randomFloat(SHARK_MIN_SCALE, SHARK_MAX_SCALE));
 
-// /**
-//  * @brief creates a health bar for a shark
-//  *
-//  * @param renderer
-//  * @param enemy - assumed to be a shark
-//  * @return entity id if successful, -1 otherwise
-//  */
-// int createSharkHealthBar(RenderSystem *renderer, Entity enemy)
-// {
-//     // Check if enemy has a position component
-//     if (!registry.positions.has(enemy))
-//     {
-//         std::cerr << "Error: Entity does not have a position component" <<
-//         std::endl; return -1;
-//     }
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = 0.f;
+  pos.position = position;
+  pos.scale    = SHARK_SCALE_FACTOR * SHARK_BOUNDING_BOX;
+  if (!checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
 
-//     auto entity = Entity();
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
 
-//     // Store a reference to the potentially re-used mesh object
-//     Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-//     registry.meshPtrs.emplace(entity, &mesh);
+  // make enemy and damage
+  registry.deadlys.emplace(entity);
+  auto& damage  = registry.oxygenModifiers.emplace(entity);
+  damage.amount = SHARK_DAMAGE;
 
-//     // Get position of enemy
-//     Position &enemyPos = registry.positions.get(enemy);
+  auto& modifyOxygenCd      = registry.modifyOxygenCd.emplace(entity);
+  modifyOxygenCd.default_cd = SHARK_ATK_SPD;
 
-//     // Setting initial positon values
-//     Position &position = registry.positions.emplace(entity);
-//     position.position = enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 +
-//     ENEMY_O2_BAR_GAP); // TODO: guesstimate on where the HP should be, update
-//     to proper position position.angle = 0.f; position.scale =
-//     SHARK_OXYGEN_SCALE;
+  // Initialize the position, scale, and physics components
+  auto& motion        = registry.motions.emplace(entity);
+  motion.velocity     = {-SHARK_MS, 0};
+  motion.acceleration = {0, 0};
 
-//     // Set health bar
-//     auto &health = registry.oxygen.emplace(entity);
-//     oxygen.capacity = SHARK_OXYGEN;
-//     oxygen.level = SHARK_OXYGEN;
-//     oxygen.rate = 0.f;
+  // ai
+  auto& wander         = registry.wanders.emplace(entity);
+  wander.active_dir_cd = 0;  // immediately picks a new direction
+  wander.change_dir_cd = getRandInt(SHARK_MIN_DIR_CD, SHARK_MAX_DIR_CD);
 
-//     // TODO: change to proper texture
-//     registry.renderRequests.insert(
-//         entity,
-//         {TEXTURE_ASSET_ID::TEXTURE_COUNT,
-//          EFFECT_ASSET_ID::TEXTURED,
-//          GEOMETRY_BUFFER_ID::SPRITE});
+  // TODO: add the room
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::SHARK, EFFECT_ASSET_ID::TEXTURED,
+               GEOMETRY_BUFFER_ID::SPRITE});
 
-//     return entity.operator unsigned int();
-// }
+  createSharkHealthBar(renderer, entity);
+  return entity;
+}
+/**
+ * @brief creates a health bar for a shark
+ *
+ * @param renderer
+ * @param enemy - assumed to be a shark
+ * @return entity id if successful, -1 otherwise
+ */
+void createSharkHealthBar(RenderSystem* renderer, Entity enemy) {
+  // Check if enemy has a position component
+  if (!registry.positions.has(enemy)) {
+    std::cerr << "Error: Entity does not have a position component"
+              << std::endl;
+    return;
+  }
+
+  // Create oxygen and background bar
+  auto sharkOxygenBar     = Entity();
+  auto sharkBackgroundBar = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(sharkOxygenBar, &mesh);
+  registry.meshPtrs.emplace(sharkBackgroundBar, &mesh);
+
+  // Get position of enemy
+  Position& enemyPos = registry.positions.get(enemy);
+
+  // Setting initial positon values
+  Position& position = registry.positions.emplace(sharkOxygenBar);
+  position.position =
+      enemyPos.position -
+      vec2(0.f, enemyPos.scale.y / 2 +
+                    ENEMY_O2_BAR_GAP);  // TODO: guesstimate on where the HP
+                                        // should be, update to proper position
+  position.angle         = 0.f;
+  position.scale         = SHARK_HEALTH_SCALE * SHARK_HEALTH_BOUNDING_BOX;
+  position.originalScale = SHARK_HEALTH_SCALE * SHARK_HEALTH_BOUNDING_BOX;
+
+  Position& backgroundPos = registry.positions.emplace(sharkBackgroundBar);
+  backgroundPos.position  = position.position;
+  backgroundPos.angle     = 0.f;
+  backgroundPos.scale     = SHARK_HEALTH_BAR_SCALE * SHARK_HEALTH_BOUNDING_BOX;
+
+  // Set health bar
+  auto& oxygen         = registry.oxygen.emplace(enemy);
+  oxygen.capacity      = SHARK_HEALTH;
+  oxygen.level         = SHARK_HEALTH;
+  oxygen.rate          = 0.f;
+  oxygen.oxygenBar     = sharkOxygenBar;
+  oxygen.backgroundBar = sharkBackgroundBar;
+
+  // TODO: change to proper texture
+  registry.renderRequests.insert(
+      sharkOxygenBar, {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
+                       EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+
+  registry.renderRequests.insert(
+      sharkBackgroundBar,
+      {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR, EFFECT_ASSET_ID::TEXTURED,
+       GEOMETRY_BUFFER_ID::SPRITE});
+}
 
 // /////////////////////////////////////////////////////////////////
 // // Octopi

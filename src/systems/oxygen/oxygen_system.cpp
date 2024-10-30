@@ -119,12 +119,12 @@ float oxygen_drain(Entity player, float oxygen_deplete_timer,
  * @return true if oxygenModifier is on a cooldown, otherwise false
  */
 bool isModOnCooldown(Entity& oxygenModifier) {
-  if (registry.attackCD.has(oxygenModifier)) {
-    auto& attackCD = registry.attackCD.get(oxygenModifier);
-    if (attackCD.attack_cd > 0.f) {
+  if (registry.modifyOxygenCd.has(oxygenModifier)) {
+    auto& modifyOxygenCd = registry.modifyOxygenCd.get(oxygenModifier);
+    if (modifyOxygenCd.curr_cd > 0.f) {
       return true;
     }
-    attackCD.attack_cd = attackCD.attack_spd;
+    modifyOxygenCd.curr_cd = modifyOxygenCd.default_cd;
   }
   return false;
 }
