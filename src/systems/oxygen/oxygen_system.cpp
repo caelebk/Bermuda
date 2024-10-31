@@ -61,6 +61,12 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
   Oxygen& entity_oxygen = registry.oxygen.get(entity);
   float   oxyModAmount  = registry.oxygenModifiers.get(oxygenModifier).amount;
   float   deltaOxygen   = calcDeltaOxygen(entity_oxygen, oxyModAmount);
+
+  if (!entity_oxygen.isRendered) {
+    renderHealthBar(entity_oxygen);
+    entity_oxygen.isRendered = true;
+  }
+
   entity_oxygen.level += deltaOxygen;
   updateHealthBarRender(entity, entity_oxygen, deltaOxygen);
   updateOxygenLvlStatus(entity_oxygen);
@@ -69,14 +75,14 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
   // play hurt sound if player is damaged AND not dead
   if (registry.players.has(entity) &&
       !registry.playerWeapons.has(oxygenModifier) &&
-      !registry.deathTimers.has(entity) && deltaOxygen <= 0) {
+      !registry.deathTimers.has(entity) && oxyModAmount <= 0) {
     registry.sounds.insert(Entity(), Sound(hurt_sound));
   }
 }
 
 /**
- * @brief update the position values of an entity's health bar depending on entity
- * position
+ * @brief update the position values of an entity's health bar depending on
+ * entity position
  */
 void updateEnemyHealthBarPos(Entity& enemy) {
   Position& enemyPos = registry.positions.get(enemy);
@@ -211,7 +217,8 @@ void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen) {
 }
 
 void createDefaultHealthbar(RenderSystem* renderer, Entity& entity,
-                            float health, vec2 healthScale, vec2 barScale, vec2 bounding_box) {
+                            float health, vec2 healthScale, vec2 barScale,
+                            vec2 bounding_box) {
   // Check if entity has a position component
   if (!registry.positions.has(entity)) {
     std::cerr << "Error: Entity does not have a position component"
@@ -252,16 +259,20 @@ void createDefaultHealthbar(RenderSystem* renderer, Entity& entity,
   entityOxygen.capacity      = health;
   entityOxygen.level         = health;
   entityOxygen.rate          = 0.f;
+  entityOxygen.isRendered    = false;
   entityOxygen.oxygenBar     = oxygenBar;
   entityOxygen.backgroundBar = backgroundBar;
+}
 
+void renderHealthBar(Oxygen& entity_oxygen) {
   // TODO: change to proper texture
   registry.renderRequests.insert(
-      oxygenBar, {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
-                       EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+      entity_oxygen.oxygenBar,
+      {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR, EFFECT_ASSET_ID::TEXTURED,
+       GEOMETRY_BUFFER_ID::SPRITE});
 
   registry.renderRequests.insert(
-      backgroundBar,
+      entity_oxygen.backgroundBar,
       {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR, EFFECT_ASSET_ID::TEXTURED,
        GEOMETRY_BUFFER_ID::SPRITE});
 }

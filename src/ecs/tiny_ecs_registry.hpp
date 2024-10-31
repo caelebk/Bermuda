@@ -22,8 +22,8 @@ class ECSRegistry {
   public:
   // Manually created list of all components this game has
   // physics related
-  ComponentContainer<Motion> motions;
-  ComponentContainer<Position> positions;
+  ComponentContainer<Motion>    motions;
+  ComponentContainer<Position>  positions;
   ComponentContainer<Collision> collisions;
 
   // player related
@@ -35,7 +35,7 @@ class ECSRegistry {
   ComponentContainer<PlayerHUD>        playerHUD;
 
   // enemy related
-  ComponentContainer<Deadly>   deadlys;
+  ComponentContainer<Deadly>         deadlys;
   ComponentContainer<ModifyOxygenCD> modifyOxygenCd;
 
   // oxygen related
@@ -75,9 +75,10 @@ class ECSRegistry {
 
   // other
   ComponentContainer<Consumable>     consumables;
-  ComponentContainer<Drop>     drops;
+  ComponentContainer<Drop>           drops;
   ComponentContainer<DebugComponent> debugComponents;
   ComponentContainer<Emoting> emoting;
+  ComponentContainer<Cursor>         cursors;
 
   // constructor that adds all containers for looping over them
   // IMPORTANT: Don't forget to add any newly added containers!
@@ -126,6 +127,7 @@ class ECSRegistry {
     registry_list.push_back(&interactable);
     // other
     registry_list.push_back(&drops);
+    registry_list.push_back(&cursors);
     registry_list.push_back(&debugComponents);
     registry_list.push_back(&consumables);
     registry_list.push_back(&emoting);

@@ -9,17 +9,16 @@
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
-class RenderSystem
-{
-	/**
-	 * The following arrays store the assets the game will use. They are loaded
-	 * at initialization and are assumed to not be modified by the render loop.
-	 *
-	 * Whenever possible, add to these lists instead of creating dynamic state
-	 * it is easier to debug and faster to execute for the computer.
-	 */
-	std::array<GLuint, texture_count> texture_gl_handles;
-	std::array<ivec2, texture_count> texture_dimensions;
+class RenderSystem {
+  /**
+   * The following arrays store the assets the game will use. They are loaded
+   * at initialization and are assumed to not be modified by the render loop.
+   *
+   * Whenever possible, add to these lists instead of creating dynamic state
+   * it is easier to debug and faster to execute for the computer.
+   */
+  std::array<GLuint, texture_count> texture_gl_handles;
+  std::array<ivec2, texture_count>  texture_dimensions;
 
   // Make sure these paths remain in sync with the associated enumerators.
   // Associated id with .obj path
@@ -29,6 +28,7 @@ class RenderSystem
 
   // Make sure these paths remain in sync with the associated enumerators.
   const std::array<std::string, texture_count> texture_paths = {
+      textures_path("cursors/crosshair_cursor.png"),
       textures_path("player/player.png"),
       textures_path("player/harpoon_gun.png"),
       textures_path("player/harpoon.png"),
@@ -59,11 +59,11 @@ class RenderSystem
       shader_path("textured_oxygen"), shader_path("water")};
   std::array<GLuint, geometry_count> vertex_buffers;
   std::array<GLuint, geometry_count> index_buffers;
-  std::array<Mesh, geometry_count> meshes;
+  std::array<Mesh, geometry_count>   meshes;
 
-public:
+  public:
   // Initialize the window
-  bool init(GLFWwindow *window);
+  bool init(GLFWwindow* window);
 
   template <class T>
   void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices,
@@ -73,12 +73,14 @@ public:
 
   void initializeGlEffects();
 
-  void initializeGlMeshes();
-  Mesh &getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
+  void  initializeGlMeshes();
+  Mesh& getMesh(GEOMETRY_BUFFER_ID id) {
+    return meshes[(int)id];
+  };
 
   void initializeGlGeometryBuffers();
 
-	void initializeGlCursor();
+  void initializeGlCursor();
 
   // Initialize the screen texture used as intermediate render target
   // The draw loop first renders to this texture, then it is used for the wind
@@ -93,13 +95,13 @@ public:
 
   mat3 createProjectionMatrix();
 
-private:
+  private:
   // Internal drawing functions for each entity type
-  void drawTexturedMesh(Entity entity, const mat3 &projection);
+  void drawTexturedMesh(Entity entity, const mat3& projection);
   void drawToScreen();
 
   // Window handle
-  GLFWwindow *window;
+  GLFWwindow* window;
 
   // Screen texture handles
   GLuint frame_buffer;
@@ -111,5 +113,5 @@ private:
 
 extern bool paused;
 
-bool loadEffectFromFile(const std::string &vs_path, const std::string &fs_path,
-                        GLuint &out_program);
+bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path,
+                        GLuint& out_program);

@@ -212,14 +212,6 @@ void RenderSystem::draw() {
     if (registry.renderRequests.has(wall))
       drawTexturedMesh(wall, projection_2D);
   }
-  for (Entity player : registry.players.entities) {
-    if (registry.renderRequests.has(player))
-      drawTexturedMesh(player, projection_2D);
-  }
-  for (Entity enemy : registry.deadlys.entities) {
-    if (registry.renderRequests.has(enemy))
-      drawTexturedMesh(enemy, projection_2D);
-  }
   for (Entity consumable : registry.consumables.entities) {
     if (registry.renderRequests.has(consumable))
       drawTexturedMesh(consumable, projection_2D);
@@ -227,6 +219,14 @@ void RenderSystem::draw() {
   for (Entity interactable : registry.interactable.entities) {
     if (registry.renderRequests.has(interactable))
       drawTexturedMesh(interactable, projection_2D);
+  }
+  for (Entity player : registry.players.entities) {
+    if (registry.renderRequests.has(player))
+      drawTexturedMesh(player, projection_2D);
+  }
+  for (Entity enemy : registry.deadlys.entities) {
+    if (registry.renderRequests.has(enemy))
+      drawTexturedMesh(enemy, projection_2D);
   }
   for (Entity projectile : registry.playerProjectiles.entities) {
     if (registry.renderRequests.has(projectile))
@@ -256,6 +256,10 @@ void RenderSystem::draw() {
   for (Entity playerHUDElement : registry.playerHUD.entities) {
     if (registry.renderRequests.has(playerHUDElement))
       drawTexturedMesh(playerHUDElement, projection_2D);
+  }
+  for (Entity cursor : registry.cursors.entities) {
+    if (registry.renderRequests.has(cursor))
+      drawTexturedMesh(cursor, projection_2D);
   }
   //////////////////////////////////////////////////////////////////////////////////////
 

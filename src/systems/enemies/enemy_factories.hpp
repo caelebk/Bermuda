@@ -48,7 +48,7 @@ Entity createFishPos(RenderSystem* renderer, vec2 position);
 #define SHARK_ATK_SPD 1000.0
 #define SHARK_MIN_SCALE 2.0
 #define SHARK_MAX_SCALE 3.0
-#define SHARK_BOUNDING_BOX vec2(32.f, 32.f)
+#define SHARK_BOUNDING_BOX vec2(32.f, 19.f)
 #define SHARK_HEALTH 75.0  // three shot
 #define SHARK_MIN_DIR_CD 1000 // random direction change cooldown so it looks more natural
 #define SHARK_MAX_DIR_CD 8000
@@ -80,7 +80,7 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position);
 #define KRAB_ATK_SPD 1000.0
 #define KRAB_MIN_SCALE 2.0
 #define KRAB_MAX_SCALE 3.0
-#define KRAB_BOUNDING_BOX vec2(18.f, 18.f)
+#define KRAB_BOUNDING_BOX vec2(18.f, 14.f)
 #define KRAB_HEALTH 250.0  // three shot
 #define KRAB_MIN_DIR_CD 1000 // random direction change cooldown so it looks more natural
 #define KRAB_MAX_DIR_CD 8000

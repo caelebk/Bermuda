@@ -132,12 +132,19 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
   while (registry.debugComponents.entities.size() > 0)
     registry.remove_all_components_of(registry.debugComponents.entities.back());
 
+  assert(registry.screenStates.components.size() <= 1);
+  ScreenState& screen = registry.screenStates.components[0];
+
   if (!paused) {
     ////////////////////////////////////////////////////////
     // Processing the player state
     ////////////////////////////////////////////////////////
-    assert(registry.screenStates.components.size() <= 1);
-    ScreenState& screen = registry.screenStates.components[0];
+    for (Entity cursor : registry.cursors.entities) {
+      if (registry.positions.has(cursor)) {
+        Position& cursor_pos = registry.positions.get(cursor);
+        cursor_pos.position = vec2((float) mouse_pos.x, (float) mouse_pos.y);
+      }
+    }
 
     update_debuffs(elapsed_ms_since_last_update);
     update_attack(elapsed_ms_since_last_update);
@@ -148,42 +155,42 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     // Update gun and harpoon angle
     updateWepProjPos(mouse_pos);
 
-    float min_counter_ms = 4000.f;
-    for (Entity entity : registry.deathTimers.entities) {
-      // progress timer
-      DeathTimer& counter = registry.deathTimers.get(entity);
-      counter.counter_ms -= elapsed_ms_since_last_update;
-      if (counter.counter_ms < min_counter_ms && entity == player) {
-        min_counter_ms = counter.counter_ms;
-      }
+    check_bounds();
+  }
 
-      // restart the game once the death timer expired
-      if (counter.counter_ms < 0) {
-        if (entity == player) {
-          registry.deathTimers.remove(entity);
-          screen.darken_screen_factor = 0;
-          restart_game();
-          return true;
-        } else if (registry.drops.has(entity) &&
-                   registry.positions.has(entity)) {
-          Drop&     drop = registry.drops.get(entity);
-          Position& pos  = registry.positions.get(entity);
-
-          auto fn     = drop.dropFn;
-          vec2 newPos = pos.position;
-          registry.remove_all_components_of(entity);
-
-          fn(renderer, newPos);
-        } else {
-          registry.remove_all_components_of(entity);
-        }
-      }
+  float min_counter_ms = 4000.f;
+  for (Entity entity : registry.deathTimers.entities) {
+    // progress timer
+    DeathTimer& counter = registry.deathTimers.get(entity);
+    counter.counter_ms -= elapsed_ms_since_last_update;
+    if (counter.counter_ms < min_counter_ms && entity == player) {
+      min_counter_ms = counter.counter_ms;
     }
 
-    check_bounds();
+    // restart the game once the death timer expired
+    if (counter.counter_ms < 0) {
+      if (entity == player) {
+        registry.deathTimers.remove(entity);
+        screen.darken_screen_factor = 0;
+        restart_game();
+        return true;
+      } else if (registry.drops.has(entity) &&
+                  registry.positions.has(entity)) {
+        Drop&     drop = registry.drops.get(entity);
+        Position& pos  = registry.positions.get(entity);
 
-    screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+        auto fn     = drop.dropFn;
+        vec2 newPos = pos.position;
+        registry.remove_all_components_of(entity);
+
+        fn(renderer, newPos);
+      } else {
+        registry.remove_all_components_of(entity);
+      }
+    }
   }
+  screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+
   return true;
 }
 
@@ -269,6 +276,8 @@ void WorldSystem::restart_game() {
 
   // spawn at fixed positions in the room
   execute_config_fixed(LVL_1_FIXED);
+
+  paused = false;
 }
 
 /**

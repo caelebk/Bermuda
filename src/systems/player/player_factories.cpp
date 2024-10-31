@@ -198,6 +198,7 @@ void createOxygenTank(RenderSystem* renderer, Entity& player, vec2 pos) {
   oxygen.capacity      = PLAYER_OXYGEN;
   oxygen.level         = PLAYER_OXYGEN;
   oxygen.rate          = PLAYER_OXYGEN_RATE;
+  oxygen.isRendered    = true;
   oxygen.oxygenBar     = playerOxygenBar;
   oxygen.backgroundBar = playerBackgroundBar;
 

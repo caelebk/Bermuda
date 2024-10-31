@@ -59,7 +59,8 @@ struct Mesh {
  */
 
 enum class TEXTURE_ASSET_ID {
-  PLAYER               = 0,
+  CURSOR               = 0,
+  PLAYER               = CURSOR + 1,
   GUN                  = PLAYER + 1,
   HARPOON              = GUN + 1,
   PLAYER_OXYGEN_TANK   = HARPOON + 1,

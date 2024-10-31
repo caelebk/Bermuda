@@ -40,3 +40,5 @@ void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen);
 void createDefaultHealthbar(RenderSystem* renderer, Entity& entity,
                             float health, vec2 healthScale, vec2 barScale,
                             vec2 bounding_box);
+
+void renderHealthBar(Oxygen& entity_oxygen);

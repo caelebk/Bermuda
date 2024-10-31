@@ -13,6 +13,10 @@ struct DebugComponent {
   // Note, an empty struct has size 1
 };
 
+struct Cursor {
+
+};
+
 struct Emoting {
   Entity child;
 };
