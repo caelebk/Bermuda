@@ -26,7 +26,7 @@ std::vector<int> get_random_door_positions(Direction direction, std::unordered_m
                               [&](const auto& pair) { return pair.second == direction; });
     
     // Generate unique positions with a minimum distance of 2 between them
-    while (positions.size() < count) {
+    while ((int) positions.size() < count) {
         int pos = get_random(min, max);
         bool is_valid = true;
 
@@ -68,14 +68,14 @@ void LevelBuilder::connect(Entity& connectee, Entity& connector) {
 
 LevelBuilder& LevelBuilder::connect_room_to_hallway(std::string r_id,
                                                     std::string d1_id,
-                                                    std::string h_id,
+                                                    std::string r2_id,
                                                     std::string d2_id) {
   RoomBuilder&    room    = rooms[r_id];
-  HallwayBuilder& hallway = hallways[h_id];
+  RoomBuilder&    room_2 =  rooms[r2_id];
 
-  connect(room.entity, hallway.entity);
-  connect(hallway.doors[d1_id], room.doors[d2_id]);
-  connect(hallway.entity, room.entity);
+  connect(room.entity, room_2.entity);
+  connect(room_2.doors[d1_id], room.doors[d2_id]);
+  connect(room_2.entity, room.entity);
   return *this;
 };
 
@@ -89,7 +89,6 @@ RoomBuilder LevelBuilder::copy_room(std::string s_id, std::string copied_s_id) {
 };
 
 void LevelBuilder::buildRoomRandom() {
-  // preset testing parameters
   std::vector<int> rooms = {5, 5, 5};
   std::vector<int> densities = {80, 50, 0};
 
@@ -98,114 +97,62 @@ void LevelBuilder::buildRoomRandom() {
   generate_level_from_graph(random_graph_with_doors);
 };
 
-void LevelBuilder::generate_random_horizontal_wall(RoomBuilder& room, RoomBuilder& (*direction)(int), std::unordered_map<int, Direction>& doors) {
-  std::vector<int> door_positions = {3, 6};
+void LevelBuilder::build_wall_with_doors(RoomBuilder& room, std::vector<int> door_positions, int max_units, int unit_size, int door_size, std::function<void(int)> draw_segment, std::function<void(std::string, int)> draw_door) {
   int door_index = 0;
   int current_size = 0;
-  while (door_index < door_positions.size() && current_size < MAX_X_UNITS) {
+  while (door_index < (int) door_positions.size() && current_size < max_units) {
       int current_door = door_positions[door_index];
 
       // Calculate the segment before the next door position
       int segment = current_door - current_size;
 
-      room.right(X_1U * segment);
-      room.door(std::to_string(door_index), X_2U); // door size
-      
-      current_size += segment + 2;
+      draw_segment(unit_size * segment);
+      draw_door(std::to_string(door_index), door_size);
+
+      current_size += segment + 2; // Update for door and segment size
       door_index++;
   }
-}
+
+  // Fill the remaining wall segment if needed
+  if (current_size < max_units) {
+      int remaining_segment = max_units - current_size;
+      draw_segment(unit_size * remaining_segment);
+  }
+};
 
 void LevelBuilder::generate_level_from_graph(std::unordered_map<int, std::unordered_map<int, Direction>>& graph) {
   // Fixed for testing, just make 1 room for now.
-  std::string room_number = "0";
-  std::unordered_map<int, Direction> directed_adjacencies = graph[0];
+  for (const auto& pair : graph) {
+    std::string room_number = std::to_string(pair.first);
+    std::unordered_map<int, Direction> directed_adjacencies = pair.second;
 
-  // Make a room.
-  RoomBuilder& current_room = room(std::to_string(0));
+    // Make a room.
+    RoomBuilder& current_room = room(room_number);
+    
+    std::vector<int> door_positions;
+    // west
+    door_positions = get_random_door_positions(WEST, directed_adjacencies, 0, MAX_Y_UNITS);
+    build_wall_with_doors(current_room, door_positions, MAX_Y_UNITS, Y_1U, Y_2U,
+        [&](int segment) { current_room.up(segment); },
+        [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
 
-  std::vector<int> door_positions = get_random_door_positions(WEST, directed_adjacencies, 0, MAX_Y_UNITS);
-  int door_index = 0;
-  int current_size = 0;
-  while (door_index < door_positions.size() && current_size < MAX_Y_UNITS) {
-      int current_door = door_positions[door_index];
+    // north
+    door_positions = get_random_door_positions(SOUTH, directed_adjacencies, 0, MAX_X_UNITS);
+    build_wall_with_doors(current_room, door_positions, MAX_X_UNITS, X_1U, X_2U,
+        [&](int segment) { current_room.right(segment); },
+        [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
 
-      // Calculate the segment before the next door position
-      int segment = current_door - current_size;
+    // east
+    door_positions = get_random_door_positions(EAST, directed_adjacencies, 0, MAX_Y_UNITS);
+    build_wall_with_doors(current_room, door_positions, MAX_Y_UNITS, Y_1U, Y_2U,
+        [&](int segment) { current_room.down(segment); },
+        [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
 
-      current_room.up(Y_1U * segment);
-      current_room.door(std::to_string(door_index), Y_2U); // door size
-      
-      current_size += segment + 2;
-      door_index++;
-  }
-
-  if (current_size < MAX_Y_UNITS) {
-      int remaining_segment = MAX_Y_UNITS - current_size;
-      current_room.up(Y_1U * remaining_segment);
-  }
-
-  door_positions = get_random_door_positions(NORTH, directed_adjacencies, 0, MAX_X_UNITS);
-  door_index = 0;
-  current_size = 0;
-  while (door_index < door_positions.size() && current_size < MAX_X_UNITS) {
-      int current_door = door_positions[door_index];
-
-      // Calculate the segment before the next door position
-      int segment = current_door - current_size;
-
-      current_room.right(X_1U * segment);
-      current_room.door(std::to_string(door_index), X_2U); // door size
-      
-      current_size += segment + 2;
-      door_index++;
-  }
-
-  if (current_size < MAX_X_UNITS) {
-      int remaining_segment = MAX_X_UNITS - current_size;
-      current_room.right(X_1U * remaining_segment);
-  }
-
-  door_positions = get_random_door_positions(EAST, directed_adjacencies, 0, MAX_Y_UNITS);
-  door_index = 0;
-  current_size = 0;
-  while (door_index < door_positions.size() && current_size < MAX_Y_UNITS) {
-      int current_door = door_positions[door_index];
-
-      // Calculate the segment before the next door position
-      int segment = current_door - current_size;
-
-      current_room.down(Y_1U * segment);
-      current_room.door(std::to_string(door_index), Y_2U); // door size
-      
-      current_size += segment + 2;
-      door_index++;
-  }
-
-  if (current_size < MAX_Y_UNITS) {
-      int remaining_segment = MAX_Y_UNITS - current_size;
-      current_room.down(Y_1U * remaining_segment);
-  }
-
-  door_positions = get_random_door_positions(SOUTH, directed_adjacencies, 0, MAX_X_UNITS);
-  door_index = 0;
-  current_size = 0;
-  while (door_index < door_positions.size() && current_size < MAX_X_UNITS) {
-      int current_door = door_positions[door_index];
-
-      // Calculate the segment before the next door position
-      int segment = current_door - current_size;
-
-      current_room.left(X_1U * segment);
-      current_room.door(std::to_string(door_index), X_2U); // door size
-      
-      current_size += segment + 2;
-      door_index++;
-  }
-
-  if (current_size < MAX_X_UNITS) {
-      int remaining_segment = MAX_X_UNITS - current_size;
-      current_room.left(X_1U * remaining_segment);
+    // south
+    door_positions = get_random_door_positions(NORTH, directed_adjacencies, 0, MAX_X_UNITS);
+    build_wall_with_doors(current_room, door_positions, MAX_X_UNITS, X_1U, X_2U,
+        [&](int segment) { current_room.left(segment); },
+        [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
   }
 }
 
@@ -403,7 +350,7 @@ void LevelBuilder::print_pair(std::pair<std::string, Entity> pair) {
   for (auto& neighbour : adjacencies.neighbours) {
     std::cout << "    " << neighbour << std::endl;
   }
-};
+}
 
 void LevelBuilder::print_rooms() {
   std::cout << "rooms:" << std::endl;

@@ -78,9 +78,14 @@ private:
 
     void connect(Entity &connectee, Entity &connector);
     void print_pair(std::pair<std::string, Entity> pair);
-    
-    void generate_random_horizontal_wall(RoomBuilder& room, RoomBuilder& (*direction)(int), std::unordered_map<int, Direction>& doors);
-    void generate_random_vertical_wall(RoomBuilder& room, RoomBuilder& (*direction)(int), std::unordered_map<int, Direction>& doors);
+
+    void build_wall_with_doors(RoomBuilder& room, std::vector<int> door_positions, 
+                              int max_units, int unit_size, int door_size, 
+                              std::function<void(int)> draw_segment,
+                              std::function<void(std::string, int)> draw_door);
+
+    // void build_room(RoomBuilder& current_room, 
+    //                 const std::vector<std::vector<int>>& directed_adjacencies);
 
     std::unordered_map<int, std::set<int>> generate_random_graph(std::vector<int>& rooms, std::vector<int>& adjacency_list);
     std::unordered_map<int, std::unordered_map<int, Direction>> generate_graph_door_connections(std::unordered_map<int, std::set<int>>& adjacency_list);
@@ -108,13 +113,13 @@ public:
     RoomBuilder copy_room(std::string s_id, std::string copied_s_id);
 
     /**
-     * Connects two rooms together through a hallway.
+     * Connects two rooms together..
      * @param r1_id: the first room's key.
      * @param d1_id: the door in the first room's key.
-     * @param h_id: the hallway's key.
-     * @param d1_id: the door in the hallway's key.
+     * @param h_id: the second room's key.
+     * @param d1_id: the door in the second room's key.
      */
-    LevelBuilder &connect_room_to_hallway(std::string r_id, std::string d1_id, std::string h_id, std::string d2_id);
+    LevelBuilder &connect_room_to_hallway(std::string r_id, std::string d1_id, std::string r2_id, std::string d2_id);
 
     /**
      * Generates a random level with a given number of rooms and a randomized number of hallways. Each element of the input represents a difficulty

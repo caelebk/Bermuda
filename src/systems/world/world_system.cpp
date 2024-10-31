@@ -329,7 +329,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   if (key == GLFW_KEY_1) {
     if (action == GLFW_PRESS && !(action == GLFW_REPEAT)) {
       curr_room = level_builder.room(
-          ROOM_ONE);  // TODO: change based on which room entered
+          "3");  // TODO: change based on which room entered
       curr_room.activate_room();
       restart_game();
     }
@@ -339,7 +339,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   if (key == GLFW_KEY_2) {
     if (action == GLFW_PRESS && !(action == GLFW_REPEAT)) {
       curr_room = level_builder.room(
-          ROOM_TWO);  // TODO: change based on which room entered
+          "13");  // TODO: change based on which room entered
       curr_room.activate_room();
       restart_game();
     }
