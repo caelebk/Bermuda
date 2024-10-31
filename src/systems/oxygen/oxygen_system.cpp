@@ -101,7 +101,7 @@ void updateEnemyHealthBarPos(Entity& enemy) {
 /**
  * @brief wrapper for oxygen depletion
  */
-float oxygen_drain(Entity player, float oxygen_deplete_timer,
+float oxygen_drain(float oxygen_deplete_timer,
                    float elapsed_ms_since_last_update) {
   oxygen_deplete_timer -= elapsed_ms_since_last_update;
   if (oxygen_deplete_timer < 0) {

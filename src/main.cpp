@@ -17,6 +17,18 @@
 using Clock = std::chrono::high_resolution_clock;
 
 bool paused;
+Entity player;
+
+// Consumable Entities
+Entity player_weapon;
+Entity player_projectile;
+Entity harpoon;
+Entity net;
+int    wep_type;
+// TODO: uncomment these as they are implemented
+//Entity concussive;
+//Entity torpedo;
+//Entity shrimp;
 
 // Entry point
 int main() {
@@ -28,7 +40,7 @@ int main() {
   AudioSystem     audios;
   CollisionSystem collisions;
 
-  // TODO: Change this when pause menu is implemented
+  // TODO: Change this to true when pause menu is implemented
   paused = false;
 
   // Initializing window
@@ -60,10 +72,14 @@ int main() {
         1000;
     t = now;
 
+    
     world.step(elapsed_ms);
-    ai.step(elapsed_ms);
-    physics.step(elapsed_ms);
-    collisions.step(elapsed_ms);
+    if (!paused) {
+      // Note: WorldSystem::step runs simply to update FPS counter, but is mostly disabled
+      ai.step(elapsed_ms);
+      physics.step(elapsed_ms);
+      collisions.step(elapsed_ms);
+    }
     audios.step(elapsed_ms);
     renderer.draw();
   }

@@ -322,6 +322,11 @@ void CollisionSystem::routePlayerProjCollisions(Entity player_proj,
   if (registry.activeWalls.has(other)) {
     resolveWallPlayerProjCollision(other, player_proj);
   }
+  if (player_proj != player_projectile) {
+    registry.motions.remove(player_proj);
+    registry.positions.remove(player_proj);
+    registry.renderRequests.remove(player_proj);
+  }
 }
 
 void CollisionSystem::routeConsumableCollisions(Entity consumable,

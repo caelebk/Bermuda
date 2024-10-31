@@ -18,7 +18,7 @@ void modifyOxygen(Entity& entity, Entity& affector);
 void updateEnemyHealthBarPos(Entity& enemy);
 
 // wrapper
-float oxygen_drain(Entity player, float oxygen_deplete_timer,
+float oxygen_drain(float oxygen_deplete_timer,
                    float elapsed_ms_since_last_update);
 
 // helper

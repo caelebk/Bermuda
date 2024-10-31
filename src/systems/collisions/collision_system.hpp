@@ -72,3 +72,5 @@ vec2 get_bounding_box(const Position &position);
 vec4 get_bounds(const Position &position);
 bool circle_collides(const Position &position1, const Position &position2);
 bool box_collides(const Position &position1, const Position &position2);
+
+extern Entity player_projectile;

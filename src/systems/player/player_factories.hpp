@@ -58,16 +58,18 @@ Entity loadNet(RenderSystem* renderer);
 
 // Enum for weapon types
 enum class PROJECTILES {
-  HARPOON = 0,
-  NET = HARPOON + 1,
+  HARPOON    = 0,
+  NET        = HARPOON + 1,
   CONCUSSIVE = NET + 1,
-  TORPEDO = CONCUSSIVE + 1,
-  SHRIMP = TORPEDO + 1,
+  TORPEDO    = CONCUSSIVE + 1,
+  SHRIMP     = TORPEDO + 1,
   PROJ_COUNT = SHRIMP + 1
 };
 
 //////////////////////////////////////////////////////////////
 // Getters
 //////////////////////////////////////////////////////////////
-Entity& getPlayerWeapon(Entity& player);
-Entity& getPlayerProjectile(Entity& player);
+Entity& getPlayerWeapon();
+Entity& getPlayerProjectile();
+
+extern Entity player;

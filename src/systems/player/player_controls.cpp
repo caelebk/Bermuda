@@ -40,7 +40,7 @@ static bool checkWeaponCollisions(Entity entity) {
  * @param player
  * @return
  */
-bool player_movement(int key, int action, int mod, Entity& player) {
+bool player_movement(int key, int action, int mod) {
   // Player movement attributes
   // Player oxygen attributes
   Player& keys          = registry.players.get(player);
@@ -93,8 +93,7 @@ bool player_movement(int key, int action, int mod, Entity& player) {
   return true;
 }
 
-bool player_mouse(int button, int action, int mods, Entity& player,
-                  Entity& player_weapon, Entity& player_projectile, Entity& default_wep) {
+bool player_mouse(int button, int action, int mods, Entity& default_wep) {
   // Shooting the projectile
   if (button == GLFW_MOUSE_BUTTON_LEFT) {
     if (action == GLFW_PRESS &&
@@ -110,22 +109,23 @@ bool player_mouse(int button, int action, int mods, Entity& player,
       if (!checkWeaponCollisions(player_weapon)) {
         return false;
       }
-      Inventory& inv = registry.inventory.get(player);
-      int type = registry.playerProjectiles.get(player_projectile).type;
-      switch (type) { 
+      Inventory& inv  = registry.inventory.get(player);
+      int        type = registry.playerProjectiles.get(player_projectile).type;
+
+      setFiredProjVelo();
+      modifyOxygen(player, player_weapon);
+
+      switch (type) {
         case int(PROJECTILES::NET):
           if (inv.nets == 0) {
             return false;
           }
           inv.nets--;
-          //if (!inv.nets) {
-          //  // TODO: Fix auto-switch dissapearing projectile bug
-          //  swapWeps(player_projectile, default_wep, HARPOON_PROJECTILE);
-          //  player_projectile = default_wep;
-          //}
+          if (!inv.nets) {
+            swapWeps(player_projectile, default_wep, int(PROJECTILES::HARPOON));
+            player_projectile = default_wep;
+          }
       }
-      setFiredProjVelo(player_projectile);
-      modifyOxygen(player, player_weapon);
     }
   }
 
@@ -133,34 +133,56 @@ bool player_mouse(int button, int action, int mods, Entity& player,
 }
 
 void swapWeps(Entity swapped, Entity swapper, int projectile) {
-  registry.motions.remove(swapped);
-  registry.positions.remove(swapped);
-  registry.renderRequests.remove(swapped);
-  registry.playerProjectiles.get(swapped).is_loaded = true;
+  if (registry.playerProjectiles.get(swapped).is_loaded) {
+    registry.motions.remove(swapped);
+    registry.positions.remove(swapped);
+    registry.renderRequests.remove(swapped);
+  }
 
-  vec2 scale = HARPOON_SCALE_FACTOR * HARPOON_BOUNDING_BOX;
-  TEXTURE_ASSET_ID  texture_id = TEXTURE_ASSET_ID::HARPOON;
+  vec2             scale      = HARPOON_SCALE_FACTOR * HARPOON_BOUNDING_BOX;
+  TEXTURE_ASSET_ID texture_id = TEXTURE_ASSET_ID::HARPOON;
 
-  switch (projectile) { 
+  switch (projectile) {
     case int(PROJECTILES::NET):
       scale = NET_SCALE_FACTOR * NET_BOUNDING_BOX;
       // TODO: Change this when net gets a texture
       texture_id = TEXTURE_ASSET_ID::HARPOON;
   }
 
-  // Setting initial positon values
-  Position& position = registry.positions.emplace(swapper);
-  position.scale     = scale;
+  // None of this is necessary if the swapper projectile hasn't collided yet
+  if (registry.playerProjectiles.get(swapper).is_loaded) {
+    // Setting initial positon values
+    Position& position = registry.positions.emplace(swapper);
+    position.scale     = scale;
 
-  // Setting initial motion values
-  // Motion will be used when acting as a projectile and is not loaded into a
-  // Gun
-  Motion& motion      = registry.motions.emplace(swapper);
-  motion.velocity     = {0.f, 0.f};
-  motion.acceleration = {0, 0};
+    // Setting initial motion values
+    // Motion will be used when acting as a projectile and is not loaded into a
+    // Gun
+    Motion& motion      = registry.motions.emplace(swapper);
+    motion.velocity     = {0.f, 0.f};
+    motion.acceleration = {0, 0};
 
-  // Request Render
-  registry.renderRequests.insert(
-      swapper, {texture_id, EFFECT_ASSET_ID::TEXTURED,
-               GEOMETRY_BUFFER_ID::SPRITE});
+    // Request Render
+    registry.renderRequests.insert(
+        swapper,
+        {texture_id, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+  }
+}
+
+void handleWeaponSwapping(int key) {
+  Inventory& inv = registry.inventory.get(player);
+
+  // Switch to harpoon gun
+  if (key == GLFW_KEY_1 && player_projectile != harpoon) {
+    swapWeps(player_projectile, harpoon, int(PROJECTILES::HARPOON));
+    player_projectile = harpoon;
+    wep_type          = (int)PROJECTILES::HARPOON;
+  }
+
+  // Switch to Net
+  if (key == GLFW_KEY_2 && inv.nets && player_projectile != net) {
+    swapWeps(player_projectile, net, int(PROJECTILES::NET));
+    player_projectile = net;
+    wep_type          = (int)PROJECTILES::NET;
+  }
 }

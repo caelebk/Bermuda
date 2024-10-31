@@ -122,9 +122,6 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
-  // Calculate 't value': time loop / loop duration
-  float lerp = elapsed_ms_since_last_update / LOOP_DURATION;
-
   // Updating window title
   std::stringstream title_ss;
   title_ss << "Bermuda      FPS: "
@@ -146,12 +143,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     update_attack(elapsed_ms_since_last_update);
 
     // Deplete oxygen when it is time...
-    oxygen_timer =
-        oxygen_drain(player, oxygen_timer, elapsed_ms_since_last_update);
+    oxygen_timer = oxygen_drain(oxygen_timer, elapsed_ms_since_last_update);
 
     // Update gun and harpoon angle
-    updateWepProjPos(mouse_pos, player, player_weapon, player_projectile,
-                     wep_type);
+    updateWepProjPos(mouse_pos);
 
     float min_counter_ms = 4000.f;
     for (Entity entity : registry.deathTimers.entities) {
@@ -185,34 +180,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       }
     }
 
-    // Set player acceleration (If player is alive)
-    if (!registry.deathTimers.has(player)) {
-      setPlayerAcceleration(player);
-    } else if (registry.motions.has(player)){
-      registry.motions.get(player).acceleration = {0.f, 0.f};
-    }
-
-    // Apply Water friction
-    applyWaterFriction(player);
-
-    // Update player velocity with lerp
-    calculatePlayerVelocity(player, lerp);
-
     check_bounds();
 
-    // Update Entity positions with lerp
-    for (Entity entity : registry.motions.entities) {
-      if (!debuff_entity_can_move(entity)) {
-        continue;
-      }
-      Motion&   motion   = registry.motions.get(entity);
-      Position& position = registry.positions.get(entity);
-      position.position += motion.velocity * lerp;
-      if (registry.oxygen.has(entity) && entity != player) {
-        // make sure health bars follow moving enemies
-        updateEnemyHealthBarPos(entity);
-      }
-    }
     screen.darken_screen_factor = 1 - min_counter_ms / 3000;
   }
   return true;
@@ -260,8 +229,6 @@ void WorldSystem::restart_game() {
   /////////////////////////////////////////////
   // World Reset
   /////////////////////////////////////////////
-  // Reset the game speed
-  current_speed = 1.f;
 
   // Remove all entities that we created
   // All that have a motion, we could also iterate over all fish, eels, ...
@@ -280,8 +247,9 @@ void WorldSystem::restart_game() {
       renderer,
       {130, window_height_px - 140});  // TODO: get player spawn position
   registry.inventory.emplace(player);
-  player_weapon     = getPlayerWeapon(player);
-  player_projectile = getPlayerProjectile(player);
+  // init global variables
+  player_weapon     = getPlayerWeapon();
+  player_projectile = getPlayerProjectile();
   harpoon           = player_projectile;
   wep_type          = (int)PROJECTILES::HARPOON;
   net               = loadNet(renderer);
@@ -374,21 +342,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
       }
     }
 
-    Inventory& inv = registry.inventory.get(player);
-
-    // Switch to harpoon gun
-    if (key == GLFW_KEY_1 && player_projectile != harpoon) {
-      swapWeps(player_projectile, harpoon, int(PROJECTILES::HARPOON));
-      player_projectile = harpoon;
-      wep_type          = (int)PROJECTILES::HARPOON;
-    }
-
-    // Switch to Net
-    if (key == GLFW_KEY_2 && inv.nets && player_projectile != net) {
-      swapWeps(player_projectile, net, int(PROJECTILES::NET));
-      player_projectile = net;
-      wep_type          = (int)PROJECTILES::NET;
-    }
+    // Handle weapon swapping
+    handleWeaponSwapping(key);
   }
 
   // ESC to close game
@@ -396,23 +351,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
 
-  // Control the current speed with `<` `>`
-  if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&
-      key == GLFW_KEY_COMMA) {
-    current_speed -= 0.1f;
-    printf("Current speed = %f\n", current_speed);
-  }
-  if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&
-      key == GLFW_KEY_PERIOD) {
-    current_speed += 0.1f;
-    printf("Current speed = %f\n", current_speed);
-  }
-  current_speed = fmax(0.f, current_speed);
-
   /////////////////////////////////////
   // Player
   /////////////////////////////////////
-  player_movement(key, action, mod, player);
+  player_movement(key, action, mod);
 }
 
 /**
@@ -423,8 +365,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-  player_mouse(button, action, mods, player, player_weapon, player_projectile,
-               harpoon);
+  player_mouse(button, action, mods, harpoon);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {

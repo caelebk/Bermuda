@@ -132,7 +132,6 @@ Entity loadHarpoon(RenderSystem* renderer, vec2 gunPosition) {
   return entity;
 }
 
-
 /********************************************************************************
  * Create net entity
  *
@@ -154,7 +153,7 @@ Entity loadNet(RenderSystem* renderer) {
   projectile.type      = int(PROJECTILES::NET);
 
   OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
-  oxyCost.amount         = NET_OXYGEN_COST;
+  oxyCost.amount          = NET_OXYGEN_COST;
 
   return entity;
 }
@@ -219,7 +218,7 @@ void createOxygenTank(RenderSystem* renderer, Entity& player, vec2 pos) {
  *
  * @param player
  ********************************************************************************/
-Entity& getPlayerWeapon(Entity& player) {
+Entity& getPlayerWeapon() {
   return registry.players.get(player).weapon;
 }
 
@@ -228,7 +227,7 @@ Entity& getPlayerWeapon(Entity& player) {
  *
  * @param player
  ********************************************************************************/
-Entity& getPlayerProjectile(Entity& player) {
-  Entity& player_weapon = getPlayerWeapon(player);
+Entity& getPlayerProjectile() {
+  Entity& player_weapon = getPlayerWeapon();
   return registry.playerWeapons.get(player_weapon).projectile;
 }
