@@ -1,6 +1,7 @@
 #include <numeric>
 #include <algorithm>
 #include <random>
+#include <iterator>
 
 #include "level.hpp"
 
@@ -10,19 +11,45 @@
 #define MIN_CONNECTIONS 1
 #define MAX_CONNECTIONS 4
 
-// An enumeration for programatically defining directions.
-enum Direction {
-  NORTH = 0,
-  EAST = 1,
-  SOUTH = 2,
-  WEST = 3
-};
-
 int get_random(int x, int y) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distribution(x, y);
     return distribution(gen);
+}
+
+std::vector<int> get_random_door_positions(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies, int min, int max) {
+    std::vector<int> positions;
+    
+    // Count the number of elements with the specified direction
+    int count = std::count_if(directed_adjacencies.begin(), directed_adjacencies.end(),
+                              [&](const auto& pair) { return pair.second == direction; });
+    
+    // Generate unique positions with a minimum distance of 2 between them
+    while (positions.size() < count) {
+        int pos = get_random(min, max);
+        bool is_valid = true;
+
+        // Ensure the position is at least 2 units away from both min and max
+        if (pos <= min + 2 || pos >= max - 2) {
+            is_valid = false;
+        }
+        
+        // Ensure each new position is at least 2 units away from existing ones
+        for (int existing_pos : positions) {
+            if (std::abs(existing_pos - pos) < 2) {
+                is_valid = false;
+                break;
+            }
+        }
+        
+        if (is_valid) {
+            positions.push_back(pos);
+        }
+    }
+    
+    std::sort(positions.begin(), positions.end());
+    return positions;
 }
 
 LevelBuilder::LevelBuilder(){};
@@ -61,7 +88,128 @@ RoomBuilder LevelBuilder::copy_room(std::string s_id, std::string copied_s_id) {
   return rooms[s_id];
 };
 
-void LevelBuilder::generate_level_from_graph(std::unordered_map<int, std::set<int>>& adjacency_list) {
+void LevelBuilder::buildRoomRandom() {
+  // preset testing parameters
+  std::vector<int> rooms = {5, 5, 5};
+  std::vector<int> densities = {80, 50, 0};
+
+  std::unordered_map<int, std::set<int>> random_graph = generate_random_graph(rooms, densities);
+  std::unordered_map<int, std::unordered_map<int, Direction>> random_graph_with_doors = generate_graph_door_connections(random_graph);
+  generate_level_from_graph(random_graph_with_doors);
+};
+
+void LevelBuilder::generate_random_horizontal_wall(RoomBuilder& room, RoomBuilder& (*direction)(int), std::unordered_map<int, Direction>& doors) {
+  std::vector<int> door_positions = {3, 6};
+  int door_index = 0;
+  int current_size = 0;
+  while (door_index < door_positions.size() && current_size < MAX_X_UNITS) {
+      int current_door = door_positions[door_index];
+
+      // Calculate the segment before the next door position
+      int segment = current_door - current_size;
+
+      room.right(X_1U * segment);
+      room.door(std::to_string(door_index), X_2U); // door size
+      
+      current_size += segment + 2;
+      door_index++;
+  }
+}
+
+void LevelBuilder::generate_level_from_graph(std::unordered_map<int, std::unordered_map<int, Direction>>& graph) {
+  // Fixed for testing, just make 1 room for now.
+  std::string room_number = "0";
+  std::unordered_map<int, Direction> directed_adjacencies = graph[0];
+
+  // Make a room.
+  RoomBuilder& current_room = room(std::to_string(0));
+
+  std::vector<int> door_positions = get_random_door_positions(WEST, directed_adjacencies, 0, MAX_Y_UNITS);
+  int door_index = 0;
+  int current_size = 0;
+  while (door_index < door_positions.size() && current_size < MAX_Y_UNITS) {
+      int current_door = door_positions[door_index];
+
+      // Calculate the segment before the next door position
+      int segment = current_door - current_size;
+
+      current_room.up(Y_1U * segment);
+      current_room.door(std::to_string(door_index), Y_2U); // door size
+      
+      current_size += segment + 2;
+      door_index++;
+  }
+
+  if (current_size < MAX_Y_UNITS) {
+      int remaining_segment = MAX_Y_UNITS - current_size;
+      current_room.up(Y_1U * remaining_segment);
+  }
+
+  door_positions = get_random_door_positions(NORTH, directed_adjacencies, 0, MAX_X_UNITS);
+  door_index = 0;
+  current_size = 0;
+  while (door_index < door_positions.size() && current_size < MAX_X_UNITS) {
+      int current_door = door_positions[door_index];
+
+      // Calculate the segment before the next door position
+      int segment = current_door - current_size;
+
+      current_room.right(X_1U * segment);
+      current_room.door(std::to_string(door_index), X_2U); // door size
+      
+      current_size += segment + 2;
+      door_index++;
+  }
+
+  if (current_size < MAX_X_UNITS) {
+      int remaining_segment = MAX_X_UNITS - current_size;
+      current_room.right(X_1U * remaining_segment);
+  }
+
+  door_positions = get_random_door_positions(EAST, directed_adjacencies, 0, MAX_Y_UNITS);
+  door_index = 0;
+  current_size = 0;
+  while (door_index < door_positions.size() && current_size < MAX_Y_UNITS) {
+      int current_door = door_positions[door_index];
+
+      // Calculate the segment before the next door position
+      int segment = current_door - current_size;
+
+      current_room.down(Y_1U * segment);
+      current_room.door(std::to_string(door_index), Y_2U); // door size
+      
+      current_size += segment + 2;
+      door_index++;
+  }
+
+  if (current_size < MAX_Y_UNITS) {
+      int remaining_segment = MAX_Y_UNITS - current_size;
+      current_room.down(Y_1U * remaining_segment);
+  }
+
+  door_positions = get_random_door_positions(SOUTH, directed_adjacencies, 0, MAX_X_UNITS);
+  door_index = 0;
+  current_size = 0;
+  while (door_index < door_positions.size() && current_size < MAX_X_UNITS) {
+      int current_door = door_positions[door_index];
+
+      // Calculate the segment before the next door position
+      int segment = current_door - current_size;
+
+      current_room.left(X_1U * segment);
+      current_room.door(std::to_string(door_index), X_2U); // door size
+      
+      current_size += segment + 2;
+      door_index++;
+  }
+
+  if (current_size < MAX_X_UNITS) {
+      int remaining_segment = MAX_X_UNITS - current_size;
+      current_room.left(X_1U * remaining_segment);
+  }
+}
+
+std::unordered_map<int, std::unordered_map<int, Direction>> LevelBuilder::generate_graph_door_connections(std::unordered_map<int, std::set<int>>& adjacency_list) {
   std::unordered_map<int, std::unordered_map<int, Direction>> room_directions;
   std::set<std::pair<int, int>> processed_pairs;
 
@@ -116,6 +264,8 @@ void LevelBuilder::generate_level_from_graph(std::unordered_map<int, std::set<in
     }
     std::cout << "\n";
   }
+
+  return room_directions;
 }
 
 std::unordered_map<int, std::set<int>> LevelBuilder::generate_random_graph(std::vector<int>& rooms, std::vector<int>& densities) {
@@ -222,13 +372,14 @@ std::unordered_map<int, std::set<int>> LevelBuilder::generate_random_graph(std::
 // Note since we transition when moving spaces, these graphs don't have to be planar.
 void LevelBuilder::generate_random_level(std::vector<int> rooms, std::vector<int> densities) {
   std::unordered_map<int, std::set<int>> random_graph = generate_random_graph(rooms, densities);
-  generate_level_from_graph(random_graph);
+  std::unordered_map<int, std::unordered_map<int, Direction>> random_graph_with_doors = generate_graph_door_connections(random_graph);
+  generate_level_from_graph(random_graph_with_doors);
 };
 
 void LevelBuilder::buildRoomOne() {
   room(ROOM_ONE).up(Y_10U).right(X_14U).down(Y_5U).right(X_6U).down(Y_5U).left(
       X_20U);
-};
+}
 
 void LevelBuilder::print_pair(std::pair<std::string, Entity> pair) {
   std::cout << "==================" << std::endl;

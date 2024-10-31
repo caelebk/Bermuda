@@ -95,7 +95,6 @@ void SpaceBuilder<T>::update_bounding_box(Vector &vector) {
 };
 
 template <typename T>
-// Sucks.
 Entity SpaceBuilder<T>::make_boundary(int magnitude) {
     vec2 endpoint = direction(magnitude);
 
@@ -122,7 +121,6 @@ SpaceBuilder<T> &SpaceBuilder<T>::add_wall(int magnitude) {
 };
 
 template <typename T>
-// Also sucks.
 SpaceBuilder<T> &SpaceBuilder<T>::door(std::string s_id, int magnitude) {
    Space &space = registry.spaces.get(entity);
   Entity boundary = make_boundary(magnitude);

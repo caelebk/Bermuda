@@ -21,6 +21,9 @@
  * NOTE: Rooms will have a standard 20 x 10 overall shape
  */
 
+#define MAX_X_UNITS 20
+#define MAX_Y_UNITS 10
+
 #define X_1U (window_width_px) / 22.f // One Room Building Unit in the X Direction
 #define X_2U 2.f * X_1U
 #define X_3U 3.f * X_1U
@@ -53,6 +56,14 @@
 #define Y_9U 9.f * Y_1U
 #define Y_10U 10.f * Y_1U
 
+// An enumeration for programatically defining directions.
+enum Direction {
+  NORTH = 0,
+  EAST = 1,
+  SOUTH = 2,
+  WEST = 3
+};
+
 int get_random(int x, int y);
 
 /**
@@ -67,9 +78,13 @@ private:
 
     void connect(Entity &connectee, Entity &connector);
     void print_pair(std::pair<std::string, Entity> pair);
+    
+    void generate_random_horizontal_wall(RoomBuilder& room, RoomBuilder& (*direction)(int), std::unordered_map<int, Direction>& doors);
+    void generate_random_vertical_wall(RoomBuilder& room, RoomBuilder& (*direction)(int), std::unordered_map<int, Direction>& doors);
 
-    std::unordered_map<int, std::set<int>> generate_random_graph(std::vector<int>& rooms, std::vector<int>& densities);
-    void generate_level_from_graph(std::unordered_map<int, std::set<int>>& graph);
+    std::unordered_map<int, std::set<int>> generate_random_graph(std::vector<int>& rooms, std::vector<int>& adjacency_list);
+    std::unordered_map<int, std::unordered_map<int, Direction>> generate_graph_door_connections(std::unordered_map<int, std::set<int>>& adjacency_list);
+    void generate_level_from_graph(std::unordered_map<int, std::unordered_map<int, Direction>>& graph);
 public:
     LevelBuilder();
 
@@ -116,4 +131,5 @@ public:
     void print_hallways();
 
     void buildRoomOne();
+    void buildRoomRandom();
 };

@@ -111,14 +111,15 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
   level_builder = LevelBuilder();
 
   // Test the randomized room generation
-  level_builder.generate_random_level({5, 5, 5}, {80, 50, 0});
+  // level_builder.generate_random_level({5, 5, 5}, {80, 50, 0});
 
   // Build All Pre-Designed Rooms
-  level_builder.buildRoomOne();
+  // level_builder.buildRoomOne();
+  level_builder.buildRoomRandom();
 
   // Set all states to default
   curr_room =
-      level_builder.room(ROOM_ONE);  // TODO: change based on which room entered
+      level_builder.room("0");  // TODO: change based on which room entered
   curr_room.activate_room();
   restart_game();
 }
@@ -278,11 +279,11 @@ void WorldSystem::restart_game() {
   // Enemy + Drops
   /////////////////////////////////////////////
   // spawn at random places in the room
-  execute_config_rand(LVL_1_RAND_POS, curr_room, renderer);
-  execute_config_rand_chance(LVL_1_RAND_POS, curr_room, renderer, 0.5);
+  // execute_config_rand(LVL_1_RAND_POS, curr_room, renderer);
+  // execute_config_rand_chance(LVL_1_RAND_POS, curr_room, renderer, 0.5);
 
-  // spawn at fixed positions in the room
-  execute_config_fixed(LVL_1_FIXED);
+  // // spawn at fixed positions in the room
+  // execute_config_fixed(LVL_1_FIXED);
 }
 
 /**
