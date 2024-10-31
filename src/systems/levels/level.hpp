@@ -53,6 +53,8 @@
 #define Y_9U 9.f * Y_1U
 #define Y_10U 10.f * Y_1U
 
+int get_random(int x, int y);
+
 /**
  * A high-level OOP to ECS wrapper API that deals with level construction. Currently, it allows you to easily edit components such as
  * a room or hallway's walls, doors, and connections.
@@ -66,6 +68,8 @@ private:
     void connect(Entity &connectee, Entity &connector);
     void print_pair(std::pair<std::string, Entity> pair);
 
+    std::unordered_map<int, std::set<int>> generate_random_graph(std::vector<int>& rooms, std::vector<int>& densities);
+    void generate_level_from_graph(std::unordered_map<int, std::set<int>>& graph);
 public:
     LevelBuilder();
 
@@ -98,14 +102,18 @@ public:
     LevelBuilder &connect_room_to_hallway(std::string r_id, std::string d1_id, std::string h_id, std::string d2_id);
 
     /**
+     * Generates a random level with a given number of rooms and a randomized number of hallways. Each element of the input represents a difficulty
+     * cluster, i.e {7, 5, 3} means 7 easy rooms, 5 medium rooms, and 3 hard rooms. 
+     * Each cluster has exactly one connection between them.
+     */
+    void generate_random_level(std::vector<int> rooms, std::vector<int> densities);
+
+
+    /**
      * Prints all rooms, hallways, (and their individual connections) inside a level in a sort-of human-readable manner for debugging purposes.
      */
     void print_rooms();
     void print_hallways();
 
-    /**
-     * @brief The Following Build Pre-Designed Rooms
-     */
     void buildRoomOne();
-    void buildRoomTwo();
 };

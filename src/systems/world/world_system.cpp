@@ -108,10 +108,13 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
   this->renderer = renderer_arg;
 
-  // Build All Pre-Designed Rooms
   level_builder = LevelBuilder();
+
+  // Test the randomized room generation
+  level_builder.generate_random_level({5, 5, 5}, {80, 50, 0});
+
+  // Build All Pre-Designed Rooms
   level_builder.buildRoomOne();
-  level_builder.buildRoomTwo();
 
   // Set all states to default
   curr_room =

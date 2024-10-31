@@ -31,6 +31,7 @@ protected:
   vec2 pointer;
 
   virtual void new_entity(T entity);
+  virtual Entity make_boundary(int magnitude);
   virtual SpaceBuilder &add_wall(int magnitude);
 
   virtual void update_bounding_box(Vector &vector);
@@ -52,14 +53,10 @@ public:
   virtual SpaceBuilder &right(int magnitude = 0);
   virtual SpaceBuilder &door(std::string s_id, int magnitude = 0);
 
-  /**
-   * Gets a list of vector representations of a room's walls.
-   */
   std::vector<Vector> get_wall_vectors();
-  /**
-   * Gets a list of vector representations of a room's doors.
-   */
   std::vector<Vector> get_door_vectors();
+
+  int count_connections();
 
   /**
    * Activate Room
@@ -76,9 +73,6 @@ public:
    * Get a random position inside a space.
    */
   vec2 get_random_position();
-
-  // virtual SpaceBuilder* rotate_right(int rotations);
-  // virtual SpaceBuilder* rotate_left(int rotations);
 };
 
 template <typename T>
@@ -86,9 +80,9 @@ SpaceBuilder<T>::SpaceBuilder() : direction(), pointer({0, 0}) {}
 
 template <typename T> void SpaceBuilder<T>::new_entity(T entity) {
   this->entity = entity;
-  registry.spaces.insert(entity, Space());
-  registry.adjacencies.insert(entity, Adjacency());
-  registry.bounding_boxes.insert(entity, SpaceBoundingBox());
+  registry.spaces.emplace(entity);
+  registry.adjacencies.emplace(entity);
+  registry.bounding_boxes.emplace(entity);
 }
 
 template <typename T>
@@ -101,22 +95,42 @@ void SpaceBuilder<T>::update_bounding_box(Vector &vector) {
 };
 
 template <typename T>
-SpaceBuilder<T> &SpaceBuilder<T>::add_wall(int magnitude) {
-  if (magnitude != 0) {
+// Sucks.
+Entity SpaceBuilder<T>::make_boundary(int magnitude) {
     vec2 endpoint = direction(magnitude);
 
-    Entity wall = Wall();
+    Entity boundary = Entity();
     Vector vector = Vector(pointer, endpoint);
-    registry.vectors.insert(wall, vector);
+    registry.vectors.insert(boundary, vector);
 
     Space &space = registry.spaces.get(entity);
-    space.walls.push_back(wall);
-    space.boundaries.push_back(wall);
+    space.boundaries.push_back(boundary);
     update_bounding_box(vector);
     pointer = endpoint;
+
+    return boundary;
+}
+
+template <typename T>
+SpaceBuilder<T> &SpaceBuilder<T>::add_wall(int magnitude) {
+  if (magnitude != 0) {
+    Space &space = registry.spaces.get(entity);
+    Entity boundary = make_boundary(magnitude);
+    space.walls.push_back(boundary);
   }
   return *this;
 };
+
+template <typename T>
+// Also sucks.
+SpaceBuilder<T> &SpaceBuilder<T>::door(std::string s_id, int magnitude) {
+   Space &space = registry.spaces.get(entity);
+  Entity boundary = make_boundary(magnitude);
+  doors[s_id] = boundary;
+  registry.adjacencies.emplace(boundary);
+  space.doors.push_back(boundary);
+  return *this;
+}
 
 template <typename T>
 vec2 SpaceBuilder<T>::get_updated_up_position(int magnitude) {
@@ -164,24 +178,6 @@ template <typename T> SpaceBuilder<T> &SpaceBuilder<T>::right(int magnitude) {
     return this->get_updated_right_position(magnitude);
   };
   return add_wall(magnitude);
-}
-
-template <typename T>
-SpaceBuilder<T> &SpaceBuilder<T>::door(std::string s_id, int magnitude) {
-  vec2 endpoint = direction(magnitude);
-
-  Entity door = Door();
-  doors[s_id] = door;
-  Vector vector = Vector(pointer, endpoint);
-  registry.adjacencies.insert(door, Adjacency());
-  registry.vectors.insert(door, vector);
-
-  Space &space = registry.spaces.get(entity);
-  space.doors.push_back(door);
-  space.boundaries.push_back(door);
-  update_bounding_box(vector);
-  pointer = endpoint;
-  return *this;
 }
 
 template <typename T> std::vector<Vector> SpaceBuilder<T>::get_wall_vectors() {
@@ -333,4 +329,8 @@ template <typename T> vec2 SpaceBuilder<T>::rejection_sample() {
 
 template <typename T> vec2 SpaceBuilder<T>::get_random_position() {
   return rejection_sample();
+}
+
+template <typename T> int SpaceBuilder<T>::count_connections() {
+  return registry.adjacencies.get(entity).size();
 }
