@@ -61,71 +61,62 @@ RoomBuilder LevelBuilder::copy_room(std::string s_id, std::string copied_s_id) {
   return rooms[s_id];
 };
 
-void LevelBuilder::generate_level_from_graph(std::unordered_map<int, std::set<int>>& graph) {
-  std::unordered_map<int, std::set<Direction>> room_directions;
+void LevelBuilder::generate_level_from_graph(std::unordered_map<int, std::set<int>>& adjacency_list) {
+  std::unordered_map<int, std::unordered_map<int, Direction>> room_directions;
+  std::set<std::pair<int, int>> processed_pairs;
 
   std::random_device rd;
-  std::default_random_engine rng(rd()); 
+  std::default_random_engine rng(rd());
 
-  // For each adjacency vector in the graph, correspond to each connected room one of the four random cardinal directions.
-  std::vector<Direction> directions = {NORTH, SOUTH, EAST, WEST};
-  for (const auto& pair : graph) {
+  std::vector<Direction> directions = {NORTH, EAST, SOUTH, WEST};
+  for (const auto& pair : adjacency_list) {
     int room_number = pair.first;
-    std::set<int> edges = pair.second;
+    std::vector<int> edges(pair.second.begin(), pair.second.end());
     std::shuffle(directions.begin(), directions.end(), rng);
 
     for (int i = 0; i < (int) edges.size(); i++) {
-      // Insert the door.
-      room_directions[room_number].insert(directions[i]);
+      int other_room = edges[i];
 
-      // Insert the opposite door on the other room.
-      // Super sucks, wow.
-      switch(directions[i]) {
-        case 0: // f(NORTH) = SOUTH
-          room_directions[i].insert(SOUTH);
-          break;
-        case 1: // f(EAST) = WEST
-          room_directions[i].insert(WEST);
-          break;
-        case 2: // f(SOUTH) = NORTH
-          room_directions[i].insert(NORTH);
-          break;
-        case 3: // f(WEST) = EAST
-          room_directions[i].insert(EAST);
-          break;
-        default: 
-          break;        
+      // Skip if already processed in reverse
+      if (processed_pairs.count({room_number, other_room}) || processed_pairs.count({other_room, room_number})) {
+        continue;
       }
+
+      room_directions[room_number][other_room] = directions[i];
+
+      // Set opposite direction for the other room
+      Direction opposite_direction;
+      switch(directions[i]) {
+        case NORTH: opposite_direction = SOUTH; break;
+        case EAST: opposite_direction = WEST; break;
+        case SOUTH: opposite_direction = NORTH; break;
+        case WEST: opposite_direction = EAST; break;
+      }
+      room_directions[other_room][room_number] = opposite_direction;
+
+      // Mark this pair as processed
+      processed_pairs.insert({room_number, other_room});
     }
   }
 
+  // Debugging output
   std::cout << "directions output" << std::endl;
-  for (const auto& pair : room_directions) {
-    int room_number = pair.first;
-    auto directions = pair.second;
+  for (int room_number = 0; room_number < (int) room_directions.size(); room_number++) {
+    std::unordered_map<int, Direction>& directions = room_directions[room_number];
     std::cout << "room " << room_number << ": ";
-    for (int i : graph[room_number]) {
-      std::cout << i;
-      switch(i) {
-        case 0:
-          std::cout << "NORTH ";
-          break;
-        case 1:
-          std::cout << "EAST ";
-          break;
-        case 2:
-          std::cout << "SOUTH ";
-          break;
-        case 3:
-          std::cout << "WEST ";
-          break;
-        default: 
-          break;        
+    for (auto const& direction_pair : directions) {
+      int other_room = direction_pair.first;
+      Direction direction = direction_pair.second;
+      switch(direction) {
+        case NORTH: std::cout << "(NORTH," << other_room << ") "; break;
+        case EAST: std::cout << "(EAST," << other_room << ") "; break;
+        case SOUTH: std::cout << "(SOUTH," << other_room << ") "; break;
+        case WEST: std::cout << "(WEST," << other_room << ") "; break;
       }
     }
     std::cout << "\n";
   }
-};
+}
 
 std::unordered_map<int, std::set<int>> LevelBuilder::generate_random_graph(std::vector<int>& rooms, std::vector<int>& densities) {
   // Make a non-ECS adjacency list as our workspace. This will be ECS-ified once we finish the graph.
@@ -185,7 +176,7 @@ std::unordered_map<int, std::set<int>> LevelBuilder::generate_random_graph(std::
           || adjacency_list[other_room_number].size() >= MAX_CONNECTIONS
         );
 
-        // Leave the entry and exit rooms sparser, since we will need to add connections to connect the sublevels at the end.
+        // Leave the exit room as a funnel point so we can place a mini-boss there. Also leave at least one connection to delineate map difficulty transitions.
         if (
           other_room_number == random_path.back()
           || (other_room_number == first_room_number && adjacency_list[first_room_number].size() >= MAX_CONNECTIONS - 1)
