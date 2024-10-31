@@ -56,6 +56,7 @@ int main() {
   renderer.init(window);
   world.init(&renderer);
   audios.init();
+  ai.init(&renderer);
 
   // variable timestep loop
   auto t = Clock::now();

@@ -75,7 +75,7 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
 }
 
 /**
- * @brief update the position values of an enemy's health bar depending on enemy
+ * @brief update the position values of an entity's health bar depending on entity
  * position
  */
 void updateEnemyHealthBarPos(Entity& enemy) {
@@ -204,7 +204,64 @@ void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen) {
     registry.deathTimers.insert(entity, {4000.f});
     registry.sounds.insert(Entity(), Sound(death_sound));
     registry.sounds.insert(Entity(), Sound(flat_line_sound));
-  } else if (!registry.deathTimers.has(entity) && !registry.players.has(entity)) {
-      registry.deathTimers.emplace(entity);
-    }
+  } else if (!registry.deathTimers.has(entity) &&
+             !registry.players.has(entity)) {
+    registry.deathTimers.emplace(entity);
+  }
+}
+
+void createDefaultHealthbar(RenderSystem* renderer, Entity& entity,
+                            float health, vec2 healthScale, vec2 barScale, vec2 bounding_box) {
+  // Check if entity has a position component
+  if (!registry.positions.has(entity)) {
+    std::cerr << "Error: Entity does not have a position component"
+              << std::endl;
+    return;
+  }
+
+  // Create oxygen and background bar
+  auto oxygenBar     = Entity();
+  auto backgroundBar = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(oxygenBar, &mesh);
+  registry.meshPtrs.emplace(backgroundBar, &mesh);
+
+  // Get position of entity
+  Position& entityPos = registry.positions.get(entity);
+
+  // Setting initial positon values
+  Position& position = registry.positions.emplace(oxygenBar);
+  position.position =
+      entityPos.position -
+      vec2(0.f, entityPos.scale.y / 2 +
+                    ENEMY_O2_BAR_GAP);  // TODO: guesstimate on where the HP
+                                        // should be, update to proper position
+  position.angle         = 0.f;
+  position.scale         = healthScale * bounding_box;
+  position.originalScale = healthScale * bounding_box;
+
+  Position& backgroundPos = registry.positions.emplace(backgroundBar);
+  backgroundPos.position  = position.position;
+  backgroundPos.angle     = 0.f;
+  backgroundPos.scale     = barScale * bounding_box;
+
+  // Set health bar
+  auto& entityOxygen         = registry.oxygen.emplace(entity);
+  entityOxygen.capacity      = health;
+  entityOxygen.level         = health;
+  entityOxygen.rate          = 0.f;
+  entityOxygen.oxygenBar     = oxygenBar;
+  entityOxygen.backgroundBar = backgroundBar;
+
+  // TODO: change to proper texture
+  registry.renderRequests.insert(
+      oxygenBar, {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
+                       EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+
+  registry.renderRequests.insert(
+      backgroundBar,
+      {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR, EFFECT_ASSET_ID::TEXTURED,
+       GEOMETRY_BUFFER_ID::SPRITE});
 }

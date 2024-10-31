@@ -4,6 +4,7 @@
 
 #include "collision_system.hpp"
 #include "enemy_factories.hpp"
+#include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "random.hpp"
 
@@ -22,6 +23,17 @@ static bool checkSpawnCollisions(Entity entity) {
     return false;
   }
   const Position& entityPos = registry.positions.get(entity);
+
+  // Entities can't spawn in the player
+  for (Entity player : registry.players.entities) {
+    if (!registry.positions.has(player)) {
+      continue;
+    }
+    const Position player_pos = registry.positions.get(player);
+    if (box_collides(entityPos, player_pos)) {
+      return false;
+    }
+  }
 
   // Entities can't spawn in walls
   for (Entity wall : registry.activeWalls.entities) {
@@ -123,6 +135,7 @@ Entity createCratePos(RenderSystem* renderer, vec2 position) {
   pos.angle    = 0.f;
   pos.position = position;
   pos.scale    = CRATE_SCALE_FACTOR * CRATE_BOUNDING_BOX;
+  pos.scale *= 4.f;
   if (!checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
     registry.remove_all_components_of(entity);
@@ -141,7 +154,7 @@ Entity createCratePos(RenderSystem* renderer, vec2 position) {
       entity, {TEXTURE_ASSET_ID::BREAKABLE_CRATE, EFFECT_ASSET_ID::TEXTURED,
                GEOMETRY_BUFFER_ID::SPRITE});
 
-  createCrateHealthBar(renderer, entity);
+  createDefaultHealthbar(renderer,entity, CRATE_HEALTH, CRATE_HEALTH_SCALE, CRATE_HEALTH_BAR_SCALE, CRATE_HEALTH_BOUNDING_BOX);
 
   // assign drops
   if (randomSuccess(CRATE_DROP_CHANCE_0)) {
@@ -153,64 +166,3 @@ Entity createCratePos(RenderSystem* renderer, vec2 position) {
   return entity;
 }
 
-/**
- * @brief creates a health bar for a crate
- *
- * @param renderer
- * @param crate - assumed to be a crate
- * @return
- */
-void createCrateHealthBar(RenderSystem* renderer, Entity& crate) {
-  // Check if crate has a position component
-  if (!registry.positions.has(crate)) {
-    std::cerr << "Error: Entity does not have a position component"
-              << std::endl;
-    return;
-  }
-
-  // Create oxygen and background bar
-  auto crateOxygenBar     = Entity();
-  auto crateBackgroundBar = Entity();
-
-  // Store a reference to the potentially re-used mesh object
-  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-  registry.meshPtrs.emplace(crateOxygenBar, &mesh);
-  registry.meshPtrs.emplace(crateBackgroundBar, &mesh);
-
-  // Get position of crate
-  Position& cratePos = registry.positions.get(crate);
-
-  // Setting initial positon values
-  Position& position = registry.positions.emplace(crateOxygenBar);
-  position.position =
-      cratePos.position -
-      vec2(0.f, cratePos.scale.y / 2 +
-                    ENEMY_O2_BAR_GAP);  // TODO: guesstimate on where the HP
-                                        // should be, update to proper position
-  position.angle         = 0.f;
-  position.scale         = CRATE_HEALTH_SCALE * CRATE_HEALTH_BOUNDING_BOX;
-  position.originalScale = CRATE_HEALTH_SCALE * CRATE_HEALTH_BOUNDING_BOX;
-
-  Position& backgroundPos = registry.positions.emplace(crateBackgroundBar);
-  backgroundPos.position  = position.position;
-  backgroundPos.angle     = 0.f;
-  backgroundPos.scale     = CRATE_HEALTH_BAR_SCALE * CRATE_HEALTH_BOUNDING_BOX;
-
-  // Set health bar
-  auto& crateOxygen         = registry.oxygen.emplace(crate);
-  crateOxygen.capacity      = CRATE_HEALTH;
-  crateOxygen.level         = CRATE_HEALTH;
-  crateOxygen.rate          = 0.f;
-  crateOxygen.oxygenBar     = crateOxygenBar;
-  crateOxygen.backgroundBar = crateBackgroundBar;
-
-  // TODO: change to proper texture
-  registry.renderRequests.insert(
-      crateOxygenBar, {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR,
-                       EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
-
-  registry.renderRequests.insert(
-      crateBackgroundBar,
-      {TEXTURE_ASSET_ID::ENEMY_BACKGROUND_BAR, EFFECT_ASSET_ID::TEXTURED,
-       GEOMETRY_BUFFER_ID::SPRITE});
-}

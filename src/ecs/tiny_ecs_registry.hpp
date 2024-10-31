@@ -44,6 +44,9 @@ class ECSRegistry {
 
   // ai related
   ComponentContainer<Wander> wanders;
+  ComponentContainer<WanderLine> wanderLines;
+  ComponentContainer<WanderSquare> wanderSquares;
+  ComponentContainer<TracksPlayer> trackPlayer;
 
   // abilities related
   ComponentContainer<Stun> stuns;
@@ -74,6 +77,7 @@ class ECSRegistry {
   ComponentContainer<Consumable>     consumables;
   ComponentContainer<Drop>     drops;
   ComponentContainer<DebugComponent> debugComponents;
+  ComponentContainer<Emoting> emoting;
 
   // constructor that adds all containers for looping over them
   // IMPORTANT: Don't forget to add any newly added containers!
@@ -97,6 +101,9 @@ class ECSRegistry {
     registry_list.push_back(&oxygenModifiers);
     // ai related
     registry_list.push_back(&wanders);
+    registry_list.push_back(&wanderLines);
+    registry_list.push_back(&wanderSquares);
+    registry_list.push_back(&trackPlayer);
     // abilities related
     registry_list.push_back(&stuns);
     registry_list.push_back(&stunned);
@@ -121,6 +128,7 @@ class ECSRegistry {
     registry_list.push_back(&drops);
     registry_list.push_back(&debugComponents);
     registry_list.push_back(&consumables);
+    registry_list.push_back(&emoting);
   }
 
   void clear_all_components() {

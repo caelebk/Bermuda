@@ -7,6 +7,7 @@
 #include "audio_system.hpp"
 #include "consumable_utils.hpp"
 #include "debuff.hpp"
+#include "enemy_util.hpp"
 #include "map_util.hpp"
 #include "oxygen_system.hpp"
 #include "physics.hpp"
@@ -41,6 +42,10 @@ void PhysicsSystem::step(float elapsed_ms) {
     if (registry.oxygen.has(entity) && entity != player) {
       // make sure health bars follow moving enemies
       updateEnemyHealthBarPos(entity);
+    }
+
+    if (registry.emoting.has(entity)) {
+      updateEmotePos(entity);
     }
   }
 }

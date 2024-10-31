@@ -20,6 +20,17 @@ static bool checkSpawnCollisions(Entity entity) {
   }
   const Position& enemyPos = registry.positions.get(entity);
 
+  // Entities can't spawn in the player
+  for (Entity player : registry.players.entities) {
+    if (!registry.positions.has(player)) {
+      continue;
+    }
+    const Position player_pos = registry.positions.get(player);
+    if (box_collides(enemyPos, player_pos)) {
+      return false;
+    }
+  }
+
   // Entities can't spawn in walls
   for (Entity wall : registry.activeWalls.entities) {
     if (!registry.positions.has(wall)) {

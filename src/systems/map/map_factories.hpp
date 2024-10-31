@@ -31,7 +31,5 @@ Entity createGeyserPos(RenderSystem *renderer, vec2 position);
 
 
 Entity createCratePos(RenderSystem *renderer, vec2 position);
-void createCrateHealthBar(RenderSystem *renderer, Entity &crate);
-
 
 Entity createGeyserPos(RenderSystem* renderer, vec2 position);

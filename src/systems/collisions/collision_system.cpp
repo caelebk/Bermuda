@@ -1,8 +1,10 @@
 #include "collision_system.hpp"
 #include <cstdio>
 
+#include "ai.hpp"
 #include "enemy.hpp"
 #include "oxygen.hpp"
+#include "tiny_ecs_registry.hpp"
 
 // Returns the local bounding coordinates scaled by entity size
 vec2 get_bounding_box(const Position& position) {
@@ -384,6 +386,12 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
   modifyOxygen(enemy, player_proj);
   playerproj_motion.velocity  = vec2(0.0f, 0.0f);
   player_projectile.is_loaded = true;
+
+  // make enemies that track the player briefly start tracking them regardless of range
+  if (registry.trackPlayer.has(enemy)) {
+    TracksPlayer &tracks = registry.trackPlayer.get(enemy);
+    tracks.active_track = true;
+  }
 }
 
 void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,

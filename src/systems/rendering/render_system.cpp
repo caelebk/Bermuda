@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 
+#include "misc.hpp"
 #include "oxygen_system.hpp"
 #include "tiny_ecs_registry.hpp"
 
@@ -242,6 +243,13 @@ void RenderSystem::draw() {
           registry.renderRequests.has(enemyOxygen.oxygenBar)) {
         drawTexturedMesh(enemyOxygen.backgroundBar, projection_2D);
         drawTexturedMesh(enemyOxygen.oxygenBar, projection_2D);
+      }
+      if (registry.emoting.has(enemy)) {
+        Emoting& emote = registry.emoting.get(enemy);
+        if (registry.renderRequests.has(emote.child)) {
+          drawTexturedMesh(emote.child, projection_2D);
+        } 
+
       }
     }
   }
