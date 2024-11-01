@@ -95,7 +95,9 @@ void updateEnemyHealthBarPos(Entity& enemy) {
       registry.positions.get(enemyOxygen.backgroundBar);
 
   oxygenBarPos.position =
-      enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP);
+      enemyPos.position -
+      vec2((oxygenBarPos.originalScale.x - oxygenBarPos.scale.x) / 2,
+           enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP);
   backgroundBarPos.position =
       enemyPos.position - vec2(0.f, enemyPos.scale.y / 2 + ENEMY_O2_BAR_GAP);
 }
