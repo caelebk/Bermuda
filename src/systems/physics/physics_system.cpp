@@ -62,7 +62,7 @@ void updateWepProjPos(vec2 mouse_pos) {
   if (registry.playerProjectiles.get(player_projectile).is_loaded) {
     vec2 relative_pos = HARPOON_RELATIVE_POS_FROM_GUN;
     switch (wep_type) {
-      case ((int)PROJECTILES::NET):
+      case (PROJECTILES::NET):
         relative_pos = NET_RELATIVE_POS_FROM_GUN;
     }
 
