@@ -57,20 +57,24 @@ class WorldSystem {
   float         oxygen_timer;
   vec2          mouse_pos;
 
-  // Consumable Entities
-  Entity concussive;
-  Entity torpedo;
-  Entity shrimp;
-
   // C++ random number generator
   std::default_random_engine            rng;
   std::uniform_real_distribution<float> uniform_dist;  // number between 0..1
 };
 
-extern bool   paused;
-extern Entity player;
-extern Entity player_weapon;
-extern Entity player_projectile;
-extern Entity harpoon;
-extern Entity net;
-extern int    wep_type;
+extern bool        paused;
+extern Entity      player;
+extern Entity      player_weapon;
+extern Entity      player_projectile;
+extern Entity      harpoon;
+extern Entity      net;
+extern Entity      concussive;
+extern Entity      torpedo;
+extern Entity      shrimp;
+extern PROJECTILES wep_type;
+
+extern Entity harpoon_gun;
+extern Entity net_gun;
+extern Entity concussive_gun;
+extern Entity torpedo_gun;
+extern Entity shrimp_gun;

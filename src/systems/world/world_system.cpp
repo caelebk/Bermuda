@@ -142,7 +142,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     for (Entity cursor : registry.cursors.entities) {
       if (registry.positions.has(cursor)) {
         Position& cursor_pos = registry.positions.get(cursor);
-        cursor_pos.position = vec2((float) mouse_pos.x, (float) mouse_pos.y);
+        cursor_pos.position  = vec2((float)mouse_pos.x, (float)mouse_pos.y);
       }
     }
 
@@ -174,8 +174,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         screen.darken_screen_factor = 0;
         restart_game();
         return true;
-      } else if (registry.drops.has(entity) &&
-                  registry.positions.has(entity)) {
+      } else if (registry.drops.has(entity) && registry.positions.has(entity)) {
         Drop&     drop = registry.drops.get(entity);
         Position& pos  = registry.positions.get(entity);
 
@@ -257,11 +256,24 @@ void WorldSystem::restart_game() {
   // init global variables
   player_weapon     = getPlayerWeapon();
   player_projectile = getPlayerProjectile();
+  harpoon_gun       = player_weapon;
   harpoon           = player_projectile;
-  wep_type          = (int)PROJECTILES::HARPOON;
+  wep_type          = PROJECTILES::HARPOON;
   net               = loadNet(renderer);
+  concussive        = loadConcussive(renderer);
+  torpedo           = loadTorpedo(renderer);
+  shrimp            = loadShrimp(renderer);
 
-  // TODO: make projectiles for the other consumables
+  // Note: It's important that these are set after the projectile globals
+  // becuase they're dependant on them being set
+  net_gun =
+      createConsumableGun(renderer, NET_GUN_OXYGEN_COST, PROJECTILES::NET);
+  concussive_gun = createConsumableGun(renderer, CONCUSSIVE_GUN_OXYGEN_COST,
+                                       PROJECTILES::CONCUSSIVE);
+  torpedo_gun    = createConsumableGun(renderer, TORPEDO_GUN_OXYGEN_COST,
+                                       PROJECTILES::TORPEDO);
+  shrimp_gun     = createConsumableGun(renderer, SHRIMP_GUN_OXYGEN_COST,
+                                       PROJECTILES::SHRIMP);
 
   createOxygenTank(
       renderer, player,
@@ -374,7 +386,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-  player_mouse(button, action, mods, harpoon);
+  player_mouse(button, action, mods, harpoon, harpoon_gun);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {

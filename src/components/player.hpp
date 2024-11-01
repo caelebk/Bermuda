@@ -1,12 +1,23 @@
 #pragma once
+
 // Player HUD component
 struct PlayerHUD {};
+
+// Enum for weapon types
+enum class PROJECTILES {
+  HARPOON    = 0,
+  NET        = HARPOON + 1,
+  CONCUSSIVE = NET + 1,
+  TORPEDO    = CONCUSSIVE + 1,
+  SHRIMP     = TORPEDO + 1,
+  PROJ_COUNT = SHRIMP + 1
+};
 
 // Projectile component
 struct PlayerProjectile {
   bool is_loaded = false;  // flags whether to follow a weapon's position or act
                            // as a projectile
-  int type;
+  PROJECTILES type;
 };
 
 // Weapon component

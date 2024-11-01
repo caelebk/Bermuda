@@ -16,19 +16,24 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
-bool paused;
+bool   paused;
 Entity player;
 
 // Consumable Entities
-Entity player_weapon;
-Entity player_projectile;
-Entity harpoon;
-Entity net;
-int    wep_type;
-// TODO: uncomment these as they are implemented
-//Entity concussive;
-//Entity torpedo;
-//Entity shrimp;
+Entity      player_weapon;
+Entity      player_projectile;
+Entity      harpoon;
+Entity      net;
+Entity      concussive;
+Entity      torpedo;
+Entity      shrimp;
+PROJECTILES wep_type;
+
+Entity harpoon_gun;
+Entity net_gun;
+Entity concussive_gun;
+Entity torpedo_gun;
+Entity shrimp_gun;
 
 // Entry point
 int main() {
@@ -73,10 +78,10 @@ int main() {
         1000;
     t = now;
 
-    
     world.step(elapsed_ms);
     if (!paused) {
-      // Note: WorldSystem::step runs simply to update FPS counter, but is mostly disabled
+      // Note: WorldSystem::step runs simply to update FPS counter, but is
+      // mostly disabled
       ai.step(elapsed_ms);
       physics.step(elapsed_ms);
       collisions.step(elapsed_ms);

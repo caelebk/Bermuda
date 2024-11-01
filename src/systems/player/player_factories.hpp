@@ -26,7 +26,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos);
 void createOxygenTank(RenderSystem* renderer, Entity& player, vec2 pos);
 
 //////////////////////////////////////////////////////////////
-// Gun
+// Guns
 //////////////////////////////////////////////////////////////
 #define GUN_SCALE_FACTOR vec2(0.60f)
 #define GUN_BOUNDING_BOX vec2(60.f, 32.f)
@@ -34,7 +34,31 @@ void createOxygenTank(RenderSystem* renderer, Entity& player, vec2 pos);
 #define HARPOON_GUN_OXYGEN_COST -25.f
 
 Entity createLoadedGun(RenderSystem* renderer, vec2 ammoPosition,
-                       int projectile);
+                       PROJECTILES projectile);
+
+// TODO: Change these based on Andy's sprite dimensions
+#define NET_GUN_SCALE_FACTOR vec2(0.60f)
+#define NET_GUN_BOUNDING_BOX vec2(60.f, 32.f)
+#define NET_GUN_RELATIVE_POS_FROM_PLAYER vec2(40.f, 0.f)
+#define NET_GUN_OXYGEN_COST -30.f
+
+#define CONCUSSIVE_GUN_SCALE_FACTOR vec2(0.60f)
+#define CONCUSSIVE_GUN_BOUNDING_BOX vec2(60.f, 32.f)
+#define CONCUSSIVE_GUN_RELATIVE_POS_FROM_PLAYER vec2(40.f, 0.f)
+#define CONCUSSIVE_GUN_OXYGEN_COST -35.f
+
+#define TORPEDO_GUN_SCALE_FACTOR vec2(0.60f)
+#define TORPEDO_GUN_BOUNDING_BOX vec2(60.f, 32.f)
+#define TORPEDO_GUN_RELATIVE_POS_FROM_PLAYER vec2(40.f, 0.f)
+#define TORPEDO_GUN_OXYGEN_COST -50.f
+
+#define SHRIMP_GUN_SCALE_FACTOR vec2(0.60f)
+#define SHRIMP_GUN_BOUNDING_BOX vec2(60.f, 32.f)
+#define SHRIMP_GUN_RELATIVE_POS_FROM_PLAYER vec2(40.f, 0.f)
+#define SHRIMP_GUN_OXYGEN_COST -100.f
+
+Entity createConsumableGun(RenderSystem* renderer, float oxy_cost,
+                           PROJECTILES projectile);
 
 //////////////////////////////////////////////////////////////
 // Load Harpoon
@@ -57,15 +81,29 @@ Entity loadHarpoon(RenderSystem* renderer, vec2 gunPosition);
 
 Entity loadNet(RenderSystem* renderer);
 
-// Enum for weapon types
-enum class PROJECTILES {
-  HARPOON    = 0,
-  NET        = HARPOON + 1,
-  CONCUSSIVE = NET + 1,
-  TORPEDO    = CONCUSSIVE + 1,
-  SHRIMP     = TORPEDO + 1,
-  PROJ_COUNT = SHRIMP + 1
-};
+// TODO: Change values based on Andy's sprite dimensions
+#define CONCUSSIVE_SCALE_FACTOR vec2(0.60f)
+#define CONCUSSIVE_BOUNDING_BOX vec2(64.f, 26.f)
+#define CONCUSSIVE_RELATIVE_POS_FROM_GUN vec2(20.f, -2.f)
+#define CONCUSSIVE_OXYGEN_COST 0.f
+
+Entity loadConcussive(RenderSystem* renderer);
+
+// TODO: Change values based on Andy's sprite dimensions
+#define TORPEDO_SCALE_FACTOR vec2(0.60f)
+#define TORPEDO_BOUNDING_BOX vec2(64.f, 26.f)
+#define TORPEDO_RELATIVE_POS_FROM_GUN vec2(20.f, -2.f)
+#define TORPEDO_OXYGEN_COST -50.f
+
+Entity loadTorpedo(RenderSystem* renderer);
+
+// TODO: Change values based on Andy's sprite dimensions
+#define SHRIMP_SCALE_FACTOR vec2(0.60f)
+#define SHRIMP_BOUNDING_BOX vec2(64.f, 26.f)
+#define SHRIMP_RELATIVE_POS_FROM_GUN vec2(20.f, -2.f)
+#define SHRIMP_OXYGEN_COST -100.f
+
+Entity loadShrimp(RenderSystem* renderer);
 
 //////////////////////////////////////////////////////////////
 // Getters
@@ -74,3 +112,8 @@ Entity& getPlayerWeapon();
 Entity& getPlayerProjectile();
 
 extern Entity player;
+extern Entity harpoon;
+extern Entity net;
+extern Entity concussive;
+extern Entity torpedo;
+extern Entity shrimp;
