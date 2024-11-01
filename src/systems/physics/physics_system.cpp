@@ -108,11 +108,6 @@ void setPlayerAcceleration() {
 void calculatePlayerVelocity(float lerp) {
   Motion& motion = registry.motions.get(player);
 
-  if (!debuff_entity_can_move(player)) {
-    motion.velocity = {0.f, 0.f};
-    return;
-  }
-
   motion.velocity += motion.acceleration * lerp;
 
   if (abs(motion.acceleration.x) == WATER_FRICTION &&

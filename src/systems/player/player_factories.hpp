@@ -53,6 +53,7 @@ Entity loadHarpoon(RenderSystem* renderer, vec2 gunPosition);
 #define NET_BOUNDING_BOX vec2(64.f, 26.f)
 #define NET_RELATIVE_POS_FROM_GUN vec2(20.f, -2.f)
 #define NET_OXYGEN_COST 0.f
+#define NET_STUN_DURATION 5000.0f
 
 Entity loadNet(RenderSystem* renderer);
 

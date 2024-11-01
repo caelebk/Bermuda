@@ -99,7 +99,7 @@ void CollisionSystem::collision_detection() {
       }
 
       Position& position_j = registry.positions.get(entity_j);
-      if (box_collides(position_i, position_j)) {
+      if (circle_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
         registry.collisions.emplace_with_duplicates(entity_j, entity_i);
       }
@@ -387,6 +387,8 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
   playerproj_motion.velocity  = vec2(0.0f, 0.0f);
   player_projectile.is_loaded = true;
 
+  handle_debuffs(enemy, player_proj);
+  
   // make enemies that track the player briefly start tracking them regardless of range
   if (registry.trackPlayer.has(enemy)) {
     TracksPlayer &tracks = registry.trackPlayer.get(enemy);

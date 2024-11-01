@@ -9,6 +9,9 @@
 #include "physics.hpp"
 #include "random.hpp"
 #include "tiny_ecs.hpp"
+#include <debuff.hpp>
+
+
 #include "tiny_ecs_registry.hpp"
 
 static inline bool is_tracking(Entity e) {
@@ -36,6 +39,11 @@ void AISystem::do_wander_ai(float elapsed_ms) {
     if (wander.active_dir_cd > 0) {
       continue;
     }
+
+    if (!debuff_entity_can_move(e)) {
+      continue;
+    }
+
     wander.active_dir_cd = wander.change_dir_cd;
 
     if (!registry.motions.has(e)) {

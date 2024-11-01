@@ -10,16 +10,16 @@
  * @brief adds stunned to the player if the player isn't already stunned and the
  * enemy is able to stun
  *
- * @param enemy
- * @param player
+ * @param stun_entity
+ * @param stunned_entity
  * @return true if success
  */
-bool handle_stun(Entity enemy, Entity player) {
-  if (registry.stuns.has(enemy)) {
-    if (!registry.stunned.has(player)) {
+bool handle_stun(Entity stun_entity, Entity stunned_entity) {
+  if (registry.stuns.has(stun_entity)) {
+    if (!registry.stunned.has(stunned_entity)) {
       std::cout << "Stunned!" << std::endl;
-      Stun&    stun    = registry.stuns.get(enemy);
-      Stunned& stunned = registry.stunned.emplace(player);
+      Stun&    stun    = registry.stuns.get(stun_entity);
+      Stunned& stunned = registry.stunned.emplace(stunned_entity);
       stunned.duration = stun.duration;
     }
     return false;
@@ -36,7 +36,7 @@ bool handle_stun(Entity enemy, Entity player) {
 bool debuff_entity_can_move(Entity& entity) {
   if (registry.stunned.has(entity)) {
     Stunned& stunned = registry.stunned.get(entity);
-    if (stunned.duration >= STUN_MOVEMENT_THRESHOLD_MS) {
+    if (stunned.duration >= STUN_MOVEMENT_THRESHOLD_MS) {      
       return false;
     }
   }
@@ -69,14 +69,14 @@ bool update_debuffs(float elapsed_ms_since_last_update) {
 /**
  * @brief does all debuff checks that the player would need
  *
- * @param enemy
- * @param player
+ * @param debuffed_entity
+ * @param debuff_entity
  * @return
  */
-bool handle_debuffs(Entity player, Entity enemy) {
+bool handle_debuffs(Entity debuffed_entity, Entity debuff_entity) {
   bool success = true;
 
-  success &= handle_stun(enemy, player);
+  success &= handle_stun(debuff_entity, debuffed_entity);
 
   return success;
 }
