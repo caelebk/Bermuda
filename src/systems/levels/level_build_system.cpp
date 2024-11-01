@@ -47,9 +47,9 @@ void level_builder_demo() {
       .right(2)
       .down(6)
       .left(6);
-  level_builder.connect_room_to_hallway("room_1_with_doors", "s", "hallway_1",
+  level_builder.connect_rooms("room_1_with_doors", "s", "hallway_1",
                                         "n");
-  level_builder.connect_room_to_hallway("room_2", "n", "hallway_1", "s");
+  level_builder.connect_rooms("room_2", "n", "hallway_1", "s");
 
   // You can also get a random position in a room.
   vec2 position = level_builder.room("room_1_with_doors").get_random_position();

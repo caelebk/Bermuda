@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <random>
 #include <iterator>
+#include <string>
 
 #include "level.hpp"
 
@@ -18,7 +19,18 @@ int get_random(int x, int y) {
     return distribution(gen);
 }
 
-std::vector<int> get_random_door_positions(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies, int min, int max) {
+Direction get_opposite_direction(Direction direction) {
+  switch(direction) {
+    case NORTH: return SOUTH;
+    case EAST: return WEST;
+    case SOUTH: return NORTH;
+    case WEST: return EAST;
+  }
+};
+
+LevelBuilder::LevelBuilder(){};
+
+std::vector<int> LevelBuilder::get_random_door_positions(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies, int min, int max) {
     std::vector<int> positions;
     
     // Count the number of elements with the specified direction
@@ -31,13 +43,13 @@ std::vector<int> get_random_door_positions(Direction direction, std::unordered_m
         bool is_valid = true;
 
         // Ensure the position is at least 2 units away from both min and max
-        if (pos <= min + 2 || pos >= max - 2) {
+        if (pos <= min + DOOR_SCALAR || pos >= max - DOOR_SCALAR) {
             is_valid = false;
         }
         
         // Ensure each new position is at least 2 units away from existing ones
         for (int existing_pos : positions) {
-            if (std::abs(existing_pos - pos) < 2) {
+            if (std::abs(existing_pos - pos) < DOOR_SCALAR) {
                 is_valid = false;
                 break;
             }
@@ -52,8 +64,6 @@ std::vector<int> get_random_door_positions(Direction direction, std::unordered_m
     return positions;
 }
 
-LevelBuilder::LevelBuilder(){};
-
 RoomBuilder& LevelBuilder::room(std::string s_id) {
   return rooms[s_id];
 };
@@ -66,15 +76,16 @@ void LevelBuilder::connect(Entity& connectee, Entity& connector) {
   registry.adjacencies.get(connectee).neighbours.push_back(connector);
 };
 
-LevelBuilder& LevelBuilder::connect_room_to_hallway(std::string r_id,
-                                                    std::string d1_id,
-                                                    std::string r2_id,
-                                                    std::string d2_id) {
+LevelBuilder& LevelBuilder::connect_rooms(std::string r_id,
+                                          std::string d1_id,
+                                          std::string r2_id,
+                                          std::string d2_id) {
   RoomBuilder&    room    = rooms[r_id];
   RoomBuilder&    room_2 =  rooms[r2_id];
 
   connect(room.entity, room_2.entity);
-  connect(room_2.doors[d1_id], room.doors[d2_id]);
+  connect(room.doors[d1_id], room_2.doors[d2_id]);
+  connect(room_2.doors[d2_id], room.doors[d1_id]);
   connect(room_2.entity, room.entity);
   return *this;
 };
@@ -88,17 +99,8 @@ RoomBuilder LevelBuilder::copy_room(std::string s_id, std::string copied_s_id) {
   return rooms[s_id];
 };
 
-void LevelBuilder::buildRoomRandom() {
-  std::vector<int> rooms = {5, 5, 5};
-  std::vector<int> densities = {80, 50, 0};
-
-  std::unordered_map<int, std::set<int>> random_graph = generate_random_graph(rooms, densities);
-  std::unordered_map<int, std::unordered_map<int, Direction>> random_graph_with_doors = generate_graph_door_connections(random_graph);
-  generate_level_from_graph(random_graph_with_doors);
-};
-
-void LevelBuilder::build_wall_with_doors(RoomBuilder& room, std::vector<int> door_positions, int max_units, int unit_size, int door_size, std::function<void(int)> draw_segment, std::function<void(std::string, int)> draw_door) {
-  int door_index = 0;
+void LevelBuilder::build_wall_with_doors(Direction direction, RoomBuilder& room, std::vector<int> door_positions, int max_units, int unit_size, std::function<void(int)> draw_segment, std::function<void(std::string, int)> draw_door) {
+  int door_index = 0; // directed_adjacencies.size() == door_positions.size()
   int current_size = 0;
   while (door_index < (int) door_positions.size() && current_size < max_units) {
       int current_door = door_positions[door_index];
@@ -107,9 +109,12 @@ void LevelBuilder::build_wall_with_doors(RoomBuilder& room, std::vector<int> doo
       int segment = current_door - current_size;
 
       draw_segment(unit_size * segment);
-      draw_door(std::to_string(door_index), door_size);
+      // Generate a door with the id: <direction_enum>_<room_number>; i.e NORTH to room 1 is 0_1.
+      std::string door_id;
+      // door_id.append();
+      draw_door(door_id, 2 * unit_size);
 
-      current_size += segment + 2; // Update for door and segment size
+      current_size += segment + DOOR_SCALAR; // Update for door and segment size
       door_index++;
   }
 
@@ -120,9 +125,9 @@ void LevelBuilder::build_wall_with_doors(RoomBuilder& room, std::vector<int> doo
   }
 };
 
-void LevelBuilder::generate_level_from_graph(std::unordered_map<int, std::unordered_map<int, Direction>>& graph) {
-  // Fixed for testing, just make 1 room for now.
-  for (const auto& pair : graph) {
+void LevelBuilder::randomize_room_shapes(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list) {
+  // Randomize only the door placements for now; randomizing room shapes is non-trivial and requires more sophistication.
+  for (const auto& pair : adjacency_list) {
     std::string room_number = std::to_string(pair.first);
     std::unordered_map<int, Direction> directed_adjacencies = pair.second;
 
@@ -132,31 +137,31 @@ void LevelBuilder::generate_level_from_graph(std::unordered_map<int, std::unorde
     std::vector<int> door_positions;
     // west
     door_positions = get_random_door_positions(WEST, directed_adjacencies, 0, MAX_Y_UNITS);
-    build_wall_with_doors(current_room, door_positions, MAX_Y_UNITS, Y_1U, Y_2U,
+    build_wall_with_doors(WEST, directed_adjacencies, current_room, door_positions, MAX_Y_UNITS, Y_1U,
         [&](int segment) { current_room.up(segment); },
         [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
 
     // north
     door_positions = get_random_door_positions(SOUTH, directed_adjacencies, 0, MAX_X_UNITS);
-    build_wall_with_doors(current_room, door_positions, MAX_X_UNITS, X_1U, X_2U,
+    build_wall_with_doors(SOUTH, directed_adjacencies, current_room, door_positions, MAX_X_UNITS, X_1U,
         [&](int segment) { current_room.right(segment); },
         [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
 
     // east
     door_positions = get_random_door_positions(EAST, directed_adjacencies, 0, MAX_Y_UNITS);
-    build_wall_with_doors(current_room, door_positions, MAX_Y_UNITS, Y_1U, Y_2U,
+    build_wall_with_doors(EAST, directed_adjacencies, current_room, door_positions, MAX_Y_UNITS, Y_1U,
         [&](int segment) { current_room.down(segment); },
         [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
 
     // south
     door_positions = get_random_door_positions(NORTH, directed_adjacencies, 0, MAX_X_UNITS);
-    build_wall_with_doors(current_room, door_positions, MAX_X_UNITS, X_1U, X_2U,
+    build_wall_with_doors(NORTH, directed_adjacencies, current_room, door_positions, MAX_X_UNITS, X_1U,
         [&](int segment) { current_room.left(segment); },
         [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
   }
 }
 
-std::unordered_map<int, std::unordered_map<int, Direction>> LevelBuilder::generate_graph_door_connections(std::unordered_map<int, std::set<int>>& adjacency_list) {
+std::unordered_map<int, std::unordered_map<int, Direction>> LevelBuilder::generate_random_graph_doors(std::unordered_map<int, std::set<int>>& adjacency_list) {
   std::unordered_map<int, std::unordered_map<int, Direction>> room_directions;
   std::set<std::pair<int, int>> processed_pairs;
 
@@ -180,13 +185,7 @@ std::unordered_map<int, std::unordered_map<int, Direction>> LevelBuilder::genera
       room_directions[room_number][other_room] = directions[i];
 
       // Set opposite direction for the other room
-      Direction opposite_direction;
-      switch(directions[i]) {
-        case NORTH: opposite_direction = SOUTH; break;
-        case EAST: opposite_direction = WEST; break;
-        case SOUTH: opposite_direction = NORTH; break;
-        case WEST: opposite_direction = EAST; break;
-      }
+      Direction opposite_direction = get_opposite_direction(directions[i]);
       room_directions[other_room][room_number] = opposite_direction;
 
       // Mark this pair as processed
@@ -195,7 +194,7 @@ std::unordered_map<int, std::unordered_map<int, Direction>> LevelBuilder::genera
   }
 
   // Debugging output
-  std::cout << "directions output" << std::endl;
+  std::cout << "Adjacency List with Door Connections" << std::endl;
   for (int room_number = 0; room_number < (int) room_directions.size(); room_number++) {
     std::unordered_map<int, Direction>& directions = room_directions[room_number];
     std::cout << "room " << room_number << ": ";
@@ -304,7 +303,7 @@ std::unordered_map<int, std::set<int>> LevelBuilder::generate_random_graph(std::
   }
 
   // debug printing 
-  std::cout << "final output" << std::endl;
+  std::cout << "Adjacency List" << std::endl;
   for (int i = 0; i < total_rooms; i++) {
     std::cout << "room " << i << ": ";
     for (int j : adjacency_list[i]) {
@@ -316,11 +315,39 @@ std::unordered_map<int, std::set<int>> LevelBuilder::generate_random_graph(std::
   return adjacency_list;
 };
 
+void LevelBuilder::connect_doors(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list) {
+  for (const auto& adjacency_list_pair : adjacency_list) {
+    std::string r1 = std::to_string(adjacency_list_pair.first);
+    std::unordered_map<int, Direction> directed_adjacencies = adjacency_list_pair.second;
+
+    // Do this by iterating over directed adjacencies for each room_number, and connecting the corresponding door to the one at adjacency_list[other_room][room_number].
+    for (const auto& adjacency_pair : directed_adjacencies) {
+      std::string r2 = std::to_string(adjacency_pair.first);
+      Direction direction = adjacency_pair.second;
+      std::string d1;
+      d1.append(r2).append("_").append(std::to_string(direction));
+      std::string d2;
+      d2.append(r1).append("_").append(std::to_string(get_opposite_direction(direction)));
+
+      connect_rooms(r1, d1, r2, d2);
+    }
+  }
+}
+
 // Note since we transition when moving spaces, these graphs don't have to be planar.
 void LevelBuilder::generate_random_level(std::vector<int> rooms, std::vector<int> densities) {
+  // Generate a randomized graph with constraints so we can pass over the graph again and ECS-ify its vertices and edges into rooms and connections.
   std::unordered_map<int, std::set<int>> random_graph = generate_random_graph(rooms, densities);
-  std::unordered_map<int, std::unordered_map<int, Direction>> random_graph_with_doors = generate_graph_door_connections(random_graph);
-  generate_level_from_graph(random_graph_with_doors);
+  // Pass over the generated graph, greedily and randomly associating each edge (door) with a direction. Since the graph is undirected, do the same for the exit door, with
+  // the opposite direction.
+  std::unordered_map<int, std::unordered_map<int, Direction>> random_graph_with_doors = generate_random_graph_doors(random_graph);
+
+  // Now, we can turn the graph with directions for each door into ECS entities and components.
+  // First, randomize the placement of each door in each room such that it maps to the direction we assigned; i.e if we have assigned EAST to a door in the graph generation
+  // phase, it should be somewhere on the left wall. Add all created entities to the ECS.
+  randomize_room_shapes(random_graph_with_doors);
+  // Now that all the doors are in place, pass over each door and connect them in the ECS.
+  connect_doors(random_graph_with_doors);
 };
 
 void LevelBuilder::buildRoomOne() {

@@ -24,6 +24,8 @@
 #define MAX_X_UNITS 20
 #define MAX_Y_UNITS 10
 
+#define DOOR_SCALAR 2
+
 #define X_1U (window_width_px) / 22.f // One Room Building Unit in the X Direction
 #define X_2U 2.f * X_1U
 #define X_3U 3.f * X_1U
@@ -65,6 +67,7 @@ enum Direction {
 };
 
 int get_random(int x, int y);
+Direction get_opposite_direction(Direction direction);
 
 /**
  * A high-level OOP to ECS wrapper API that deals with level construction. Currently, it allows you to easily edit components such as
@@ -79,17 +82,18 @@ private:
     void connect(Entity &connectee, Entity &connector);
     void print_pair(std::pair<std::string, Entity> pair);
 
-    void build_wall_with_doors(RoomBuilder& room, std::vector<int> door_positions, 
-                              int max_units, int unit_size, int door_size, 
+    std::vector<int> get_random_door_positions(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies, int min, int max);
+    void build_wall_with_doors(Direction direction,
+                              std::vector<int> other_rooms,
+                              RoomBuilder& room, std::vector<int> door_positions, 
+                              int max_units, int unit_size,
                               std::function<void(int)> draw_segment,
                               std::function<void(std::string, int)> draw_door);
 
-    // void build_room(RoomBuilder& current_room, 
-    //                 const std::vector<std::vector<int>>& directed_adjacencies);
-
     std::unordered_map<int, std::set<int>> generate_random_graph(std::vector<int>& rooms, std::vector<int>& adjacency_list);
-    std::unordered_map<int, std::unordered_map<int, Direction>> generate_graph_door_connections(std::unordered_map<int, std::set<int>>& adjacency_list);
-    void generate_level_from_graph(std::unordered_map<int, std::unordered_map<int, Direction>>& graph);
+    std::unordered_map<int, std::unordered_map<int, Direction>> generate_random_graph_doors(std::unordered_map<int, std::set<int>>& adjacency_list);
+    void randomize_room_shapes(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
+    void connect_doors(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
 public:
     LevelBuilder();
 
@@ -119,7 +123,7 @@ public:
      * @param h_id: the second room's key.
      * @param d1_id: the door in the second room's key.
      */
-    LevelBuilder &connect_room_to_hallway(std::string r_id, std::string d1_id, std::string r2_id, std::string d2_id);
+    LevelBuilder &connect_rooms(std::string r_id, std::string d1_id, std::string r2_id, std::string d2_id);
 
     /**
      * Generates a random level with a given number of rooms and a randomized number of hallways. Each element of the input represents a difficulty
@@ -136,5 +140,4 @@ public:
     void print_hallways();
 
     void buildRoomOne();
-    void buildRoomRandom();
 };
