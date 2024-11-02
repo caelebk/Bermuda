@@ -1,4 +1,5 @@
 
+#include "ai_system.hpp"
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
 
@@ -15,14 +16,37 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
+bool   paused;
+Entity player;
+
+// Consumable Entities
+Entity      player_weapon;
+Entity      player_projectile;
+Entity      harpoon;
+Entity      net;
+Entity      concussive;
+Entity      torpedo;
+Entity      shrimp;
+PROJECTILES wep_type;
+
+Entity harpoon_gun;
+Entity net_gun;
+Entity concussive_gun;
+Entity torpedo_gun;
+Entity shrimp_gun;
+
 // Entry point
 int main() {
   // Global systems
   WorldSystem     world;
   RenderSystem    renderer;
+  AISystem        ai;
   PhysicsSystem   physics;
   AudioSystem     audios;
   CollisionSystem collisions;
+
+  // TODO: Change this to true when pause menu is implemented
+  paused = false;
 
   // Initializing window
   GLFWwindow* window = world.create_window();
@@ -37,6 +61,7 @@ int main() {
   renderer.init(window);
   world.init(&renderer);
   audios.init();
+  ai.init(&renderer);
 
   // variable timestep loop
   auto t = Clock::now();
@@ -54,8 +79,13 @@ int main() {
     t = now;
 
     world.step(elapsed_ms);
-    physics.step(elapsed_ms);
-    collisions.step(elapsed_ms);
+    if (!paused) {
+      // Note: WorldSystem::step runs simply to update FPS counter, but is
+      // mostly disabled
+      ai.step(elapsed_ms);
+      physics.step(elapsed_ms);
+      collisions.step(elapsed_ms);
+    }
     audios.step(elapsed_ms);
     renderer.draw();
   }

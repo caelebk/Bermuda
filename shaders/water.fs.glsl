@@ -15,6 +15,7 @@ vec2 distort(vec2 uv)
 
 vec4 color_shift(vec4 in_color) 
 {
+	in_color.xyz = in_color.xyz * vec3(0.1 * sin(-0.1 * time) + 0.6, 0.9, 0.9);
 	return in_color;
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "level.hpp"
+#include "random.hpp"
 #include "render_system.hpp"
 #include <functional>
 #include <glm/ext/vector_float2.hpp>
@@ -45,10 +46,8 @@ void execute_config_rand_chance(
     const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p)>>
         &funcs,
     SpaceBuilder<T> &space_builder, RenderSystem *renderer, float chance) {
-  std::default_random_engine rng;
-  std::uniform_real_distribution<float> uniform_dist; // number between 0..1
   for (const auto &func : funcs) {
-    if (chance >= uniform_dist(rng)) {
+    if (randomSuccess(chance)) {
       vec2 loc;
       do {
         loc = space_builder.get_random_position();

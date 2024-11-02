@@ -1,8 +1,13 @@
 #include "physics_system.hpp"
 
+#include <cstdio>
+#include <iostream>
+#include <world_system.hpp>
+
 #include "audio_system.hpp"
 #include "consumable_utils.hpp"
 #include "debuff.hpp"
+#include "enemy_util.hpp"
 #include "map_util.hpp"
 #include "oxygen_system.hpp"
 #include "physics.hpp"
@@ -10,21 +15,42 @@
 #include "tiny_ecs_registry.hpp"
 
 void PhysicsSystem::step(float elapsed_ms) {
-  auto& motion_registry   = registry.motions;
-  auto& position_registry = registry.positions;
-  for (uint i = 0; i < motion_registry.size(); i++) {
-    Entity    entity   = motion_registry.entities[i];
-    Motion&   motion   = motion_registry.get(entity);
-    Position& position = position_registry.get(entity);
+  // Calculate 't value': time loop / loop duration
+  float lerp = elapsed_ms / LOOP_DURATION;
 
-    float step_seconds = elapsed_ms / 1000.f;
-    vec2  distance     = (motion.velocity) * step_seconds;
-    position.position += distance;
+  // Set player acceleration (If player is alive)
+  if (!registry.deathTimers.has(player)) {
+    setPlayerAcceleration();
+  } else if (registry.motions.has(player)) {
+    registry.motions.get(player).acceleration = {0.f, 0.f};
+  }
+
+  // Apply Water friction
+  applyWaterFriction(player);
+
+  // Update player velocity with lerp
+  calculatePlayerVelocity(lerp);
+
+  // Update Entity positions with lerp
+  for (Entity entity : registry.motions.entities) {
+    if (!debuff_entity_can_move(entity)) {
+      continue;
+    }
+    Motion&   motion   = registry.motions.get(entity);
+    Position& position = registry.positions.get(entity);
+    position.position += motion.velocity * lerp;
+    if (registry.oxygen.has(entity) && entity != player) {
+      // make sure health bars follow moving enemies
+      updateEnemyHealthBarPos(entity);
+    }
+
+    if (registry.emoting.has(entity)) {
+      updateEmotePos(entity);
+    }
   }
 }
 
-void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon,
-                      Entity player_projectile) {
+void updateWepProjPos(vec2 mouse_pos) {
   vec2      player_pos     = registry.positions.get(player).position;
   vec2      pos_cursor_vec = mouse_pos - player_pos;
   float     angle          = atan2(pos_cursor_vec.y, pos_cursor_vec.x);
@@ -34,14 +60,20 @@ void updateWepProjPos(vec2 mouse_pos, Entity player, Entity player_weapon,
   weapon_pos.position      = calculate_pos_vec(GUN_RELATIVE_POS_FROM_PLAYER.x,
                                                player_pos, weapon_pos.angle);
   if (registry.playerProjectiles.get(player_projectile).is_loaded) {
-    proj_pos.angle    = angle;
-    proj_pos.position = calculate_pos_vec(
-        HARPOON_RELATIVE_POS_FROM_GUN.x, weapon_pos.position, proj_pos.angle,
-        {0.f, HARPOON_RELATIVE_POS_FROM_GUN.y});
+    vec2 relative_pos = HARPOON_RELATIVE_POS_FROM_GUN;
+    switch (wep_type) {
+      case (PROJECTILES::NET):
+        relative_pos = NET_RELATIVE_POS_FROM_GUN;
+    }
+
+    proj_pos.angle = angle;
+    proj_pos.position =
+        calculate_pos_vec(relative_pos.x, weapon_pos.position, proj_pos.angle,
+                          {0.f, relative_pos.y});
   }
 }
 
-void setFiredProjVelo(Entity player_projectile) {
+void setFiredProjVelo() {
   PlayerProjectile& proj = registry.playerProjectiles.get(player_projectile);
   proj.is_loaded         = false;
   float angle            = registry.positions.get(player_projectile).angle;
@@ -50,7 +82,7 @@ void setFiredProjVelo(Entity player_projectile) {
   registry.sounds.insert(player_projectile, Sound(blast_sound));
 }
 
-void setPlayerAcceleration(Entity player) {
+void setPlayerAcceleration() {
   Motion& motion      = registry.motions.get(player);
   Player& keys        = registry.players.get(player);
   motion.acceleration = {0.f, 0.f};
@@ -73,13 +105,8 @@ void setPlayerAcceleration(Entity player) {
   }
 }
 
-void calculatePlayerVelocity(Entity player, float lerp) {
+void calculatePlayerVelocity(float lerp) {
   Motion& motion = registry.motions.get(player);
-
-  if (!debuff_entity_can_move(player)) {
-    motion.velocity = {0.f, 0.f};
-    return;
-  }
 
   motion.velocity += motion.acceleration * lerp;
 

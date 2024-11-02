@@ -1,30 +1,44 @@
 #pragma once
 
 #include "common.hpp"
+#include "enemy.hpp"
+#include "oxygen.hpp"
 #include "render_system.hpp"
 #include "tiny_ecs.hpp"
-#include "oxygen.hpp"
-#include "enemy.hpp"
 
 #define LOW_OXYGEN_THRESHOLD 0.2f
 
 // deplete oxygen (passive consumption over time)
-void depleteOxygen(Entity &entity);
+void depleteOxygen(Entity& entity);
 
 // affector modifies entity's oxygen/health
-void modifyOxygen(Entity &entity, Entity &affector);
+void modifyOxygen(Entity& entity, Entity& affector);
+
+// update position of enemy health bars
+void updateEnemyHealthBarPos(Entity& enemy);
+
+// wrapper
+float oxygen_drain(float oxygen_deplete_timer,
+                   float elapsed_ms_since_last_update);
 
 // helper
-bool isDeadAfterChange(Oxygen &oxygen, float amount);
+bool isModOnCooldown(Entity& oxygenModifier);
 
-// checks player oxygen and renders oxygen bar (calls checkOxygenLevel)
-void checkAndRenderOxygen(Entity &entity, Oxygen &oxygen, float amount);
+// helper
+float calcDeltaOxygen(Oxygen& entity_oxygen, float oxygenModifierAmount);
 
-// checks if player oxygen is low and adds/removes lowOxygen component
-void checkOxygenLevel(Entity &entity);
+// helper
+void updateHealthBarRender(Entity& entity, Oxygen& entity_oxygen,
+                           float deltaOxygen);
 
-// updates position of enemy and associated health bar
-void updateHealthBarAndEnemyPos(Entity &enemy);
+// helper
+void updateOxygenLvlStatus(Oxygen& entity_oxygen);
 
-float oxygen_drain(Entity player, float oxygen_deplete_timer,
-                   float elapsed_ms_since_last_update);
+// helper
+void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen);
+
+void createDefaultHealthbar(RenderSystem* renderer, Entity& entity,
+                            float health, vec2 healthScale, vec2 barScale,
+                            vec2 bounding_box);
+
+void renderHealthBar(Oxygen& entity_oxygen);

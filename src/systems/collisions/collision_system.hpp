@@ -57,8 +57,8 @@ private:
     //Wall <-> Player Projectile
     void resolveWallEnemyCollision(Entity wall, Entity enemy);
 
-    //Wall <-> Player
-    void resolveWallPlayerCollision(Entity wall, Entity player);
+    //Wall <-> Something that should stop on the wall
+    void resolveStopOnWall(Entity wall, Entity entity);
 
     //Door <-> Player
     void resolveDoorPlayerCollision(Entity door, Entity player);
@@ -75,3 +75,5 @@ vec2 get_bounding_box(const Position &position);
 vec4 get_bounds(const Position &position);
 bool circle_collides(const Position &position1, const Position &position2);
 bool box_collides(const Position &position1, const Position &position2);
+
+extern Entity player_projectile;

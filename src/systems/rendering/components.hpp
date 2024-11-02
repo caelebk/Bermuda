@@ -1,9 +1,9 @@
 #pragma once
+#include <vector>
+
 #include "../ext/stb_image/stb_image.h"
 #include "common.hpp"
 #include "misc.hpp"
-
-#include <vector>
 // Sets the brightness of the screen
 struct ScreenState {
   float darken_screen_factor = -1;
@@ -24,13 +24,13 @@ struct TexturedVertex {
 
 // Mesh datastructure for storing vertex and index buffers
 struct Mesh {
-  static bool loadFromOBJFile(std::string obj_path,
-                              std::vector<ColoredVertex> &out_vertices,
-                              std::vector<uint16_t> &out_vertex_indices,
-                              vec2 &out_size);
-  vec2 original_size = {1, 1};
+  static bool                loadFromOBJFile(std::string                 obj_path,
+                                             std::vector<ColoredVertex>& out_vertices,
+                                             std::vector<uint16_t>&      out_vertex_indices,
+                                             vec2&                       out_size);
+  vec2                       original_size = {1, 1};
   std::vector<ColoredVertex> vertices;
-  std::vector<uint16_t> vertex_indices;
+  std::vector<uint16_t>      vertex_indices;
 };
 
 /**
@@ -59,41 +59,51 @@ struct Mesh {
  */
 
 enum class TEXTURE_ASSET_ID {
-  PLAYER = 0,
-  GUN = PLAYER + 1,
-  HARPOON = GUN + 1,
-  PLAYER_OXYGEN_TANK = HARPOON + 1,
-  PLAYER_OXYGEN_BAR = PLAYER_OXYGEN_TANK + 1,
+  CURSOR               = 0,
+  PLAYER               = CURSOR + 1,
+  GUN                  = PLAYER + 1,
+  HARPOON              = GUN + 1,
+  PLAYER_OXYGEN_TANK   = HARPOON + 1,
+  PLAYER_OXYGEN_BAR    = PLAYER_OXYGEN_TANK + 1,
   ENEMY_BACKGROUND_BAR = PLAYER_OXYGEN_BAR + 1,
   ENEMY_OXYGEN_BAR = ENEMY_BACKGROUND_BAR + 1,
-  WALL = ENEMY_OXYGEN_BAR + 1,
+  EMOTE_EXCLAMATION = ENEMY_OXYGEN_BAR + 1,
+  EMOTE_QUESTION = EMOTE_EXCLAMATION + 1,
+  WALL = EMOTE_QUESTION + 1,
   JELLY = WALL + 1,
-  FISH = JELLY + 1,
-  OXYGEN_TANK = FISH + 1,
-  GEYSER = OXYGEN_TANK + 1,
+  FISH0 = JELLY + 1,
+  FISH1 = FISH0 + 1,
+  FISH2 = FISH1 + 1,
+  FISH3 = FISH2 + 1,
+  FISH4 = FISH3 + 1,
+  SHARK = FISH4 + 1,
+  KRAB = SHARK + 1,
+  BREAKABLE_CRATE = KRAB + 1,
+  OXYGEN_CANISTER = BREAKABLE_CRATE + 1,
+  GEYSER = OXYGEN_CANISTER + 1,
   TEXTURE_COUNT = GEYSER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
-  COLOURED = 0,
-  TEXTURED = COLOURED + 1,
+  COLOURED        = 0,
+  TEXTURED        = COLOURED + 1,
   TEXTURED_OXYGEN = TEXTURED + 1,
-  WATER = TEXTURED_OXYGEN + 1,
-  EFFECT_COUNT = WATER + 1
+  WATER           = TEXTURED_OXYGEN + 1,
+  EFFECT_COUNT    = WATER + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-  SPRITE = 0,
-  DEBUG_LINE = SPRITE + 1,
+  SPRITE          = 0,
+  DEBUG_LINE      = SPRITE + 1,
   SCREEN_TRIANGLE = DEBUG_LINE + 1,
-  GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
+  GEOMETRY_COUNT  = SCREEN_TRIANGLE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
 struct RenderRequest {
-  TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
-  EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
+  TEXTURE_ASSET_ID   used_texture  = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+  EFFECT_ASSET_ID    used_effect   = EFFECT_ASSET_ID::EFFECT_COUNT;
   GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };

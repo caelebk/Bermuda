@@ -14,6 +14,9 @@ bool update_death(float elapsed_ms_since_last_update) {
       registry.deathTimers.remove(entity);
       if (registry.players.has(entity)) {
         return true;
+      } else if (registry.drops.has(entity)) {
+
+        registry.remove_all_components_of(entity);
       } else {
         registry.remove_all_components_of(entity);
       }

@@ -200,9 +200,6 @@ template <typename T> void SpaceBuilder<T>::activate_boundary(Entity& boundary) 
 }
 
 template <typename T> void SpaceBuilder<T>::deactive_boundary(Entity& boundary) {
-  if (registry.collidables.has(boundary)) {
-    registry.collidables.remove(boundary);
-  }
   if (registry.positions.has(boundary)) {
     registry.positions.remove(boundary);
   }
@@ -228,7 +225,6 @@ template <typename T> void SpaceBuilder<T>::activate_room() {
   for (Entity& wall : registry.spaces.get(entity).walls) {
     activate_boundary(wall);
     registry.activeWalls.emplace(wall);
-    registry.collidables.emplace(wall);
     registry.renderRequests.insert(wall, {TEXTURE_ASSET_ID::WALL,
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
@@ -237,7 +233,6 @@ template <typename T> void SpaceBuilder<T>::activate_room() {
   for (Entity& door : registry.spaces.get(entity).doors) {
     activate_boundary(door);
     registry.activeDoors.emplace(door);
-    registry.collidables.emplace(door);
   }
 }
 

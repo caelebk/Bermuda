@@ -203,8 +203,27 @@ void RenderSystem::initializeGlGeometryBuffers() {
  * Standard Crosshair Cursor
  ********************************************************************************/
 void RenderSystem::initializeGlCursor() {
-  GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
-  glfwSetCursor(window, cursor);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+  auto cursor = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(cursor, &mesh);
+
+  // Setting initial position values
+  Position& position = registry.positions.emplace(cursor);
+  position.position  = vec2(0.f);
+  position.angle     = 0.f;
+  position.scale     = vec2(32.f);
+
+  // Make Cursor
+  registry.cursors.emplace(cursor);
+
+  // Request Render
+  registry.renderRequests.insert(
+      cursor, {TEXTURE_ASSET_ID::CURSOR, EFFECT_ASSET_ID::TEXTURED,
+               GEOMETRY_BUFFER_ID::SPRITE});
 }
 
 RenderSystem::~RenderSystem() {

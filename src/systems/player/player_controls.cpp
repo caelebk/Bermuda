@@ -40,7 +40,7 @@ static bool checkWeaponCollisions(Entity entity) {
  * @param player
  * @return
  */
-bool player_movement(int key, int action, int mod, Entity& player) {
+bool player_movement(int key, int action, int mod) {
   // Player movement attributes
   // Player oxygen attributes
   Player& keys          = registry.players.get(player);
@@ -93,8 +93,8 @@ bool player_movement(int key, int action, int mod, Entity& player) {
   return true;
 }
 
-bool player_mouse(int button, int action, int mods, Entity& player,
-                  Entity& player_weapon, Entity& player_projectile) {
+bool player_mouse(int button, int action, int mods, Entity& default_wep,
+                  Entity& default_gun) {
   // Shooting the projectile
   if (button == GLFW_MOUSE_BUTTON_LEFT) {
     if (action == GLFW_PRESS &&
@@ -110,10 +110,198 @@ bool player_mouse(int button, int action, int mods, Entity& player,
       if (!checkWeaponCollisions(player_weapon)) {
         return false;
       }
-      setFiredProjVelo(player_projectile);
+      Inventory&  inv  = registry.inventory.get(player);
+      PROJECTILES type = registry.playerProjectiles.get(player_projectile).type;
+
+      // Debug statement
+      printf("Weapon type: %d\n", type);
+
+      setFiredProjVelo();
       modifyOxygen(player, player_weapon);
+
+      switch (type) {
+        case PROJECTILES::NET:
+          if (!inv.nets) {
+            return false;
+          }
+          inv.nets--;
+          if (!inv.nets) {
+            doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+          }
+          break;
+        case PROJECTILES::CONCUSSIVE:
+          if (!inv.concussors) {
+            return false;
+          }
+          inv.concussors--;
+          if (!inv.concussors) {
+            doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+          }
+          break;
+        case PROJECTILES::TORPEDO:
+          if (!inv.torpedos) {
+            return false;
+          }
+          inv.torpedos--;
+          if (!inv.torpedos) {
+            doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+          }
+          break;
+        case PROJECTILES::SHRIMP:
+          if (!inv.shrimp) {
+            return false;
+          }
+          inv.shrimp--;
+          if (!inv.shrimp) {
+            doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+          }
+          break;
+      }
+      // Debug Statements:
+      printf("Nets: %d\n", inv.nets);
+      printf("Concussive charges: %d\n", inv.concussors);
+      printf("Torpedos: %d\n", inv.torpedos);
+      printf("Shrimp Charges: %d\n\n", inv.shrimp);
     }
   }
 
   return true;
+}
+
+void swapWeps(Entity swapped, Entity swapper, PROJECTILES projectile) {
+  if (registry.playerProjectiles.get(swapped).is_loaded) {
+    registry.motions.remove(swapped);
+    registry.positions.remove(swapped);
+    registry.renderRequests.remove(swapped);
+  }
+
+  vec2             scale      = HARPOON_SCALE_FACTOR * HARPOON_BOUNDING_BOX;
+  TEXTURE_ASSET_ID texture_id = TEXTURE_ASSET_ID::HARPOON;
+
+  switch (projectile) {
+    case PROJECTILES::NET:
+      scale = NET_SCALE_FACTOR * NET_BOUNDING_BOX;
+      // TODO: Change this when net gets a texture
+      texture_id = TEXTURE_ASSET_ID::HARPOON;
+      break;
+    case PROJECTILES::CONCUSSIVE:
+      scale = CONCUSSIVE_SCALE_FACTOR * CONCUSSIVE_BOUNDING_BOX;
+      // TODO: Change this when concussive gets a texture
+      texture_id = TEXTURE_ASSET_ID::HARPOON;
+      break;
+    case PROJECTILES::TORPEDO:
+      scale = TORPEDO_SCALE_FACTOR * TORPEDO_BOUNDING_BOX;
+      // TODO: Change this when torpedo gets a texture
+      texture_id = TEXTURE_ASSET_ID::HARPOON;
+      break;
+    case PROJECTILES::SHRIMP:
+      scale = TORPEDO_SCALE_FACTOR * TORPEDO_BOUNDING_BOX;
+      // TODO: Change this when shrimp gets a texture
+      texture_id = TEXTURE_ASSET_ID::HARPOON;
+      break;
+  }
+
+  // None of this is necessary if the swapper projectile hasn't collided yet
+  if (registry.playerProjectiles.get(swapper).is_loaded) {
+    // Setting initial positon values
+    Position& position = registry.positions.emplace(swapper);
+    position.scale     = scale;
+
+    // Setting initial motion values
+    // Motion will be used when acting as a projectile and is not loaded into a
+    // Gun
+    Motion& motion      = registry.motions.emplace(swapper);
+    motion.velocity     = {0.f, 0.f};
+    motion.acceleration = {0, 0};
+
+    // Request Render
+    registry.renderRequests.insert(
+        swapper,
+        {texture_id, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+  }
+}
+
+void handleGunSwap(Entity swapped, Entity swapper, PROJECTILES projectile) {
+  registry.motions.remove(swapped);
+  registry.positions.remove(swapped);
+  registry.renderRequests.remove(swapped);
+
+  vec2             scale      = GUN_SCALE_FACTOR * GUN_BOUNDING_BOX;
+  TEXTURE_ASSET_ID texture_id = TEXTURE_ASSET_ID::GUN;
+
+  switch (projectile) {
+    case PROJECTILES::NET:
+      scale = NET_GUN_SCALE_FACTOR * NET_GUN_BOUNDING_BOX;
+      // TODO: Change this when net gun gets a texture
+      texture_id = TEXTURE_ASSET_ID::GUN;
+      break;
+    case PROJECTILES::CONCUSSIVE:
+      scale = CONCUSSIVE_GUN_SCALE_FACTOR * CONCUSSIVE_GUN_BOUNDING_BOX;
+      // TODO: Change this when concussive gun gets a texture
+      texture_id = TEXTURE_ASSET_ID::GUN;
+      break;
+    case PROJECTILES::TORPEDO:
+      scale = TORPEDO_GUN_SCALE_FACTOR * TORPEDO_GUN_BOUNDING_BOX;
+      // TODO: Change this when torpedo gun gets a texture
+      texture_id = TEXTURE_ASSET_ID::GUN;
+      break;
+    case PROJECTILES::SHRIMP:
+      scale = SHRIMP_GUN_SCALE_FACTOR * SHRIMP_GUN_BOUNDING_BOX;
+      // TODO: Change this when shrimp gun gets a texture
+      texture_id = TEXTURE_ASSET_ID::GUN;
+      break;
+  }
+
+  // Setting initial position values
+  Position& position = registry.positions.emplace(swapper);
+  position.scale     = scale;
+
+  // Setting initial motion values
+  Motion& motion      = registry.motions.emplace(swapper);
+  motion.velocity     = {0.f, 0.f};
+  motion.acceleration = {0, 0};
+
+  // Request Render
+  registry.renderRequests.insert(
+      swapper,
+      {texture_id, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+}
+
+void handleWeaponSwapping(int key) {
+  Inventory& inv = registry.inventory.get(player);
+
+  // Switch to harpoon gun
+  if (key == GLFW_KEY_1 && player_projectile != harpoon) {
+    doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+  }
+
+  // Switch to Net
+  if (key == GLFW_KEY_2 && inv.nets && player_projectile != net) {
+    doWeaponSwap(net, net_gun, PROJECTILES::NET);
+  }
+
+  // Switch to Concussive
+  if (key == GLFW_KEY_3 && inv.concussors && player_projectile != concussive) {
+    doWeaponSwap(concussive, concussive_gun, PROJECTILES::CONCUSSIVE);
+  }
+
+  // Switch to Torpedo
+  if (key == GLFW_KEY_4 && inv.torpedos && player_projectile != torpedo) {
+    doWeaponSwap(torpedo, torpedo_gun, PROJECTILES::TORPEDO);
+  }
+
+  // Switch to Pistol Shrimp
+  if (key == GLFW_KEY_5 && inv.shrimp && player_projectile != shrimp) {
+    doWeaponSwap(shrimp, shrimp_gun, PROJECTILES::SHRIMP);
+  }
+}
+
+// Helper for handleWeaponSwapping and player_mouse
+void doWeaponSwap(Entity swapper_proj, Entity swapper_wep,
+                  PROJECTILES projectile) {
+  swapWeps(player_projectile, swapper_proj, projectile);
+  handleGunSwap(player_weapon, swapper_wep, projectile);
+  player_projectile = swapper_proj;
+  player_weapon     = swapper_wep;
+  wep_type          = projectile;
 }
