@@ -1,4 +1,5 @@
 #include "spawning.hpp"
+
 #include "random.hpp"
 #include "tiny_ecs_registry.hpp"
 
@@ -45,6 +46,19 @@ bool remove_all_entities() {
 
   while (registry.interactable.entities.size() > 0) {
     registry.remove_all_components_of(registry.interactable.entities.back());
+  }
+
+  while (registry.playerWeapons.entities.size() > 0) {
+    registry.remove_all_components_of(registry.playerWeapons.entities.back());
+  }
+
+  while (registry.playerProjectiles.entities.size() > 0) {
+    registry.remove_all_components_of(
+        registry.playerProjectiles.entities.back());
+  }
+
+  while (registry.oxygenModifiers.entities.size() > 0) {
+    registry.remove_all_components_of(registry.oxygenModifiers.entities.back());
   }
 
   return true;

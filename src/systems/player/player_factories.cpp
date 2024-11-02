@@ -34,7 +34,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos) {
 
   // Request Render
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::PLAYER, EFFECT_ASSET_ID::TEXTURED,
+      entity, {TEXTURE_ASSET_ID::PLAYER, EFFECT_ASSET_ID::PLAYER,
                GEOMETRY_BUFFER_ID::SPRITE});
 
   return entity;
@@ -186,7 +186,7 @@ Entity loadNet(RenderSystem* renderer) {
   OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
   oxyCost.amount          = NET_OXYGEN_COST;
 
-  Stun& stun = registry.stuns.emplace(entity);
+  Stun& stun    = registry.stuns.emplace(entity);
   stun.duration = NET_STUN_DURATION;
 
   return entity;

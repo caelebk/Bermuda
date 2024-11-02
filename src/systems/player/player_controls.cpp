@@ -1,6 +1,7 @@
 #include "player_controls.hpp"
 
 #include "collision_system.hpp"
+#include "inventory_HUD.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "player_factories.hpp"
@@ -93,8 +94,8 @@ bool player_movement(int key, int action, int mod) {
   return true;
 }
 
-bool player_mouse(int button, int action, int mods, Entity& default_wep,
-                  Entity& default_gun) {
+bool player_mouse(RenderSystem* renderer, int button, int action, int mods,
+                  Entity& default_wep, Entity& default_gun) {
   // Shooting the projectile
   if (button == GLFW_MOUSE_BUTTON_LEFT) {
     if (action == GLFW_PRESS &&
@@ -125,6 +126,7 @@ bool player_mouse(int button, int action, int mods, Entity& default_wep,
             return false;
           }
           inv.nets--;
+          updateInventoryCounter(renderer, INVENTORY::NET, inv.nets);
           if (!inv.nets) {
             doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
           }
@@ -134,6 +136,8 @@ bool player_mouse(int button, int action, int mods, Entity& default_wep,
             return false;
           }
           inv.concussors--;
+          updateInventoryCounter(renderer, INVENTORY::CONCUSSIVE,
+                                 inv.concussors);
           if (!inv.concussors) {
             doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
           }
@@ -143,6 +147,7 @@ bool player_mouse(int button, int action, int mods, Entity& default_wep,
             return false;
           }
           inv.torpedos--;
+          updateInventoryCounter(renderer, INVENTORY::TORPEDO, inv.torpedos);
           if (!inv.torpedos) {
             doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
           }
@@ -152,6 +157,7 @@ bool player_mouse(int button, int action, int mods, Entity& default_wep,
             return false;
           }
           inv.shrimp--;
+          updateInventoryCounter(renderer, INVENTORY::SHRIMP, inv.shrimp);
           if (!inv.shrimp) {
             doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
           }
@@ -304,4 +310,22 @@ void doWeaponSwap(Entity swapper_proj, Entity swapper_wep,
   player_projectile = swapper_proj;
   player_weapon     = swapper_wep;
   wep_type          = projectile;
+}
+
+Entity createPauseMenu(RenderSystem* renderer) {
+  auto pause_menu = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(pause_menu, &mesh);
+
+  // Setting initial position values
+  Position& position = registry.positions.emplace(pause_menu);
+  position.position  = vec2(window_width_px / 2.f, window_height_px / 2.f);
+  position.angle     = 0.f;
+  position.scale     = vec2(window_width_px, window_height_px);
+
+  registry.pauseMenus.emplace(pause_menu);
+
+  return pause_menu;
 }

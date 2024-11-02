@@ -20,3 +20,7 @@ struct GameCursor {
 struct Emoting {
   Entity child;
 };
+
+struct PauseMenu {
+
+};

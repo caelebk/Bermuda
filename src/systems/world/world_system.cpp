@@ -9,6 +9,7 @@
 #include "debuff.hpp"
 #include "enemy_factories.hpp"
 #include "enemy_util.hpp"
+#include "inventory_HUD.hpp"
 #include "level_spawn.hpp"
 #include "map_factories.hpp"
 #include "map_util.hpp"
@@ -23,6 +24,7 @@
 #include <GLFW/glfw3.h>
 
 #include <cassert>
+#include <damage.hpp>
 #include <iostream>
 #include <sstream>
 
@@ -113,6 +115,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
   level_builder.activate_starting_room();
 
   restart_game();
+  restart_game();
 }
 
 // Update our game world
@@ -134,6 +137,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     ////////////////////////////////////////////////////////
     // Processing the player state
     ////////////////////////////////////////////////////////
+    if (registry.renderRequests.has(pause_menu)) {
+      registry.renderRequests.remove(pause_menu);
+    }
+
     for (Entity cursor : registry.cursors.entities) {
       if (registry.positions.has(cursor)) {
         Position& cursor_pos = registry.positions.get(cursor);
@@ -143,6 +150,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     update_debuffs(elapsed_ms_since_last_update);
     update_attack(elapsed_ms_since_last_update);
+    update_collision_timers(elapsed_ms_since_last_update);
 
     // Deplete oxygen when it is time...
     oxygen_timer = oxygen_drain(oxygen_timer, elapsed_ms_since_last_update);
@@ -151,6 +159,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     updateWepProjPos(mouse_pos);
 
     check_bounds();
+  } else {
+    if (!registry.renderRequests.has(pause_menu)) {
+      registry.renderRequests.insert(
+          pause_menu, {TEXTURE_ASSET_ID::PAUSE, EFFECT_ASSET_ID::TEXTURED,
+                       GEOMETRY_BUFFER_ID::SPRITE});
+    }
   }
 
   float min_counter_ms = 4000.f;
@@ -239,15 +253,21 @@ void WorldSystem::restart_game() {
     registry.remove_all_components_of(
         registry.oxygen.get(entity).backgroundBar);
   }
+  for (Entity pauseMenu : registry.pauseMenus.entities) {
+    registry.remove_all_components_of(pauseMenu);
+  }
 
   // Debugging for memory/component leaks
   remove_all_entities();
   registry.list_all_components();
 
+  pause_menu = createPauseMenu(renderer);
+
   player = createPlayer(
       renderer,
       {130, window_height_px - 140});  // TODO: get player spawn position
   registry.inventory.emplace(player);
+  createInvHUD(renderer, player);
   // init global variables
   player_weapon     = getPlayerWeapon();
   player_projectile = getPlayerProjectile();
@@ -360,7 +380,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-  player_mouse(button, action, mods, harpoon, harpoon_gun);
+  player_mouse(renderer, button, action, mods, harpoon, harpoon_gun);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {

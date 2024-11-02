@@ -59,29 +59,40 @@ struct Mesh {
  */
 
 enum class TEXTURE_ASSET_ID {
-  CURSOR               = 0,
+  PAUSE                = 0,
+  ZERO                 = PAUSE + 1,
+  ONE                  = ZERO + 1,
+  TWO                  = ONE + 1,
+  THREE                = TWO + 1,
+  FOUR                 = THREE + 1,
+  FIVE                 = FOUR + 1,
+  SIX                  = FIVE + 1,
+  SEVEN                = SIX + 1,
+  EIGHT                = SEVEN + 1,
+  NINE                 = EIGHT + 1,
+  CURSOR               = NINE + 1,
   PLAYER               = CURSOR + 1,
   GUN                  = PLAYER + 1,
   HARPOON              = GUN + 1,
   PLAYER_OXYGEN_TANK   = HARPOON + 1,
   PLAYER_OXYGEN_BAR    = PLAYER_OXYGEN_TANK + 1,
   ENEMY_BACKGROUND_BAR = PLAYER_OXYGEN_BAR + 1,
-  ENEMY_OXYGEN_BAR = ENEMY_BACKGROUND_BAR + 1,
-  EMOTE_EXCLAMATION = ENEMY_OXYGEN_BAR + 1,
-  EMOTE_QUESTION = EMOTE_EXCLAMATION + 1,
-  WALL = EMOTE_QUESTION + 1,
-  JELLY = WALL + 1,
-  FISH0 = JELLY + 1,
-  FISH1 = FISH0 + 1,
-  FISH2 = FISH1 + 1,
-  FISH3 = FISH2 + 1,
-  FISH4 = FISH3 + 1,
-  SHARK = FISH4 + 1,
-  KRAB = SHARK + 1,
-  BREAKABLE_CRATE = KRAB + 1,
-  OXYGEN_CANISTER = BREAKABLE_CRATE + 1,
-  GEYSER = OXYGEN_CANISTER + 1,
-  TEXTURE_COUNT = GEYSER + 1
+  ENEMY_OXYGEN_BAR     = ENEMY_BACKGROUND_BAR + 1,
+  EMOTE_EXCLAMATION    = ENEMY_OXYGEN_BAR + 1,
+  EMOTE_QUESTION       = EMOTE_EXCLAMATION + 1,
+  WALL                 = EMOTE_QUESTION + 1,
+  JELLY                = WALL + 1,
+  FISH0                = JELLY + 1,
+  FISH1                = FISH0 + 1,
+  FISH2                = FISH1 + 1,
+  FISH3                = FISH2 + 1,
+  FISH4                = FISH3 + 1,
+  SHARK                = FISH4 + 1,
+  KRAB                 = SHARK + 1,
+  BREAKABLE_CRATE      = KRAB + 1,
+  OXYGEN_CANISTER      = BREAKABLE_CRATE + 1,
+  GEYSER               = OXYGEN_CANISTER + 1,
+  TEXTURE_COUNT        = GEYSER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -90,7 +101,9 @@ enum class EFFECT_ASSET_ID {
   TEXTURED        = COLOURED + 1,
   TEXTURED_OXYGEN = TEXTURED + 1,
   WATER           = TEXTURED_OXYGEN + 1,
-  EFFECT_COUNT    = WATER + 1
+  PLAYER          = WATER + 1,
+  ENEMY           = PLAYER + 1,
+  EFFECT_COUNT    = ENEMY + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

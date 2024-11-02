@@ -33,6 +33,7 @@ class ECSRegistry {
   ComponentContainer<PlayerProjectile> playerProjectiles;
   ComponentContainer<Inventory>        inventory;
   ComponentContainer<PlayerHUD>        playerHUD;
+  ComponentContainer<InventoryHUD>     invHUD;
 
   // enemy related
   ComponentContainer<Deadly>         deadlys;
@@ -43,8 +44,8 @@ class ECSRegistry {
   ComponentContainer<OxygenModifier> oxygenModifiers;
 
   // ai related
-  ComponentContainer<Wander> wanders;
-  ComponentContainer<WanderLine> wanderLines;
+  ComponentContainer<Wander>       wanders;
+  ComponentContainer<WanderLine>   wanderLines;
   ComponentContainer<WanderSquare> wanderSquares;
   ComponentContainer<TracksPlayer> trackPlayer;
 
@@ -69,6 +70,7 @@ class ECSRegistry {
   // status related
   ComponentContainer<LowOxygen> lowOxygen;
   ComponentContainer<Stunned>   stunned;
+  ComponentContainer<Attacked>  attacked;
 
   // audio related
   ComponentContainer<Sound> sounds;
@@ -78,8 +80,9 @@ class ECSRegistry {
   ComponentContainer<Consumable>     consumables;
   ComponentContainer<Drop>           drops;
   ComponentContainer<DebugComponent> debugComponents;
-  ComponentContainer<Emoting> emoting;
-  ComponentContainer<GameCursor>         cursors;
+  ComponentContainer<Emoting>        emoting;
+  ComponentContainer<GameCursor>     cursors;
+  ComponentContainer<PauseMenu>      pauseMenus;
 
   // constructor that adds all containers for looping over them
   // IMPORTANT: Don't forget to add any newly added containers!
@@ -95,6 +98,7 @@ class ECSRegistry {
     registry_list.push_back(&playerProjectiles);
     registry_list.push_back(&inventory);
     registry_list.push_back(&playerHUD);
+    registry_list.push_back(&invHUD);
     // enemy related
     registry_list.push_back(&deadlys);
     registry_list.push_back(&modifyOxygenCd);
@@ -123,6 +127,7 @@ class ECSRegistry {
     registry_list.push_back(&activeDoors);
     // status related
     registry_list.push_back(&lowOxygen);
+    registry_list.push_back(&attacked);
     // audio related
     registry_list.push_back(&sounds);
     registry_list.push_back(&musics);
@@ -133,6 +138,7 @@ class ECSRegistry {
     registry_list.push_back(&debugComponents);
     registry_list.push_back(&consumables);
     registry_list.push_back(&emoting);
+    registry_list.push_back(&pauseMenus);
   }
 
   void clear_all_components() {

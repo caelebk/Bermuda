@@ -119,7 +119,7 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position) {
   // physics and pos
 
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::JELLY, EFFECT_ASSET_ID::TEXTURED,
+      entity, {TEXTURE_ASSET_ID::JELLY, EFFECT_ASSET_ID::ENEMY,
                GEOMETRY_BUFFER_ID::SPRITE});
 
   createDefaultHealthbar(renderer, entity, JELLY_HEALTH, JELLY_HEALTH_SCALE,
@@ -183,7 +183,7 @@ Entity createFishPos(RenderSystem* renderer, vec2 position) {
 
   registry.renderRequests.insert(
       entity,
-      {fish_texture, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+      {fish_texture, EFFECT_ASSET_ID::ENEMY, GEOMETRY_BUFFER_ID::SPRITE});
 
   createDefaultHealthbar(renderer, entity, FISH_HEALTH, FISH_HEALTH_SCALE,
                          FISH_HEALTH_BAR_SCALE, FISH_HEALTH_BOUNDING_BOX);
@@ -247,7 +247,7 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position) {
 
   // TODO: add the room
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::SHARK, EFFECT_ASSET_ID::TEXTURED,
+      entity, {TEXTURE_ASSET_ID::SHARK, EFFECT_ASSET_ID::ENEMY,
                GEOMETRY_BUFFER_ID::SPRITE});
 
   createDefaultHealthbar(renderer, entity, SHARK_HEALTH, SHARK_HEALTH_SCALE,
@@ -320,7 +320,7 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position) {
 
   // TODO: add the room
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::KRAB, EFFECT_ASSET_ID::TEXTURED,
+      entity, {TEXTURE_ASSET_ID::KRAB, EFFECT_ASSET_ID::ENEMY,
                GEOMETRY_BUFFER_ID::SPRITE});
 
   createDefaultHealthbar(renderer, entity, KRAB_HEALTH, KRAB_HEALTH_SCALE,
