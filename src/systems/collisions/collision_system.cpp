@@ -1,5 +1,7 @@
 #include "collision_system.hpp"
+
 #include <cstdio>
+#include <damage.hpp>
 
 #include "ai.hpp"
 #include "enemy.hpp"
@@ -102,6 +104,7 @@ void CollisionSystem::collision_detection() {
       if (circle_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
         registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        addDamageIndicatorTimer(entity_j);
       }
     }
 
@@ -143,6 +146,9 @@ void CollisionSystem::collision_detection() {
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
         registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        if (registry.oxygenModifiers.has(entity_j)) {
+          addDamageIndicatorTimer(entity_i);
+        }
       }
     }
 
@@ -388,11 +394,12 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
   player_projectile.is_loaded = true;
 
   handle_debuffs(enemy, player_proj);
-  
-  // make enemies that track the player briefly start tracking them regardless of range
+
+  // make enemies that track the player briefly start tracking them regardless
+  // of range
   if (registry.trackPlayer.has(enemy)) {
-    TracksPlayer &tracks = registry.trackPlayer.get(enemy);
-    tracks.active_track = true;
+    TracksPlayer& tracks = registry.trackPlayer.get(enemy);
+    tracks.active_track  = true;
   }
 }
 

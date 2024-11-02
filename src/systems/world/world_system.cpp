@@ -24,6 +24,7 @@
 #include <GLFW/glfw3.h>
 
 #include <cassert>
+#include <damage.hpp>
 #include <iostream>
 #include <sstream>
 
@@ -154,6 +155,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     update_debuffs(elapsed_ms_since_last_update);
     update_attack(elapsed_ms_since_last_update);
+    update_collision_timers(elapsed_ms_since_last_update);
 
     // Deplete oxygen when it is time...
     oxygen_timer = oxygen_drain(oxygen_timer, elapsed_ms_since_last_update);

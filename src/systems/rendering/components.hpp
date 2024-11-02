@@ -101,7 +101,9 @@ enum class EFFECT_ASSET_ID {
   TEXTURED        = COLOURED + 1,
   TEXTURED_OXYGEN = TEXTURED + 1,
   WATER           = TEXTURED_OXYGEN + 1,
-  EFFECT_COUNT    = WATER + 1
+  PLAYER          = WATER + 1,
+  ENEMY           = PLAYER + 1,
+  EFFECT_COUNT    = ENEMY + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

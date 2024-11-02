@@ -69,6 +69,7 @@ class ECSRegistry {
   // status related
   ComponentContainer<LowOxygen> lowOxygen;
   ComponentContainer<Stunned>   stunned;
+  ComponentContainer<Attacked>  attacked;
 
   // audio related
   ComponentContainer<Sound> sounds;
@@ -124,6 +125,7 @@ class ECSRegistry {
     registry_list.push_back(&activeWalls);
     // status related
     registry_list.push_back(&lowOxygen);
+    registry_list.push_back(&attacked);
     // audio related
     registry_list.push_back(&sounds);
     registry_list.push_back(&musics);

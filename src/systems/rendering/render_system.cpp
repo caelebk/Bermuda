@@ -39,7 +39,9 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3& projection) {
 
   // Input data location as in the vertex buffer
   if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED ||
-      render_request.used_effect == EFFECT_ASSET_ID::TEXTURED_OXYGEN) {
+      render_request.used_effect == EFFECT_ASSET_ID::TEXTURED_OXYGEN ||
+      render_request.used_effect == EFFECT_ASSET_ID::PLAYER ||
+      render_request.used_effect == EFFECT_ASSET_ID::ENEMY) {
     GLint in_position_loc = glGetAttribLocation(program, "in_position");
     GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
     gl_has_errors();
@@ -64,6 +66,18 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3& projection) {
       glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
       glUniform1i(is_low_oxygen_uloc, registry.lowOxygen.has(entity));
 
+      gl_has_errors();
+    }
+
+    if (render_request.used_effect == EFFECT_ASSET_ID::PLAYER ||
+        render_request.used_effect == EFFECT_ASSET_ID::ENEMY) {
+      GLuint damage_timer_uloc = glGetUniformLocation(program, "damageTimer");
+      GLuint stun_timer_uloc   = glGetUniformLocation(program, "stunned");
+      gl_has_errors();
+      glUniform1f(damage_timer_uloc, registry.attacked.has(entity)
+                                         ? registry.attacked.get(entity).timer
+                                         : 0.0f);
+      glUniform1f(stun_timer_uloc, registry.stunned.has(entity) ? true : false);
       gl_has_errors();
     }
 

@@ -34,7 +34,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos) {
 
   // Request Render
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::PLAYER, EFFECT_ASSET_ID::TEXTURED,
+      entity, {TEXTURE_ASSET_ID::PLAYER, EFFECT_ASSET_ID::PLAYER,
                GEOMETRY_BUFFER_ID::SPRITE});
 
   return entity;
