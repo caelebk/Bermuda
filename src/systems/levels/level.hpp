@@ -82,14 +82,19 @@ private:
     void connect(Entity &connectee, Entity &connector);
     void print_pair(std::pair<std::string, Entity> pair);
 
+    // returns a vector of filtered directed_adjacencies to have only those directed_adjacencies matching the given direction
+    std::vector<int> filter_directed_adjacencies(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies);
     std::vector<int> get_random_door_positions(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies, int min, int max);
-    void build_wall_with_doors(Direction direction,
-                              std::vector<int> other_rooms,
-                              RoomBuilder& room, std::vector<int> door_positions, 
-                              int max_units, int unit_size,
+
+    void build_wall_with_doors(RoomBuilder& room,
+                              Direction direction,
+                              std::unordered_map<int, Direction> directed_adjacencies,
+                              int max_units,
+                              int unit_size,
                               std::function<void(int)> draw_segment,
                               std::function<void(std::string, int)> draw_door);
 
+    // TODO: extract these to type and place in graph.hpp / graph.cpp
     std::unordered_map<int, std::set<int>> generate_random_graph(std::vector<int>& rooms, std::vector<int>& adjacency_list);
     std::unordered_map<int, std::unordered_map<int, Direction>> generate_random_graph_doors(std::unordered_map<int, std::set<int>>& adjacency_list);
     void randomize_room_shapes(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
