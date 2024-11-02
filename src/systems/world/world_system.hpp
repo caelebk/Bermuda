@@ -52,8 +52,6 @@ class WorldSystem {
 
   // Game state
   RenderSystem* renderer;
-  LevelBuilder  level_builder;
-  RoomBuilder   curr_room;
   float         oxygen_timer;
   vec2          mouse_pos;
 
@@ -79,3 +77,5 @@ extern Entity net_gun;
 extern Entity concussive_gun;
 extern Entity torpedo_gun;
 extern Entity shrimp_gun;
+
+extern LevelBuilder level_builder;

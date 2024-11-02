@@ -17,10 +17,10 @@
 #include "oxygen.hpp"
 #include "physics.hpp"
 #include "player.hpp"
+#include "level.hpp"
 
 class CollisionSystem
 {
-
 private:
 	void collision_detection();
 	void collision_resolution();
@@ -32,6 +32,7 @@ private:
 	void routePlayerCollisions(Entity player, Entity other);
     void routeEnemyCollisions(Entity enemy, Entity other);
 	void routeWallCollisions(Entity wall, Entity other);
+    void routeDoorCollisions(Entity door, Entity other);
 	void routePlayerProjCollisions(Entity player_proj, Entity other);
     void routeConsumableCollisions(Entity consumable, Entity other);
     void routeInteractableCollisions(Entity interactable, Entity other);
@@ -60,6 +61,9 @@ private:
     //Wall <-> Something that should stop on the wall
     void resolveStopOnWall(Entity wall, Entity entity);
 
+    //Door <-> Player
+    void resolveDoorPlayerCollision(Entity door, Entity player);
+
 public:
 	void step(float elapsed_ms);
 
@@ -74,3 +78,5 @@ bool circle_collides(const Position &position1, const Position &position2);
 bool box_collides(const Position &position1, const Position &position2);
 
 extern Entity player_projectile;
+
+extern LevelBuilder level_builder;

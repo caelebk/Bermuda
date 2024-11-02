@@ -1,9 +1,15 @@
-#include "level.hpp"
+#include <numeric>
+#include <algorithm>
+#include <random>
+#include <iterator>
+#include <string>
 
+#include "level.hpp"
+#include "graph.hpp"
 #include "common.hpp"
 #include "room.hpp"
 
-LevelBuilder::LevelBuilder(){};
+LevelBuilder::LevelBuilder(): current_room_id("0") {};
 
 RoomBuilder& LevelBuilder::room(std::string s_id) {
   return rooms[s_id];
@@ -13,20 +19,28 @@ HallwayBuilder& LevelBuilder::hallway(std::string s_id) {
   return hallways[s_id];
 };
 
-void LevelBuilder::connect(Entity& connectee, Entity& connector) {
-  registry.adjacencies.get(connectee).neighbours.push_back(connector);
-};
+LevelBuilder& LevelBuilder::connect(Direction direction,
+                                    std::string r_id,
+                                    std::string d1_id,
+                                    std::string r2_id,
+                                    std::string d2_id) {
+  RoomBuilder&    room_1    = rooms[r_id];
+  RoomBuilder&    room_2 =  rooms[r2_id];
+  Entity&    door_1    = room_1.doors[d1_id];
+  Entity&    door_2 =  room_2.doors[d2_id];
 
-LevelBuilder& LevelBuilder::connect_room_to_hallway(std::string r_id,
-                                                    std::string d1_id,
-                                                    std::string h_id,
-                                                    std::string d2_id) {
-  RoomBuilder&    room    = rooms[r_id];
-  HallwayBuilder& hallway = hallways[h_id];
+  if (!registry.doorConnections.has(door_1) && !registry.doorConnections.has(door_2)) {
+    DoorConnection& door_connection_1 = registry.doorConnections.emplace(door_1);
+    door_connection_1.direction = direction;
+    door_connection_1.room_id = r2_id;
+    door_connection_1.exit_door = door_2;
 
-  connect(room.entity, hallway.entity);
-  connect(hallway.doors[d1_id], room.doors[d2_id]);
-  connect(hallway.entity, room.entity);
+    DoorConnection& door_connection_2 = registry.doorConnections.emplace(door_2);
+    door_connection_2.direction = get_opposite_direction(direction);
+    door_connection_2.room_id = r_id;
+    door_connection_2.exit_door = door_1;
+  }
+
   return *this;
 };
 
@@ -39,76 +53,208 @@ RoomBuilder LevelBuilder::copy_room(std::string s_id, std::string copied_s_id) {
   return rooms[s_id];
 };
 
-void LevelBuilder::print_pair(std::pair<std::string, Entity> pair) {
-  std::cout << "==================" << std::endl;
-  std::cout << "  key:" << pair.first << std::endl;
-  std::cout << "  id:" << pair.second << std::endl;
-  Space& space = registry.spaces.get(pair.second);
-  std::cout << "  walls: " << std::endl;
-  for (auto& wall : space.walls) {
-    Vector& vector = registry.vectors.get(wall);
-    printf("    (%f, %f), (%f, %f):\n", vector.start.x, vector.start.y,
-           vector.end.x, vector.end.y);
+void LevelBuilder::activate_boundary(Entity& boundary) {
+    Vector &boundary_vector = registry.vectors.get(boundary);
+    float boundary_width = abs(boundary_vector.end.x - boundary_vector.start.x);
+    float boundary_height = abs(boundary_vector.end.y - boundary_vector.start.y);
+    float boundary_pos_x = (boundary_vector.end.x + boundary_vector.start.x) / 2;
+    float boundary_pos_y = (boundary_vector.end.y + boundary_vector.start.y) / 2;
+
+    vec2 bounding_box;
+    if (boundary_width <= 0) {
+      bounding_box = vec2(WALL_THICKNESS, boundary_height + WALL_THICKNESS);
+    } else if (boundary_height <= 0) {
+      bounding_box = vec2(boundary_width + WALL_THICKNESS, WALL_THICKNESS);
+    }
+    vec2 position =
+        vec2(boundary_pos_x + ROOM_ORIGIN_POS.x, boundary_pos_y + ROOM_ORIGIN_POS.y);
+
+    // Setting initial position values
+    Position &position_component = registry.positions.emplace(boundary);
+    position_component.position = position;
+    position_component.angle = 0.f;
+    position_component.scale = bounding_box;
+}
+
+void LevelBuilder::deactivate_boundary(Entity& boundary) {
+  if (registry.positions.has(boundary)) {
+    registry.positions.remove(boundary);
   }
-  std::cout << "  doors:" << std::endl;
-  for (auto& door : space.doors) {
-    Vector& vector = registry.vectors.get(door);
-    printf("    (%f, %f), (%f, %f):\n", vector.start.x, vector.start.y,
-           vector.end.x, vector.end.y);
+  if (registry.renderRequests.has(boundary)) {
+    registry.renderRequests.remove(boundary);
   }
-  std::cout << "  connections:" << std::endl;
-  Adjacency& adjacencies = registry.adjacencies.get(pair.second);
-  for (auto& neighbour : adjacencies.neighbours) {
-    std::cout << "    " << neighbour << std::endl;
+  if (registry.activeWalls.has(boundary)) {
+    registry.activeWalls.remove(boundary);
+  }
+  if (registry.activeDoors.has(boundary)) {
+    registry.activeDoors.remove(boundary);
   }
 };
 
-void LevelBuilder::print_rooms() {
-  std::cout << "rooms:" << std::endl;
-  for (auto pair : rooms) {
-    print_pair(std::make_pair(pair.first, rooms[pair.first].entity));
-  };
+void LevelBuilder::activate_room(std::string room_id) {
+  current_room_id = room_id;
+
+  for (Entity& wall : registry.spaces.get(room(current_room_id).entity).walls) {
+    activate_boundary(wall);
+    registry.activeWalls.emplace(wall);
+    registry.renderRequests.insert(wall, {TEXTURE_ASSET_ID::WALL,
+                                          EFFECT_ASSET_ID::TEXTURED,
+                                          GEOMETRY_BUFFER_ID::SPRITE});
+  }
+
+  for (Entity& door : registry.spaces.get(room(current_room_id).entity).doors) {
+    activate_boundary(door);
+    ActiveDoor& activeDoor = registry.activeDoors.emplace(door);
+  }
+}
+
+void LevelBuilder::deactivate_room() {
+  for (auto &boundary : registry.spaces.get(room(current_room_id).entity).boundaries) {
+    deactivate_boundary(boundary);
+  }
+}
+
+void LevelBuilder::move_player_to_door(Direction direction, Entity& exit_door) {
+  for (auto &door : registry.spaces.get(room(current_room_id).entity).doors) {
+    if (door == exit_door) {
+      if (registry.positions.has(door)) {
+        Position& door_position = registry.positions.get(door);
+        for (auto &player : registry.players.entities) {
+          Position& player_position = registry.positions.get(player);
+
+          // Offset the player from the door so they don't immediately reswitch rooms.
+          // Get the opposite direction of the wall that this door was on; i.e if you enter a door on the WEST, you should spawn on the EAST.
+          player_position.position = door_position.position;
+          Direction opposite_direction = get_opposite_direction(direction);
+          std::cout << "opposite: " << opposite_direction << std::endl;
+          switch(opposite_direction) {
+            case Direction::NORTH:
+              player_position.position.y += 30;
+              break;
+            case Direction::EAST:
+              player_position.position.x -= 30;
+              break;
+            case Direction::SOUTH:
+              player_position.position.y -= 30;
+              break;
+            case Direction::WEST:
+              player_position.position.x += 30;
+              break;
+          }
+        }
+      }
+    } 
+  }
+}
+
+void LevelBuilder::build_wall_with_random_doors(RoomBuilder& room,
+                                        Direction direction,
+                                        std::unordered_map<int, Direction> directed_adjacencies,
+                                        int max_units,
+                                        int unit_size,
+                                        std::function<void(int)> draw_segment,
+                                        std::function<void(std::string, int)> draw_door) {
+  int door_index = 0; 
+  int current_size = 0;
+  std::vector<int> connected_rooms = get_connecting_vertices_with_direction(direction, directed_adjacencies);
+  std::vector<int> door_positions = get_random_door_positions(connected_rooms, 0, max_units);
+  while (door_index < (int) door_positions.size() && current_size < max_units) {
+      int current_door = door_positions[door_index];
+      int other_room = connected_rooms[door_index];
+
+      // Calculate the segment before the next door position
+      int segment = current_door - current_size;
+
+      draw_segment(unit_size * segment);
+      // Generate a door with the id: <direction_enum>_<room_number>; i.e NORTH to room 1 is 0_1.
+      std::string door_id;
+      door_id.append(std::to_string(other_room)).append("_").append(std::to_string(direction));
+      draw_door(door_id, 2 * unit_size);
+
+      current_size += segment + DOOR_SCALAR; // Update for door and segment size
+      door_index++;
+  }
+
+  // Fill the remaining wall segment if needed
+  if (current_size < max_units) {
+      int remaining_segment = max_units - current_size;
+      draw_segment(unit_size * remaining_segment);
+  }
 };
 
-void LevelBuilder::print_hallways() {
-  std::cout << "hallways:" << std::endl;
-  for (auto pair : hallways) {
-    print_pair(std::make_pair(pair.first, hallways[pair.first].entity));
-  };
+void LevelBuilder::randomize_room_shapes(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list) {
+  for (const auto& pair : adjacency_list) {
+    std::string room_number = std::to_string(pair.first);
+    std::unordered_map<int, Direction> directed_adjacencies = pair.second;
+
+    RoomBuilder& current_room = room(room_number);
+    
+    // west
+    build_wall_with_random_doors(current_room, Direction::WEST, directed_adjacencies, MAX_Y_UNITS, Y_1U,
+        [&](int segment) { current_room.up(segment); },
+        [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
+
+    // north
+    build_wall_with_random_doors(current_room, Direction::SOUTH, directed_adjacencies, MAX_X_UNITS, X_1U,
+        [&](int segment) { current_room.right(segment); },
+        [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
+
+    // east
+    build_wall_with_random_doors(current_room, Direction::EAST, directed_adjacencies, MAX_Y_UNITS, Y_1U,
+        [&](int segment) { current_room.down(segment); },
+        [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
+
+    // south
+    build_wall_with_random_doors(current_room, Direction::NORTH, directed_adjacencies, MAX_X_UNITS, X_1U,
+        [&](int segment) { current_room.left(segment); },
+        [&](std::string door_id, int door_size) { current_room.door(door_id, door_size); });
+  }
+}
+
+void LevelBuilder::connect_doors(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list) {
+  for (const auto& adjacency_list_pair : adjacency_list) {
+    std::string r1 = std::to_string(adjacency_list_pair.first);
+    std::unordered_map<int, Direction> directed_adjacencies = adjacency_list_pair.second;
+
+    for (const auto& adjacency_pair : directed_adjacencies) {
+      std::string r2 = std::to_string(adjacency_pair.first);
+      Direction direction = adjacency_pair.second;
+      std::string d1;
+      d1.append(r2).append("_").append(std::to_string(direction));
+      std::string d2;
+      d2.append(r1).append("_").append(std::to_string(get_opposite_direction(direction)));
+
+      connect(direction, r1, d1, r2, d2);
+    }
+  }
+}
+
+// Note since we transition when moving spaces, these graphs don't have to be planar.
+void LevelBuilder::generate_random_level(std::vector<int> rooms, std::vector<int> densities) {
+  // Generate a randomized graph with constraints. We then ECS-ify its vertices and edges into rooms and connections.
+  std::unordered_map<int, std::set<int>> random_graph = generate_random_graph(rooms, densities);
+  // Pass over that generated graph, greedily and randomly associating each edge (door) with a direction. Since the graph is undirected, do the same for the exit door, with
+  // the opposite direction.
+  std::unordered_map<int, std::unordered_map<int, Direction>> random_graph_with_doors = expand_graph_to_random_directed_graph(random_graph);
+
+  // Now, we can turn the graph with directions for each door into ECS entities and components.
+  // First, randomize the placement of each door in each room such that it maps to the direction we assigned. Add all created entities to the ECS.
+  randomize_room_shapes(random_graph_with_doors);
+  // Now that all the doors are in the ECS, add their connections to the ECS.
+  connect_doors(random_graph_with_doors);
 };
 
-/********************************************************************************
- * @brief Build Pre-Designed Room 1 No Doors
- ********************************************************************************/
-void LevelBuilder::buildRoomOne()  // TODO: REMOVE AFTER M1
-{
-  room(ROOM_ONE).up(Y_10U).right(X_14U).down(Y_5U).right(X_6U).down(Y_5U).left(
-      X_20U);
-};
+void LevelBuilder::switch_room(DoorConnection& door_connection) {
+  Direction direction = door_connection.direction;
+  std::string room_id = door_connection.room_id;
+  Entity& exit_door = door_connection.exit_door;
 
-/********************************************************************************
- * @brief Build Pre-Designed Room 2 No Doors
- ********************************************************************************/
-void LevelBuilder::buildRoomTwo()  // TODO: REMOVE AFTER M1
-{
-  room(ROOM_TWO).up(Y_10U).right(X_20U).down(Y_10U).left(X_20U);
-};
+  deactivate_room();
+  activate_room(room_id);
 
-/********************************************************************************
- * @brief Build Pre-Designed Room 1
- ********************************************************************************/
-// void LevelBuilder::buildRoomTwo()
-// {
-//     room(ROOM_ONE).up(Y_10U).right(X_6U).door("d1",
-//     X_2U).right(X_6U).down(Y_5U).right(X_6U).down(Y_1U).door("d2",
-//     Y_3U).down(Y_1U).left(X_20U);
-// };
+  move_player_to_door(direction, exit_door);
+}
 
-/********************************************************************************
- * @brief Build Pre-Designed Room 2
- ********************************************************************************/
-// void LevelBuilder::buildRoomThree()
-// {
-//     room(ROOM_TWO).up(Y_10U).right(X_20U).down(Y_4U).door("d3",
-//     Y_2U).down(Y_4U).left(X_20U);
-// };
+void LevelBuilder::activate_starting_room() {
+  activate_room(STARTING_ROOM_ID);
+}
