@@ -8,12 +8,7 @@
 #include "room.hpp"
 #include "hallway.hpp"
 
-/**
- * The Following Define Standard Room IDs
- */
-
-#define ROOM_ONE "room_1"
-#define ROOM_TWO "room_2"
+#define STARTING_ROOM_ID "0"
 
 /**
  * The Following Define Standardized Units For Room Building
@@ -23,8 +18,6 @@
 
 #define MAX_X_UNITS 20
 #define MAX_Y_UNITS 10
-
-#define DOOR_SCALAR 2
 
 #define X_1U (window_width_px) / 22.f // One Room Building Unit in the X Direction
 #define X_2U 2.f * X_1U
@@ -58,55 +51,42 @@
 #define Y_9U 9.f * Y_1U
 #define Y_10U 10.f * Y_1U
 
-// An enumeration for programatically defining directions.
-enum Direction {
-  NORTH = 0,
-  EAST = 1,
-  SOUTH = 2,
-  WEST = 3
-};
-
 int get_random(int x, int y);
 Direction get_opposite_direction(Direction direction);
 
 /**
- * A high-level OOP to ECS wrapper API that deals with level construction. Currently, it allows you to easily edit components such as
- * a room or hallway's walls, doors, and connections.
+ * A high-level OOP to ECS wrapper API that deals with levels. Facilitates the construction of levels as well as switching between them.
  */
+// May need to be refactored into a LevelSystem and a LevelBuilder module; where the LevelSystem handles gameplay related level functionality instead of having LevelBuilder double as 
+// a system.
 class LevelBuilder
 {
 private:
     std::unordered_map<std::string, RoomBuilder> rooms;
     std::unordered_map<std::string, HallwayBuilder> hallways;
 
-    void connect(Entity &connectee, Entity &connector);
-    void print_pair(std::pair<std::string, Entity> pair);
+    void activate_room(std::string room_id);
+    void deactivate_room();
+        
+    void activate_boundary(Entity& boundary);
+    void deactivate_boundary(Entity& boundary);
 
-    // counts how many directions of the given type are in a directed adjacency
+    // May not belong here in this class.
+    void move_player_to_door(Direction direction, Entity& door);
 
-    void build_wall_with_doors(RoomBuilder& room,
-                              Direction direction,
-                              std::unordered_map<int, Direction> directed_adjacencies,
-                              int max_units,
-                              int unit_size,
-                              std::function<void(int)> draw_segment,
-                              std::function<void(std::string, int)> draw_door);
+    void build_wall_with_random_doors(RoomBuilder& room,
+                                Direction direction,
+                                std::unordered_map<int, Direction> directed_adjacencies,
+                                int max_units,
+                                int unit_size,
+                                std::function<void(int)> draw_segment,
+                                std::function<void(std::string, int)> draw_door);
 
-    // TODO: extract up to LevelBuilder functions to type and place in graph.hpp / graph.cpp
-    int count_directions_of_directed_adjacencies(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies);
-
-    // returns a vector of filtered directed_adjacencies to have only those directed_adjacencies matching the given direction
-    std::vector<int> get_connected_rooms_matching_direction(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies);
-
-    std::vector<int> get_random_door_positions(std::vector<int>& connected_rooms, int min, int max);
-    std::unordered_map<int, std::unordered_map<int, Direction>> generate_random_graph_doors(std::unordered_map<int, std::set<int>>& adjacency_list);
-
-    std::unordered_map<int, std::set<int>> generate_random_graph(std::vector<int>& rooms, std::vector<int>& adjacency_list);
-
-    // LevelBuilder functions
     void randomize_room_shapes(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
     void connect_doors(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
 public:
+    std::string current_room_id;
+
     LevelBuilder();
 
     /**
@@ -129,27 +109,26 @@ public:
     RoomBuilder copy_room(std::string s_id, std::string copied_s_id);
 
     /**
-     * Connects two rooms together..
+     * Connects two doors together.
+     * @param direction: the wall that the first door is on.
      * @param r1_id: the first room's key.
      * @param d1_id: the door in the first room's key.
-     * @param h_id: the second room's key.
+     * @param r2_id: the second room's key.
      * @param d1_id: the door in the second room's key.
      */
-    LevelBuilder &connect_rooms(std::string r_id, std::string d1_id, std::string r2_id, std::string d2_id);
+    LevelBuilder &connect(Direction direction, std::string r1_id, std::string d1_id, std::string r2_id, std::string d2_id);
 
     /**
-     * Generates a random level with a given number of rooms and a randomized number of hallways. Each element of the input represents a difficulty
-     * cluster, i.e {7, 5, 3} means 7 easy rooms, 5 medium rooms, and 3 hard rooms. 
-     * Each cluster has exactly one connection between them.
+     * Generates a randomized level.
+     * @param rooms: a vector of the number of rooms for each difficulty area, i.e {5,5,5} = 15 rooms, each grouped by ascending difficulty class.
+     * @param densities: a weighting on the probability of a room to have connections. Must match the length of rooms. e.g {80, 50, 0} makes easy rooms low on connections
+     *                   and later rooms heavy on connections.
      */
     void generate_random_level(std::vector<int> rooms, std::vector<int> densities);
+    
+    // Switches to the room pointed at by the given DoorConnection.
+    void switch_room(DoorConnection& door_connection);
 
-
-    /**
-     * Prints all rooms, hallways, (and their individual connections) inside a level in a sort-of human-readable manner for debugging purposes.
-     */
-    void print_rooms();
-    void print_hallways();
-
-    void buildRoomOne();
+    // Activates the starting room.
+    void activate_starting_room();
 };

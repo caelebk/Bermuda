@@ -61,9 +61,9 @@ class ECSRegistry {
   ComponentContainer<SpaceBoundingBox> bounding_boxes;
   ComponentContainer<Vector>           vectors;
   ComponentContainer<Space>            spaces;
-  ComponentContainer<Adjacency>        adjacencies;
+  ComponentContainer<DoorConnection>   doorConnections;
   ComponentContainer<ActiveWall>       activeWalls;
-  ComponentContainer<ActiveDoor> activeDoors;
+  ComponentContainer<ActiveDoor>       activeDoors;
   ComponentContainer<Interactable>     interactable;
 
   // status related
@@ -118,7 +118,7 @@ class ECSRegistry {
     registry_list.push_back(&bounding_boxes);
     registry_list.push_back(&vectors);
     registry_list.push_back(&spaces);
-    registry_list.push_back(&adjacencies);
+    registry_list.push_back(&doorConnections);
     registry_list.push_back(&activeWalls);
     registry_list.push_back(&activeDoors);
     // status related

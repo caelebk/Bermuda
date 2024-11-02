@@ -7,9 +7,9 @@
 #include <chrono>
 
 // internal
+#include "level.hpp"
 #include "audio_system.hpp"
 #include "collision_system.hpp"
-#include "level_build_system.hpp"
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
@@ -34,6 +34,8 @@ Entity net_gun;
 Entity concussive_gun;
 Entity torpedo_gun;
 Entity shrimp_gun;
+
+LevelBuilder level_builder;
 
 // Entry point
 int main() {

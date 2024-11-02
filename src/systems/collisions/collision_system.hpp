@@ -17,6 +17,7 @@
 #include "oxygen.hpp"
 #include "physics.hpp"
 #include "player.hpp"
+#include "level.hpp"
 
 class CollisionSystem
 {
@@ -77,3 +78,5 @@ bool circle_collides(const Position &position1, const Position &position2);
 bool box_collides(const Position &position1, const Position &position2);
 
 extern Entity player_projectile;
+
+extern LevelBuilder level_builder;

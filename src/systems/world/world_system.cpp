@@ -108,15 +108,10 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
   this->renderer = renderer_arg;
 
-  level_builder = LevelBuilder();
-
-  // Test the randomized room generation
+  // Generate a random level
   level_builder.generate_random_level({5, 5, 5}, {80, 50, 0});
+  level_builder.activate_starting_room();
 
-  // Set all states to default
-  curr_room =
-      level_builder.room("0");  // TODO: change based on which room entered
-  curr_room.activate_room();
   restart_game();
 }
 
@@ -283,8 +278,8 @@ void WorldSystem::restart_game() {
   // Enemy + Drops
   /////////////////////////////////////////////
   // spawn at random places in the room
-  execute_config_rand(LVL_1_RAND_POS, curr_room, renderer);
-  execute_config_rand_chance(LVL_1_RAND_POS, curr_room, renderer, 0.5);
+  execute_config_rand(LVL_1_RAND_POS, level_builder.room(level_builder.current_room_id), renderer);
+  execute_config_rand_chance(LVL_1_RAND_POS, level_builder.room(level_builder.current_room_id), renderer, 0.5);
 
   // // spawn at fixed positions in the room
   execute_config_fixed(LVL_1_FIXED);
@@ -340,29 +335,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         debugging.in_debug_mode = false;
       else
         debugging.in_debug_mode = true;
-    }
-
-    // TODO: REMOVE temporary key input to switch between rooms (facilitate
-    // collision testing)
-    if (key == GLFW_KEY_9) {
-      if (action == GLFW_PRESS && !(action == GLFW_REPEAT)) {
-        curr_room.deactivate_room();
-        curr_room = level_builder.room(
-            "0");  // TODO: change based on which room entered
-        curr_room.activate_room();
-        restart_game();
-      }
-    }
-    // TODO: REMOVE temporary key input to switch between rooms (facilitate
-    // collision testing)
-    if (key == GLFW_KEY_0) {
-      if (action == GLFW_PRESS && !(action == GLFW_REPEAT)) {
-        curr_room.deactivate_room();
-        curr_room = level_builder.room(
-            "1");  // TODO: change based on which room entered
-        curr_room.activate_room();
-        restart_game();
-      }
     }
 
     // Handle weapon swapping

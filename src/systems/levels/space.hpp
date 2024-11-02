@@ -15,39 +15,29 @@
            12.f) // Position of Room Origin (Top-Left Corner)
 #define WALL_THICKNESS 16.f
 
-struct Wall : Entity {
-public:
-  Wall();
-};
-
-struct Door : Wall {
-public:
-  Door();
-};
-
+// TODO:
+// If we go ahead with 86'ing hallways, this has no reason to be a template.
 template <typename T> class SpaceBuilder {
 protected:
-  std::function<vec2(int)> direction;
-  vec2 pointer;
+  std::function<vec2(int)> direction; // the last direction of a SpaceBuilder boundary construction call.
+  vec2 pointer; // the absolute position of where the 'cursor' is, i.e it's position is that of the last wall added to this SpaceBuilder.
 
   virtual void new_entity(T entity);
+
+  virtual void update_bounding_box(Vector &vector);
   virtual Entity make_boundary(int magnitude);
   virtual SpaceBuilder &add_wall(int magnitude);
 
-  virtual void update_bounding_box(Vector &vector);
   virtual vec2 get_updated_up_position(int magnitude);
   virtual vec2 get_updated_down_position(int magnitude);
   virtual vec2 get_updated_right_position(int magnitude);
   virtual vec2 get_updated_left_position(int magnitude);
 
-  void activate_boundary(Entity& boundary);
-  void deactive_boundary(Entity& boundary);
-
   vec2 rejection_sample();
 
 public:
-  T entity;
-  std::unordered_map<std::string, Entity> doors;
+  T entity; // the space under construction.
+  std::unordered_map<std::string, Entity> doors; // the doors belonging to the space.
   SpaceBuilder();
 
   virtual SpaceBuilder &up(int magnitude = 0);
@@ -56,20 +46,7 @@ public:
   virtual SpaceBuilder &right(int magnitude = 0);
   virtual SpaceBuilder &door(std::string s_id, int magnitude = 0);
 
-  /**
-   * Activate Room
-   */
-  void activate_room();
-
-  /**
-   * Deactivate Room
-   */
-  void deactivate_room();
-
   bool is_in_room(vec2 &position);
-  /**
-   * Get a random position inside a space.
-   */
   vec2 get_random_position();
 };
 
@@ -79,7 +56,6 @@ SpaceBuilder<T>::SpaceBuilder() : direction(), pointer({0, 0}) {}
 template <typename T> void SpaceBuilder<T>::new_entity(T entity) {
   this->entity = entity;
   registry.spaces.emplace(entity);
-  registry.adjacencies.emplace(entity);
   registry.bounding_boxes.emplace(entity);
 }
 
@@ -94,15 +70,20 @@ void SpaceBuilder<T>::update_bounding_box(Vector &vector) {
 
 template <typename T>
 Entity SpaceBuilder<T>::make_boundary(int magnitude) {
+    Entity boundary = Entity();
     vec2 endpoint = direction(magnitude);
 
-    Entity boundary = Entity();
+    // Add the boundary (wall or door) to the appropriate component containers.
     Vector vector = Vector(pointer, endpoint);
     registry.vectors.insert(boundary, vector);
 
     Space &space = registry.spaces.get(entity);
     space.boundaries.push_back(boundary);
+
+    // Update the space's bounding box.
     update_bounding_box(vector);
+
+    // Update the last direction of the builder.
     pointer = endpoint;
 
     return boundary;
@@ -120,10 +101,12 @@ SpaceBuilder<T> &SpaceBuilder<T>::add_wall(int magnitude) {
 
 template <typename T>
 SpaceBuilder<T> &SpaceBuilder<T>::door(std::string s_id, int magnitude) {
-   Space &space = registry.spaces.get(entity);
+  Space &space = registry.spaces.get(entity);
   Entity boundary = make_boundary(magnitude);
+
+  // Add the door to the space, keyed by string.
   doors[s_id] = boundary;
-  registry.adjacencies.emplace(boundary);
+
   space.doors.push_back(boundary);
   return *this;
 }
@@ -176,77 +159,6 @@ template <typename T> SpaceBuilder<T> &SpaceBuilder<T>::right(int magnitude) {
   return add_wall(magnitude);
 }
 
-template <typename T> void SpaceBuilder<T>::activate_boundary(Entity& boundary) {
-    Vector &boundary_vector = registry.vectors.get(boundary);
-    float boundary_width = abs(boundary_vector.end.x - boundary_vector.start.x);
-    float boundary_height = abs(boundary_vector.end.y - boundary_vector.start.y);
-    float boundary_pos_x = (boundary_vector.end.x + boundary_vector.start.x) / 2;
-    float boundary_pos_y = (boundary_vector.end.y + boundary_vector.start.y) / 2;
-
-    vec2 bounding_box;
-    if (boundary_width <= 0) {
-      bounding_box = vec2(WALL_THICKNESS, boundary_height + WALL_THICKNESS);
-    } else if (boundary_height <= 0) {
-      bounding_box = vec2(boundary_width + WALL_THICKNESS, WALL_THICKNESS);
-    }
-    vec2 position =
-        vec2(boundary_pos_x + ROOM_ORIGIN_POS.x, boundary_pos_y + ROOM_ORIGIN_POS.y);
-
-    // Setting initial position values
-    Position &position_component = registry.positions.emplace(boundary);
-    position_component.position = position;
-    position_component.angle = 0.f;
-    position_component.scale = bounding_box;
-}
-
-template <typename T> void SpaceBuilder<T>::deactive_boundary(Entity& boundary) {
-  if (registry.positions.has(boundary)) {
-    registry.positions.remove(boundary);
-  }
-  if (registry.renderRequests.has(boundary)) {
-    registry.renderRequests.remove(boundary);
-  }
-  if (registry.activeWalls.has(boundary)) {
-    registry.activeWalls.remove(boundary);
-  }
-  if (registry.activeDoors.has(boundary)) {
-    registry.activeDoors.remove(boundary);
-  }
-};
-
-/********************************************************************************
- * @brief Activate Room
- *
- * @details associate Positions and RenderRequests to each wall / door in a room
- ********************************************************************************/
-template <typename T> void SpaceBuilder<T>::activate_room() {
-  deactivate_room();
-
-  for (Entity& wall : registry.spaces.get(entity).walls) {
-    activate_boundary(wall);
-    registry.activeWalls.emplace(wall);
-    registry.renderRequests.insert(wall, {TEXTURE_ASSET_ID::WALL,
-                                          EFFECT_ASSET_ID::TEXTURED,
-                                          GEOMETRY_BUFFER_ID::SPRITE});
-  }
-
-  for (Entity& door : registry.spaces.get(entity).doors) {
-    activate_boundary(door);
-    registry.activeDoors.emplace(door);
-  }
-}
-
-/********************************************************************************
- * @brief Deactivate Room
- *
- * @details clear Positions and RenderRequests from each wall and door in a room
- ********************************************************************************/
-template <typename T> void SpaceBuilder<T>::deactivate_room() {
-  for (auto &boundary : registry.spaces.get(entity).boundaries) {
-    deactive_boundary(boundary);
-  }
-}
-
 template <typename T> bool SpaceBuilder<T>::is_in_room(vec2 &position) {
   // All well-formed rooms are rectilinear polygons. Therefore, if a point is
   // inside a room, it must be bounded in all four directions by at least one
@@ -286,9 +198,6 @@ template <typename T> bool SpaceBuilder<T>::is_in_room(vec2 &position) {
   return left && right && up && down;
 };
 
-/*
-Returns a random vec2 inside a well-formed room's exact dimensions.
-*/
 template <typename T> vec2 SpaceBuilder<T>::rejection_sample() {
   SpaceBoundingBox &box = registry.bounding_boxes.get(entity);
   std::random_device rd;

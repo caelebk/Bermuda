@@ -1,5 +1,6 @@
 #include "collision_system.hpp"
 #include <cstdio>
+#include <iostream>
 
 #include "ai.hpp"
 #include "enemy.hpp"
@@ -76,6 +77,7 @@ void CollisionSystem::collision_detection() {
       registry.playerProjectiles;
   ComponentContainer<Deadly>&       enemy_container      = registry.deadlys;
   ComponentContainer<ActiveWall>&   wall_container       = registry.activeWalls;
+  ComponentContainer<ActiveDoor>&   door_container       = registry.activeDoors;
   ComponentContainer<Consumable>&   consumable_container = registry.consumables;
   ComponentContainer<Interactable>& interactable_container =
       registry.interactable;
@@ -217,6 +219,44 @@ void CollisionSystem::collision_detection() {
       }
     }
   }
+
+  // 4. Detect door collisions
+  for (uint i = 0; i < door_container.components.size(); i++) {
+    Entity entity_i = door_container.entities[i];
+    if (!registry.positions.has(entity_i)) {
+      continue;
+    }
+    Position& position_i = registry.positions.get(entity_i);
+
+    for (uint j = 0; j < enemy_container.size(); j++) {
+      Entity entity_j = enemy_container.entities[j];
+      if (!registry.positions.has(entity_j)) {
+        continue;
+      }
+
+      if (entity_i == entity_j) {
+        // TODO: this is a bit of a hack, crates are enemies that are walls
+        continue;
+      }
+      Position& position_j = registry.positions.get(entity_j);
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+      }
+    }
+
+    for (uint j = 0; j < player_container.size(); j++) {
+      Entity entity_j = player_container.entities[j];
+      if (!registry.positions.has(entity_j)) {
+        continue;
+      }
+      Position& position_j = registry.positions.get(entity_j);
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+      }
+    }    
+  }
 }
 
 void CollisionSystem::collision_resolution_debug_info(Entity entity,
@@ -243,6 +283,11 @@ void CollisionSystem::collision_resolution() {
     // Wall Collision Handling
     if (registry.activeWalls.has(entity)) {
       routeWallCollisions(entity, entity_other);
+    }
+
+    // Door Collision Handling
+    if (registry.activeDoors.has(entity)) {
+      routeDoorCollisions(entity, entity_other);
     }
 
     // Enemy Collision Handling
@@ -327,7 +372,8 @@ void CollisionSystem::routeDoorCollisions(Entity door, Entity other) {
   if (registry.players.has(other)) {
     resolveDoorPlayerCollision(door, other);
   }
-  // This is probably fine, since a door is a wall to everyone else but the player.
+
+  // Since enemies and projectiles can't enter different rooms, simply treat their collisions like a wall.
   if (registry.playerProjectiles.has(other)) {
     resolveWallPlayerProjCollision(door, other);
   }
@@ -504,5 +550,6 @@ void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
 }
 
 void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
-  printf("collided with a door");
+  DoorConnection& door_connection = registry.doorConnections.get(door);
+  level_builder.switch_room(door_connection);
 }
