@@ -82,9 +82,7 @@ private:
     void connect(Entity &connectee, Entity &connector);
     void print_pair(std::pair<std::string, Entity> pair);
 
-    // returns a vector of filtered directed_adjacencies to have only those directed_adjacencies matching the given direction
-    std::vector<int> filter_directed_adjacencies(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies);
-    std::vector<int> get_random_door_positions(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies, int min, int max);
+    // counts how many directions of the given type are in a directed adjacency
 
     void build_wall_with_doors(RoomBuilder& room,
                               Direction direction,
@@ -94,9 +92,18 @@ private:
                               std::function<void(int)> draw_segment,
                               std::function<void(std::string, int)> draw_door);
 
-    // TODO: extract these to type and place in graph.hpp / graph.cpp
-    std::unordered_map<int, std::set<int>> generate_random_graph(std::vector<int>& rooms, std::vector<int>& adjacency_list);
+    // TODO: extract up to LevelBuilder functions to type and place in graph.hpp / graph.cpp
+    int count_directions_of_directed_adjacencies(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies);
+
+    // returns a vector of filtered directed_adjacencies to have only those directed_adjacencies matching the given direction
+    std::vector<int> get_connected_rooms_matching_direction(Direction direction, std::unordered_map<int, Direction>& directed_adjacencies);
+
+    std::vector<int> get_random_door_positions(std::vector<int>& connected_rooms, int min, int max);
     std::unordered_map<int, std::unordered_map<int, Direction>> generate_random_graph_doors(std::unordered_map<int, std::set<int>>& adjacency_list);
+
+    std::unordered_map<int, std::set<int>> generate_random_graph(std::vector<int>& rooms, std::vector<int>& adjacency_list);
+
+    // LevelBuilder functions
     void randomize_room_shapes(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
     void connect_doors(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
 public:

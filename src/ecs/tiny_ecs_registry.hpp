@@ -59,6 +59,7 @@ public:
   ComponentContainer<Space> spaces;
   ComponentContainer<Adjacency> adjacencies;
   ComponentContainer<ActiveWall> activeWalls;
+  ComponentContainer<ActiveDoor> activeDoors;
   ComponentContainer<Interactable> interactable;
 
   // status related
@@ -108,6 +109,7 @@ public:
     registry_list.push_back(&spaces);
     registry_list.push_back(&adjacencies);
     registry_list.push_back(&activeWalls);
+    registry_list.push_back(&activeDoors);
     // status related
     registry_list.push_back(&lowOxygen);
     // audio related

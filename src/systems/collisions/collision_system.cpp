@@ -91,6 +91,12 @@ void CollisionSystem::collision_detection() {
         continue;
       }
 
+      // wall to door
+      if (registry.activeWalls.has(entity_i) &&
+          registry.activeDoors.has(entity_j)) {
+        continue;
+      }
+
       // wall <-> interactable
       if (registry.activeWalls.has(entity_i) &&
           registry.interactable.has(entity_j)) {
@@ -210,6 +216,8 @@ void CollisionSystem::collision_resolution_debug_info(Entity entity,
       printf("Oxygen\n");
     } else if (registry.playerProjectiles.has(entity_other)) {
       printf("Player Projectile\n");
+    } else if (registry.activeDoors.has(entity_other)) {
+      printf("Door\n");
     }
   }
 }
@@ -235,6 +243,11 @@ void CollisionSystem::collision_resolution() {
     // Wall Collision Handling
     if (registry.activeWalls.has(entity)) {
       routeWallCollisions(entity, entity_other);
+    }
+
+    // Door Collision Handling
+    if (registry.activeDoors.has(entity)) {
+      routeDoorCollisions(entity, entity_other);
     }
 
     // Player Projectile Collision Handling
@@ -270,6 +283,9 @@ void CollisionSystem::routePlayerCollisions(Entity player, Entity other) {
   if (registry.activeWalls.has(other)) {
     resolveWallPlayerCollision(other, player);
   }
+  if (registry.activeDoors.has(other)) {
+    resolveDoorPlayerCollision(other, player);
+  }
   if (registry.interactable.has(other)) {
     resolvePlayerInteractableCollision(player, other);
   }
@@ -300,6 +316,23 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
   }
   if (registry.deadlys.has(other)) {
     resolveWallEnemyCollision(wall, other);
+  }
+}
+
+void CollisionSystem::routeDoorCollisions(Entity door, Entity other) {
+  if (!registry.motions.has(other)) {
+    return;
+  }
+
+  if (registry.players.has(other)) {
+    resolveDoorPlayerCollision(door, other);
+  }
+  // zamn!
+  if (registry.playerProjectiles.has(other)) {
+    resolveWallPlayerProjCollision(door, other);
+  }
+  if (registry.deadlys.has(other)) {
+    resolveWallEnemyCollision(door, other);
   }
 }
 
@@ -442,4 +475,11 @@ void CollisionSystem::resolveWallPlayerCollision(Entity wall, Entity player) {
                    : overlapY;
     player_position.position.y += overlapY;
   }
+}
+
+void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
+  Motion& player_motion  = registry.motions.get(player);
+  player_motion.velocity = vec2(0.0f, 0.0f);
+
+  printf("collided with door\n");
 }

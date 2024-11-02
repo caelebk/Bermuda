@@ -40,6 +40,9 @@ protected:
   virtual vec2 get_updated_right_position(int magnitude);
   virtual vec2 get_updated_left_position(int magnitude);
 
+  void activate_boundary(Entity& boundary);
+  void deactive_boundary(Entity& boundary);
+
   vec2 rejection_sample();
 
 public:
@@ -53,11 +56,6 @@ public:
   virtual SpaceBuilder &right(int magnitude = 0);
   virtual SpaceBuilder &door(std::string s_id, int magnitude = 0);
 
-  std::vector<Vector> get_wall_vectors();
-  std::vector<Vector> get_door_vectors();
-
-  int count_connections();
-
   /**
    * Activate Room
    */
@@ -66,7 +64,7 @@ public:
   /**
    * Deactivate Room
    */
-  void deactivate_current_room();
+  void deactivate_room();
 
   bool is_in_room(vec2 &position);
   /**
@@ -178,85 +176,79 @@ template <typename T> SpaceBuilder<T> &SpaceBuilder<T>::right(int magnitude) {
   return add_wall(magnitude);
 }
 
-template <typename T> std::vector<Vector> SpaceBuilder<T>::get_wall_vectors() {
-  std::vector<Vector> vectors;
-  for (auto &wall : registry.spaces.get(entity).walls) {
-    vectors.push_back(registry.vectors.get(wall));
-  }
-  return vectors;
+template <typename T> void SpaceBuilder<T>::activate_boundary(Entity& boundary) {
+    Vector &boundary_vector = registry.vectors.get(boundary);
+    float boundary_width = abs(boundary_vector.end.x - boundary_vector.start.x);
+    float boundary_height = abs(boundary_vector.end.y - boundary_vector.start.y);
+    float boundary_pos_x = (boundary_vector.end.x + boundary_vector.start.x) / 2;
+    float boundary_pos_y = (boundary_vector.end.y + boundary_vector.start.y) / 2;
+
+    vec2 bounding_box;
+    if (boundary_width <= 0) {
+      bounding_box = vec2(WALL_THICKNESS, boundary_height + WALL_THICKNESS);
+    } else if (boundary_height <= 0) {
+      bounding_box = vec2(boundary_width + WALL_THICKNESS, WALL_THICKNESS);
+    }
+    vec2 position =
+        vec2(boundary_pos_x + ROOM_ORIGIN_POS.x, boundary_pos_y + ROOM_ORIGIN_POS.y);
+
+    // Setting initial position values
+    Position &position_component = registry.positions.emplace(boundary);
+    position_component.position = position;
+    position_component.angle = 0.f;
+    position_component.scale = bounding_box;
 }
 
-template <typename T> std::vector<Vector> SpaceBuilder<T>::get_door_vectors() {
-  std::vector<Vector> vectors;
-  for (auto &door : registry.spaces.get(entity).doors) {
-    vectors.push_back(registry.vectors.get(door));
+template <typename T> void SpaceBuilder<T>::deactive_boundary(Entity& boundary) {
+  if (registry.collidables.has(boundary)) {
+    registry.collidables.remove(boundary);
   }
-  return vectors;
-}
+  if (registry.positions.has(boundary)) {
+    registry.positions.remove(boundary);
+  }
+  if (registry.renderRequests.has(boundary)) {
+    registry.renderRequests.remove(boundary);
+  }
+  if (registry.activeWalls.has(boundary)) {
+    registry.activeWalls.remove(boundary);
+  }
+  if (registry.activeDoors.has(boundary)) {
+    registry.activeDoors.remove(boundary);
+  }
+};
 
 /********************************************************************************
  * @brief Activate Room
  *
- * @details associate Positions and RenderRequests to each wall in a room
+ * @details associate Positions and RenderRequests to each wall / door in a room
  ********************************************************************************/
 template <typename T> void SpaceBuilder<T>::activate_room() {
-  deactivate_current_room();
+  deactivate_room();
 
-  std::vector<Vector> vectors;
-  for (auto &wall : registry.spaces.get(entity).walls) {
-    Vector &wall_vector = registry.vectors.get(wall);
-    float wall_width = abs(wall_vector.end.x - wall_vector.start.x);
-    float wall_height = abs(wall_vector.end.y - wall_vector.start.y);
-    float wall_pos_x = (wall_vector.end.x + wall_vector.start.x) / 2;
-    float wall_pos_y = (wall_vector.end.y + wall_vector.start.y) / 2;
-
-    vec2 wall_bounding_box;
-    if (wall_width <= 0) {
-      wall_bounding_box = vec2(WALL_THICKNESS, wall_height + WALL_THICKNESS);
-    } else if (wall_height <= 0) {
-      wall_bounding_box = vec2(wall_width + WALL_THICKNESS, WALL_THICKNESS);
-    }
-    vec2 wall_position =
-        vec2(wall_pos_x + ROOM_ORIGIN_POS.x, wall_pos_y + ROOM_ORIGIN_POS.y);
-
-    // Setting initial position values
-    Position &position = registry.positions.emplace(wall);
-    position.position = wall_position;
-    position.angle = 0.f;
-    position.scale = wall_bounding_box;
-
-    // Make Active Wall
+  for (Entity& wall : registry.spaces.get(entity).walls) {
+    activate_boundary(wall);
     registry.activeWalls.emplace(wall);
-
-    // Make collidable
     registry.collidables.emplace(wall);
-
-    // Request Render
     registry.renderRequests.insert(wall, {TEXTURE_ASSET_ID::WALL,
                                           EFFECT_ASSET_ID::TEXTURED,
                                           GEOMETRY_BUFFER_ID::SPRITE});
+  }
+
+  for (Entity& door : registry.spaces.get(entity).doors) {
+    activate_boundary(door);
+    registry.activeDoors.emplace(door);
+    registry.collidables.emplace(door);
   }
 }
 
 /********************************************************************************
  * @brief Deactivate Room
  *
- * @details clear Positions and RenderRequests from each wall in a room
+ * @details clear Positions and RenderRequests from each wall and door in a room
  ********************************************************************************/
-template <typename T> void SpaceBuilder<T>::deactivate_current_room() {
-  for (auto &wall : registry.activeWalls.entities) {
-    if (registry.collidables.has(wall)) {
-      registry.collidables.remove(wall);
-    }
-    if (registry.positions.has(wall)) {
-      registry.positions.remove(wall);
-    }
-    if (registry.renderRequests.has(wall)) {
-      registry.renderRequests.remove(wall);
-    }
-    if (registry.activeWalls.has(wall)) {
-      registry.activeWalls.remove(wall);
-    }
+template <typename T> void SpaceBuilder<T>::deactivate_room() {
+  for (auto &boundary : registry.spaces.get(entity).boundaries) {
+    deactive_boundary(boundary);
   }
 }
 
@@ -327,8 +319,4 @@ template <typename T> vec2 SpaceBuilder<T>::rejection_sample() {
 
 template <typename T> vec2 SpaceBuilder<T>::get_random_position() {
   return rejection_sample();
-}
-
-template <typename T> int SpaceBuilder<T>::count_connections() {
-  return registry.adjacencies.get(entity).size();
 }

@@ -324,8 +324,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   // collision testing)
   if (key == GLFW_KEY_1) {
     if (action == GLFW_PRESS && !(action == GLFW_REPEAT)) {
+      curr_room.deactivate_room();
       curr_room = level_builder.room(
-          "3");  // TODO: change based on which room entered
+          "0");  // TODO: change based on which room entered
       curr_room.activate_room();
       restart_game();
     }
@@ -334,8 +335,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   // collision testing)
   if (key == GLFW_KEY_2) {
     if (action == GLFW_PRESS && !(action == GLFW_REPEAT)) {
+      curr_room.deactivate_room();
       curr_room = level_builder.room(
-          "13");  // TODO: change based on which room entered
+          "1");  // TODO: change based on which room entered
       curr_room.activate_room();
       restart_game();
     }

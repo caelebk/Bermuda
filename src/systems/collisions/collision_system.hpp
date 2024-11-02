@@ -20,7 +20,6 @@
 
 class CollisionSystem
 {
-
 private:
 	void collision_detection();
 	void collision_resolution();
@@ -32,6 +31,7 @@ private:
 	void routePlayerCollisions(Entity player, Entity other);
     void routeEnemyCollisions(Entity enemy, Entity other);
 	void routeWallCollisions(Entity wall, Entity other);
+    void routeDoorCollisions(Entity door, Entity other);
 	void routePlayerProjCollisions(Entity player_proj, Entity other);
     void routeConsumableCollisions(Entity consumable, Entity other);
     void routeInteractableCollisions(Entity interactable, Entity other);
@@ -59,6 +59,9 @@ private:
 
     //Wall <-> Player
     void resolveWallPlayerCollision(Entity wall, Entity player);
+
+    //Door <-> Player
+    void resolveDoorPlayerCollision(Entity door, Entity player);
 
 public:
 	void step(float elapsed_ms);

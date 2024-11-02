@@ -3,6 +3,12 @@
 #include "common.hpp"
 #include <limits>
 
+/*
+"To instantiate a global variable; this path poisons the mind and corrupts the code.
+To disguise it as a component; this path is that to harmony.
+-Confucius"
+*/
+
 struct SpaceBoundingBox {
     float minimum_x = std::numeric_limits<float>::max();
     float maximum_x = std::numeric_limits<float>::min();
@@ -28,5 +34,7 @@ struct Adjacency {
 };
 
 struct ActiveWall {};
+
+struct ActiveDoor {};
 
 struct Interactable {};

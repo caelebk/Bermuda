@@ -79,25 +79,25 @@ void level_builder_demo() {
   level_builder.print_hallways();
 };
 
-void how_to_get_walls_and_doors_demo() {
-  std::cout << "how_to_get_walls_and_doors_demo" << std::endl;
-  LevelBuilder level_builder = LevelBuilder();
-  level_builder.room("room_1").up(6).right(6).down(6).left(2).door("s", 2).left(
-      2);
+// void how_to_get_walls_and_doors_demo() {
+//   std::cout << "how_to_get_walls_and_doors_demo" << std::endl;
+//   LevelBuilder level_builder = LevelBuilder();
+//   level_builder.room("room_1").up(6).right(6).down(6).left(2).door("s", 2).left(
+//       2);
 
-  // You can get all the room's wall components like this.
-  std::vector<Vector> walls = level_builder.room("room_1").get_wall_vectors();
-  std::cout << "walls: " << std::endl;
-  for (auto& wall : walls) {
-    printf("(%f, %f) (%f, %f)\n", wall.start.x, wall.start.y, wall.end.x,
-           wall.end.y);
-  }
+//   // You can get all the room's wall components like this.
+//   std::vector<Vector> walls = level_builder.room("room_1").get_wall_vectors();
+//   std::cout << "walls: " << std::endl;
+//   for (auto& wall : walls) {
+//     printf("(%f, %f) (%f, %f)\n", wall.start.x, wall.start.y, wall.end.x,
+//            wall.end.y);
+//   }
 
-  // Ditto for doors.
-  std::vector<Vector> doors = level_builder.room("room_1").get_door_vectors();
-  std::cout << "doors: " << std::endl;
-  for (auto& door : doors) {
-    printf("(%f, %f) (%f, %f)\n", door.start.x, door.start.y, door.end.x,
-           door.end.y);
-  }
-}
+//   // Ditto for doors.
+//   std::vector<Vector> doors = level_builder.room("room_1").get_door_vectors();
+//   std::cout << "doors: " << std::endl;
+//   for (auto& door : doors) {
+//     printf("(%f, %f) (%f, %f)\n", door.start.x, door.start.y, door.end.x,
+//            door.end.y);
+//   }
+// }
