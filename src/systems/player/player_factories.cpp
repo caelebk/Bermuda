@@ -186,7 +186,7 @@ Entity loadNet(RenderSystem* renderer) {
   OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
   oxyCost.amount          = NET_OXYGEN_COST;
 
-  Stun& stun = registry.stuns.emplace(entity);
+  Stun& stun    = registry.stuns.emplace(entity);
   stun.duration = NET_STUN_DURATION;
 
   return entity;

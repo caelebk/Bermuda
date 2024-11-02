@@ -17,6 +17,8 @@
 using Clock = std::chrono::high_resolution_clock;
 
 bool   paused;
+Entity pause_menu;
+
 Entity player;
 
 // Consumable Entities
@@ -45,9 +47,6 @@ int main() {
   AudioSystem     audios;
   CollisionSystem collisions;
 
-  // TODO: Change this to true when pause menu is implemented
-  paused = false;
-
   // Initializing window
   GLFWwindow* window = world.create_window();
   if (!window) {
@@ -62,6 +61,8 @@ int main() {
   world.init(&renderer);
   audios.init();
   ai.init(&renderer);
+
+  paused = true;
 
   // variable timestep loop
   auto t = Clock::now();

@@ -3,6 +3,22 @@
 // Player HUD component
 struct PlayerHUD {};
 
+// Enum for inventory types
+enum class INVENTORY {
+  KEY        = 0,
+  NET        = KEY + 1,
+  CONCUSSIVE = NET + 1,
+  TORPEDO    = CONCUSSIVE + 1,
+  SHRIMP     = TORPEDO + 1,
+  PROJ_COUNT = SHRIMP + 1
+};
+
+// Inventory HUD component
+struct InventoryHUD {
+  INVENTORY inv_type;
+  std::unordered_map<unsigned int, Entity> count_digits;
+};
+
 // Enum for weapon types
 enum class PROJECTILES {
   HARPOON    = 0,

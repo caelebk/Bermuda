@@ -8,7 +8,7 @@
 
 bool player_movement(int key, int action, int mod);
 
-bool player_mouse(int key, int action, int mod, Entity& default_wep,
+bool player_mouse(RenderSystem* renderer, int key, int action, int mod, Entity& default_wep,
                   Entity& default_gun);
 
 void swapWeps(Entity swapped, Entity swapper, PROJECTILES projectile);
@@ -20,6 +20,8 @@ void handleWeaponSwapping(int key);
 // Helper for handleWeaponSwapping and player_mouse
 void doWeaponSwap(Entity swapper_proj, Entity swapper_wep,
                   PROJECTILES projectile);
+
+Entity createPauseMenu(RenderSystem* renderer);
 
 extern Entity      player;
 extern Entity      player_weapon;

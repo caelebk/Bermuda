@@ -152,6 +152,8 @@ void RenderSystem::drawToScreen() {
   glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
   ScreenState& screen = registry.screenStates.get(screen_state_entity);
   glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
+  GLuint is_paused_uloc = glGetUniformLocation(water_program, "is_paused");
+  glUniform1i(is_paused_uloc, paused);
   gl_has_errors();
   // Set the vertex position and vertex texture coordinates (both stored in the
   // same VBO)
@@ -248,8 +250,7 @@ void RenderSystem::draw() {
         Emoting& emote = registry.emoting.get(enemy);
         if (registry.renderRequests.has(emote.child)) {
           drawTexturedMesh(emote.child, projection_2D);
-        } 
-
+        }
       }
     }
   }
@@ -260,6 +261,10 @@ void RenderSystem::draw() {
   for (Entity cursor : registry.cursors.entities) {
     if (registry.renderRequests.has(cursor))
       drawTexturedMesh(cursor, projection_2D);
+  }
+  for (Entity pauseMenu : registry.pauseMenus.entities) {
+    if (registry.renderRequests.has(pauseMenu))
+      drawTexturedMesh(pauseMenu, projection_2D);
   }
   //////////////////////////////////////////////////////////////////////////////////////
 
