@@ -23,7 +23,7 @@ class WorldSystem {
   GLFWwindow* create_window();
 
   // starts the game
-  void init(RenderSystem* renderer);
+  void init(RenderSystem* renderer, LevelBuilder* level_builder);
 
   // Releases all associated resources
   ~WorldSystem();
@@ -51,6 +51,7 @@ class WorldSystem {
   unsigned int points;
 
   // Game state
+  LevelBuilder* level_builder;
   RenderSystem* renderer;
   float         oxygen_timer;
   vec2          mouse_pos;
@@ -77,5 +78,3 @@ extern Entity net_gun;
 extern Entity concussive_gun;
 extern Entity torpedo_gun;
 extern Entity shrimp_gun;
-
-extern LevelBuilder level_builder;

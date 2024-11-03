@@ -62,8 +62,23 @@ Direction get_opposite_direction(Direction direction);
 class LevelBuilder
 {
 private:
+    std::string current_room_id;
+    RenderSystem* renderer;
+
+    std::set<std::string> entered_rooms;
+    std::set<std::string> boss_rooms;
+
+    // TODO: componentize this
+    std::map<std::string, std::vector<vec2>> crate_positions;
+
     std::unordered_map<std::string, RoomBuilder> rooms;
     std::unordered_map<std::string, HallwayBuilder> hallways;
+
+    void mark_boss_rooms(std::vector<int> rooms);
+    void spawn_miniboss();
+
+    void mark_room_entered(std::string room_id);
+    bool has_entered_room(std::string room_id);
 
     void activate_room(std::string room_id);
     void deactivate_room();
@@ -85,9 +100,7 @@ private:
     void randomize_room_shapes(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
     void connect_doors(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
 public:
-    std::string current_room_id;
-
-    LevelBuilder();
+    void init(RenderSystem* renderer);
 
     /**
      * Returns the RoomBuilder for a room, making a new one if one under the given key does not exist.
@@ -100,13 +113,6 @@ public:
      * @param s_id: the room's key.
      */
     HallwayBuilder &hallway(std::string s_id);
-
-    /**
-     * Copies the shape and bounding box of one room to another. Does not copy that room's adjacencies.
-     * @param s_id: the room's key.
-     * @param copied_s_id: the room-to-be-copied's key.
-     */
-    RoomBuilder copy_room(std::string s_id, std::string copied_s_id);
 
     /**
      * Connects two doors together.
@@ -127,7 +133,7 @@ public:
     void generate_random_level(std::vector<int> rooms, std::vector<int> densities);
     
     // Switches to the room pointed at by the given DoorConnection.
-    void switch_room(DoorConnection& door_connection);
+    void enter_room(DoorConnection& door_connection);
 
     // Activates the starting room.
     void activate_starting_room();

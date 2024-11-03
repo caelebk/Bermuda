@@ -86,6 +86,10 @@ bool circle_box_collides(const Position& circle_pos, float radius, const Positio
   return distanceSquared <= radiusSquared;
 }
 
+void CollisionSystem::init(LevelBuilder* level) {
+  this->level = level;
+}
+
 void CollisionSystem::step(float elapsed_ms) {
   collision_detection();
   collision_resolution();
@@ -313,6 +317,7 @@ void CollisionSystem::collision_resolution() {
 
     // Door Collision Handling
     if (registry.activeDoors.has(entity)) {
+      std::cout << "something collided" << std::endl;
       routeDoorCollisions(entity, entity_other);
     }
 
@@ -390,6 +395,7 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
 }
 
 void CollisionSystem::routeDoorCollisions(Entity door, Entity other) {
+  std::cout << "something collided" << std::endl;
   if (!registry.motions.has(other)) {
     return;
   }
@@ -646,6 +652,7 @@ void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
 }
 
 void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
+  std::cout << "collided with door" << std::endl;
   DoorConnection& door_connection = registry.doorConnections.get(door);
-  level_builder.switch_room(door_connection);
+  level->enter_room(door_connection);
 }

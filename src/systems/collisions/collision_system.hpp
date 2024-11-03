@@ -22,6 +22,8 @@
 class CollisionSystem
 {
 private:
+    LevelBuilder* level;
+
 	void collision_detection();
 	void collision_resolution();
 	void collision_resolution_debug_info(Entity entity, Entity entity_other);
@@ -70,6 +72,7 @@ private:
 
    void detectAndResolveExplosion(Entity proj, Entity enemy);
 public:
+    void init(LevelBuilder* level);
 	void step(float elapsed_ms);
 
 	CollisionSystem()
@@ -84,6 +87,4 @@ bool box_collides(const Position &position1, const Position &position2);
 bool circle_box_collides(const Position &position1, float radius, const Position &position2);
 
 extern Entity player_projectile;
-
-extern LevelBuilder level_builder;
 extern Entity player;

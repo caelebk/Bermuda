@@ -10,5 +10,3 @@ Makefile
 bermuda
 bermuda.exe
 .vscode/
-ext/project_path.hpp
-ext/project_path.hpp.in

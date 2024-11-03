@@ -102,6 +102,9 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position) {
   // make consumable
   registry.interactable.emplace(entity);
 
+  // designate this as a geyser; facilitates room transitions.
+  registry.geysers.emplace(entity);
+
   // Add stats
   auto& refill        = registry.oxygenModifiers.emplace(entity);
   refill.amount       = GEYSER_QTY;

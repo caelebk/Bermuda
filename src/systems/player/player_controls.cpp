@@ -24,6 +24,10 @@ static bool checkWeaponCollisions(Entity entity) {
     if (!registry.positions.has(wall)) {
       continue;
     }
+    // If it's a crate, let the player blast it.
+    if (registry.deadlys.has(wall)) {
+      continue;
+    }
     const Position wallPos = registry.positions.get(wall);
     if (box_collides(entityPos, wallPos)) {
       return false;

@@ -69,6 +69,7 @@ class ECSRegistry {
   ComponentContainer<ActiveDoor>       activeDoors;
   ComponentContainer<Interactable>     interactable;
   ComponentContainer<Floor>            floors;
+  ComponentContainer<Geyser>           geysers;
 
   // status related
   ComponentContainer<LowOxygen> lowOxygen;
@@ -131,6 +132,7 @@ class ECSRegistry {
     registry_list.push_back(&activeWalls);
     registry_list.push_back(&activeDoors);
     registry_list.push_back(&interactable);
+    registry_list.push_back(&geysers);
     registry_list.push_back(&floors);
     // status related
     registry_list.push_back(&lowOxygen);

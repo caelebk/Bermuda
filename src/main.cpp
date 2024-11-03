@@ -37,11 +37,10 @@ Entity concussive_gun;
 Entity torpedo_gun;
 Entity shrimp_gun;
 
-LevelBuilder level_builder;
-
 // Entry point
 int main() {
   // Global systems
+  LevelBuilder    level_builder;
   WorldSystem     world;
   RenderSystem    renderer;
   AISystem        ai;
@@ -59,8 +58,10 @@ int main() {
   }
 
   // initialize the main systems
+  collisions.init(&level_builder);
   renderer.init(window);
-  world.init(&renderer);
+  level_builder.init(&renderer);
+  world.init(&renderer, &level_builder);
   audios.init();
   ai.init(&renderer);
 

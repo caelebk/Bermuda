@@ -48,14 +48,11 @@ std::vector<int> get_connecting_vertices_with_direction(Direction direction, Dir
     return connected_rooms;
 }
 
-std::vector<int> get_random_door_positions(std::vector<int>& connected_rooms, int min, int max) {
+std::vector<int> get_random_door_positions(int num_doors, int min, int max) {
   std::vector<int> positions;
 
-  // Count the number of elements with the specified direction.
-  int count = connected_rooms.size();
-
   // Generate unique positions with a minimum distance of DOOR_SCALAR between them.
-  while ((int)positions.size() < count) {
+  while ((int)positions.size() < num_doors) {
     int  position      = getRandInt(min, max);
     bool is_valid = true;
 
@@ -66,17 +63,24 @@ std::vector<int> get_random_door_positions(std::vector<int>& connected_rooms, in
 
     // Ensure each new position is at least DOOR_SCALAR units away from existing ones.
     for (int existing_pos : positions) {
-      if (std::abs(existing_pos - position) < DOOR_SCALAR) {
+      if (std::abs(existing_pos - position) < DOOR_SCALAR + 1) {
         is_valid = false;
         break;
       }
     }
 
+    // std::cout << "position: " << position << std::endl;
+    // for (int i = 0; i < positions.size(); i++) {
+    //     std::cout << "existing pos: " << positions[i] << std::endl;
+    // }
+
     if (is_valid) {
       positions.push_back(position);
     } else {
       // Try again from scratch.
-      positions = std::vector<int>();
+      while (positions.size() > 0) {
+        positions.pop_back();
+      }
     }
   }
 
@@ -85,6 +89,8 @@ std::vector<int> get_random_door_positions(std::vector<int>& connected_rooms, in
 }
 
 DirectedGraph expand_graph_to_random_directed_graph(Graph& graph) {
+    std::random_device rd;
+    std::default_random_engine rng(rd());
     // For each edge in the adjacency list, associate each to one of four randomized directions to make our doors make physical sense when rendered.
     // Expand the adjacency list into a directed adjacency list that stores this assigned direction as a nested map.
     DirectedGraph directed_graph;
@@ -100,12 +106,13 @@ DirectedGraph expand_graph_to_random_directed_graph(Graph& graph) {
 
             Direction random_direction;
             do {
+                std::shuffle(directions.begin() + 1, directions.end() - 1, rng);
                 random_direction = directions[getRandInt(0, directions.size() - 1)];
             } while (
                 // Keep selecting another direction until:
                 // 1. That direction has not already been added to this room, up to thrice (since it may be impossible to fit doors onto one wall if there are enough of them).
                 // TODO: Remove magic number.
-                count_edges_with_direction(random_direction, directed_graph[room_number]) >= 3
+                count_edges_with_direction(random_direction, directed_graph[room_number]) >= 2
             );
 
             // If we've already processed this pair, move on.
@@ -163,7 +170,9 @@ Graph generate_random_graph(std::vector<int>& rooms, std::vector<int>& densities
         // Generate a random path through this cluster. random_path also doubles as a normalized access of 0->cluster indices to 
         // the random path, for later loops.
         std::vector<int> random_path = std::vector<int>(rooms_in_cluster);
-        std::iota(random_path.begin(), random_path.end(), first_room_number);
+        for (int i = 0; i < rooms_in_cluster; ++i) {
+            random_path[i] = first_room_number + i;
+        }
         // Keep the first and last nodes fixed, so we can connect difficulty areas via first_room and the elements of the input vector.
         std::shuffle(random_path.begin() + 1, random_path.end() - 1, rng);
 

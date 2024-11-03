@@ -54,3 +54,5 @@ struct ActiveDoor {};
 struct Interactable {};
 
 struct Floor {};
+
+struct Geyser {};

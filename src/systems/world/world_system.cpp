@@ -107,12 +107,9 @@ GLFWwindow* WorldSystem::create_window() {
   return window;
 }
 
-void WorldSystem::init(RenderSystem* renderer_arg) {
+void WorldSystem::init(RenderSystem* renderer_arg, LevelBuilder* level_builder) {
   this->renderer = renderer_arg;
-
-  // Generate a random level
-  level_builder.generate_random_level({5, 5, 5}, {80, 50, 0});
-  level_builder.activate_starting_room();
+  this->level_builder = level_builder;
 
   restart_game();
   restart_game();
@@ -301,11 +298,10 @@ void WorldSystem::restart_game() {
   // Enemy + Drops
   /////////////////////////////////////////////
   // spawn at random places in the room
-  execute_config_rand(LVL_1_RAND_POS, level_builder.room(level_builder.current_room_id), renderer);
-  execute_config_rand_chance(LVL_1_RAND_POS, level_builder.room(level_builder.current_room_id), renderer, 0.5);
+  // execute_config_rand(LVL_1_RAND_POS, level_builder.room(level_builder.current_room_id), renderer);
+  // execute_config_rand_chance(LVL_1_RAND_POS, level_builder.room(level_builder.current_room_id), renderer, 0.5);
 
-  // spawn at fixed positions in the room
-  execute_config_fixed(LVL_1_FIXED);
+  level_builder->activate_starting_room();
 
   paused = false;
 }

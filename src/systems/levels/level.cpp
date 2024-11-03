@@ -4,13 +4,22 @@
 #include <iterator>
 #include <string>
 
+#include "spawning.hpp"
+#include "level_spawn.hpp"
+#include "map_factories.hpp"
 #include "level.hpp"
 #include "graph.hpp"
 #include "common.hpp"
 #include "room.hpp"
 #include "player_factories.hpp"
 
-LevelBuilder::LevelBuilder(): current_room_id("0") {};
+void LevelBuilder::init(RenderSystem* renderer) {
+  this->renderer = renderer;
+  current_room_id = STARTING_ROOM_ID;
+
+  // TODO: extract magic numbers
+  generate_random_level({5, 5, 5}, {80, 50, 0});
+};
 
 RoomBuilder& LevelBuilder::room(std::string s_id) {
   return rooms[s_id];
@@ -43,15 +52,6 @@ LevelBuilder& LevelBuilder::connect(Direction direction,
   }
 
   return *this;
-};
-
-RoomBuilder LevelBuilder::copy_room(std::string s_id, std::string copied_s_id) {
-  room(s_id);
-  registry.spaces.get(room(s_id).entity) =
-      registry.spaces.get(room(copied_s_id).entity);
-  registry.bounding_boxes.get(room(s_id).entity) =
-      registry.bounding_boxes.get(room(copied_s_id).entity);
-  return rooms[s_id];
 };
 
 void LevelBuilder::activate_boundary(Entity& boundary) {
@@ -92,9 +92,37 @@ void LevelBuilder::deactivate_boundary(Entity& boundary) {
   }
 };
 
+void LevelBuilder::mark_boss_rooms(std::vector<int> rooms) {
+  int i = 0;
+  int cluster = -1;
+  while (i < rooms.size()) {
+    cluster += rooms[i];
+    boss_rooms.insert(std::to_string(cluster));
+    i++;
+  }
+
+  for (auto& boss_room : boss_rooms) {
+    std::cout << "boss room: " << boss_room << std::endl;
+  }
+}
+
+void LevelBuilder::spawn_miniboss() {
+  // execute_config_rand(LVL_1_RAND_POS, room(current_room_id), renderer); // Replace "LVL_1_RAND_POS" with the macro for miniboss.
+  std::cout << "Miniboss spawned!" << std::endl;
+}
+
+void LevelBuilder::mark_room_entered(std::string room_id) {
+  entered_rooms.insert(room_id);
+}
+
+bool LevelBuilder::has_entered_room(std::string room_id) {
+  return entered_rooms.count(room_id) > 0;
+}
+
 void LevelBuilder::activate_room(std::string room_id) {
   current_room_id = room_id;
 
+  // Render the walls.
   for (Entity& wall : registry.spaces.get(room(current_room_id).entity).walls) {
     activate_boundary(wall);
     registry.activeWalls.emplace(wall);
@@ -103,31 +131,10 @@ void LevelBuilder::activate_room(std::string room_id) {
                                           GEOMETRY_BUFFER_ID::SPRITE});
   }
 
+  // Render the doors.
   for (Entity& door : registry.spaces.get(room(current_room_id).entity).doors) {
     activate_boundary(door);
     registry.activeDoors.emplace(door);
-    // TODO: make better door assets
-    // Position &door_position = registry.positions.get(door);
-    // Direction direction = registry.doorConnections.get(door).direction;
-    // TEXTURE_ASSET_ID texture_id;
-    // switch (direction) {
-    //   case Direction::NORTH:
-    //     texture_id = TEXTURE_ASSET_ID::TOP_DOORWAY;
-    //     break;
-    //   case Direction::EAST:
-    //     texture_id = TEXTURE_ASSET_ID::SIDE_DOORWAY;
-    //     break;
-    //   case Direction::SOUTH:
-    //     texture_id = TEXTURE_ASSET_ID::BOT_DOORWAY;
-    //     break;
-    //   case Direction::WEST:
-    //     texture_id = TEXTURE_ASSET_ID::SIDE_DOORWAY;
-    //     door_position.scale.x *= -1;
-    //     break;
-    // }
-    // registry.renderRequests.insert(door, {texture_id,
-    //                                       EFFECT_ASSET_ID::TEXTURED,
-    //                                       GEOMETRY_BUFFER_ID::SPRITE});
   }
 
   // activate the floor
@@ -139,13 +146,63 @@ void LevelBuilder::activate_room(std::string room_id) {
   registry.floors.emplace(floor);
 
   registry.renderRequests.insert(floor, {TEXTURE_ASSET_ID::FLOOR,
-                                         EFFECT_ASSET_ID::TEXTURED,
-                                         GEOMETRY_BUFFER_ID::SPRITE});
+                                        EFFECT_ASSET_ID::TEXTURED,
+                                        GEOMETRY_BUFFER_ID::SPRITE});
+
+// Spawn the appropriate entities.
+  // TODO: extract to function
+  // If we're in a boss room, just only spawn the boss; ignore everything else.
+  if (boss_rooms.count(current_room_id)) {
+    spawn_miniboss();
+  } else if (!has_entered_room(current_room_id)) {
+    mark_room_entered(current_room_id);
+    // It's the first time in this room, spawn enemies AND crates.
+    execute_config_rand(LVL_1_RAND_POS, room(room_id), renderer);
+    execute_config_rand_chance(LVL_1_RAND_POS, room(room_id), renderer, 0.5);
+
+    // Also, store the positions of every crate for a later visit to this room.
+    ComponentContainer<Deadly>& enemy_container = registry.deadlys;
+    ComponentContainer<ActiveWall>& wall_container = registry.activeWalls;
+    for (uint i = 0; i < wall_container.components.size(); i++) {
+      Entity entity_i = wall_container.entities[i];
+      if (registry.deadlys.has(entity_i)) {
+        if (!registry.positions.has(entity_i)) {
+          continue;
+        }
+        Position& position = registry.positions.get(entity_i);
+        // TODO: this is a bit of a hack, crates are enemies that are walls
+        crate_positions[current_room_id].push_back(position.position);
+      }
+    }
+  } else {
+    // Retrieve all the stored crate positions and stick 'em on the floor.
+    for (auto& crate_position : crate_positions[current_room_id]) { 
+      createCratePos(renderer, crate_position);
+    }
+
+    execute_config_rand(LVL_1_RAND_POS_CRATELESS, room(current_room_id), renderer);
+    execute_config_rand_chance(LVL_1_RAND_POS_CRATELESS, room(current_room_id), renderer, 0.5);
+  }
 }
 
 void LevelBuilder::deactivate_room() {
   for (auto &boundary : registry.spaces.get(room(current_room_id).entity).boundaries) {
     deactivate_boundary(boundary);
+  }
+
+  // Remove every geyser on the map.
+  for (auto& geyser : registry.geysers.entities) {
+    registry.remove_all_components_of(geyser);
+  }
+
+  // Also, remove every enemy on the map.
+  for (auto& enemy : registry.deadlys.entities) {
+    registry.remove_all_components_of(enemy);
+  }
+
+  // And every consumable as well.
+  for (auto& consumable : registry.consumables.entities) {
+    registry.remove_all_components_of(consumable);
   }
 }
 
@@ -161,7 +218,6 @@ void LevelBuilder::move_player_to_door(Direction direction, Entity& exit_door) {
           // Get the opposite direction of the wall that this door was on; i.e if you enter a door on the WEST, you should spawn on the EAST.
           player_position.position = door_position.position;
           Direction opposite_direction = get_opposite_direction(direction);
-          std::cout << "opposite: " << opposite_direction << std::endl;
           
           float offset = PLAYER_BOUNDING_BOX.x * PLAYER_SCALE_FACTOR.x;
           switch(opposite_direction) {
@@ -194,7 +250,7 @@ void LevelBuilder::build_wall_with_random_doors(RoomBuilder& room,
   int door_index = 0; 
   int current_size = 0;
   std::vector<int> connected_rooms = get_connecting_vertices_with_direction(direction, directed_adjacencies);
-  std::vector<int> door_positions = get_random_door_positions(connected_rooms, 0, max_units);
+  std::vector<int> door_positions = get_random_door_positions(connected_rooms.size(), 0, max_units);
   while (door_index < (int) door_positions.size() && current_size < max_units) {
       int current_door = door_positions[door_index];
       int other_room = connected_rooms[door_index];
@@ -279,19 +335,23 @@ void LevelBuilder::generate_random_level(std::vector<int> rooms, std::vector<int
   randomize_room_shapes(random_graph_with_doors);
   // Now that all the doors are in the ECS, add their connections to the ECS.
   connect_doors(random_graph_with_doors);
+  // Also, mark each boss room.
+  mark_boss_rooms(rooms);
 };
 
-void LevelBuilder::switch_room(DoorConnection& door_connection) {
+void LevelBuilder::enter_room(DoorConnection& door_connection) {
   Direction direction = door_connection.direction;
   std::string room_id = door_connection.room_id;
   Entity& exit_door = door_connection.exit_door;
 
   deactivate_room();
   activate_room(room_id);
-
   move_player_to_door(direction, exit_door);
+
+  std::cout << "Player entered room: " << current_room_id << std::endl;
 }
 
 void LevelBuilder::activate_starting_room() {
+  deactivate_room();
   activate_room(STARTING_ROOM_ID);
 }
