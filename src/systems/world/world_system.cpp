@@ -380,7 +380,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-  player_mouse(renderer, button, action, mods, harpoon, harpoon_gun);
+  if (!paused) {
+    player_mouse(renderer, button, action, mods, harpoon, harpoon_gun);
+  }
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
