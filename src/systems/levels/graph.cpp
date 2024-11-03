@@ -3,6 +3,7 @@
 
 #include "random.hpp"
 #include "graph.hpp"
+#include <numeric>
 
 Direction get_opposite_direction(Direction direction) {
     Direction opposite;
