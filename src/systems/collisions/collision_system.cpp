@@ -7,6 +7,8 @@
 #include "enemy.hpp"
 #include "oxygen.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <player_factories.hpp>
+#include <player_controls.hpp>
 
 // Returns the local bounding coordinates scaled by entity size
 vec2 get_bounding_box(const Position& position) {
@@ -64,6 +66,26 @@ bool box_collides(const Position& position1, const Position& position2) {
          horizontal_overlap2;
 }
 
+bool circle_box_collides(const Position& circle_pos, float radius, const Position& box_pos) {
+  vec4 box_bound = get_bounds(box_pos);
+
+  float box_left = box_bound[0];
+  float box_right = box_bound[1];
+  float box_top = box_bound[2];
+  float box_bot = box_bound[3];
+
+  float closestX = clamp(circle_pos.position.x, box_left, box_right);
+  float closestY = clamp(circle_pos.position.y, box_top, box_bot);
+
+  float distanceX = circle_pos.position.x - closestX;
+  float distanceY = circle_pos.position.y - closestY;
+
+  float distanceSquared = distanceX * distanceX + distanceY * distanceY;
+  float radiusSquared = radius * radius;
+
+  return distanceSquared <= radiusSquared;
+}
+
 void CollisionSystem::step(float elapsed_ms) {
   collision_detection();
   collision_resolution();
@@ -95,6 +117,20 @@ void CollisionSystem::collision_detection() {
       continue;
     }
 
+    //detect player projectile and wall collisions
+    for (uint j = 0; j < wall_container.size(); j++) {
+      Entity entity_j = wall_container.entities[j];
+      if (!registry.positions.has(entity_j)) {
+        continue;
+      }
+      Position& position_j = registry.positions.get(entity_j);
+      if (box_collides(position_i, position_j)) {
+        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+      }
+    }
+
+    //detect player projectile and enemy collisions
     for (uint j = 0; j < enemy_container.size(); j++) {
       Entity entity_j = enemy_container.entities[j];
       if (!registry.positions.has(entity_j)) {
@@ -103,19 +139,6 @@ void CollisionSystem::collision_detection() {
 
       Position& position_j = registry.positions.get(entity_j);
       if (circle_collides(position_i, position_j)) {
-        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-        addDamageIndicatorTimer(entity_j);
-      }
-    }
-
-    for (uint j = 0; j < wall_container.size(); j++) {
-      Entity entity_j = wall_container.entities[j];
-      if (!registry.positions.has(entity_j)) {
-        continue;
-      }
-      Position& position_j = registry.positions.get(entity_j);
-      if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
         registry.collisions.emplace_with_duplicates(entity_j, entity_i);
       }
@@ -130,6 +153,7 @@ void CollisionSystem::collision_detection() {
     }
     Position& position_i = registry.positions.get(entity_i);
 
+    //detect player and enemy collisions
     for (uint j = 0; j < enemy_container.size(); j++) {
       Entity entity_j = enemy_container.entities[j];
       if (!registry.positions.has(entity_j)) {
@@ -147,9 +171,6 @@ void CollisionSystem::collision_detection() {
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
         registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-        if (registry.oxygenModifiers.has(entity_j)) {
-          addDamageIndicatorTimer(entity_i);
-        }
       }
     }
 
@@ -395,10 +416,15 @@ void CollisionSystem::routePlayerProjCollisions(Entity player_proj,
   if (registry.activeWalls.has(other)) {
     resolveWallPlayerProjCollision(other, player_proj);
   }
-  if (player_proj != player_projectile) {
-    registry.motions.remove(player_proj);
-    registry.positions.remove(player_proj);
-    registry.renderRequests.remove(player_proj);
+
+  PlayerProjectile& player_proj_component = registry.playerProjectiles.get(player_proj);
+  bool checkWepSwapped = player_proj != player_projectile;
+
+  //Destroy projectile on collision if weapons have been swapped, except for concussive (handled in debuff.cpp) & shrimp (handled in resolveWallPlayerProj)
+  if (checkWepSwapped && 
+      player_proj_component.type != PROJECTILES::CONCUSSIVE && 
+      player_proj_component.type != PROJECTILES::SHRIMP) {
+    destroyGunOrProjectile(player_proj);
   }
 }
 
@@ -455,10 +481,27 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
   Motion& playerproj_motion = registry.motions.get(player_proj);
 
   modifyOxygen(enemy, player_proj);
-  playerproj_motion.velocity  = vec2(0.0f, 0.0f);
-  player_projectile.is_loaded = true;
 
-  handle_debuffs(enemy, player_proj);
+  switch (player_projectile.type) {
+    case PROJECTILES::HARPOON:
+      break;
+    case PROJECTILES::NET:
+      handle_debuffs(enemy, player_proj);
+      break;
+    case PROJECTILES::CONCUSSIVE:
+      //ignore boxes and jellyfish.
+      if (!registry.activeWalls.has(enemy) && registry.motions.has(enemy)) {
+        handle_debuffs(enemy, player_proj);
+      }
+      break;
+    case PROJECTILES::TORPEDO:
+      detectAndResolveExplosion(player_proj, enemy);
+      break;
+    case PROJECTILES::SHRIMP:
+      break;
+  }
+
+  addDamageIndicatorTimer(enemy);
 
   // make enemies that track the player briefly start tracking them regardless
   // of range
@@ -466,16 +509,61 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
     TracksPlayer& tracks = registry.trackPlayer.get(enemy);
     tracks.active_track  = true;
   }
+
+  if (player_projectile.type != PROJECTILES::CONCUSSIVE && 
+      player_projectile.type != PROJECTILES::SHRIMP) {
+        
+      playerproj_motion.velocity  = vec2(0.0f, 0.0f);
+      player_projectile.is_loaded = true;
+  }
+}
+
+void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity enemy) {
+  for (Entity enemy_check : registry.deadlys.entities) {
+    if (enemy_check == enemy || !registry.positions.has(enemy)) {
+      continue;
+    }
+    Position& playerproj_position = registry.positions.get(proj);
+    AreaOfEffect& playerproj_aoe = registry.aoe.get(proj);
+    Position& enemy_position = registry.positions.get(enemy_check);
+
+    if (circle_box_collides(playerproj_position, playerproj_aoe.radius, enemy_position)) {
+      modifyOxygen(enemy_check, proj);
+      addDamageIndicatorTimer(enemy_check);
+    }
+  }
 }
 
 void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
                                                      Entity player_proj) {
-  Motion&           proj_motion = registry.motions.get(player_proj);
-  PlayerProjectile& player_projectile =
-      registry.playerProjectiles.get(player_proj);
 
-  proj_motion.velocity        = vec2(0.0, 0.0);
-  player_projectile.is_loaded = true;
+  if (!registry.motions.has(player_proj) || !registry.playerProjectiles.has(player_proj)) {
+    return;
+  }
+  Motion&           proj_motion = registry.motions.get(player_proj);
+  PlayerProjectile& proj_component =
+      registry.playerProjectiles.get(player_proj);
+  Inventory& inventory = registry.inventory.get(player);
+
+  bool check_wep_swap = player_projectile != player_proj;
+
+  if (proj_component.type == PROJECTILES::SHRIMP) {
+    if (inventory.shrimp > 0) {
+      if (check_wep_swap) {
+        destroyGunOrProjectile(player_proj);
+      } else {
+        proj_motion.velocity = vec2(0.f);
+        proj_component.is_loaded = true;
+      }
+    } else {
+      destroyGunOrProjectile(player_proj);
+      doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+    }
+  } else {
+    proj_motion.velocity = vec2(0.f);
+    proj_component.is_loaded = true;
+  }
+
 }
 
 void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
@@ -501,8 +589,6 @@ void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
 
 void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
   Motion& entity_motion  = registry.motions.get(entity);
-  entity_motion.velocity = vec2(0.0f, 0.0f);
-
   Position& wall_position   = registry.positions.get(wall);
   Position& entity_position = registry.positions.get(entity);
 

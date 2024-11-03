@@ -51,6 +51,8 @@ class ECSRegistry {
 
   // abilities related
   ComponentContainer<Stun> stuns;
+  ComponentContainer<KnockBack> knockbacks;
+  ComponentContainer<AreaOfEffect> aoe;
 
   // render related
   ComponentContainer<Mesh*>         meshPtrs;
@@ -70,6 +72,7 @@ class ECSRegistry {
   // status related
   ComponentContainer<LowOxygen> lowOxygen;
   ComponentContainer<Stunned>   stunned;
+  ComponentContainer<KnockedBack>   knockedback;
   ComponentContainer<Attacked>  attacked;
 
   // audio related
@@ -112,7 +115,8 @@ class ECSRegistry {
     registry_list.push_back(&trackPlayer);
     // abilities related
     registry_list.push_back(&stuns);
-    registry_list.push_back(&stunned);
+    registry_list.push_back(&knockbacks);
+    registry_list.push_back(&aoe);
     // render related
     registry_list.push_back(&meshPtrs);
     registry_list.push_back(&renderRequests);
@@ -127,6 +131,8 @@ class ECSRegistry {
     registry_list.push_back(&activeDoors);
     // status related
     registry_list.push_back(&lowOxygen);
+    registry_list.push_back(&stunned);
+    registry_list.push_back(&knockedback);
     registry_list.push_back(&attacked);
     // audio related
     registry_list.push_back(&sounds);

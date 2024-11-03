@@ -60,5 +60,8 @@ struct Player {
   bool downHeld  = false;
   bool leftHeld  = false;
   bool rightHeld = false;
+  bool gliding = false;
   bool dashing   = false;
+  int dashTimer = 0;
+  int dashCooldownTimer = 0;
 };

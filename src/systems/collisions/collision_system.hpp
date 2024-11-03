@@ -64,6 +64,11 @@ private:
     //Door <-> Player
     void resolveDoorPlayerCollision(Entity door, Entity player);
 
+    /***********************************************************************
+        Special Detection & Resolutions
+    ***********************************************************************/  
+
+   void detectAndResolveExplosion(Entity proj, Entity enemy);
 public:
 	void step(float elapsed_ms);
 
@@ -76,7 +81,9 @@ vec2 get_bounding_box(const Position &position);
 vec4 get_bounds(const Position &position);
 bool circle_collides(const Position &position1, const Position &position2);
 bool box_collides(const Position &position1, const Position &position2);
+bool circle_box_collides(const Position &position1, float radius, const Position &position2);
 
 extern Entity player_projectile;
 
 extern LevelBuilder level_builder;
+extern Entity player;

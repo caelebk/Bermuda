@@ -18,6 +18,7 @@
 #define PLAYER_OXYGEN_BOUNDING_BOX \
   vec2(100.f, 500.f)  // TODO: update to actual values
 #define PLAYER_OXYGEN_RATE -3.f
+#define PLAYER_DASH_COST -25.f
 #define PLAYER_OXYGEN_DEPLETE_TIME_MS 1000.f  // to be balanced later
 
 Entity createPlayer(RenderSystem* renderer, vec2 pos);
@@ -83,23 +84,24 @@ Entity loadNet(RenderSystem* renderer);
 
 // TODO: Change values based on Andy's sprite dimensions
 #define CONCUSSIVE_SCALE_FACTOR vec2(0.60f)
-#define CONCUSSIVE_BOUNDING_BOX vec2(64.f, 26.f)
+#define CONCUSSIVE_BOUNDING_BOX vec2(52.f, 156.f)
 #define CONCUSSIVE_RELATIVE_POS_FROM_GUN vec2(20.f, -2.f)
 #define CONCUSSIVE_OXYGEN_COST 0.f
-
+#define CONCUSSION_KNOCKBACK_DURATION 500.f
 Entity loadConcussive(RenderSystem* renderer);
 
 // TODO: Change values based on Andy's sprite dimensions
 #define TORPEDO_SCALE_FACTOR vec2(0.60f)
 #define TORPEDO_BOUNDING_BOX vec2(64.f, 26.f)
 #define TORPEDO_RELATIVE_POS_FROM_GUN vec2(20.f, -2.f)
-#define TORPEDO_OXYGEN_COST -50.f
+#define TORPEDO_OXYGEN_COST -15.f
+#define TORPEDO_DAMAGE_RADIUS 150;
 
 Entity loadTorpedo(RenderSystem* renderer);
 
 // TODO: Change values based on Andy's sprite dimensions
 #define SHRIMP_SCALE_FACTOR vec2(0.60f)
-#define SHRIMP_BOUNDING_BOX vec2(64.f, 26.f)
+#define SHRIMP_BOUNDING_BOX vec2(13.f, 13.f)
 #define SHRIMP_RELATIVE_POS_FROM_GUN vec2(20.f, -2.f)
 #define SHRIMP_OXYGEN_COST -100.f
 

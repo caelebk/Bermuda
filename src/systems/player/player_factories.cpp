@@ -78,8 +78,15 @@ Entity createLoadedGun(RenderSystem* renderer, vec2 playerPosition,
     case PROJECTILES::NET:
       weapon.projectile = loadNet(renderer);
       break;
-
-      // TODO: Add other projectiles (i.e. nets, pistol shrimp, etc.)
+    case PROJECTILES::CONCUSSIVE:
+      weapon.projectile = loadConcussive(renderer);
+      break;
+    case PROJECTILES::TORPEDO:
+      weapon.projectile = loadTorpedo(renderer);
+      break;
+    case PROJECTILES::SHRIMP:
+      weapon.projectile = loadShrimp(renderer);
+      break;
   }
 
   // Request Render
@@ -193,10 +200,9 @@ Entity loadNet(RenderSystem* renderer) {
 }
 
 /********************************************************************************
- * Create concussive "projectile" entity
+ * Create concussive entity
  *
  * @param renderer
- * @param gunPosition: position of corresponding Player
  ********************************************************************************/
 Entity loadConcussive(RenderSystem* renderer) {
   auto entity = Entity();
@@ -214,6 +220,9 @@ Entity loadConcussive(RenderSystem* renderer) {
 
   OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
   oxyCost.amount          = CONCUSSIVE_OXYGEN_COST;
+
+  KnockBack& knockback = registry.knockbacks.emplace(entity);
+  knockback.duration = CONCUSSION_KNOCKBACK_DURATION;
 
   return entity;
 }
@@ -240,6 +249,9 @@ Entity loadTorpedo(RenderSystem* renderer) {
 
   OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
   oxyCost.amount          = TORPEDO_OXYGEN_COST;
+
+  AreaOfEffect& aoe = registry.aoe.emplace(entity);
+  aoe.radius = TORPEDO_DAMAGE_RADIUS;
 
   return entity;
 }

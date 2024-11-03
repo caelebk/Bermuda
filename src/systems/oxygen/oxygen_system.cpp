@@ -72,10 +72,11 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
   updateOxygenLvlStatus(entity_oxygen);
   updateDeathStatus(entity, entity_oxygen);
 
-  // play hurt sound if player is damaged AND not dead
+  // play hurt sound if player is damaged, not dashing, AND not dead
   if (registry.players.has(entity) &&
       !registry.playerWeapons.has(oxygenModifier) &&
-      !registry.deathTimers.has(entity) && oxyModAmount <= 0) {
+      !registry.deathTimers.has(entity) && oxyModAmount <= 0 &&
+      !registry.players.get(entity).dashing) {
     registry.sounds.insert(Entity(), Sound(hurt_sound));
   }
 }

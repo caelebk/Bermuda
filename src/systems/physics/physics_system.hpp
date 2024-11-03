@@ -18,16 +18,21 @@
 
 // Net Projectile Speed (To be balanced later)
 #define HARPOON_SPEED 100.0f
+#define SHRIMP_SPEED 500.0f
 
 // Max velocity (To be balanced later)
 #define MAX_PLAYER_SPEED 30.f
-#define MAX_DASH_SPEED MAX_PLAYER_SPEED * 2
+#define MAX_GLIDE_SPEED MAX_PLAYER_SPEED * 2
 
+// Player Dash
+#define DASH_DURATION 50.f
+#define DASH_COOLDOWN_DURATION 500.f
+#define DASH_SPEED 200
 // NOTE: WATER_FRICTION SHOULD ALWAYS BE SMALLER THAN PLAYER_ACCELERATION
 
 // Velocity given by pressing movement keys (To be balanced later)
 #define PLAYER_ACCELERATION MAX_PLAYER_SPEED
-#define DASH_ACCELERATION PLAYER_ACCELERATION * 2
+#define GLIDE_ACCELERATION PLAYER_ACCELERATION * 2
 
 // Acceleration applies on player by force of friction
 #define WATER_FRICTION MAX_PLAYER_SPEED / 2.f
@@ -51,5 +56,7 @@ void setFiredProjVelo();
 void setPlayerAcceleration();
 
 void calculatePlayerVelocity(float lerp);
+
+void playerDash();
 
 void applyWaterFriction(Entity entity);
