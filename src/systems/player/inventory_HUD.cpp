@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "tiny_ecs_registry.hpp"
+#include "player_factories.hpp"
 
 // texture assets for inventory count
 TEXTURE_ASSET_ID digitTextures[10] = {
@@ -47,26 +48,26 @@ void createInvHUD(RenderSystem* renderer, Entity& player) {
   auto& netIconPos         = registry.positions.emplace(netIcon);
   netIconPos.angle         = 0.f;
   netIconPos.position      = INV_NET_POS;
-  netIconPos.scale         = INV_NET_SCALE_FACTOR * INV_NET_BOUNDING_BOX;
+  netIconPos.scale         = INV_NET_SCALE_FACTOR * NET_BOUNDING_BOX;
   netIconPos.originalScale = netIconPos.scale;
 
   auto& concussiveIconPos    = registry.positions.emplace(concussiveIcon);
   concussiveIconPos.angle    = 0.f;
   concussiveIconPos.position = INV_CONCUSSIVE_POS;
   concussiveIconPos.scale =
-      INV_CONCUSSIVE_SCALE_FACTOR * INV_CONCUSSIVE_BOUNDING_BOX;
+      INV_CONCUSSIVE_SCALE_FACTOR * CONCUSSIVE_BOUNDING_BOX;
   concussiveIconPos.originalScale = concussiveIconPos.scale;
 
   auto& torpedoIconPos    = registry.positions.emplace(torpedoIcon);
   torpedoIconPos.angle    = 0.f;
   torpedoIconPos.position = INV_TORPEDO_POS;
-  torpedoIconPos.scale    = INV_TORPEDO_SCALE_FACTOR * INV_TORPEDO_BOUNDING_BOX;
+  torpedoIconPos.scale    = INV_TORPEDO_SCALE_FACTOR * TORPEDO_BOUNDING_BOX;
   torpedoIconPos.originalScale = torpedoIconPos.scale;
 
   auto& shrimpIconPos    = registry.positions.emplace(shrimpIcon);
   shrimpIconPos.angle    = 0.f;
   shrimpIconPos.position = INV_SHRIMP_POS;
-  shrimpIconPos.scale    = INV_SHRIMP_SCALE_FACTOR * INV_SHRIMP_BOUNDING_BOX;
+  shrimpIconPos.scale    = INV_SHRIMP_SCALE_FACTOR * SHRIMP_BOUNDING_BOX;
   shrimpIconPos.originalScale = shrimpIconPos.scale;
 
   registry.playerHUD.emplace(keyIcon);
@@ -90,23 +91,22 @@ void createInvHUD(RenderSystem* renderer, Entity& player) {
   InventoryHUD& shrimpHUD = registry.invHUD.emplace(shrimpIcon);
   shrimpHUD.inv_type      = INVENTORY::SHRIMP;
 
-  // TODO: change to proper textures
   registry.renderRequests.insert(
-      keyIcon, {TEXTURE_ASSET_ID::HARPOON, EFFECT_ASSET_ID::TEXTURED,
+      keyIcon, {TEXTURE_ASSET_ID::KEY, EFFECT_ASSET_ID::TEXTURED,
                 GEOMETRY_BUFFER_ID::SPRITE});
 
   registry.renderRequests.insert(
-      netIcon, {TEXTURE_ASSET_ID::HARPOON, EFFECT_ASSET_ID::TEXTURED,
+      netIcon, {TEXTURE_ASSET_ID::NET, EFFECT_ASSET_ID::TEXTURED,
                 GEOMETRY_BUFFER_ID::SPRITE});
   registry.renderRequests.insert(
-      concussiveIcon, {TEXTURE_ASSET_ID::HARPOON, EFFECT_ASSET_ID::TEXTURED,
+      concussiveIcon, {TEXTURE_ASSET_ID::CONCUSSIVE, EFFECT_ASSET_ID::TEXTURED,
                        GEOMETRY_BUFFER_ID::SPRITE});
 
   registry.renderRequests.insert(
-      torpedoIcon, {TEXTURE_ASSET_ID::HARPOON, EFFECT_ASSET_ID::TEXTURED,
+      torpedoIcon, {TEXTURE_ASSET_ID::TORPEDO, EFFECT_ASSET_ID::TEXTURED,
                     GEOMETRY_BUFFER_ID::SPRITE});
   registry.renderRequests.insert(
-      shrimpIcon, {TEXTURE_ASSET_ID::HARPOON, EFFECT_ASSET_ID::TEXTURED,
+      shrimpIcon, {TEXTURE_ASSET_ID::SHRIMP, EFFECT_ASSET_ID::TEXTURED,
                    GEOMETRY_BUFFER_ID::SPRITE});
 
   updateInventoryCounter(renderer, INVENTORY::KEY, player_inventory.keys);
@@ -180,7 +180,7 @@ void updateCounterDigits(RenderSystem* renderer, Entity& invTypeIcon,
     } else {
       digitEntityPos.position =
           invTypeIconPos.position + vec2(invTypeIconPos.scale.x / 2.f, 0.f) +
-          vec2(digitEntityPos.scale.x / 2.f, 0.f) + INV_DIGIT_GAP;
+          vec2(digitEntityPos.scale.x / 2.f, 0.f) + INV_ICON_DIGIT_GAP;
     }
     digitEntityPos.originalScale = digitEntityPos.scale;
 

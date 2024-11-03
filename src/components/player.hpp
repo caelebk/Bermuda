@@ -44,10 +44,10 @@ struct PlayerWeapon {
 // Consumable inventory
 struct Inventory {
   // TODO: Change this when pickups are added for each consumable
-  unsigned int nets       = 3;
-  unsigned int concussors = 3;
-  unsigned int torpedos   = 3;
-  unsigned int shrimp     = 3;
+  unsigned int nets       = 10;
+  unsigned int concussors = 10;
+  unsigned int torpedos   = 10;
+  unsigned int shrimp     = 10;
   unsigned int keys       = 0;
 };
 

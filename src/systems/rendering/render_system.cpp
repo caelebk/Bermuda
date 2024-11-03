@@ -224,9 +224,17 @@ void RenderSystem::draw() {
    *entity albeit iterating through all Sprites in sequence. A good point to
    *optimize
    *************************************************************************************/
+  for (Entity floor : registry.floors.entities) {
+    if (registry.renderRequests.has(floor))
+      drawTexturedMesh(floor, projection_2D);
+  }
   for (Entity wall : registry.activeWalls.entities) {
     if (registry.renderRequests.has(wall))
       drawTexturedMesh(wall, projection_2D);
+  }
+  for (Entity door : registry.activeDoors.entities) {
+    if (registry.renderRequests.has(door))
+      drawTexturedMesh(door, projection_2D);
   }
   for (Entity consumable : registry.consumables.entities) {
     if (registry.renderRequests.has(consumable))
@@ -240,10 +248,6 @@ void RenderSystem::draw() {
     if (registry.renderRequests.has(player))
       drawTexturedMesh(player, projection_2D);
   }
-  for (Entity enemy : registry.deadlys.entities) {
-    if (registry.renderRequests.has(enemy))
-      drawTexturedMesh(enemy, projection_2D);
-  }
   for (Entity projectile : registry.playerProjectiles.entities) {
     if (registry.renderRequests.has(projectile))
       drawTexturedMesh(projectile, projection_2D);
@@ -251,6 +255,10 @@ void RenderSystem::draw() {
   for (Entity weapon : registry.playerWeapons.entities) {
     if (registry.renderRequests.has(weapon))
       drawTexturedMesh(weapon, projection_2D);
+  }
+  for (Entity enemy : registry.deadlys.entities) {
+    if (registry.renderRequests.has(enemy))
+      drawTexturedMesh(enemy, projection_2D);
   }
   for (Entity enemy : registry.deadlys.entities) {
     if (registry.oxygen.has(enemy)) {
@@ -264,7 +272,7 @@ void RenderSystem::draw() {
         Emoting& emote = registry.emoting.get(enemy);
         if (registry.renderRequests.has(emote.child)) {
           drawTexturedMesh(emote.child, projection_2D);
-        }
+        } 
       }
     }
   }

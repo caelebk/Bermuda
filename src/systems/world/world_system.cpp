@@ -34,7 +34,7 @@
 
 // create the underwater world
 WorldSystem::WorldSystem()
-    : points(0), oxygen_timer(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
+    : oxygen_timer(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
   // Seeding rng with random device
   rng = std::default_random_engine(std::random_device()());
 }
@@ -154,8 +154,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     // Deplete oxygen when it is time...
     oxygen_timer = oxygen_drain(oxygen_timer, elapsed_ms_since_last_update);
+    
+    // Update the player's direction
+    updatePlayerDirection(mouse_pos);
 
-    // Update gun and harpoon angle
+    // Update gun and projectile angle
     updateWepProjPos(mouse_pos);
 
     check_bounds();
@@ -163,7 +166,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     if (!registry.renderRequests.has(pause_menu)) {
       registry.renderRequests.insert(
           pause_menu, {TEXTURE_ASSET_ID::PAUSE, EFFECT_ASSET_ID::TEXTURED,
-                       GEOMETRY_BUFFER_ID::SPRITE});
+                        GEOMETRY_BUFFER_ID::SPRITE});
     }
   }
 
@@ -265,7 +268,7 @@ void WorldSystem::restart_game() {
 
   player = createPlayer(
       renderer,
-      {130, window_height_px - 140});  // TODO: get player spawn position
+      {150, window_height_px - 150});  // TODO: get player spawn position
   registry.inventory.emplace(player);
   createInvHUD(renderer, player);
   // init global variables
@@ -292,7 +295,7 @@ void WorldSystem::restart_game() {
 
   createOxygenTank(
       renderer, player,
-      {47.5, window_height_px / 2});  // TODO: figure out oxygen tank position
+      {47.5, window_height_px / 2});
 
   /////////////////////////////////////////////
   // Enemy + Drops
@@ -301,7 +304,7 @@ void WorldSystem::restart_game() {
   execute_config_rand(LVL_1_RAND_POS, level_builder.room(level_builder.current_room_id), renderer);
   execute_config_rand_chance(LVL_1_RAND_POS, level_builder.room(level_builder.current_room_id), renderer, 0.5);
 
-  // // spawn at fixed positions in the room
+  // spawn at fixed positions in the room
   execute_config_fixed(LVL_1_FIXED);
 
   paused = false;

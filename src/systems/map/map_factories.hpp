@@ -19,7 +19,7 @@ Entity createGeyserPos(RenderSystem *renderer, vec2 position);
 //////////////////////////////////////////////////////////////
 // Crate
 //////////////////////////////////////////////////////////////
-#define CRATE_SCALE_FACTOR vec2(1.4f)
+#define CRATE_SCALE_FACTOR vec2(1.0f)
 #define CRATE_BOUNDING_BOX vec2(18.f, 18.f) // vec2(PNG_width, PNG_height)
 #define CRATE_HEALTH 75.0 // three shot to show workin
 #define CRATE_HEALTH_SCALE vec2(1.4f)

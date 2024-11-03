@@ -51,6 +51,8 @@ extern Entity player;
 
 void updateWepProjPos(vec2 mouse_pos);
 
+void updatePlayerDirection(vec2 mouse_pos);
+
 void setFiredProjVelo();
 
 void setPlayerAcceleration();

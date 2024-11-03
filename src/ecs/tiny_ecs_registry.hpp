@@ -68,6 +68,7 @@ class ECSRegistry {
   ComponentContainer<ActiveWall>       activeWalls;
   ComponentContainer<ActiveDoor>       activeDoors;
   ComponentContainer<Interactable>     interactable;
+  ComponentContainer<Floor>            floors;
 
   // status related
   ComponentContainer<LowOxygen> lowOxygen;
@@ -129,6 +130,8 @@ class ECSRegistry {
     registry_list.push_back(&doorConnections);
     registry_list.push_back(&activeWalls);
     registry_list.push_back(&activeDoors);
+    registry_list.push_back(&interactable);
+    registry_list.push_back(&floors);
     // status related
     registry_list.push_back(&lowOxygen);
     registry_list.push_back(&stunned);
@@ -137,7 +140,6 @@ class ECSRegistry {
     // audio related
     registry_list.push_back(&sounds);
     registry_list.push_back(&musics);
-    registry_list.push_back(&interactable);
     // other
     registry_list.push_back(&drops);
     registry_list.push_back(&cursors);

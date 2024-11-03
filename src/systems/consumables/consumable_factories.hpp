@@ -9,7 +9,7 @@
 // Oxygen_Canister
 //////////////////////////////////////////////////////////////
 #define OXYGEN_CANISTER_QTY 100.0  // heals
-#define OXYGEN_CANISTER_SCALE_FACTOR vec2(0.05f)
+#define OXYGEN_CANISTER_SCALE_FACTOR vec2(0.08f)
 #define OXYGEN_CANISTER_BOUNDING_BOX \
   vec2(512.f, 512.f)  // vec2(PNG_width, PNG_height)
 

@@ -63,14 +63,47 @@ void PhysicsSystem::step(float elapsed_ms) {
 }
 
 void updateWepProjPos(vec2 mouse_pos) {
-  vec2      player_pos     = registry.positions.get(player).position;
+  Position& player_comp    = registry.positions.get(player);
+  vec2      player_pos     = player_comp.position;
   vec2      pos_cursor_vec = mouse_pos - player_pos;
+  vec2 arm_offset = (player_comp.scale.x < 0) ? vec2(-ARM_OFFSET.x, ARM_OFFSET.y) : ARM_OFFSET;
+  pos_cursor_vec -= arm_offset;
   float     angle          = atan2(pos_cursor_vec.y, pos_cursor_vec.x);
   Position& weapon_pos     = registry.positions.get(player_weapon);
   Position& proj_pos       = registry.positions.get(player_projectile);
-  weapon_pos.angle         = angle;
-  weapon_pos.position      = calculate_pos_vec(GUN_RELATIVE_POS_FROM_PLAYER.x,
-                                               player_pos, weapon_pos.angle);
+  weapon_pos.angle         = (player_comp.scale.x < 0) ? angle + 3.14159 : angle;
+
+  float flipped = (player_comp.scale.x < 0) ? -1 : 1;
+  switch (wep_type) {
+    case (PROJECTILES::HARPOON):
+      weapon_pos.position = calculate_pos_vec(
+          GUN_RELATIVE_POS_FROM_PLAYER.x * flipped,
+          player_pos, weapon_pos.angle, arm_offset);
+      break;
+    case (PROJECTILES::NET):
+      weapon_pos.position = calculate_pos_vec(
+          NET_GUN_RELATIVE_POS_FROM_PLAYER.x * flipped,
+          player_pos, weapon_pos.angle, arm_offset);
+      break;
+    case (PROJECTILES::CONCUSSIVE):
+      weapon_pos.position = calculate_pos_vec(
+          CONCUSSIVE_GUN_RELATIVE_POS_FROM_PLAYER.x * flipped, 
+          player_pos, weapon_pos.angle, arm_offset);
+      break;
+    case (PROJECTILES::TORPEDO):
+      weapon_pos.position = calculate_pos_vec(
+          TORPEDO_GUN_RELATIVE_POS_FROM_PLAYER.x * flipped,
+          player_pos, weapon_pos.angle,
+          arm_offset);
+      break;
+    case (PROJECTILES::SHRIMP):
+      weapon_pos.position = calculate_pos_vec(
+          SHRIMP_GUN_RELATIVE_POS_FROM_PLAYER.x * flipped,
+          player_pos, weapon_pos.angle,
+          arm_offset);
+      break;
+  }
+
   if (registry.playerProjectiles.get(player_projectile).is_loaded) {
     vec2 relative_pos = HARPOON_RELATIVE_POS_FROM_GUN;
     switch (wep_type) {
@@ -89,11 +122,30 @@ void updateWepProjPos(vec2 mouse_pos) {
       case (PROJECTILES::PROJ_COUNT):
         break;
     }
-
-    proj_pos.angle = angle;
+    if (player_comp.scale.x < 0) {
+      relative_pos.x *= -1;
+    }
+    proj_pos.angle = weapon_pos.angle;
     proj_pos.position =
         calculate_pos_vec(relative_pos.x, weapon_pos.position, proj_pos.angle,
                           {0.f, relative_pos.y});
+  }
+}
+
+void updatePlayerDirection(vec2 mouse_pos) {
+  Position& player_pos = registry.positions.get(player);
+  bool mouse_right_face_left = player_pos.position.x < mouse_pos.x && player_pos.scale.x < 0;
+  bool mouse_left_face_right = player_pos.position.x > mouse_pos.x && player_pos.scale.x > 0;
+  if (mouse_right_face_left || mouse_left_face_right) {
+    player_pos.scale.x *= -1;
+
+    Position& weapon = registry.positions.get(player_weapon);
+    weapon.scale.x *= -1;
+    weapon.position.x *= -1;
+
+    Position& projectile = registry.positions.get(player_projectile);
+    projectile.scale.x *= -1;
+    projectile.position.x *= -1;
   }
 }
 
@@ -102,12 +154,16 @@ void setFiredProjVelo() {
   proj.is_loaded         = false;
   float angle            = registry.positions.get(player_projectile).angle;
   Motion& proj_motion = registry.motions.get(player_projectile);
+  float direction        = registry.positions.get(player).scale.x / 
+                           abs(registry.positions.get(player).scale.x);
   switch (proj.type) {
     case PROJECTILES::SHRIMP:
-      proj_motion.velocity = {SHRIMP_SPEED * cos(angle), SHRIMP_SPEED * sin(angle)};
+      proj_motion.velocity = {SHRIMP_SPEED * cos(angle) * direction, 
+        SHRIMP_SPEED * sin(angle) * direction};
       break;
     default:
-      proj_motion.velocity = {HARPOON_SPEED * cos(angle), HARPOON_SPEED * sin(angle)};
+      proj_motion.velocity = {HARPOON_SPEED * cos(angle) * direction, 
+        HARPOON_SPEED * sin(angle) * direction};
       break;
   }
   registry.sounds.insert(player_projectile, Sound(blast_sound));

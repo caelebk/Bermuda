@@ -34,7 +34,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos) {
 
   // Request Render
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::PLAYER, EFFECT_ASSET_ID::PLAYER,
+      entity, {TEXTURE_ASSET_ID::PLAYER1, EFFECT_ASSET_ID::PLAYER,
                GEOMETRY_BUFFER_ID::SPRITE});
 
   return entity;
@@ -60,9 +60,7 @@ Entity createLoadedGun(RenderSystem* renderer, vec2 playerPosition,
   position.scale     = GUN_SCALE_FACTOR * GUN_BOUNDING_BOX;
 
   // Setting initial motion values
-  Motion& motion = registry.motions.emplace(
-      entity);  // TODO: REMOVE once Gun position/angle is updated accordingly
-                // based on corresponding Player
+  Motion& motion = registry.motions.emplace(entity);
   motion.velocity     = {0.f, 0.f};
   motion.acceleration = {0, 0};
 
@@ -91,7 +89,7 @@ Entity createLoadedGun(RenderSystem* renderer, vec2 playerPosition,
 
   // Request Render
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::GUN, EFFECT_ASSET_ID::TEXTURED,
+      entity, {TEXTURE_ASSET_ID::HARPOON_GUN, EFFECT_ASSET_ID::TEXTURED,
                GEOMETRY_BUFFER_ID::SPRITE});
 
   return entity;
@@ -222,7 +220,7 @@ Entity loadConcussive(RenderSystem* renderer) {
   oxyCost.amount          = CONCUSSIVE_OXYGEN_COST;
 
   KnockBack& knockback = registry.knockbacks.emplace(entity);
-  knockback.duration = CONCUSSION_KNOCKBACK_DURATION;
+  knockback.duration = CONCUSSIVE_KNOCKBACK_DURATION;
 
   return entity;
 }
@@ -257,7 +255,7 @@ Entity loadTorpedo(RenderSystem* renderer) {
 }
 
 /********************************************************************************
- * Create net entity
+ * Create the goated projectile entity
  *
  * @param renderer
  * @param gunPosition: position of corresponding Player
@@ -309,9 +307,9 @@ void createOxygenTank(RenderSystem* renderer, Entity& player, vec2 pos) {
 
   auto& backgroundPos    = registry.positions.emplace(playerBackgroundBar);
   backgroundPos.angle    = 0.f;
-  backgroundPos.position = pos;
+  backgroundPos.position = pos + vec2(0.f, -43.f);
   backgroundPos.scale =
-      PLAYER_OXYGEN_TANK_SCALE_FACTOR * PLAYER_OXYGEN_BOUNDING_BOX;
+      PLAYER_OXYGEN_TANK_SCALE_FACTOR * PLAYER_OXYGEN_TANK_BOUNDING_BOX;
 
   // Add Oxygen Meter to Player HUD (Order Matters for Rendering)
   registry.playerHUD.emplace(playerBackgroundBar);
@@ -326,7 +324,6 @@ void createOxygenTank(RenderSystem* renderer, Entity& player, vec2 pos) {
   oxygen.oxygenBar     = playerOxygenBar;
   oxygen.backgroundBar = playerBackgroundBar;
 
-  // TODO: change to proper texture
   registry.renderRequests.insert(
       playerOxygenBar,
       {TEXTURE_ASSET_ID::PLAYER_OXYGEN_BAR, EFFECT_ASSET_ID::TEXTURED_OXYGEN,

@@ -32,6 +32,8 @@ static bool checkWeaponCollisions(Entity entity) {
 
   return true;
 }
+
+float player_texture_num = 0.f;
 /**
  * @brief Handles player movement
  *
@@ -76,6 +78,26 @@ bool player_movement(int key, int action, int mod) {
       } else {
         keys.rightHeld = true;
       }
+    }
+    // if any key is held, increment player_texture_num
+    if (keys.upHeld || keys.downHeld || keys.leftHeld || keys.rightHeld) {
+      player_texture_num += 0.2f;
+      if (player_texture_num >= 8.f) {
+        player_texture_num = 0.f;
+      }
+    }
+    // choose correct player texture based on player_texture_num
+    if (player_texture_num < 2.f) {
+      registry.renderRequests.get(player).used_texture = TEXTURE_ASSET_ID::PLAYER1;
+    }
+    else if (player_texture_num < 4.f) {
+      registry.renderRequests.get(player).used_texture = TEXTURE_ASSET_ID::PLAYER2;
+    }
+    else if (player_texture_num < 6.f) {
+      registry.renderRequests.get(player).used_texture = TEXTURE_ASSET_ID::PLAYER3;
+    }
+    else {
+      registry.renderRequests.get(player).used_texture = TEXTURE_ASSET_ID::PLAYER2;
     }
   }
 
@@ -206,23 +228,19 @@ void swapWeps(Entity swapped, Entity swapper, PROJECTILES projectile) {
   switch (projectile) {
     case PROJECTILES::NET:
       scale = NET_SCALE_FACTOR * NET_BOUNDING_BOX;
-      // TODO: Change this when net gets a texture
-      texture_id = TEXTURE_ASSET_ID::JELLY;
+      texture_id = TEXTURE_ASSET_ID::NET;
       break;
     case PROJECTILES::CONCUSSIVE:
       scale = CONCUSSIVE_SCALE_FACTOR * CONCUSSIVE_BOUNDING_BOX;
-      // TODO: Change this when concussive gets a texture
-      texture_id = TEXTURE_ASSET_ID::WALL;
+      texture_id = TEXTURE_ASSET_ID::CONCUSSIVE;
       break;
     case PROJECTILES::TORPEDO:
       scale = TORPEDO_SCALE_FACTOR * TORPEDO_BOUNDING_BOX;
-      // TODO: Change this when torpedo gets a texture
-      texture_id = TEXTURE_ASSET_ID::WALL;
+      texture_id = TEXTURE_ASSET_ID::TORPEDO;
       break;
     case PROJECTILES::SHRIMP:
       scale = SHRIMP_SCALE_FACTOR * SHRIMP_BOUNDING_BOX;
-      // TODO: Change this when shrimp gets a texture
-      texture_id = TEXTURE_ASSET_ID::WALL;
+      texture_id = TEXTURE_ASSET_ID::SHRIMP;
       break;
   }
 
@@ -231,6 +249,11 @@ void swapWeps(Entity swapped, Entity swapper, PROJECTILES projectile) {
     // Setting initial positon values
     Position& position = registry.positions.emplace(swapper);
     position.scale     = scale;
+
+    Position& player_pos = registry.positions.get(player);
+    if (player_pos.scale.x < 0) {
+      position.scale.x *= -1;
+    }
 
     // Setting initial motion values
     // Motion will be used when acting as a projectile and is not loaded into a
@@ -250,34 +273,35 @@ void handleGunSwap(Entity swapped, Entity swapper, PROJECTILES projectile) {
   destroyGunOrProjectile(swapped);
 
   vec2             scale      = GUN_SCALE_FACTOR * GUN_BOUNDING_BOX;
-  TEXTURE_ASSET_ID texture_id = TEXTURE_ASSET_ID::GUN;
+  TEXTURE_ASSET_ID texture_id = TEXTURE_ASSET_ID::HARPOON_GUN;
 
   switch (projectile) {
     case PROJECTILES::NET:
       scale = NET_GUN_SCALE_FACTOR * NET_GUN_BOUNDING_BOX;
-      // TODO: Change this when net gun gets a texture
-      texture_id = TEXTURE_ASSET_ID::GUN;
+      texture_id = TEXTURE_ASSET_ID::NET_GUN;
       break;
     case PROJECTILES::CONCUSSIVE:
       scale = CONCUSSIVE_GUN_SCALE_FACTOR * CONCUSSIVE_GUN_BOUNDING_BOX;
-      // TODO: Change this when concussive gun gets a texture
-      texture_id = TEXTURE_ASSET_ID::GUN;
+      texture_id = TEXTURE_ASSET_ID::CONCUSSIVE_GUN;
       break;
     case PROJECTILES::TORPEDO:
       scale = TORPEDO_GUN_SCALE_FACTOR * TORPEDO_GUN_BOUNDING_BOX;
-      // TODO: Change this when torpedo gun gets a texture
-      texture_id = TEXTURE_ASSET_ID::GUN;
+      texture_id = TEXTURE_ASSET_ID::TORPEDO_GUN;
       break;
     case PROJECTILES::SHRIMP:
       scale = SHRIMP_GUN_SCALE_FACTOR * SHRIMP_GUN_BOUNDING_BOX;
-      // TODO: Change this when shrimp gun gets a texture
-      texture_id = TEXTURE_ASSET_ID::GUN;
+      texture_id = TEXTURE_ASSET_ID::SHRIMP_GUN;
       break;
   }
 
   // Setting initial position values
   Position& position = registry.positions.emplace(swapper);
   position.scale     = scale;
+
+  Position& player_pos = registry.positions.get(player);
+  if (player_pos.scale.x < 0) {
+    position.scale.x *= -1;
+  }
 
   // Setting initial motion values
   Motion& motion      = registry.motions.emplace(swapper);

@@ -8,6 +8,7 @@
 #include "graph.hpp"
 #include "common.hpp"
 #include "room.hpp"
+#include "player_factories.hpp"
 
 LevelBuilder::LevelBuilder(): current_room_id("0") {};
 
@@ -104,8 +105,42 @@ void LevelBuilder::activate_room(std::string room_id) {
 
   for (Entity& door : registry.spaces.get(room(current_room_id).entity).doors) {
     activate_boundary(door);
-    ActiveDoor& activeDoor = registry.activeDoors.emplace(door);
+    registry.activeDoors.emplace(door);
+    // TODO: make better door assets
+    // Position &door_position = registry.positions.get(door);
+    // Direction direction = registry.doorConnections.get(door).direction;
+    // TEXTURE_ASSET_ID texture_id;
+    // switch (direction) {
+    //   case Direction::NORTH:
+    //     texture_id = TEXTURE_ASSET_ID::TOP_DOORWAY;
+    //     break;
+    //   case Direction::EAST:
+    //     texture_id = TEXTURE_ASSET_ID::SIDE_DOORWAY;
+    //     break;
+    //   case Direction::SOUTH:
+    //     texture_id = TEXTURE_ASSET_ID::BOT_DOORWAY;
+    //     break;
+    //   case Direction::WEST:
+    //     texture_id = TEXTURE_ASSET_ID::SIDE_DOORWAY;
+    //     door_position.scale.x *= -1;
+    //     break;
+    // }
+    // registry.renderRequests.insert(door, {texture_id,
+    //                                       EFFECT_ASSET_ID::TEXTURED,
+    //                                       GEOMETRY_BUFFER_ID::SPRITE});
   }
+
+  // activate the floor
+  Entity floor = Entity();
+  Position &floor_pos = registry.positions.emplace(floor);
+  floor_pos.position = {window_width_px / 2, window_height_px / 2};
+  floor_pos.scale = {window_width_px, window_height_px};
+
+  registry.floors.emplace(floor);
+
+  registry.renderRequests.insert(floor, {TEXTURE_ASSET_ID::FLOOR,
+                                         EFFECT_ASSET_ID::TEXTURED,
+                                         GEOMETRY_BUFFER_ID::SPRITE});
 }
 
 void LevelBuilder::deactivate_room() {
@@ -127,18 +162,20 @@ void LevelBuilder::move_player_to_door(Direction direction, Entity& exit_door) {
           player_position.position = door_position.position;
           Direction opposite_direction = get_opposite_direction(direction);
           std::cout << "opposite: " << opposite_direction << std::endl;
+          
+          float offset = PLAYER_BOUNDING_BOX.x * PLAYER_SCALE_FACTOR.x;
           switch(opposite_direction) {
             case Direction::NORTH:
-              player_position.position.y += 30;
+              player_position.position.y += offset;
               break;
             case Direction::EAST:
-              player_position.position.x -= 30;
+              player_position.position.x -= offset;
               break;
             case Direction::SOUTH:
-              player_position.position.y -= 30;
+              player_position.position.y -= offset;
               break;
             case Direction::WEST:
-              player_position.position.x += 30;
+              player_position.position.x += offset;
               break;
           }
         }

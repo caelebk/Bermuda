@@ -52,3 +52,5 @@ struct ActiveWall {};
 struct ActiveDoor {};
 
 struct Interactable {};
+
+struct Floor {};
