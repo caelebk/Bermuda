@@ -98,7 +98,9 @@ bool update_debuffs(float elapsed_ms_since_last_update) {
     // remove if no longer stunned
     if (stunned.duration < 0) {
       if (stunned.original_velocity != vec2(0.f)) {
-        registry.motions.get(entity).velocity = stunned.original_velocity;
+        if (registry.motions.has(entity)) {
+          registry.motions.get(entity).velocity = stunned.original_velocity;
+        }
       }
       registry.stunned.remove(entity);
     }
@@ -113,7 +115,9 @@ bool update_debuffs(float elapsed_ms_since_last_update) {
 
     // remove knocked back debuff
     if (knockedback.duration <= 0) {
-      registry.motions.get(entity).velocity = knockedback.original_velocity;
+      if (registry.motions.has(entity)) {
+        registry.motions.get(entity).velocity = knockedback.original_velocity;
+      }
       registry.knockedback.remove(entity);
 
       Inventory& inventory = registry.inventory.get(player);

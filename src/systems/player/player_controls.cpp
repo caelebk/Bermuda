@@ -337,7 +337,9 @@ bool destroyGunOrProjectile(Entity entity) {
     registry.motions.remove(entity);
     registry.positions.remove(entity);
     registry.renderRequests.remove(entity);
+    return true;
   }
+  return false;
 }
 
 Entity createPauseMenu(RenderSystem* renderer) {

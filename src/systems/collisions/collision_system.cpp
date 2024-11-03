@@ -335,10 +335,9 @@ void CollisionSystem::collision_resolution() {
     if (registry.interactable.has(entity)) {
       routeInteractableCollisions(entity, entity_other);
     }
-
-    // Remove all collisions from this simulation step
-    registry.collisions.clear();
   }
+  // Remove all collisions from this simulation step
+  registry.collisions.clear();
 }
 
 /*********************************************
@@ -420,7 +419,8 @@ void CollisionSystem::routePlayerProjCollisions(Entity player_proj,
   PlayerProjectile& player_proj_component = registry.playerProjectiles.get(player_proj);
   bool checkWepSwapped = player_proj != player_projectile;
 
-  //Destroy projectile on collision if weapons have been swapped, except for concussive (handled in debuff.cpp) & shrimp (handled in resolveWallPlayerProj)
+  //Remove render projectile if weapons have been swapped or collision just occured, 
+  //except for concussive (handled in debuff.cpp) & shrimp (handled in resolveWallPlayerProj)
   if (checkWepSwapped && 
       player_proj_component.type != PROJECTILES::CONCUSSIVE && 
       player_proj_component.type != PROJECTILES::SHRIMP) {
@@ -476,13 +476,17 @@ void CollisionSystem::resolvePlayerInteractableCollision(Entity player,
 
 void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
                                                       Entity player_proj) {
-  PlayerProjectile& player_projectile =
+  PlayerProjectile& playerproj_comp =
       registry.playerProjectiles.get(player_proj);
+
+  if (!registry.motions.has(player_proj)) {
+    return;
+  }
   Motion& playerproj_motion = registry.motions.get(player_proj);
 
   modifyOxygen(enemy, player_proj);
 
-  switch (player_projectile.type) {
+  switch (playerproj_comp.type) {
     case PROJECTILES::HARPOON:
       break;
     case PROJECTILES::NET:
@@ -510,11 +514,11 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
     tracks.active_track  = true;
   }
 
-  if (player_projectile.type != PROJECTILES::CONCUSSIVE && 
-      player_projectile.type != PROJECTILES::SHRIMP) {
+  if (playerproj_comp.type != PROJECTILES::CONCUSSIVE && 
+      playerproj_comp.type != PROJECTILES::SHRIMP) {
         
       playerproj_motion.velocity  = vec2(0.0f, 0.0f);
-      player_projectile.is_loaded = true;
+      playerproj_comp.is_loaded = true;
   }
 }
 
