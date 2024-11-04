@@ -27,6 +27,8 @@ static void addCrabMelee() {
   tracking.leash_radius = KRAB_BOSS_LEASH_RADIUS;
   tracking.acceleration = KRAB_BOSS_TRACKING_ACCELERATION * 4;
   printf("Crab boss is trying to melee!\n");
+
+  addCrabBossWander();
 }
 
 static void addCrabRanged() {
@@ -42,6 +44,8 @@ static void addCrabRanged() {
   tracking.leash_radius = KRAB_BOSS_LEASH_RADIUS * 2;
   tracking.acceleration = KRAB_BOSS_TRACKING_ACCELERATION;
   printf("Crab boss is trying to shoot player!\n");
+
+  addCrabBossWander();
 }
 
 Entity createCrabBossPos(RenderSystem* renderer, vec2 position) {

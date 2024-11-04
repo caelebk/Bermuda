@@ -559,6 +559,7 @@ void CollisionSystem::routeInteractableCollisions(Entity interactable,
 void CollisionSystem::resolvePlayerEnemyCollision(Entity player, Entity enemy) {
   handle_debuffs(player, enemy);
   modifyOxygen(player, enemy);
+  addDamageIndicatorTimer(player);
 }
 
 void CollisionSystem::resolvePlayerConsumableCollision(Entity player,

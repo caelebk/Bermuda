@@ -19,6 +19,10 @@ static inline bool is_tracking(Entity e) {
   if (registry.trackPlayer.has(e)) {
     return registry.trackPlayer.get(e).active_track;
   }
+
+  if (registry.trackPlayerRanged.has(e)) {
+    return registry.trackPlayerRanged.get(e).active_track;
+  }
   return false;
 }
 
@@ -29,6 +33,7 @@ static inline bool is_proj(Entity e) {
 
 
 static void removeFromAI(Entity &e) {
+
   if (registry.wanders.has(e)) {
     registry.wanders.remove(e);
   }
@@ -40,6 +45,7 @@ static void removeFromAI(Entity &e) {
   if (registry.wanderSquares.has(e)) {
     registry.wanderSquares.remove(e);
   }
+  
 
   if (registry.trackPlayer.has(e)) {
     registry.trackPlayer.remove(e);
