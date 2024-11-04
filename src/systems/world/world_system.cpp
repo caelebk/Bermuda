@@ -194,13 +194,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     check_bounds();
   } else if (transitioning) {
     if (screen.darken_screen_factor < 1.f && registry.roomTransitions.has(rt_entity)) {
-      screen.darken_screen_factor = min(1.f, screen.darken_screen_factor + 0.02f);
+      screen.darken_screen_factor = min(1.f, screen.darken_screen_factor + 0.001f * elapsed_ms_since_last_update);
     } else if (screen.darken_screen_factor >= 1.f && registry.roomTransitions.has(rt_entity)) {
       RoomTransition& roomTransition = registry.roomTransitions.get(rt_entity);
       level_builder->enter_room(roomTransition.door_connection);
       registry.remove_all_components_of(rt_entity);
     } else if (screen.darken_screen_factor > 0.f && !registry.roomTransitions.has(rt_entity)) {
-      screen.darken_screen_factor = max(0.f, screen.darken_screen_factor - 0.02f);
+      screen.darken_screen_factor = max(0.f, screen.darken_screen_factor - 0.001f * elapsed_ms_since_last_update);
     } else if (screen.darken_screen_factor <= 0.f && !registry.roomTransitions.has(rt_entity)) {
       transitioning = false;
     }
