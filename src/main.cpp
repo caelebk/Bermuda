@@ -7,9 +7,9 @@
 #include <chrono>
 
 // internal
-#include "level.hpp"
 #include "audio_system.hpp"
 #include "collision_system.hpp"
+#include "level.hpp"
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
@@ -18,6 +18,8 @@ using Clock = std::chrono::high_resolution_clock;
 
 bool   paused;
 Entity pause_menu;
+bool   transitioning = false;
+Entity rt_entity;
 
 Entity player;
 
@@ -83,7 +85,7 @@ int main() {
     t = now;
 
     world.step(elapsed_ms);
-    if (!paused) {
+    if (!paused && !transitioning) {
       // Note: WorldSystem::step runs simply to update FPS counter, but is
       // mostly disabled
       ai.step(elapsed_ms);

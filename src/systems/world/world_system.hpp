@@ -63,6 +63,8 @@ class WorldSystem {
 
 extern bool        paused;
 extern Entity      pause_menu;
+extern bool        transitioning;
+extern Entity      rt_entity;
 extern Entity      player;
 extern Entity      player_weapon;
 extern Entity      player_projectile;

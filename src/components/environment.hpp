@@ -47,6 +47,10 @@ struct DoorConnection {
   Entity exit_door;
 };
 
+struct RoomTransition {
+  DoorConnection door_connection;
+};
+
 struct ActiveWall {};
 
 struct ActiveDoor {};

@@ -88,3 +88,6 @@ bool circle_box_collides(const Position &position1, float radius, const Position
 
 extern Entity player_projectile;
 extern Entity player;
+
+extern bool        transitioning;
+extern Entity      rt_entity;

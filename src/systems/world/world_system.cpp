@@ -130,7 +130,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
   assert(registry.screenStates.components.size() <= 1);
   ScreenState& screen = registry.screenStates.components[0];
 
-  if (!paused) {
+  if (!paused && !transitioning) {
     ////////////////////////////////////////////////////////
     // Processing the player state
     ////////////////////////////////////////////////////////
@@ -158,46 +158,59 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     // Update gun and projectile angle
     updateWepProjPos(mouse_pos);
 
+    float min_counter_ms = 4000.f;
+    for (Entity entity : registry.deathTimers.entities) {
+      // progress timer
+      DeathTimer& counter = registry.deathTimers.get(entity);
+      counter.counter_ms -= elapsed_ms_since_last_update;
+      if (counter.counter_ms < min_counter_ms && entity == player) {
+        min_counter_ms = counter.counter_ms;
+      }
+
+      // restart the game once the death timer expired
+      if (counter.counter_ms < 0) {
+        if (entity == player) {
+          registry.deathTimers.remove(entity);
+          screen.darken_screen_factor = 0;
+          restart_game();
+          return true;
+        } else if (registry.drops.has(entity) &&
+                   registry.positions.has(entity)) {
+          Drop&     drop = registry.drops.get(entity);
+          Position& pos  = registry.positions.get(entity);
+
+          auto fn     = drop.dropFn;
+          vec2 newPos = pos.position;
+          registry.remove_all_components_of(entity);
+
+          fn(renderer, newPos);
+        } else {
+          registry.remove_all_components_of(entity);
+        }
+      }
+    }
+    screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+
     check_bounds();
+  } else if (transitioning) {
+    if (screen.darken_screen_factor < 1.f && registry.roomTransitions.has(rt_entity)) {
+      screen.darken_screen_factor = min(1.f, screen.darken_screen_factor + 0.02f);
+    } else if (screen.darken_screen_factor >= 1.f && registry.roomTransitions.has(rt_entity)) {
+      RoomTransition& roomTransition = registry.roomTransitions.get(rt_entity);
+      level_builder->enter_room(roomTransition.door_connection);
+      registry.remove_all_components_of(rt_entity);
+    } else if (screen.darken_screen_factor > 0.f && !registry.roomTransitions.has(rt_entity)) {
+      screen.darken_screen_factor = max(0.f, screen.darken_screen_factor - 0.02f);
+    } else if (screen.darken_screen_factor <= 0.f && !registry.roomTransitions.has(rt_entity)) {
+      transitioning = false;
+    }
   } else {
     if (!registry.renderRequests.has(pause_menu)) {
       registry.renderRequests.insert(
           pause_menu, {TEXTURE_ASSET_ID::PAUSE, EFFECT_ASSET_ID::TEXTURED,
-                        GEOMETRY_BUFFER_ID::SPRITE});
+                       GEOMETRY_BUFFER_ID::SPRITE});
     }
   }
-
-  float min_counter_ms = 4000.f;
-  for (Entity entity : registry.deathTimers.entities) {
-    // progress timer
-    DeathTimer& counter = registry.deathTimers.get(entity);
-    counter.counter_ms -= elapsed_ms_since_last_update;
-    if (counter.counter_ms < min_counter_ms && entity == player) {
-      min_counter_ms = counter.counter_ms;
-    }
-
-    // restart the game once the death timer expired
-    if (counter.counter_ms < 0) {
-      if (entity == player) {
-        registry.deathTimers.remove(entity);
-        screen.darken_screen_factor = 0;
-        restart_game();
-        return true;
-      } else if (registry.drops.has(entity) && registry.positions.has(entity)) {
-        Drop&     drop = registry.drops.get(entity);
-        Position& pos  = registry.positions.get(entity);
-
-        auto fn     = drop.dropFn;
-        vec2 newPos = pos.position;
-        registry.remove_all_components_of(entity);
-
-        fn(renderer, newPos);
-      } else {
-        registry.remove_all_components_of(entity);
-      }
-    }
-  }
-  screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
   return true;
 }
@@ -298,8 +311,6 @@ void WorldSystem::restart_game() {
   // Enemy + Drops
   /////////////////////////////////////////////
   // spawn at random places in the room
-  // execute_config_rand(LVL_1_RAND_POS, level_builder.room(level_builder.current_room_id), renderer);
-  // execute_config_rand_chance(LVL_1_RAND_POS, level_builder.room(level_builder.current_room_id), renderer, 0.5);
 
   level_builder->activate_starting_room();
 
@@ -327,7 +338,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   // Help / Pause
   /////////////////////////////////////
   // Toggling game pause
-  if (action == GLFW_RELEASE && key == GLFW_KEY_P) {
+  if (action == GLFW_RELEASE && key == GLFW_KEY_P && !registry.deathTimers.has(player)) {
     paused = !paused;
     if (paused) {
       depleteOxygen(player);

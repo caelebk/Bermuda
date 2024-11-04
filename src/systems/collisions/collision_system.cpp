@@ -653,6 +653,12 @@ void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
 
 void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
   std::cout << "collided with door" << std::endl;
+
+  rt_entity = Entity();
+  RoomTransition& roomTransition = registry.roomTransitions.emplace(rt_entity);
+
   DoorConnection& door_connection = registry.doorConnections.get(door);
-  level->enter_room(door_connection);
+  roomTransition.door_connection = door_connection;
+
+  transitioning = true;
 }
