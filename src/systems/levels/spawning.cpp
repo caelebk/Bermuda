@@ -61,5 +61,9 @@ bool remove_all_entities() {
     registry.remove_all_components_of(registry.oxygenModifiers.entities.back());
   }
 
+  while (registry.playersCollisionMeshes.entities.size() > 0) {
+    registry.remove_all_components_of(registry.playersCollisionMeshes.entities.back());
+  }
+
   return true;
 }

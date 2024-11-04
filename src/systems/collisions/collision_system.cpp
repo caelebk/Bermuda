@@ -2,13 +2,13 @@
 
 #include <cstdio>
 #include <damage.hpp>
+#include <player_controls.hpp>
+#include <player_factories.hpp>
 
 #include "ai.hpp"
 #include "enemy.hpp"
 #include "oxygen.hpp"
 #include "tiny_ecs_registry.hpp"
-#include <player_factories.hpp>
-#include <player_controls.hpp>
 
 // Returns the local bounding coordinates scaled by entity size
 vec2 get_bounding_box(const Position& position) {
@@ -66,13 +66,14 @@ bool box_collides(const Position& position1, const Position& position2) {
          horizontal_overlap2;
 }
 
-bool circle_box_collides(const Position& circle_pos, float radius, const Position& box_pos) {
+bool circle_box_collides(const Position& circle_pos, float radius,
+                         const Position& box_pos) {
   vec4 box_bound = get_bounds(box_pos);
 
-  float box_left = box_bound[0];
+  float box_left  = box_bound[0];
   float box_right = box_bound[1];
-  float box_top = box_bound[2];
-  float box_bot = box_bound[3];
+  float box_top   = box_bound[2];
+  float box_bot   = box_bound[3];
 
   float closestX = clamp(circle_pos.position.x, box_left, box_right);
   float closestY = clamp(circle_pos.position.y, box_top, box_bot);
@@ -81,9 +82,81 @@ bool circle_box_collides(const Position& circle_pos, float radius, const Positio
   float distanceY = circle_pos.position.y - closestY;
 
   float distanceSquared = distanceX * distanceX + distanceY * distanceY;
-  float radiusSquared = radius * radius;
+  float radiusSquared   = radius * radius;
 
   return distanceSquared <= radiusSquared;
+}
+
+bool mesh_collides(Entity mesh, Entity other) {
+  // ignore player collision mesh - player collisions
+  if (registry.players.has(other) || !registry.positions.has(mesh) || !registry.meshPtrs.has(mesh)) {
+    return false;
+  }
+
+  Position &mesh_pos = registry.positions.get(mesh);
+  Mesh* meshPtr = registry.meshPtrs.get(mesh);
+  Position &other_pos = registry.positions.get(other);
+
+  vec4 other_bb = get_bounds(other_pos);
+
+  // get transformations
+  Transform transform;
+  transform.translate(mesh_pos.position);
+  transform.rotate(mesh_pos.angle);
+  transform.scale(mesh_pos.scale);
+  mat3 modelmatrix = transform.mat;
+
+
+  for (uint16_t i = 0; i < meshPtr->vertex_indices.size(); i += 3) {
+    bool hor  = false;
+    bool vert = false;
+    if ((size_t)i + 2 >= meshPtr->vertices.size()) {
+      continue;
+    }
+
+    std::vector<vec2> overlap;
+    for (uint16_t idx = 0; idx < 3; idx++) {
+      // get vertex
+      ColoredVertex v = meshPtr->vertices[i + idx];
+      // convert to world coordinates
+      v.position.z = 1.f;
+      v.position   = modelmatrix * v.position;
+
+      bool hor_local =
+          (v.position.x >= other_bb[0] && v.position.x <= other_bb[1]);
+      bool ver_local =
+          (v.position.y >= other_bb[2] && v.position.y <= other_bb[3]);
+
+      hor  = hor || hor_local;
+      vert = vert || ver_local;
+
+      if (hor_local || ver_local) {
+        overlap.push_back(v.position);
+      }
+    }
+    // is colliding with 1 vertice
+    if (overlap.size() == 0 || !hor || !vert) {
+      continue;
+    }
+
+    if (overlap.size() != 2) {
+      // this means that a single vertice is inside, or all 3 (the entire thing)
+      // is inside
+      return true;
+    }
+
+    vec2 vert0 = overlap[0];
+    vec2 vert1 = overlap[1];
+    // the midpoint should also be overlapping
+    vec2 midpoint = (vert0 + vert1) / 2.f;
+
+    if((midpoint.x >= other_bb[0] && midpoint.x <= other_bb[1]) &&
+           (midpoint.y >= other_bb[2] && midpoint.y <= other_bb[3])) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void CollisionSystem::init(LevelBuilder* level) {
@@ -121,7 +194,7 @@ void CollisionSystem::collision_detection() {
       continue;
     }
 
-    //detect player projectile and wall collisions
+    // detect player projectile and wall collisions
     for (uint j = 0; j < wall_container.size(); j++) {
       Entity entity_j = wall_container.entities[j];
       if (!registry.positions.has(entity_j)) {
@@ -134,7 +207,7 @@ void CollisionSystem::collision_detection() {
       }
     }
 
-    //detect player projectile and enemy collisions
+    // detect player projectile and enemy collisions
     for (uint j = 0; j < enemy_container.size(); j++) {
       Entity entity_j = enemy_container.entities[j];
       if (!registry.positions.has(entity_j)) {
@@ -155,9 +228,10 @@ void CollisionSystem::collision_detection() {
     if (!registry.positions.has(entity_i)) {
       continue;
     }
-    Position& position_i = registry.positions.get(entity_i);
+    Player player_comp = registry.players.get(entity_i);
+    Position& position_i = registry.positions.get(player_comp.collisionMesh);
 
-    //detect player and enemy collisions
+    // detect player and enemy collisions
     for (uint j = 0; j < enemy_container.size(); j++) {
       Entity entity_j = enemy_container.entities[j];
       if (!registry.positions.has(entity_j)) {
@@ -171,10 +245,13 @@ void CollisionSystem::collision_detection() {
           continue;
         }
       }
+
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
-        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        if (mesh_collides(player_comp.collisionMesh, entity_j)) {
+          registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+          registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        }
       }
     }
 
@@ -185,8 +262,10 @@ void CollisionSystem::collision_detection() {
       }
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
-        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        if (mesh_collides(player_comp.collisionMesh, entity_j)) {
+          registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+          registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        }
       }
     }
 
@@ -206,8 +285,10 @@ void CollisionSystem::collision_detection() {
 
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
-        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        if (mesh_collides(player_comp.collisionMesh, entity_j)) {
+          registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+          registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        }
       }
     }
   }
@@ -242,10 +323,13 @@ void CollisionSystem::collision_detection() {
       if (!registry.positions.has(entity_j)) {
         continue;
       }
-      Position& position_j = registry.positions.get(entity_j);
+      Player& player_comp = registry.players.get(entity_j);
+      Position& position_j = registry.positions.get(player_comp.collisionMesh);
       if (box_collides(position_i, position_j)) {
-        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        if (mesh_collides(player_comp.collisionMesh, entity_i)) {
+          registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+          registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        }
       }
     }
   }
@@ -280,12 +364,16 @@ void CollisionSystem::collision_detection() {
       if (!registry.positions.has(entity_j)) {
         continue;
       }
-      Position& position_j = registry.positions.get(entity_j);
+
+      Player& player_comp = registry.players.get(entity_j);
+      Position& position_j = registry.positions.get(player_comp.collisionMesh);
       if (box_collides(position_i, position_j)) {
-        registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-        registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        if (mesh_collides(player_comp.collisionMesh, entity_i)) {
+          registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+          registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+        }
       }
-    }    
+    }
   }
 }
 
@@ -395,6 +483,8 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
 
   if (registry.players.has(other)) {
     resolveStopOnWall(wall, other);
+    Player& player = registry.players.get(other);
+    resolveStopOnWall(wall, player.collisionMesh);
   }
   if (registry.playerProjectiles.has(other)) {
     resolveWallPlayerProjCollision(wall, other);
@@ -414,7 +504,8 @@ void CollisionSystem::routeDoorCollisions(Entity door, Entity other) {
     resolveDoorPlayerCollision(door, other);
   }
 
-  // Since enemies and projectiles can't enter different rooms, simply treat their collisions like a wall.
+  // Since enemies and projectiles can't enter different rooms, simply treat
+  // their collisions like a wall.
   if (registry.playerProjectiles.has(other)) {
     resolveWallPlayerProjCollision(door, other);
   }
@@ -432,13 +523,15 @@ void CollisionSystem::routePlayerProjCollisions(Entity player_proj,
     resolveWallPlayerProjCollision(other, player_proj);
   }
 
-  PlayerProjectile& player_proj_component = registry.playerProjectiles.get(player_proj);
+  PlayerProjectile& player_proj_component =
+      registry.playerProjectiles.get(player_proj);
   bool checkWepSwapped = player_proj != player_projectile;
 
-  //Remove render projectile if weapons have been swapped or collision just occured, 
-  //except for concussive (handled in debuff.cpp) & shrimp (handled in resolveWallPlayerProj)
-  if (checkWepSwapped && 
-      player_proj_component.type != PROJECTILES::CONCUSSIVE && 
+  // Remove render projectile if weapons have been swapped or collision just
+  // occured, except for concussive (handled in debuff.cpp) & shrimp (handled in
+  // resolveWallPlayerProj)
+  if (checkWepSwapped &&
+      player_proj_component.type != PROJECTILES::CONCUSSIVE &&
       player_proj_component.type != PROJECTILES::SHRIMP) {
     destroyGunOrProjectile(player_proj);
   }
@@ -509,7 +602,7 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
       handle_debuffs(enemy, player_proj);
       break;
     case PROJECTILES::CONCUSSIVE:
-      //ignore boxes and jellyfish.
+      // ignore boxes and jellyfish.
       if (!registry.activeWalls.has(enemy) && registry.motions.has(enemy)) {
         handle_debuffs(enemy, player_proj);
       }
@@ -530,11 +623,10 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
     tracks.active_track  = true;
   }
 
-  if (playerproj_comp.type != PROJECTILES::CONCUSSIVE && 
+  if (playerproj_comp.type != PROJECTILES::CONCUSSIVE &&
       playerproj_comp.type != PROJECTILES::SHRIMP) {
-        
-      playerproj_motion.velocity  = vec2(0.0f, 0.0f);
-      playerproj_comp.is_loaded = true;
+    playerproj_motion.velocity = vec2(0.0f, 0.0f);
+    playerproj_comp.is_loaded  = true;
   }
 }
 
@@ -543,11 +635,12 @@ void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity enemy) {
     if (enemy_check == enemy || !registry.positions.has(enemy)) {
       continue;
     }
-    Position& playerproj_position = registry.positions.get(proj);
-    AreaOfEffect& playerproj_aoe = registry.aoe.get(proj);
-    Position& enemy_position = registry.positions.get(enemy_check);
+    Position&     playerproj_position = registry.positions.get(proj);
+    AreaOfEffect& playerproj_aoe      = registry.aoe.get(proj);
+    Position&     enemy_position      = registry.positions.get(enemy_check);
 
-    if (circle_box_collides(playerproj_position, playerproj_aoe.radius, enemy_position)) {
+    if (circle_box_collides(playerproj_position, playerproj_aoe.radius,
+                            enemy_position)) {
       modifyOxygen(enemy_check, proj);
       addDamageIndicatorTimer(enemy_check);
     }
@@ -556,8 +649,8 @@ void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity enemy) {
 
 void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
                                                      Entity player_proj) {
-
-  if (!registry.motions.has(player_proj) || !registry.playerProjectiles.has(player_proj)) {
+  if (!registry.motions.has(player_proj) ||
+      !registry.playerProjectiles.has(player_proj)) {
     return;
   }
   Motion&           proj_motion = registry.motions.get(player_proj);
@@ -572,7 +665,7 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
       if (check_wep_swap) {
         destroyGunOrProjectile(player_proj);
       } else {
-        proj_motion.velocity = vec2(0.f);
+        proj_motion.velocity     = vec2(0.f);
         proj_component.is_loaded = true;
       }
     } else {
@@ -580,10 +673,9 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
       doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
     }
   } else {
-    proj_motion.velocity = vec2(0.f);
+    proj_motion.velocity     = vec2(0.f);
     proj_component.is_loaded = true;
   }
-
 }
 
 void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
@@ -610,7 +702,6 @@ void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
 }
 
 void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
-  Motion& entity_motion  = registry.motions.get(entity);
   Position& wall_position   = registry.positions.get(wall);
   Position& entity_position = registry.positions.get(entity);
 

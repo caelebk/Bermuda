@@ -119,12 +119,14 @@ enum class EFFECT_ASSET_ID {
   WATER           = TEXTURED_OXYGEN + 1,
   PLAYER          = WATER + 1,
   ENEMY           = PLAYER + 1,
-  EFFECT_COUNT    = ENEMY + 1
+  COLLISION_MESH  = ENEMY + 1,
+  EFFECT_COUNT    = COLLISION_MESH + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-  SPRITE          = 0,
+  PLAYER          = 0,
+  SPRITE          = PLAYER + 1,
   DEBUG_LINE      = SPRITE + 1,
   SCREEN_TRIANGLE = DEBUG_LINE + 1,
   GEOMETRY_COUNT  = SCREEN_TRIANGLE + 1

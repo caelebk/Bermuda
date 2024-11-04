@@ -321,6 +321,11 @@ void handleGunSwap(Entity swapped, Entity swapper, PROJECTILES projectile) {
 void handleWeaponSwapping(int key) {
   Inventory& inv = registry.inventory.get(player);
 
+  PlayerProjectile& playerproj_comp = registry.playerProjectiles.get(player_projectile);
+
+  if (!playerproj_comp.is_loaded) {
+    return;
+  }
   // Switch to harpoon gun
   if (key == GLFW_KEY_1 && player_projectile != harpoon) {
     doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);

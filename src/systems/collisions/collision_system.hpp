@@ -85,6 +85,7 @@ vec4 get_bounds(const Position &position);
 bool circle_collides(const Position &position1, const Position &position2);
 bool box_collides(const Position &position1, const Position &position2);
 bool circle_box_collides(const Position &position1, float radius, const Position &position2);
+bool mesh_collides(Entity mesh, Entity other);
 
 extern Entity player_projectile;
 extern Entity player;

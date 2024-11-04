@@ -32,10 +32,27 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos) {
   player.weapon =
       createLoadedGun(renderer, position.position, PROJECTILES::HARPOON);
 
-  // Request Render
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::PLAYER1, EFFECT_ASSET_ID::PLAYER,
-               GEOMETRY_BUFFER_ID::SPRITE});
+    entity, {TEXTURE_ASSET_ID::PLAYER1, EFFECT_ASSET_ID::PLAYER,
+              GEOMETRY_BUFFER_ID::SPRITE});
+
+  auto collisionEntity = Entity();
+  Mesh& collisionMesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PLAYER);
+  registry.meshPtrs.emplace(collisionEntity, &collisionMesh);
+
+  // Setting initial position values
+  Position& collisionMeshPosition = registry.positions.emplace(collisionEntity);
+  collisionMeshPosition.position  = pos;
+  collisionMeshPosition.angle     = 0.f;
+  collisionMeshPosition.scale     = PLAYER_SCALE_FACTOR * PLAYER_BOUNDING_BOX;
+
+  PlayerCollisionMesh& collision_mesh_comp = registry.playersCollisionMeshes.emplace(collisionEntity);
+  // Uncomment to render the collision mesh.
+  // registry.renderRequests.insert(
+  //     collisionEntity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::COLLISION_MESH,
+  //              GEOMETRY_BUFFER_ID::PLAYER});
+
+  player.collisionMesh = collisionEntity;
 
   return entity;
 }

@@ -54,7 +54,7 @@ struct Inventory {
 // Player component
 struct Player {
   Entity weapon;
-
+  Entity collisionMesh;
   // Controls
   bool upHeld    = false;
   bool downHeld  = false;
@@ -64,4 +64,7 @@ struct Player {
   bool dashing   = false;
   int dashTimer = 0;
   int dashCooldownTimer = 0;
+};
+
+struct PlayerCollisionMesh {
 };

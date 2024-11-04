@@ -24,6 +24,7 @@ class RenderSystem {
   // Associated id with .obj path
   const std::vector<std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths = {
       // specify meshes of other assets here
+		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER, mesh_path("player.obj"))
   };
 
   // Make sure these paths remain in sync with the associated enumerators.
@@ -84,7 +85,8 @@ class RenderSystem {
   const std::array<std::string, effect_count> effect_paths = {
       shader_path("coloured"),        shader_path("textured"),
       shader_path("textured_oxygen"), shader_path("water"),
-      shader_path("player"),          shader_path("enemy")};
+      shader_path("player"),          shader_path("enemy"), 
+      shader_path("collision_mesh")};
   std::array<GLuint, geometry_count> vertex_buffers;
   std::array<GLuint, geometry_count> index_buffers;
   std::array<Mesh, geometry_count>   meshes;
@@ -126,6 +128,7 @@ class RenderSystem {
   private:
   // Internal drawing functions for each entity type
   void drawTexturedMesh(Entity entity, const mat3& projection);
+  void drawTexturedMeshTemp(Entity entity, const mat3& projection);
   void drawToScreen();
 
   // Window handle

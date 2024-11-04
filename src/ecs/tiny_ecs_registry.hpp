@@ -29,6 +29,7 @@ class ECSRegistry {
   // player related
   ComponentContainer<DeathTimer>       deathTimers;
   ComponentContainer<Player>           players;
+  ComponentContainer<PlayerCollisionMesh>           playersCollisionMeshes;
   ComponentContainer<PlayerWeapon>     playerWeapons;
   ComponentContainer<PlayerProjectile> playerProjectiles;
   ComponentContainer<Inventory>        inventory;
@@ -103,6 +104,7 @@ class ECSRegistry {
     // player related
     registry_list.push_back(&deathTimers);
     registry_list.push_back(&players);
+    registry_list.push_back(&playersCollisionMeshes);
     registry_list.push_back(&playerWeapons);
     registry_list.push_back(&playerProjectiles);
     registry_list.push_back(&inventory);

@@ -234,6 +234,9 @@ void LevelBuilder::move_player_to_door(Direction direction, Entity& exit_door) {
               player_position.position.x += offset;
               break;
           }
+          Player& player_comp = registry.players.get(player);
+          Position& player_mesh_pos = registry.positions.get(player_comp.collisionMesh);
+          player_mesh_pos.position = player_position.position;
         }
       }
     } 

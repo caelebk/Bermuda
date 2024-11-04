@@ -40,17 +40,26 @@ void PhysicsSystem::step(float elapsed_ms) {
   for (Entity entity : registry.motions.entities) {
     Motion&   motion   = registry.motions.get(entity);
     Position& position = registry.positions.get(entity);
-    position.position += motion.velocity * lerp;
 
     if (!debuff_entity_can_move(entity)) {
       motion.velocity = vec2(0.0f);
     }
-
+    
     if (debuff_entity_knockedback(entity)) {
       KnockedBack& knockedback = registry.knockedback.get(entity);
       motion.velocity          = knockedback.knocked_velocity;
     }
 
+    position.position += motion.velocity * lerp;
+
+    if (registry.players.has(entity)) {
+      Player& player = registry.players.get(entity);
+      Position& player_mesh_position = registry.positions.get(player.collisionMesh);
+      player_mesh_position.position += motion.velocity * lerp;
+    }
+
+
+    
     if (registry.oxygen.has(entity) && entity != player) {
       // make sure health bars follow moving enemies
       updateEnemyHealthBarPos(entity);
@@ -148,6 +157,11 @@ void updatePlayerDirection(vec2 mouse_pos) {
   bool mouse_left_face_right =
       player_pos.position.x > mouse_pos.x && player_pos.scale.x > 0;
   if (mouse_right_face_left || mouse_left_face_right) {
+
+    Player& player_comp = registry.players.get(player);
+    Position& player_mesh_pos = registry.positions.get(player_comp.collisionMesh);
+
+    player_mesh_pos.scale.x *= -1;
     player_pos.scale.x *= -1;
 
     Position& weapon = registry.positions.get(player_weapon);
