@@ -262,7 +262,7 @@ void LevelBuilder::build_wall_with_random_doors(RoomBuilder& room,
       // Generate a door with the id: <direction_enum>_<room_number>; i.e NORTH to room 1 is 0_1.
       std::string door_id;
       door_id.append(std::to_string(other_room)).append("_").append(std::to_string(direction));
-      draw_door(door_id, 2 * unit_size);
+      draw_door(door_id, DOOR_SCALAR * unit_size);
 
       current_size += segment + DOOR_SCALAR; // Update for door and segment size
       door_index++;

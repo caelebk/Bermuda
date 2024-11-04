@@ -5,7 +5,7 @@
 #define MIN_CONNECTIONS 1
 #define MAX_CONNECTIONS 4
 
-#define DOOR_SCALAR 2
+#define DOOR_SCALAR 1
 
 using Graph = std::unordered_map<int, std::set<int>>;
 using DirectedEdges = std::unordered_map<int, Direction>;

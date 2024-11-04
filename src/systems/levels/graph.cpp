@@ -69,11 +69,11 @@ std::vector<int> get_random_door_positions(int num_doors, int min, int max) {
       }
     }
 
-    std::cout << "position: " << position << std::endl;
-    for (int i = 0; i < positions.size(); i++) {
-        std::cout << "existing pos: " << positions[i] << std::endl;
-        std::cout << "count: " << num_doors << std::endl;
-    }
+    // std::cout << "position: " << position << std::endl;
+    // for (int i = 0; i < positions.size(); i++) {
+    //     std::cout << "existing pos: " << positions[i] << std::endl;
+    //     std::cout << "count: " << num_doors << std::endl;
+    // }
 
     if (is_valid) {
       positions.push_back(position);
