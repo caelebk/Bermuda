@@ -89,7 +89,7 @@ Entity createLoadedGun(RenderSystem* renderer, vec2 playerPosition,
 
   // Request Render
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::HARPOON_GUN, EFFECT_ASSET_ID::TEXTURED,
+      entity, {TEXTURE_ASSET_ID::HARPOON_GUN, EFFECT_ASSET_ID::PLAYER,
                GEOMETRY_BUFFER_ID::SPRITE});
 
   return entity;

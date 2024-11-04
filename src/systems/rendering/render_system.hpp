@@ -141,5 +141,8 @@ class RenderSystem {
 
 extern bool paused;
 
+extern Entity player;
+extern Entity player_weapon;
+
 bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path,
                         GLuint& out_program);

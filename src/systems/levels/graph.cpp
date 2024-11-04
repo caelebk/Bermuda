@@ -69,10 +69,11 @@ std::vector<int> get_random_door_positions(int num_doors, int min, int max) {
       }
     }
 
-    // std::cout << "position: " << position << std::endl;
-    // for (int i = 0; i < positions.size(); i++) {
-    //     std::cout << "existing pos: " << positions[i] << std::endl;
-    // }
+    std::cout << "position: " << position << std::endl;
+    for (int i = 0; i < positions.size(); i++) {
+        std::cout << "existing pos: " << positions[i] << std::endl;
+        std::cout << "count: " << num_doors << std::endl;
+    }
 
     if (is_valid) {
       positions.push_back(position);
@@ -104,6 +105,11 @@ DirectedGraph expand_graph_to_random_directed_graph(Graph& graph) {
         for (int i = 0; i < (int) edges.size(); i++) {
             int other_room = edges[i];
 
+            // If we've already processed this pair, move on.
+            if (processed_pairs.count({room_number, other_room}) || processed_pairs.count({other_room, room_number})) {
+                continue;
+            }
+
             Direction random_direction;
             do {
                 std::shuffle(directions.begin() + 1, directions.end() - 1, rng);
@@ -114,11 +120,6 @@ DirectedGraph expand_graph_to_random_directed_graph(Graph& graph) {
                 // TODO: Remove magic number.
                 count_edges_with_direction(random_direction, directed_graph[room_number]) >= 2
             );
-
-            // If we've already processed this pair, move on.
-            if (processed_pairs.count({room_number, other_room}) || processed_pairs.count({other_room, room_number})) {
-                continue;
-            }
 
             directed_graph[room_number][other_room] = random_direction;
 

@@ -78,6 +78,13 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3& projection) {
                                          ? registry.attacked.get(entity).timer
                                          : 0.0f);
       glUniform1f(stun_timer_uloc, registry.stunned.has(entity) ? true : false);
+      if (entity == player_weapon) {
+        glUniform1f(stun_timer_uloc,
+                    registry.stunned.has(player) ? true : false);
+        glUniform1f(damage_timer_uloc, registry.attacked.has(player)
+                                           ? registry.attacked.get(player).timer
+                                           : 0.0f);
+      }
       gl_has_errors();
     }
 

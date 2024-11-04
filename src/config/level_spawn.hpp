@@ -45,7 +45,7 @@
 #define LVL_1_RAND_POS                                                       \
   {createOxygenCanisterPos, createCratePos, createCratePos,  createCratePos, \
    createCratePos,          createCratePos, createGeyserPos, createSharkPos, \
-   createKrabPos,           createFishPos}
+   createKrabPos,           createFishPos, createJellyPos, createJellyPos}
 // createJellyPos,          createJellyPos,  createJellyPos,          \
       // createJellyPos,          createJellyPos,  createOxygenCanisterPos, \
       // createOxygenCanisterPos, createGeyserPos, createGeyserPos,         \
@@ -57,4 +57,5 @@
 
 #define LVL_1_RAND_POS_CRATELESS                                            \
   {createOxygenCanisterPos, createGeyserPos, createSharkPos, createKrabPos, \
-   createFishPos,           createSharkPos,  createKrabPos,  createFishPos}
+   createFishPos,           createSharkPos,  createKrabPos,  createFishPos, \
+   createJellyPos, createJellyPos}

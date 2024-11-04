@@ -390,7 +390,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-  if (!paused) {
+  if (!paused && !registry.stunned.has(player)) {
     player_mouse(renderer, button, action, mods, harpoon, harpoon_gun);
   }
 }

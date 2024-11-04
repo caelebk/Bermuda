@@ -315,7 +315,7 @@ void handleGunSwap(Entity swapped, Entity swapper, PROJECTILES projectile) {
   // Request Render
   registry.renderRequests.insert(
       swapper,
-      {texture_id, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+      {texture_id, EFFECT_ASSET_ID::PLAYER, GEOMETRY_BUFFER_ID::SPRITE});
 }
 
 void handleWeaponSwapping(int key) {
