@@ -6,8 +6,10 @@
 #include <player_factories.hpp>
 
 #include "ai.hpp"
+#include "debuff.hpp"
 #include "enemy.hpp"
 #include "oxygen.hpp"
+#include "player.hpp"
 #include "tiny_ecs_registry.hpp"
 
 // Returns the local bounding coordinates scaled by entity size
@@ -764,4 +766,9 @@ void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
   roomTransition.door_connection = door_connection;
 
   transitioning = true;
+
+  PlayerProjectile &pp = registry.playerProjectiles.get(player_projectile);
+  Motion &pp_m = registry.motions.get(player_projectile);
+  pp.is_loaded = true;
+  pp_m.velocity = {0.f, 0.f};
 }

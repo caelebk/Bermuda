@@ -73,7 +73,7 @@ Entity createCrabBossPos(RenderSystem* renderer, vec2 position) {
   addCrabBossWander();
 
   boss.ai_cd = KRAB_BOSS_AI_CD;
-  boss.ai    = std::vector<std::function<void()>>({addCrabMelee, addCrabRanged, addCrabBossWander});
+  boss.ai    = std::vector<std::function<void()>>({addCrabMelee, addCrabMelee, addCrabMelee, addCrabMelee, addCrabRanged, addCrabRanged, addCrabBossWander});
 
   // TODO: add the room
   registry.renderRequests.insert(
