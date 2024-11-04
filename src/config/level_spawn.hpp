@@ -1,4 +1,5 @@
 #pragma once
+#include "boss_factories.hpp"
 #include "enemy_factories.hpp"
 
 // currently used as "always spawn"
@@ -35,10 +36,16 @@
       },                                                                 \
   }
 
-#define LVL_1_RAND_POS                              \
-  {createOxygenCanisterPos, createCratePos, createCratePos, createCratePos,  \
-   createCratePos, createCratePos, createGeyserPos, \
-   createSharkPos, createKrabPos,  createFishPos}
+#define CRAB_MINIBOSS                                                            \
+  {                                                                              \
+      createCrabBossPos,       createCratePos,          createOxygenCanisterPos, \
+      createOxygenCanisterPos, createOxygenCanisterPos, createOxygenCanisterPos, \
+  }
+
+#define LVL_1_RAND_POS                                                       \
+  {createOxygenCanisterPos, createCratePos, createCratePos,  createCratePos, \
+   createCratePos,          createCratePos, createGeyserPos, createSharkPos, \
+   createKrabPos,           createFishPos}
 // createJellyPos,          createJellyPos,  createJellyPos,          \
       // createJellyPos,          createJellyPos,  createOxygenCanisterPos, \
       // createOxygenCanisterPos, createGeyserPos, createGeyserPos,         \
@@ -48,4 +55,6 @@
       // createFishPos,           createFishPos,   createFishPos,           \
       //
 
-#define LVL_1_RAND_POS_CRATELESS {createOxygenCanisterPos, createGeyserPos, createSharkPos, createKrabPos, createFishPos, createSharkPos, createKrabPos, createFishPos}
+#define LVL_1_RAND_POS_CRATELESS                                            \
+  {createOxygenCanisterPos, createGeyserPos, createSharkPos, createKrabPos, \
+   createFishPos,           createSharkPos,  createKrabPos,  createFishPos}

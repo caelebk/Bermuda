@@ -48,16 +48,16 @@ static bool checkSpawnCollisions(Entity entity) {
     }
   }
 
-  // Entities can't spawn in other enemies
-  for (Entity deadly : registry.deadlys.entities) {
-    if (!registry.positions.has(deadly)) {
-      continue;
-    }
-    const Position deadlyPos = registry.positions.get(deadly);
-    if (box_collides(enemyPos, deadlyPos)) {
-      return false;
-    }
-  }
+  // // Entities can't spawn in other enemies
+  // for (Entity deadly : registry.deadlys.entities) {
+  //   if (!registry.positions.has(deadly)) {
+  //     continue;
+  //   }
+  //   const Position deadlyPos = registry.positions.get(deadly);
+  //   if (box_collides(enemyPos, deadlyPos)) {
+  //     return false;
+  //   }
+  // }
 
   // Entities can't spawn in interactables
   for (Entity interactable : registry.interactable.entities) {

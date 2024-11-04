@@ -317,7 +317,7 @@ void CollisionSystem::collision_resolution() {
 
     // Door Collision Handling
     if (registry.activeDoors.has(entity)) {
-      std::cout << "something collided" << std::endl;
+      // std::cout << "something collided" << std::endl;
       routeDoorCollisions(entity, entity_other);
     }
 
@@ -367,14 +367,24 @@ void CollisionSystem::routePlayerCollisions(Entity player, Entity other) {
 }
 
 void CollisionSystem::routeEnemyCollisions(Entity enemy, Entity other) {
+  bool routed = false;
   if (registry.players.has(other)) {
+    routed = true;
     resolvePlayerEnemyCollision(other, enemy);
   }
   if (registry.playerProjectiles.has(other)) {
+    routed = true;
     resolveEnemyPlayerProjCollision(enemy, other);
   }
   if (registry.activeWalls.has(other)) {
+    routed = true;
     resolveWallEnemyCollision(other, enemy);
+  }
+
+  // if an enemy is acting as a projectile and hits something, it 
+  // is no longer acting as a projectile and goes back to its regular ai
+  if (routed && registry.actsAsProjectile.has(enemy)) {
+    registry.actsAsProjectile.remove(enemy);
   }
 }
 
@@ -389,13 +399,13 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
   if (registry.playerProjectiles.has(other)) {
     resolveWallPlayerProjCollision(wall, other);
   }
-  if (registry.deadlys.has(other)) {
-    resolveWallEnemyCollision(wall, other);
-  }
+  // if (registry.deadlys.has(other)) {
+    // resolveWallEnemyCollision(wall, other);
+  // }
 }
 
 void CollisionSystem::routeDoorCollisions(Entity door, Entity other) {
-  std::cout << "something collided" << std::endl;
+  // std::cout << "something collided" << std::endl;
   if (!registry.motions.has(other)) {
     return;
   }
@@ -580,6 +590,7 @@ void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
   if (!registry.motions.has(enemy) || !registry.positions.has(enemy)) {
     return;
   }
+
   Motion&   enemy_motion   = registry.motions.get(enemy);
   Position& enemy_position = registry.positions.get(enemy);
   vec2      temp_velocity  = enemy_motion.velocity;
@@ -590,6 +601,7 @@ void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
 
   // adjust enemy ai
   enemy_motion.velocity *= -1.0f;
+  enemy_motion.acceleration *= -1.0f;
 
   enemy_position.scale.x = abs(enemy_position.scale.x);
   if (enemy_motion.velocity.x > 0) {

@@ -107,7 +107,7 @@ void LevelBuilder::mark_boss_rooms(std::vector<int> rooms) {
 }
 
 void LevelBuilder::spawn_miniboss() {
-  // execute_config_rand(LVL_1_RAND_POS, room(current_room_id), renderer); // Replace "LVL_1_RAND_POS" with the macro for miniboss.
+  execute_config_rand(CRAB_MINIBOSS, room(current_room_id), renderer); // Replace "LVL_1_RAND_POS" with the macro for miniboss.
   std::cout << "Miniboss spawned!" << std::endl;
 }
 

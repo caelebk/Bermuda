@@ -5,6 +5,7 @@
 
 #include "ai.hpp"
 #include "collision_system.hpp"
+#include "enemy_factories.hpp"
 #include "enemy_util.hpp"
 #include "physics.hpp"
 #include "random.hpp"
@@ -21,6 +22,54 @@ static inline bool is_tracking(Entity e) {
   return false;
 }
 
+static inline bool is_proj(Entity e) {
+  return registry.actsAsProjectile.has(e);
+}
+
+
+
+static void removeFromAI(Entity &e) {
+  if (registry.wanders.has(e)) {
+    registry.wanders.remove(e);
+  }
+
+  if (registry.wanderLines.has(e)) {
+    registry.wanderLines.remove(e);
+  }
+
+  if (registry.wanderSquares.has(e)) {
+    registry.wanderSquares.remove(e);
+  }
+
+  if (registry.trackPlayer.has(e)) {
+    registry.trackPlayer.remove(e);
+  }
+
+  if (registry.trackPlayerRanged.has(e)) {
+    registry.trackPlayerRanged.remove(e);
+  }
+}
+
+
+void AISystem::do_boss_ai(float elapsed_ms) {
+  for (Entity &b: registry.bosses.entities) {
+    Boss &boss = registry.bosses.get(b);
+    boss.curr_cd -= elapsed_ms;
+
+    if (boss.curr_cd > 0) {
+      continue;
+    }
+    boss.curr_cd = boss.ai_cd;
+
+    // removes their current ai
+    removeFromAI(b);
+
+    // add random ai
+    auto ai_func = boss.ai[getRandInt(0, boss.ai.size() - 1)];
+    ai_func();
+  }
+}
+
 /**
  * @brief updates all entities that are wandering. this will randomly change
  * their direction
@@ -29,7 +78,7 @@ static inline bool is_tracking(Entity e) {
  */
 void AISystem::do_wander_ai(float elapsed_ms) {
   for (Entity& e : registry.wanders.entities) {
-    if (is_tracking(e)) {
+    if (is_tracking(e) || is_proj(e)) {
       continue;
     }
 
@@ -79,7 +128,7 @@ void AISystem::do_wander_ai(float elapsed_ms) {
  */
 void AISystem::do_wander_ai_line(float elapsed_ms) {
   for (Entity& e : registry.wanderLines.entities) {
-    if (is_tracking(e)) {
+    if (is_tracking(e) || is_proj(e)) {
       continue;
     }
     WanderLine& wander = registry.wanderLines.get(e);
@@ -123,7 +172,7 @@ void AISystem::do_wander_ai_square(float elapsed_ms) {
   static const mat2 rotateCounterClockwise = mat2(0.0, -1.0, 1.0, 0.0);
 
   for (Entity& e : registry.wanderSquares.entities) {
-    if (is_tracking(e)) {
+    if (is_tracking(e) || is_proj(e)) {
       continue;
     }
     WanderSquare& wander = registry.wanderSquares.get(e);
@@ -266,7 +315,7 @@ void AISystem::do_track_player(float elapsed_ms) {
     TracksPlayer& tracker = registry.trackPlayer.get(e);
     tracker.curr_cd -= elapsed_ms;
 
-    if (tracker.curr_cd > 0) {
+    if (tracker.curr_cd > 0 || is_proj(e)) {
       continue;
     }
     tracker.curr_cd = tracker.tracking_cd;
@@ -314,11 +363,111 @@ void AISystem::do_track_player(float elapsed_ms) {
   }
 }
 
+/**
+ * @brief updates all entities that are wandering. this will randomly change
+ * their direction to the other line direction
+ *
+ * @param elapsed_ms
+ */
+void AISystem::do_track_player_ranged(float elapsed_ms) {
+  if (registry.players.entities.size() != 1) {
+    return;
+  }
+  Entity player = registry.players.entities[0];
+
+  if (!registry.positions.has(player)) {
+    return;
+  }
+
+  Position& player_pos = registry.positions.get(player);
+
+  for (Entity& e : registry.trackPlayerRanged.entities) {
+    TracksPlayerRanged& tracker = registry.trackPlayerRanged.get(e);
+    tracker.curr_cd -= elapsed_ms;
+
+    if (tracker.curr_cd > 0) {
+      continue;
+    }
+    tracker.curr_cd = tracker.tracking_cd;
+
+    if (!registry.positions.has(e)) {
+      continue;
+    }
+    Position& entity_pos = registry.positions.get(e);
+    float     range =
+        tracker.active_track ? tracker.leash_radius : tracker.spot_radius;
+
+    if (!in_range_of_player(entity_pos, player_pos, range) ||
+        !can_see_player(entity_pos, player_pos)) {
+      if (tracker.active_track) {
+        printf("%d stopped tracking the player!\n", (unsigned int)e);
+        createEmote(this->renderer, e, EMOTE::QUESTION);
+      }
+      tracker.active_track = false;
+      continue;
+    }
+    printf("%d is tracking the player!\n", (unsigned int)e);
+    if (tracker.active_track) {
+      createEmote(this->renderer, e, EMOTE::NONE);
+    } else {
+      createEmote(this->renderer, e, EMOTE::EXCLAMATION);
+    }
+    tracker.active_track = true;
+
+    // set the entity velocity
+    Motion& motion     = registry.motions.get(e);
+    float   velocity   = sqrt(dot(motion.velocity, motion.velocity));
+    vec2    player_dir_o = player_pos.position - entity_pos.position;
+    vec2    player_dir = normalize(player_dir_o);
+
+    motion.velocity     = player_dir * velocity;
+    motion.acceleration = player_dir * tracker.acceleration;
+
+    // if the player is too close try to kite, move away from player
+    float player_dist = sqrt(dot(player_dir_o, player_dir_o));
+    if (player_dist <= tracker.min_distance)  {
+      motion.acceleration *= -1.f;
+      motion.velocity *= -1.f;
+    }
+
+    if (registry.positions.has(e)) {
+      Position& p = registry.positions.get(e);
+
+      p.scale.x = abs(p.scale.x);
+      if (motion.velocity.x > 0) {
+        // scale should be opposite of velocity
+        p.scale.x *= -1;
+      }
+    }
+
+    // TODO: make this generic for different projectiles, for now just create a fish
+
+    // create a fish overlapping them
+    Entity fish = createFishPos(this->renderer, entity_pos.position);
+    // make them pretend that they're a projectile
+    registry.actsAsProjectile.emplace(fish);
+
+    // make them go towards the player's current direction
+    Motion &fish_motion = registry.motions.get(fish);
+    float fish_velocity = sqrt(dot(fish_motion.velocity, fish_motion.velocity)) * 2;
+    float fish_accel = sqrt(dot(fish_motion.acceleration, fish_motion.acceleration)) * 2;
+    fish_motion.velocity = fish_velocity * player_dir;
+    fish_motion.acceleration = fish_accel * player_dir;
+  }
+}
+
+
 void AISystem::step(float elapsed_ms) {
+  // minibosses
+  if (registry.bosses.entities.size() > 0) {
+    do_boss_ai(elapsed_ms);
+  }
+
   do_wander_ai(elapsed_ms);
   do_wander_ai_line(elapsed_ms);
   do_wander_ai_square(elapsed_ms);
   do_track_player(elapsed_ms);
+  do_track_player_ranged(elapsed_ms);
 }
 
 void AISystem::init(RenderSystem* renderer_arg) {

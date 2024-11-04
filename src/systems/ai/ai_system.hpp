@@ -11,10 +11,12 @@
 class AISystem {
   private:
   RenderSystem * renderer;
+  void do_boss_ai(float elapsed_ms);
   void do_wander_ai(float elapsed_ms);
   void do_wander_ai_line(float elapsed_ms);
   void do_wander_ai_square(float elapsed_ms);
   void do_track_player(float elapsed_ms);
+  void do_track_player_ranged(float elapsed_ms);
   bool can_see_player(Position &pos, Position &player_pos);
   bool in_range_of_player(Position &pos, Position &player_pos, float range);
   public:

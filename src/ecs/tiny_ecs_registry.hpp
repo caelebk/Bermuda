@@ -37,6 +37,7 @@ class ECSRegistry {
 
   // enemy related
   ComponentContainer<Deadly>         deadlys;
+  ComponentContainer<Boss>           bosses;
   ComponentContainer<ModifyOxygenCD> modifyOxygenCd;
 
   // oxygen related
@@ -48,11 +49,13 @@ class ECSRegistry {
   ComponentContainer<WanderLine>   wanderLines;
   ComponentContainer<WanderSquare> wanderSquares;
   ComponentContainer<TracksPlayer> trackPlayer;
+  ComponentContainer<TracksPlayerRanged> trackPlayerRanged;
 
   // abilities related
   ComponentContainer<Stun> stuns;
   ComponentContainer<KnockBack> knockbacks;
   ComponentContainer<AreaOfEffect> aoe;
+  ComponentContainer<ActsAsProjectile> actsAsProjectile;
 
   // render related
   ComponentContainer<Mesh*>         meshPtrs;
@@ -107,6 +110,7 @@ class ECSRegistry {
     registry_list.push_back(&invHUD);
     // enemy related
     registry_list.push_back(&deadlys);
+    registry_list.push_back(&bosses);
     registry_list.push_back(&modifyOxygenCd);
     // oxygen related
     registry_list.push_back(&oxygen);
@@ -116,6 +120,7 @@ class ECSRegistry {
     registry_list.push_back(&wanderLines);
     registry_list.push_back(&wanderSquares);
     registry_list.push_back(&trackPlayer);
+    registry_list.push_back(&trackPlayerRanged);
     // abilities related
     registry_list.push_back(&stuns);
     registry_list.push_back(&knockbacks);
@@ -172,6 +177,23 @@ class ECSRegistry {
   }
 
   void remove_all_components_of(Entity e) {
+    // player, collision, emoting oxygen
+    if (oxygen.has(e)) {
+      Oxygen &o = oxygen.get(e);
+      remove_all_components_of(o.oxygenBar);
+      remove_all_components_of(o.backgroundBar);
+    }
+
+    if (players.has(e)) {
+      Player &p = players.get(e);
+      remove_all_components_of(p.weapon);
+    }
+
+    if (emoting.has(e)) {
+      Emoting &ee = emoting.get(e); 
+      remove_all_components_of(ee.child);
+    }
+
     for (ContainerInterface* reg : registry_list) reg->remove(e);
   }
 };

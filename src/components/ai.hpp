@@ -32,3 +32,16 @@ struct TracksPlayer {
   float leash_radius = 0.f;
   float acceleration = 0.f;
 };
+
+struct TracksPlayerRanged {
+  bool  active_track = false;
+  float curr_cd      = 0.f;
+  float tracking_cd  = 0.f;
+  float spot_radius  = 0.f;
+  float leash_radius = 0.f;
+  float min_distance = 0.f;
+  float acceleration = 0.f;
+};
+
+struct ActsAsProjectile {
+};
