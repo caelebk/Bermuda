@@ -128,6 +128,11 @@ void updateWepProjPos(vec2 mouse_pos) {
     }
     if (player_comp.scale.x < 0) {
       relative_pos.x *= -1;
+      if (proj_pos.scale.x > 0) {
+        proj_pos.scale.x *= -1;
+      }
+    } else if (proj_pos.scale.x < 0) {
+      proj_pos.scale.x *= -1;
     }
     proj_pos.angle = weapon_pos.angle;
     proj_pos.position =
@@ -149,9 +154,11 @@ void updatePlayerDirection(vec2 mouse_pos) {
     weapon.scale.x *= -1;
     weapon.position.x *= -1;
 
-    Position& projectile = registry.positions.get(player_projectile);
-    projectile.scale.x *= -1;
-    projectile.position.x *= -1;
+    if (registry.playerProjectiles.get(player_projectile).is_loaded) {
+      Position& projectile = registry.positions.get(player_projectile);
+      projectile.scale.x *= -1;
+      projectile.position.x *= -1;
+    }
   }
 }
 
