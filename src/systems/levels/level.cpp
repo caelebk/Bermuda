@@ -135,6 +135,20 @@ void LevelBuilder::activate_room(std::string room_id) {
   for (Entity& door : registry.spaces.get(room(current_room_id).entity).doors) {
     activate_boundary(door);
     registry.activeDoors.emplace(door);
+    Direction direction = registry.doorConnections.get(door).direction;
+    Position& door_position = registry.positions.get(door);
+    if (direction == Direction::SOUTH || direction == Direction::WEST) {
+      door_position.angle = M_PI;
+    }
+    if (direction == Direction::NORTH || direction == Direction::SOUTH) {
+      registry.renderRequests.insert(door, {TEXTURE_ASSET_ID::DOORWAY_H,
+                                            EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE});
+    } else {
+      registry.renderRequests.insert(door, {TEXTURE_ASSET_ID::DOORWAY_V,
+                                            EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE});
+    }
   }
 
   // activate the floor

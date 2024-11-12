@@ -13,8 +13,8 @@
 #define JELLY_DAMAGE -15.0
 #define JELLY_ATK_SPD 1000.0
 #define JELLY_STUN_MS 2000.0
-#define JELLY_SCALE_FACTOR vec2(1.4f)
-#define JELLY_BOUNDING_BOX vec2(24.f, 24.f)  // vec2(PNG_width, PNG_height)
+#define JELLY_SCALE_FACTOR vec2(0.15f)
+#define JELLY_BOUNDING_BOX vec2(266.f, 400.f)  // vec2(PNG_width, PNG_height)
 #define JELLY_HEALTH 50.0                    // two shot to show workin
 #define JELLY_HEALTH_SCALE vec2(1.4f)
 #define JELLY_HEALTH_BAR_SCALE vec2(1.5f)
@@ -46,9 +46,9 @@ Entity createFishPos(RenderSystem* renderer, vec2 position);
 #define SHARK_MS 30.0
 #define SHARK_DAMAGE -20.0
 #define SHARK_ATK_SPD 1000.0
-#define SHARK_MIN_SCALE 2.0
-#define SHARK_MAX_SCALE 3.0
-#define SHARK_BOUNDING_BOX vec2(32.f, 19.f)
+#define SHARK_MIN_SCALE 0.1
+#define SHARK_MAX_SCALE 0.2
+#define SHARK_BOUNDING_BOX vec2(765.f, 306.f)
 #define SHARK_HEALTH 75.0  // three shot
 #define SHARK_MIN_DIR_CD 1000 // random direction change cooldown so it looks more natural
 #define SHARK_MAX_DIR_CD 8000
@@ -78,9 +78,9 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position);
 #define KRAB_MS 10.0
 #define KRAB_DAMAGE -100.0
 #define KRAB_ATK_SPD 1000.0
-#define KRAB_MIN_SCALE 2.0
-#define KRAB_MAX_SCALE 3.0
-#define KRAB_BOUNDING_BOX vec2(18.f, 14.f)
+#define KRAB_MIN_SCALE 0.01
+#define KRAB_MAX_SCALE 0.02
+#define KRAB_BOUNDING_BOX vec2(3445.f, 2494.f)
 #define KRAB_HEALTH 250.0  // three shot
 #define KRAB_MIN_DIR_CD 1000 // random direction change cooldown so it looks more natural
 #define KRAB_MAX_DIR_CD 8000
