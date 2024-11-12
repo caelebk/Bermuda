@@ -449,7 +449,12 @@ void AISystem::do_track_player_ranged(float elapsed_ms) {
     // TODO: make this generic for different projectiles, for now just create a fish
 
     // create a fish overlapping them
-    Entity fish = createFishPos(this->renderer, entity_pos.position);
+    Entity fish = createFishPos(this->renderer, entity_pos.position, false);
+
+    if ((unsigned int) fish == 0) {
+      continue; 
+    }
+
     // make them pretend that they're a projectile
     registry.actsAsProjectile.emplace(fish);
 

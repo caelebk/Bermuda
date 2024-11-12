@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "respawn.hpp"
 #include <limits>
 
 /*
@@ -55,8 +56,14 @@ struct ActiveWall {};
 
 struct ActiveDoor {};
 
-struct Interactable {};
+struct Interactable {
+  std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;
+};
 
 struct Floor {};
 
 struct Geyser {};
+
+struct Breakable {
+  std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;
+};

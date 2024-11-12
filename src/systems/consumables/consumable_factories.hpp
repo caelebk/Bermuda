@@ -13,4 +13,5 @@
 #define OXYGEN_CANISTER_BOUNDING_BOX \
   vec2(240.f, 112.f)  // vec2(PNG_width, PNG_height)
 
-Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position);
+Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity respawnOxygenCanister(RenderSystem* renderer, EntityState es);

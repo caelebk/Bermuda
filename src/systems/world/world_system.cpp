@@ -135,7 +135,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     // Processing the player state
     ////////////////////////////////////////////////////////
     if (registry.renderRequests.has(pause_menu)) {
-      registry.renderRequests.remove(pause_menu);
+      registry.remove_all_components_of(pause_menu);
     }
 
     for (Entity cursor : registry.cursors.entities) {
@@ -183,7 +183,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
           vec2 newPos = pos.position;
           registry.remove_all_components_of(entity);
 
-          fn(renderer, newPos);
+          fn(renderer, newPos, false);
         } else {
           registry.remove_all_components_of(entity);
         }
@@ -258,22 +258,12 @@ void WorldSystem::restart_game() {
   // World Reset
   /////////////////////////////////////////////
 
-  // Remove all entities that we created
-  // All that have a motion, we could also iterate over all fish, eels, ...
-  // but that would be more cumbersome
-  for (Entity entity : registry.oxygen.entities) {
-    registry.remove_all_components_of(registry.oxygen.get(entity).oxygenBar);
-    registry.remove_all_components_of(
-        registry.oxygen.get(entity).backgroundBar);
-  }
-  for (Entity pauseMenu : registry.pauseMenus.entities) {
-    registry.remove_all_components_of(pauseMenu);
-  }
-
   // Debugging for memory/component leaks
   remove_all_entities();
+
   registry.list_all_components();
 
+  registry.remove_all_components_of(pause_menu);
   pause_menu = createPauseMenu(renderer);
 
   player = createPlayer(

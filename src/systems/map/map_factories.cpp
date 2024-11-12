@@ -1,9 +1,11 @@
 #include "map_factories.hpp"
 
+#include <cstdio>
 #include <iostream>
 
 #include "collision_system.hpp"
 #include "enemy_factories.hpp"
+#include "environment.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "random.hpp"
@@ -46,6 +48,18 @@ static bool checkSpawnCollisions(Entity entity) {
     }
   }
 
+  for (Entity door : registry.activeDoors.entities) {
+    if (!registry.positions.has(door)) {
+      continue;
+    }
+    const Position doorPos = registry.positions.get(door);
+    vec2 dist_vec = entityPos.position - doorPos.position;
+    float dist = sqrt(dot(dist_vec, dist_vec));
+    if (dist < DOOR_SPAWN_RADIUS) {
+      return false;
+    }
+  }
+
   // Entities can't spawn in interactables
   for (Entity interactable : registry.interactable.entities) {
     if (!registry.positions.has(interactable)) {
@@ -80,7 +94,7 @@ static bool checkSpawnCollisions(Entity entity) {
  * @param position
  * @return
  */
-Entity createGeyserPos(RenderSystem* renderer, vec2 position) {
+Entity createGeyserPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
 
@@ -89,7 +103,7 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position) {
   pos.position = position;
   pos.scale    = GEYSER_SCALE_FACTOR * GEYSER_BOUNDING_BOX;
 
-  if (!checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
     registry.remove_all_components_of(entity);
     return Entity(0);
@@ -100,14 +114,15 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position) {
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make consumable
-  registry.interactable.emplace(entity);
+  Interactable &i = registry.interactable.emplace(entity);
+  i.respawnFn = respawnGeyser;
 
   // designate this as a geyser; facilitates room transitions.
   registry.geysers.emplace(entity);
 
   // Add stats
-  auto& refill        = registry.oxygenModifiers.emplace(entity);
-  refill.amount       = GEYSER_QTY;
+  auto& refill              = registry.oxygenModifiers.emplace(entity);
+  refill.amount             = GEYSER_QTY;
   auto& modifyOxygenCd      = registry.modifyOxygenCd.emplace(entity);
   modifyOxygenCd.default_cd = GEYSER_RATE_MS;
 
@@ -119,6 +134,21 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position) {
 
   return entity;
 }
+
+/**
+ * @brief Respawns a Geyser based on it's entity state
+ *
+ * @param renderer 
+ * @param es 
+ * @return 
+ */
+Entity respawnGeyser(RenderSystem *renderer, EntityState es) {
+  Entity entity = createGeyserPos(renderer, es.position.position, false);
+  return entity;
+}
+
+
+
 /////////////////////////////////////////////////////////////////
 // crate
 /////////////////////////////////////////////////////////////////
@@ -130,7 +160,7 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position) {
  * @return
  */
 
-Entity createCratePos(RenderSystem* renderer, vec2 position) {
+Entity createCratePos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
   // physics and pos
@@ -139,7 +169,7 @@ Entity createCratePos(RenderSystem* renderer, vec2 position) {
   pos.position = position;
   pos.scale    = CRATE_SCALE_FACTOR * CRATE_BOUNDING_BOX;
   pos.scale *= 4.f;
-  if (!checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
     registry.remove_all_components_of(entity);
     return Entity(0);
@@ -151,21 +181,56 @@ Entity createCratePos(RenderSystem* renderer, vec2 position) {
 
   // reuse wall code
   registry.activeWalls.emplace(entity);
-  registry.deadlys.emplace(entity);
+  Breakable &b = registry.breakables.emplace(entity);
+  b.respawnFn = respawnCrate;
 
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::BREAKABLE_CRATE, EFFECT_ASSET_ID::TEXTURED,
                GEOMETRY_BUFFER_ID::SPRITE});
 
-  createDefaultHealthbar(renderer,entity, CRATE_HEALTH, CRATE_HEALTH_SCALE, CRATE_HEALTH_BAR_SCALE, CRATE_HEALTH_BOUNDING_BOX);
+  createDefaultHealthbar(renderer, entity, CRATE_HEALTH, CRATE_HEALTH_SCALE,
+                         CRATE_HEALTH_BAR_SCALE, CRATE_HEALTH_BOUNDING_BOX);
 
   // assign drops
   if (randomSuccess(CRATE_DROP_CHANCE_0)) {
-    Drop &drop = registry.drops.emplace(entity);
+    Drop& drop  = registry.drops.emplace(entity);
     drop.dropFn = CRATE_DROP_0;
     return entity;
   }
 
   return entity;
 }
+
+/**
+ * @brief Respawns a Crate based on it's entity state
+ *
+ * @param renderer 
+ * @param es 
+ * @return 
+ */
+Entity respawnCrate(RenderSystem *renderer, EntityState es) {
+  Entity entity = createCratePos(renderer, es.position.position, false);
+
+  // respawn failed, ignore
+  if ((unsigned int) entity == 0) {
+    return Entity(0);
+  }
+
+  // Restore State
+  Position &pos = registry.positions.get(entity);
+  pos.angle = es.position.angle;
+  pos.scale = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen &o = registry.oxygen.get(entity);
+  float diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}
+
 

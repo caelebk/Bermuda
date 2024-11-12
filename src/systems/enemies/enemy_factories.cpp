@@ -32,7 +32,9 @@ static bool checkSpawnCollisions(Entity entity) {
       continue;
     }
     const Position player_pos = registry.positions.get(player);
-    if (box_collides(enemyPos, player_pos)) {
+    vec2 dist_vec = player_pos.position - enemyPos.position;
+    float dist = sqrt(dot(dist_vec, dist_vec));
+    if (dist < PLAYER_SPAWN_RADIUS) {
       return false;
     }
   }
@@ -47,17 +49,6 @@ static bool checkSpawnCollisions(Entity entity) {
       return false;
     }
   }
-
-  // // Entities can't spawn in other enemies
-  // for (Entity deadly : registry.deadlys.entities) {
-  //   if (!registry.positions.has(deadly)) {
-  //     continue;
-  //   }
-  //   const Position deadlyPos = registry.positions.get(deadly);
-  //   if (box_collides(enemyPos, deadlyPos)) {
-  //     return false;
-  //   }
-  // }
 
   // Entities can't spawn in interactables
   for (Entity interactable : registry.interactable.entities) {
@@ -83,7 +74,7 @@ static bool checkSpawnCollisions(Entity entity) {
  * @param position
  * @return the entity if successful, 0 otherwise
  */
-Entity createJellyPos(RenderSystem* renderer, vec2 position) {
+Entity createJellyPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
 
@@ -92,7 +83,7 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position) {
   pos.position = position;
   pos.scale    = JELLY_SCALE_FACTOR * JELLY_BOUNDING_BOX;
 
-  if (!checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
     registry.remove_all_components_of(entity);
     return Entity(0);
@@ -103,7 +94,8 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position) {
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy
-  registry.deadlys.emplace(entity);
+  Deadly &d = registry.deadlys.emplace(entity);
+  d.respawnFn = respawnJelly;
 
   // Add stats
   auto& damage  = registry.oxygenModifiers.emplace(entity);
@@ -128,6 +120,33 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position) {
   return entity;
 }
 
+/**
+ * @brief Respawns a Jelly based on it's entity state
+ *
+ * @param renderer 
+ * @param es 
+ * @return 
+ */
+Entity respawnJelly(RenderSystem *renderer, EntityState es) {
+  Entity entity = createJellyPos(renderer, es.position.position, false);
+
+  // Restore State
+  Position &pos = registry.positions.get(entity);
+  pos.angle = es.position.angle;
+  pos.scale = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen &o = registry.oxygen.get(entity);
+  float diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}
+
 /////////////////////////////////////////////////////////////////
 // Fish
 /////////////////////////////////////////////////////////////////
@@ -138,7 +157,7 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position) {
  * @param position
  * @return
  */
-Entity createFishPos(RenderSystem* renderer, vec2 position) {
+Entity createFishPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
 
@@ -146,7 +165,7 @@ Entity createFishPos(RenderSystem* renderer, vec2 position) {
   pos.angle    = 0.f;
   pos.position = position;
   pos.scale    = FISH_SCALE_FACTOR * FISH_BOUNDING_BOX;
-  if (!checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
     registry.remove_all_components_of(entity);
     return Entity(0);
@@ -157,7 +176,9 @@ Entity createFishPos(RenderSystem* renderer, vec2 position) {
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  registry.deadlys.emplace(entity);
+  Deadly &d = registry.deadlys.emplace(entity);
+  d.respawnFn = respawnFish;
+
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = FISH_DAMAGE;
 
@@ -190,6 +211,33 @@ Entity createFishPos(RenderSystem* renderer, vec2 position) {
   return entity;
 }
 
+/**
+ * @brief Respawns a Fish based on it's entity state
+ *
+ * @param renderer 
+ * @param es 
+ * @return 
+ */
+Entity respawnFish(RenderSystem *renderer, EntityState es) {
+  Entity entity = createFishPos(renderer, es.position.position, false);
+
+  // Restore State
+  Position &pos = registry.positions.get(entity);
+  pos.angle = es.position.angle;
+  pos.scale = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen &o = registry.oxygen.get(entity);
+  float diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}
+
 /////////////////////////////////////////////////////////////////
 // Sharks
 /////////////////////////////////////////////////////////////////
@@ -202,7 +250,7 @@ Entity createFishPos(RenderSystem* renderer, vec2 position) {
  * @param position
  * @return
  */
-Entity createSharkPos(RenderSystem* renderer, vec2 position) {
+Entity createSharkPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
   // Reserve an entity
   auto entity             = Entity();
   vec2 SHARK_SCALE_FACTOR = vec2(randomFloat(SHARK_MIN_SCALE, SHARK_MAX_SCALE));
@@ -211,7 +259,7 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position) {
   pos.angle    = 0.f;
   pos.position = position;
   pos.scale    = SHARK_SCALE_FACTOR * SHARK_BOUNDING_BOX;
-  if (!checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
     registry.remove_all_components_of(entity);
     return Entity(0);
@@ -222,7 +270,9 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position) {
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  registry.deadlys.emplace(entity);
+  Deadly &d = registry.deadlys.emplace(entity);
+  d.respawnFn = respawnShark;
+
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = SHARK_DAMAGE;
 
@@ -255,6 +305,33 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position) {
   return entity;
 }
 
+/**
+ * @brief Respawns a Shark based on it's entity state
+ *
+ * @param renderer 
+ * @param es 
+ * @return 
+ */
+Entity respawnShark(RenderSystem *renderer, EntityState es) {
+  Entity entity = createSharkPos(renderer, es.position.position, false);
+
+  // Restore State
+  Position &pos = registry.positions.get(entity);
+  pos.angle = es.position.angle;
+  pos.scale = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen &o = registry.oxygen.get(entity);
+  float diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}
+
 // /////////////////////////////////////////////////////////////////
 // // Krabs
 // /////////////////////////////////////////////////////////////////
@@ -267,7 +344,7 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position) {
  * @param position
  * @return
  */
-Entity createKrabPos(RenderSystem* renderer, vec2 position) {
+Entity createKrabPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
   // Reserve an entity
   auto entity            = Entity();
   vec2 KRAB_SCALE_FACTOR = vec2(randomFloat(KRAB_MIN_SCALE, KRAB_MAX_SCALE));
@@ -276,7 +353,7 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position) {
   pos.angle    = 0.f;
   pos.position = position;
   pos.scale    = KRAB_SCALE_FACTOR * KRAB_BOUNDING_BOX;
-  if (!checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
     registry.remove_all_components_of(entity);
     return Entity(0);
@@ -287,7 +364,9 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position) {
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  registry.deadlys.emplace(entity);
+  Deadly &d = registry.deadlys.emplace(entity);
+  d.respawnFn = respawnKrab;
+
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = KRAB_DAMAGE;
 
@@ -327,3 +406,32 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position) {
                          KRAB_HEALTH_BAR_SCALE, KRAB_HEALTH_BOUNDING_BOX);
   return entity;
 }
+
+
+/**
+ * @brief Respawns a Krab based on it's entity state
+ *
+ * @param renderer 
+ * @param es 
+ * @return 
+ */
+Entity respawnKrab(RenderSystem *renderer, EntityState es) {
+  Entity entity = createKrabPos(renderer, es.position.position, false);
+
+  // Restore State
+  Position &pos = registry.positions.get(entity);
+  pos.angle = es.position.angle;
+  pos.scale = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen &o = registry.oxygen.get(entity);
+  float diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}
+

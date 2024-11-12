@@ -1,94 +1,95 @@
 #pragma once
 
-#include "common.hpp"
-#include "tiny_ecs.hpp"
-#include "components.hpp"
-#include "tiny_ecs_registry.hpp"
-#include "audio_system.hpp"
-#include "oxygen_system.hpp"
-
 #include "abilities.hpp"
-#include "debuff.hpp"
 #include "ai.hpp"
+#include "audio_system.hpp"
+#include "common.hpp"
+#include "components.hpp"
+#include "debuff.hpp"
 #include "enemy.hpp"
 #include "environment.hpp"
 #include "items.hpp"
+#include "level.hpp"
 #include "misc.hpp"
 #include "oxygen.hpp"
+#include "oxygen_system.hpp"
 #include "physics.hpp"
 #include "player.hpp"
-#include "level.hpp"
+#include "tiny_ecs.hpp"
+#include "tiny_ecs_registry.hpp"
 
-class CollisionSystem
-{
-private:
-    LevelBuilder* level;
+class CollisionSystem {
+  private:
+  LevelBuilder* level;
 
-	void collision_detection();
-	void collision_resolution();
-	void collision_resolution_debug_info(Entity entity, Entity entity_other);
+  void collision_detection();
+  void collision_resolution();
+  void collision_resolution_debug_info(Entity entity, Entity entity_other);
 
-    /***********************************************************************
-    Entity -> Other Collision Routing (routes to correct Entity <-> Entity)
-    ***********************************************************************/
-	void routePlayerCollisions(Entity player, Entity other);
-    void routeEnemyCollisions(Entity enemy, Entity other);
-	void routeWallCollisions(Entity wall, Entity other);
-    void routeDoorCollisions(Entity door, Entity other);
-	void routePlayerProjCollisions(Entity player_proj, Entity other);
-    void routeConsumableCollisions(Entity consumable, Entity other);
-    void routeInteractableCollisions(Entity interactable, Entity other);
+  /***********************************************************************
+  Entity -> Other Collision Routing (routes to correct Entity <-> Entity)
+  ***********************************************************************/
+  void routePlayerCollisions(Entity player, Entity other);
+  void routeEnemyCollisions(Entity enemy, Entity other);
+  void routeWallCollisions(Entity wall, Entity other);
+  void routeDoorCollisions(Entity door, Entity other);
+  void routePlayerProjCollisions(Entity player_proj, Entity other);
+  void routeConsumableCollisions(Entity consumable, Entity other);
+  void routeInteractableCollisions(Entity interactable, Entity other);
 
-    /***********************************************************************
-        Entity <-> Entity Collision Resolutions
-    ***********************************************************************/    
-    //Player <-> Enemy
-    void resolvePlayerEnemyCollision(Entity player, Entity enemy);
+  /***********************************************************************
+      Entity <-> Entity Collision Resolutions
+  ***********************************************************************/
+  // Player <-> Enemy
+  void resolvePlayerEnemyCollision(Entity player, Entity enemy);
 
-    //Player <-> Consumable
-    void resolvePlayerConsumableCollision(Entity player, Entity consumable);
+  // Player <-> Consumable
+  void resolvePlayerConsumableCollision(Entity player, Entity consumable);
 
-    //Player <-> Interactable
-    void resolvePlayerInteractableCollision(Entity player, Entity interactable);
+  // Player <-> Interactable
+  void resolvePlayerInteractableCollision(Entity player, Entity interactable);
 
-    //Enemy <-> Player Projectile
-    void resolveEnemyPlayerProjCollision(Entity enemy, Entity player_proj);
+  // Enemy <-> Player Projectile
+  void resolveEnemyPlayerProjCollision(Entity enemy, Entity player_proj);
 
-    //Wall <-> Player Projectile
-    void resolveWallPlayerProjCollision(Entity wall, Entity player_proj);
+  // Breakable <-> Player Projectile
+  void resolveBreakablePlayerProjCollision(Entity breakable, Entity player_proj);
 
-    //Wall <-> Player Projectile
-    void resolveWallEnemyCollision(Entity wall, Entity enemy);
+  // Wall <-> Player Projectile
+  void resolveWallPlayerProjCollision(Entity wall, Entity player_proj);
 
-    //Wall <-> Something that should stop on the wall
-    void resolveStopOnWall(Entity wall, Entity entity);
+  // Wall <-> Player Projectile
+  void resolveWallEnemyCollision(Entity wall, Entity enemy);
 
-    //Door <-> Player
-    void resolveDoorPlayerCollision(Entity door, Entity player);
+  // Wall <-> Something that should stop on the wall
+  void resolveStopOnWall(Entity wall, Entity entity);
 
-    /***********************************************************************
-        Special Detection & Resolutions
-    ***********************************************************************/  
+  // Door <-> Player
+  void resolveDoorPlayerCollision(Entity door, Entity player);
 
-   void detectAndResolveExplosion(Entity proj, Entity enemy);
-public:
-    void init(LevelBuilder* level);
-	void step(float elapsed_ms);
+  /***********************************************************************
+      Special Detection & Resolutions
+  ***********************************************************************/
 
-	CollisionSystem()
-	{
-	}
+  void detectAndResolveExplosion(Entity proj, Entity enemy);
+
+  public:
+  void init(LevelBuilder* level);
+  void step(float elapsed_ms);
+
+  CollisionSystem() {}
 };
 
-vec2 get_bounding_box(const Position &position);
-vec4 get_bounds(const Position &position);
-bool circle_collides(const Position &position1, const Position &position2);
-bool box_collides(const Position &position1, const Position &position2);
-bool circle_box_collides(const Position &position1, float radius, const Position &position2);
+vec2 get_bounding_box(const Position& position);
+vec4 get_bounds(const Position& position);
+bool circle_collides(const Position& position1, const Position& position2);
+bool box_collides(const Position& position1, const Position& position2);
+bool circle_box_collides(const Position& position1, float radius,
+                         const Position& position2);
 bool mesh_collides(Entity mesh, Entity other);
 
 extern Entity player_projectile;
 extern Entity player;
 
-extern bool        transitioning;
-extern Entity      rt_entity;
+extern bool   transitioning;
+extern Entity rt_entity;

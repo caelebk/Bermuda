@@ -4,7 +4,9 @@
 #include <map>
 #include <memory>
 #include <unordered_map>
+#include <set>
 
+#include "respawn.hpp"
 #include "room.hpp"
 #include "hallway.hpp"
 
@@ -69,7 +71,7 @@ private:
     std::set<std::string> boss_rooms;
 
     // TODO: componentize this
-    std::map<std::string, std::vector<vec2>> crate_positions;
+    std::map<std::string, std::vector<EntitySave>> saved_entities;
 
     std::unordered_map<std::string, RoomBuilder> rooms;
     std::unordered_map<std::string, HallwayBuilder> hallways;

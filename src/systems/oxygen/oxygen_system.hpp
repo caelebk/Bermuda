@@ -14,6 +14,8 @@ void depleteOxygen(Entity& entity);
 // affector modifies entity's oxygen/health
 void modifyOxygen(Entity& entity, Entity& affector);
 
+void modifyOxygenAmount(Entity& entity, float amount);
+
 // update position of enemy health bars
 void updateEnemyHealthBarPos(Entity& enemy);
 

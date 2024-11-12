@@ -1,5 +1,6 @@
 #include "oxygen_system.hpp"
 
+#include <cstdio>
 #include <iostream>
 
 #include "audio_system.hpp"
@@ -58,11 +59,13 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
       isModOnCooldown(oxygenModifier)) {
     return;
   }
+  printf("Modifying oxygen\n");
   Oxygen& entity_oxygen = registry.oxygen.get(entity);
   float   oxyModAmount  = registry.oxygenModifiers.get(oxygenModifier).amount;
   float   deltaOxygen   = calcDeltaOxygen(entity_oxygen, oxyModAmount);
 
   if (!entity_oxygen.isRendered) {
+    printf("Rendering Oxygen\n");
     renderHealthBar(entity_oxygen);
     entity_oxygen.isRendered = true;
   }
@@ -79,6 +82,22 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
       !registry.players.get(entity).dashing) {
     registry.sounds.insert(Entity(), Sound(hurt_sound));
   }
+}
+
+void modifyOxygenAmount(Entity& entity, float amount) {
+  Oxygen& entity_oxygen = registry.oxygen.get(entity);
+  float   deltaOxygen   = calcDeltaOxygen(entity_oxygen, amount);
+
+  if (!entity_oxygen.isRendered) {
+    printf("Rendering Oxygen\n");
+    renderHealthBar(entity_oxygen);
+    entity_oxygen.isRendered = true;
+  }
+
+  entity_oxygen.level += deltaOxygen;
+  updateHealthBarRender(entity, entity_oxygen, deltaOxygen);
+  updateOxygenLvlStatus(entity_oxygen);
+  updateDeathStatus(entity, entity_oxygen);
 }
 
 /**

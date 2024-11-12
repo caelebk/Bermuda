@@ -25,16 +25,15 @@
 #define KRAB_BOSS_MIN_DIR_CD 1000 // random direction change cooldown so it looks more natural
 #define KRAB_BOSS_MAX_DIR_CD 8000
 #define KRAB_BOSS_TRACKING_CD 1000.f
-#define KRAB_BOSS_SPOT_RADIUS 450.f
-#define KRAB_BOSS_LEASH_RADIUS 500.f
+#define KRAB_BOSS_ENEMY_LIMIT 16 // 15 + itself
+#define KRAB_BOSS_SPOT_RADIUS 400.f
+#define KRAB_BOSS_LEASH_RADIUS 600.f
 #define KRAB_BOSS_TRACKING_ACCELERATION 10.f
 #define KRAB_BOSS_HEALTH_SCALE vec2(1.4f)
 #define KRAB_BOSS_HEALTH_BAR_SCALE vec2(1.5f)
 #define KRAB_BOSS_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 #define KRAB_BOSS_AI_CD 10000 // switch every 10 seconds
 
-
-
-
-Entity createCrabBossPos(RenderSystem* renderer, vec2 position);
+Entity createCrabBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity respawnCrabBoss(RenderSystem* renderer, EntityState es);
 

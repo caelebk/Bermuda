@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <damage.hpp>
+#include <glm/geometric.hpp>
 #include <player_controls.hpp>
 #include <player_factories.hpp>
 
@@ -91,13 +92,14 @@ bool circle_box_collides(const Position& circle_pos, float radius,
 
 bool mesh_collides(Entity mesh, Entity other) {
   // ignore player collision mesh - player collisions
-  if (registry.players.has(other) || !registry.positions.has(mesh) || !registry.meshPtrs.has(mesh)) {
+  if (registry.players.has(other) || !registry.positions.has(mesh) ||
+      !registry.meshPtrs.has(mesh)) {
     return false;
   }
 
-  Position &mesh_pos = registry.positions.get(mesh);
-  Mesh* meshPtr = registry.meshPtrs.get(mesh);
-  Position &other_pos = registry.positions.get(other);
+  Position& mesh_pos  = registry.positions.get(mesh);
+  Mesh*     meshPtr   = registry.meshPtrs.get(mesh);
+  Position& other_pos = registry.positions.get(other);
 
   vec4 other_bb = get_bounds(other_pos);
 
@@ -107,7 +109,6 @@ bool mesh_collides(Entity mesh, Entity other) {
   transform.rotate(mesh_pos.angle);
   transform.scale(mesh_pos.scale);
   mat3 modelmatrix = transform.mat;
-
 
   for (uint16_t i = 0; i < meshPtr->vertex_indices.size(); i += 3) {
     bool hor  = false;
@@ -152,8 +153,8 @@ bool mesh_collides(Entity mesh, Entity other) {
     // the midpoint should also be overlapping
     vec2 midpoint = (vert0 + vert1) / 2.f;
 
-    if((midpoint.x >= other_bb[0] && midpoint.x <= other_bb[1]) &&
-           (midpoint.y >= other_bb[2] && midpoint.y <= other_bb[3])) {
+    if ((midpoint.x >= other_bb[0] && midpoint.x <= other_bb[1]) &&
+        (midpoint.y >= other_bb[2] && midpoint.y <= other_bb[3])) {
       return true;
     }
   }
@@ -230,8 +231,8 @@ void CollisionSystem::collision_detection() {
     if (!registry.positions.has(entity_i)) {
       continue;
     }
-    Player player_comp = registry.players.get(entity_i);
-    Position& position_i = registry.positions.get(player_comp.collisionMesh);
+    Player    player_comp = registry.players.get(entity_i);
+    Position& position_i  = registry.positions.get(player_comp.collisionMesh);
 
     // detect player and enemy collisions
     for (uint j = 0; j < enemy_container.size(); j++) {
@@ -309,10 +310,6 @@ void CollisionSystem::collision_detection() {
         continue;
       }
 
-      if (entity_i == entity_j) {
-        // TODO: this is a bit of a hack, crates are enemies that are walls
-        continue;
-      }
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -325,8 +322,8 @@ void CollisionSystem::collision_detection() {
       if (!registry.positions.has(entity_j)) {
         continue;
       }
-      Player& player_comp = registry.players.get(entity_j);
-      Position& position_j = registry.positions.get(player_comp.collisionMesh);
+      Player&   player_comp = registry.players.get(entity_j);
+      Position& position_j  = registry.positions.get(player_comp.collisionMesh);
       if (box_collides(position_i, position_j)) {
         if (mesh_collides(player_comp.collisionMesh, entity_i)) {
           registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -350,10 +347,6 @@ void CollisionSystem::collision_detection() {
         continue;
       }
 
-      if (entity_i == entity_j) {
-        // TODO: this is a bit of a hack, crates are enemies that are walls
-        continue;
-      }
       Position& position_j = registry.positions.get(entity_j);
       if (box_collides(position_i, position_j)) {
         registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -367,8 +360,8 @@ void CollisionSystem::collision_detection() {
         continue;
       }
 
-      Player& player_comp = registry.players.get(entity_j);
-      Position& position_j = registry.positions.get(player_comp.collisionMesh);
+      Player&   player_comp = registry.players.get(entity_j);
+      Position& position_j  = registry.positions.get(player_comp.collisionMesh);
       if (box_collides(position_i, position_j)) {
         if (mesh_collides(player_comp.collisionMesh, entity_i)) {
           registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -471,7 +464,7 @@ void CollisionSystem::routeEnemyCollisions(Entity enemy, Entity other) {
     resolveWallEnemyCollision(other, enemy);
   }
 
-  // if an enemy is acting as a projectile and hits something, it 
+  // if an enemy is acting as a projectile and hits something, it
   // is no longer acting as a projectile and goes back to its regular ai
   if (routed && registry.actsAsProjectile.has(enemy)) {
     registry.actsAsProjectile.remove(enemy);
@@ -490,10 +483,11 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
   }
   if (registry.playerProjectiles.has(other)) {
     resolveWallPlayerProjCollision(wall, other);
+
+    if (registry.breakables.has(wall)) {
+      resolveBreakablePlayerProjCollision(wall, other);
+    }
   }
-  // if (registry.deadlys.has(other)) {
-    // resolveWallEnemyCollision(wall, other);
-  // }
 }
 
 void CollisionSystem::routeDoorCollisions(Entity door, Entity other) {
@@ -523,6 +517,9 @@ void CollisionSystem::routePlayerProjCollisions(Entity player_proj,
   }
   if (registry.activeWalls.has(other)) {
     resolveWallPlayerProjCollision(other, player_proj);
+  }
+  if (registry.breakables.has(other)) {
+    modifyOxygen(other, player_proj);
   }
 
   PlayerProjectile& player_proj_component =
@@ -559,9 +556,6 @@ void CollisionSystem::routeInteractableCollisions(Entity interactable,
 void CollisionSystem::resolvePlayerEnemyCollision(Entity player, Entity enemy) {
   handle_debuffs(player, enemy);
   modifyOxygen(player, enemy);
-  if (!registry.activeWalls.has(enemy)) {
-    addDamageIndicatorTimer(player);
-  }
 }
 
 void CollisionSystem::resolvePlayerConsumableCollision(Entity player,
@@ -635,6 +629,22 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
   }
 }
 
+void CollisionSystem::resolveBreakablePlayerProjCollision(Entity breakable,
+                                                          Entity player_proj) {
+  if (!registry.motions.has(player_proj)) {
+    return;
+  }
+
+  PlayerProjectile& playerproj_comp =
+      registry.playerProjectiles.get(player_proj);
+
+  modifyOxygen(breakable, player_proj);
+
+  if (playerproj_comp.type == PROJECTILES::TORPEDO) {
+      detectAndResolveExplosion(player_proj, breakable);
+  }
+}
+
 void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity enemy) {
   for (Entity enemy_check : registry.deadlys.entities) {
     if (enemy_check == enemy || !registry.positions.has(enemy)) {
@@ -690,16 +700,30 @@ void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
 
   Motion&   enemy_motion   = registry.motions.get(enemy);
   Position& enemy_position = registry.positions.get(enemy);
-  vec2      temp_velocity  = enemy_motion.velocity;
+  Position& wall_position  = registry.positions.get(wall);
+  vec2 wall_dir = normalize(wall_position.position - enemy_position.position);
+  vec2 temp_velocity = enemy_motion.velocity;
 
   resolveStopOnWall(wall, enemy);
 
-  enemy_motion.velocity = temp_velocity;
-
-  // adjust enemy ai
-  enemy_motion.velocity *= -1.0f;
-  enemy_motion.acceleration *= -1.0f;
-
+  // if the enemy is actively tracking the player, route them around the wall
+  if ((registry.trackPlayer.has(enemy) &&
+       registry.trackPlayer.get(enemy).active_track) ||
+      (registry.trackPlayer.has(enemy) &&
+       registry.trackPlayer.get(enemy).active_track)) {
+    vec2  enemy_dir = normalize(temp_velocity);
+    float velocity  = sqrt(dot(temp_velocity, temp_velocity));
+    float acceleration =
+        sqrt(dot(enemy_motion.acceleration, enemy_motion.acceleration));
+    vec2 new_dir              = normalize(enemy_dir - wall_dir);
+    enemy_motion.velocity     = new_dir * velocity;
+    enemy_motion.acceleration = new_dir * acceleration;
+  } else {
+    enemy_motion.velocity = temp_velocity;
+    // adjust enemy ai
+    enemy_motion.velocity *= -1.0f;
+    enemy_motion.acceleration *= -1.0f;
+  }
   enemy_position.scale.x = abs(enemy_position.scale.x);
   if (enemy_motion.velocity.x > 0) {
     enemy_position.scale.x *= -1.0f;
@@ -762,16 +786,16 @@ void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
 void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
   std::cout << "collided with door" << std::endl;
 
-  rt_entity = Entity();
+  rt_entity                      = Entity();
   RoomTransition& roomTransition = registry.roomTransitions.emplace(rt_entity);
 
   DoorConnection& door_connection = registry.doorConnections.get(door);
-  roomTransition.door_connection = door_connection;
+  roomTransition.door_connection  = door_connection;
 
   transitioning = true;
 
-  PlayerProjectile &pp = registry.playerProjectiles.get(player_projectile);
-  Motion &pp_m = registry.motions.get(player_projectile);
-  pp.is_loaded = true;
-  pp_m.velocity = {0.f, 0.f};
+  PlayerProjectile& pp   = registry.playerProjectiles.get(player_projectile);
+  Motion&           pp_m = registry.motions.get(player_projectile);
+  pp.is_loaded           = true;
+  pp_m.velocity          = {0.f, 0.f};
 }

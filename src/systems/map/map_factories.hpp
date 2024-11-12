@@ -6,6 +6,8 @@
 #include "tiny_ecs_registry.hpp"
 #include "consumable_factories.hpp"
 
+#define DOOR_SPAWN_RADIUS 100.f
+
 //////////////////////////////////////////////////////////////
 // Geyser
 //////////////////////////////////////////////////////////////
@@ -14,7 +16,8 @@
 #define GEYSER_SCALE_FACTOR vec2(0.15f)
 #define GEYSER_BOUNDING_BOX vec2(329.f, 344.f) // vec2(PNG_width, PNG_height)
 
-Entity createGeyserPos(RenderSystem *renderer, vec2 position);
+Entity createGeyserPos(RenderSystem *renderer, vec2 position, bool checkCollisions = true);
+Entity respawnGeyser(RenderSystem *renderer, EntityState es);
 
 //////////////////////////////////////////////////////////////
 // Crate
@@ -30,6 +33,5 @@ Entity createGeyserPos(RenderSystem *renderer, vec2 position);
 #define CRATE_DROP_CHANCE_0 0.5
 
 
-Entity createCratePos(RenderSystem *renderer, vec2 position);
-
-Entity createGeyserPos(RenderSystem* renderer, vec2 position);
+Entity createCratePos(RenderSystem *renderer, vec2 position, bool checkCollisions = true);
+Entity respawnCrate(RenderSystem *renderer, EntityState es);

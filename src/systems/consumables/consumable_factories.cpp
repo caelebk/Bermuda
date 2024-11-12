@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "collision_system.hpp"
+#include "items.hpp"
 
 /////////////////////////////////////////////////////////////////
 // Util
@@ -42,6 +43,17 @@ static bool checkSpawnCollisions(Entity entity) {
     }
   }
 
+  // Entities can't spawn in breakables
+  for (Entity wall : registry.breakables.entities) {
+    if (!registry.positions.has(wall)) {
+      continue;
+    }
+    const Position wallPos = registry.positions.get(wall);
+    if (box_collides(enemyPos, wallPos)) {
+      return false;
+    }
+  }
+
   // Entities can't spawn in interactables
   for (Entity interactable : registry.interactable.entities) {
     if (!registry.positions.has(interactable)) {
@@ -66,7 +78,7 @@ static bool checkSpawnCollisions(Entity entity) {
  * @param position
  * @return
  */
-Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position) {
+Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
 
@@ -75,7 +87,7 @@ Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position) {
   pos.position = position;
   pos.scale    = OXYGEN_CANISTER_SCALE_FACTOR * OXYGEN_CANISTER_BOUNDING_BOX;
 
-  if (!checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
     registry.remove_all_components_of(entity);
     return Entity(0);
@@ -85,7 +97,8 @@ Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position) {
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make consumable
-  registry.consumables.emplace(entity);
+  Consumable &c = registry.consumables.emplace(entity);
+  c.respawnFn = respawnOxygenCanister;
 
   // Add stats
   auto& refill  = registry.oxygenModifiers.emplace(entity);
@@ -99,3 +112,17 @@ Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position) {
 
   return entity;
 }
+
+/**
+ * @brief Respawns a Geyser based on it's entity state
+ *
+ * @param renderer 
+ * @param es 
+ * @return 
+ */
+Entity respawnOxygenCanister(RenderSystem *renderer, EntityState es) {
+  Entity entity = createOxygenCanisterPos(renderer, es.position.position, false);
+  return entity;
+}
+
+

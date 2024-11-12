@@ -1,9 +1,13 @@
 #pragma once
 #include <functional>
 #include <vector>
+#include "render_system.hpp"
+#include "respawn.hpp"
 
 // anything that is deadly to the player
-struct Deadly {};
+struct Deadly {
+  std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;
+};
 
 struct Boss {
   float curr_cd      = 0.f;

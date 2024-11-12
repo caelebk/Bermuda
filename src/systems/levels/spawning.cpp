@@ -52,6 +52,10 @@ bool remove_all_entities() {
     registry.remove_all_components_of(registry.playerWeapons.entities.back());
   }
 
+  while (registry.breakables.entities.size() > 0) {
+    registry.remove_all_components_of(registry.breakables.entities.back());
+  }
+
   while (registry.playerProjectiles.entities.size() > 0) {
     registry.remove_all_components_of(
         registry.playerProjectiles.entities.back());
@@ -64,6 +68,18 @@ bool remove_all_entities() {
   while (registry.playersCollisionMeshes.entities.size() > 0) {
     registry.remove_all_components_of(registry.playersCollisionMeshes.entities.back());
   }
+
+  while (registry.playerHUD.entities.size() > 0) {
+    registry.remove_all_components_of(registry.playerHUD.entities.back());
+  }
+
+  while (registry.invHUD.entities.size() > 0) {
+    registry.remove_all_components_of(registry.invHUD.entities.back());
+  }
+
+  registry.stunned.clear();
+  registry.knockedback.clear();
+  registry.collisions.clear();
 
   return true;
 }

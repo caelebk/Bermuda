@@ -74,6 +74,7 @@ class ECSRegistry {
   ComponentContainer<Interactable>     interactable;
   ComponentContainer<Floor>            floors;
   ComponentContainer<Geyser>           geysers;
+  ComponentContainer<Breakable>        breakables;
 
   // status related
   ComponentContainer<LowOxygen> lowOxygen;
@@ -87,6 +88,7 @@ class ECSRegistry {
 
   // other
   ComponentContainer<Consumable>     consumables;
+  ComponentContainer<Item>     items;
   ComponentContainer<Drop>           drops;
   ComponentContainer<DebugComponent> debugComponents;
   ComponentContainer<Emoting>        emoting;
@@ -142,6 +144,7 @@ class ECSRegistry {
     registry_list.push_back(&interactable);
     registry_list.push_back(&geysers);
     registry_list.push_back(&floors);
+    registry_list.push_back(&breakables);
     // status related
     registry_list.push_back(&lowOxygen);
     registry_list.push_back(&stunned);
@@ -155,6 +158,7 @@ class ECSRegistry {
     registry_list.push_back(&cursors);
     registry_list.push_back(&debugComponents);
     registry_list.push_back(&consumables);
+    registry_list.push_back(&items);
     registry_list.push_back(&emoting);
     registry_list.push_back(&pauseMenus);
     registry_list.push_back(&roomTransitions);
@@ -194,6 +198,12 @@ class ECSRegistry {
     if (emoting.has(e)) {
       Emoting &ee = emoting.get(e); 
       remove_all_components_of(ee.child);
+    }
+
+    if (invHUD.has(e)) {
+      for (auto& pair : invHUD.get(e).count_digits) {
+        remove_all_components_of(pair.second);
+      }
     }
 
     for (ContainerInterface* reg : registry_list) reg->remove(e);

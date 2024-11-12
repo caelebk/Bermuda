@@ -100,19 +100,19 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3& projection) {
     glBindTexture(GL_TEXTURE_2D, texture_id);
     gl_has_errors();
   } else if (render_request.used_effect == EFFECT_ASSET_ID::COLLISION_MESH) {
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_color_loc = glGetAttribLocation(program, "in_color");
-		gl_has_errors();
+    GLint in_position_loc = glGetAttribLocation(program, "in_position");
+    GLint in_color_loc    = glGetAttribLocation(program, "in_color");
+    gl_has_errors();
 
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)0);
-		gl_has_errors();
-		glEnableVertexAttribArray(in_color_loc);
-		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)sizeof(vec3));
-		gl_has_errors();
-	} else {
+    glEnableVertexAttribArray(in_position_loc);
+    glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(ColoredVertex), (void*)0);
+    gl_has_errors();
+    glEnableVertexAttribArray(in_color_loc);
+    glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(ColoredVertex), (void*)sizeof(vec3));
+    gl_has_errors();
+  } else {
     assert(false && "Type of render request not supported");
   }
 
@@ -249,8 +249,17 @@ void RenderSystem::draw() {
       drawTexturedMesh(floor, projection_2D);
   }
   for (Entity wall : registry.activeWalls.entities) {
-    if (registry.renderRequests.has(wall))
+    if (registry.renderRequests.has(wall)) {
+      if (registry.breakables.has(wall) && registry.oxygen.has(wall)) {
+        Oxygen& wallOxygen = registry.oxygen.get(wall);
+        if (registry.renderRequests.has(wallOxygen.backgroundBar) &&
+            registry.renderRequests.has(wallOxygen.oxygenBar)) {
+          drawTexturedMesh(wallOxygen.backgroundBar, projection_2D);
+          drawTexturedMesh(wallOxygen.oxygenBar, projection_2D);
+        }
+      }
       drawTexturedMesh(wall, projection_2D);
+    }
   }
   for (Entity door : registry.activeDoors.entities) {
     if (registry.renderRequests.has(door))
@@ -268,7 +277,7 @@ void RenderSystem::draw() {
     if (registry.renderRequests.has(player))
       drawTexturedMesh(player, projection_2D);
   }
-  //Collision mesh rendering
+  // Collision mesh rendering
   for (Entity playerCollisionMesh : registry.playersCollisionMeshes.entities) {
     if (registry.renderRequests.has(playerCollisionMesh)) {
       drawTexturedMesh(playerCollisionMesh, projection_2D);
@@ -298,7 +307,7 @@ void RenderSystem::draw() {
         Emoting& emote = registry.emoting.get(enemy);
         if (registry.renderRequests.has(emote.child)) {
           drawTexturedMesh(emote.child, projection_2D);
-        } 
+        }
       }
     }
   }

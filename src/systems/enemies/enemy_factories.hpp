@@ -3,9 +3,11 @@
 #include "common.hpp"
 #include "random.hpp"
 #include "render_system.hpp"
+#include "respawn.hpp"
 #include "tiny_ecs.hpp"
 
 #define ENEMY_O2_BAR_GAP 20.f
+#define PLAYER_SPAWN_RADIUS 300.f
 
 //////////////////////////////////////////////////////////////
 // JellyFish
@@ -20,7 +22,8 @@
 #define JELLY_HEALTH_BAR_SCALE vec2(1.5f)
 #define JELLY_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 
-Entity createJellyPos(RenderSystem* renderer, vec2 position);
+Entity createJellyPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity respawnJelly(RenderSystem* renderer, EntityState es);
 
 //////////////////////////////////////////////////////////////
 // Fish
@@ -37,7 +40,8 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position);
 #define FISH_HEALTH_BAR_SCALE vec2(1.5f)
 #define FISH_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 
-Entity createFishPos(RenderSystem* renderer, vec2 position);
+Entity createFishPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity respawnFish(RenderSystem* renderer, EntityState es);
 
 //////////////////////////////////////////////////////////////
 // Sharks
@@ -60,8 +64,8 @@ Entity createFishPos(RenderSystem* renderer, vec2 position);
 #define SHARK_HEALTH_BAR_SCALE vec2(1.5f)
 #define SHARK_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 
-
-Entity createSharkPos(RenderSystem* renderer, vec2 position);
+Entity createSharkPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity respawnShark(RenderSystem* renderer, EntityState es);
 
 // //////////////////////////////////////////////////////////////
 // // Octopi
@@ -92,42 +96,6 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position);
 #define KRAB_HEALTH_BAR_SCALE vec2(1.5f)
 #define KRAB_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 
+Entity createKrabPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity respawnKrab(RenderSystem* renderer, EntityState es);
 
-Entity createKrabPos(RenderSystem* renderer, vec2 position);
-
-
-// //////////////////////////////////////////////////////////////
-// // Sea mine
-// //////////////////////////////////////////////////////////////
-
-// #define SEA_MINE_OXYGEN 25.0
-// #define SEA_MINE_OXYGEN_SCALE vec2(80.f, 4.f)
-
-// int createSeaMineHealthBar(RenderSystem *renderer, Entity enemy);
-
-// //////////////////////////////////////////////////////////////
-// // Merpeople
-// //////////////////////////////////////////////////////////////
-
-// #define MERPERSON_OXYGEN 120.0
-// #define MERPERSON_OXYGEN_SCALE vec2(100.f, 4.f)
-
-// int createMerpersonHealthBar(RenderSystem *renderer, Entity enemy);
-
-// //////////////////////////////////////////////////////////////
-// // Void Tentacles
-// //////////////////////////////////////////////////////////////
-
-// #define TENTACLE_OXYGEN 20.0
-// #define TENTACLE_OXYGEN_SCALE vec2(50.f, 4.f)
-
-// int createTentacleHealthBar(RenderSystem *renderer, Entity enemy);
-
-// //////////////////////////////////////////////////////////////
-// // Serpents
-// //////////////////////////////////////////////////////////////
-
-// #define SERPENT_OXYGEN 50.0
-// #define SERPENT_OXYGEN_SCALE vec2(200.f, 4.f)
-
-// int createSerpentHealthBar(RenderSystem *renderer, Entity enemy);
