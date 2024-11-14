@@ -25,6 +25,7 @@ class ECSRegistry {
   ComponentContainer<Motion>    motions;
   ComponentContainer<Position>  positions;
   ComponentContainer<Collision> collisions;
+  ComponentContainer<Mass>      masses;
 
   // player related
   ComponentContainer<DeathTimer>       deathTimers;
@@ -103,6 +104,7 @@ class ECSRegistry {
     registry_list.push_back(&motions);
     registry_list.push_back(&collisions);
     registry_list.push_back(&positions);
+    registry_list.push_back(&masses);
     // player related
     registry_list.push_back(&deathTimers);
     registry_list.push_back(&players);

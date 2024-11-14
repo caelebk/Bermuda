@@ -164,11 +164,19 @@ Entity createCratePos(RenderSystem* renderer, vec2 position, bool checkCollision
   // Reserve an entity
   auto entity = Entity();
   // physics and pos
-  auto& pos    = registry.positions.emplace(entity);
+  Position& pos    = registry.positions.emplace(entity);
   pos.angle    = 0.f;
   pos.position = position;
   pos.scale    = CRATE_SCALE_FACTOR * CRATE_BOUNDING_BOX;
   pos.scale *= 4.f;
+
+  Motion& motion = registry.motions.emplace(entity);
+  motion.acceleration = {0.f, 0.f};
+  motion.velocity     = {0.f, 0.f};
+
+  Mass& mass = registry.masses.emplace(entity);
+  mass.mass  = CRATE_MASS;
+
   if (checkCollisions && !checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
     registry.remove_all_components_of(entity);

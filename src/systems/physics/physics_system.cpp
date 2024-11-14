@@ -25,9 +25,16 @@ void PhysicsSystem::step(float elapsed_ms) {
     registry.motions.get(player).acceleration = {0.f, 0.f};
   }
 
-  // Apply Water friction
+  // Apply water friction
   applyWaterFriction(player);
-
+  for (Entity entity : registry.masses.entities) {
+    if (!registry.players.has(entity)) {
+      registry.motions.get(entity).acceleration = {0.f, 0.f};
+      applyWaterFriction(entity);
+      calculateVelocity(entity, lerp);
+    }
+  }
+  
   // Apply dash if player is dashing or increment cooldown for dash
   playerDash();
 
@@ -57,8 +64,6 @@ void PhysicsSystem::step(float elapsed_ms) {
       Position& player_mesh_position = registry.positions.get(player.collisionMesh);
       player_mesh_position.position += motion.velocity * lerp;
     }
-
-
     
     if (registry.oxygen.has(entity) && entity != player) {
       // make sure health bars follow moving enemies
@@ -265,6 +270,21 @@ void calculatePlayerVelocity(float lerp) {
   }
 }
 
+void calculateVelocity(Entity entity, float lerp) {
+  Motion& motion = registry.motions.get(entity);
+  
+  motion.velocity += motion.acceleration * lerp;
+  
+  if (abs(motion.velocity.x) < abs(motion.acceleration.x * lerp) &&
+      motion.velocity.x * motion.acceleration.x > 0) {
+    motion.velocity.x = 0;
+  }
+  if (abs(motion.velocity.y) < abs(motion.acceleration.y * lerp) &&
+      motion.velocity.y * motion.acceleration.y > 0) {
+    motion.velocity.y = 0;
+  }
+}
+
 void playerDash() {
   Motion& motion = registry.motions.get(player);
   Player& keys   = registry.players.get(player);
@@ -306,14 +326,19 @@ void playerDash() {
 void applyWaterFriction(Entity entity) {
   Motion& motion = registry.motions.get(entity);
 
+  float water_friction = WATER_FRICTION;
+      // Keep this here just in case, but acceleration by friction is NOT proportional to mass, which is why we can use a constant
+      /*float(registry.masses.get(entity).mass) / float(PLAYER_MASS) *
+      WATER_FRICTION;*/
+
   // Water friction should accelerate in the opposite direction of the player's
   // velocity. If the player isn't moving, friction has no effect
   if (motion.velocity.x) {
-    motion.velocity.x > 0 ? motion.acceleration.x -= WATER_FRICTION
-                          : motion.acceleration.x += WATER_FRICTION;
+    motion.velocity.x > 0 ? motion.acceleration.x -= water_friction
+                          : motion.acceleration.x += water_friction;
   }
   if (motion.velocity.y) {
-    motion.velocity.y > 0 ? motion.acceleration.y -= WATER_FRICTION
-                          : motion.acceleration.y += WATER_FRICTION;
+    motion.velocity.y > 0 ? motion.acceleration.y -= water_friction
+                          : motion.acceleration.y += water_friction;
   }
 }

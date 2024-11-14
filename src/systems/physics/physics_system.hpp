@@ -59,6 +59,8 @@ void setPlayerAcceleration();
 
 void calculatePlayerVelocity(float lerp);
 
+void calculateVelocity(Entity entity, float lerp);
+
 void playerDash();
 
 void applyWaterFriction(Entity entity);

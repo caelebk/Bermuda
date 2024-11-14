@@ -332,6 +332,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     paused = !paused;
     if (paused) {
       depleteOxygen(player);
+      pause_menu = createPauseMenu(renderer);
     }
   }
 

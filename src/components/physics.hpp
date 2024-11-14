@@ -15,6 +15,10 @@ struct Motion {
   vec2 velocity = {0, 0};
 };
 
+struct Mass {
+  int mass;
+};
+
 // Stucture to store collision information
 struct Collision {
   // Note, the first object is stored in the ECS container.entities

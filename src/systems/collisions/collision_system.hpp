@@ -64,6 +64,9 @@ class CollisionSystem {
   // Wall <-> Something that should stop on the wall
   void resolveStopOnWall(Entity wall, Entity entity);
 
+  // Crate <-> Player (Or anything with mass)
+  void resolveMassCollision(Entity crate, Entity other);
+
   // Door <-> Player
   void resolveDoorPlayerCollision(Entity door, Entity player);
 

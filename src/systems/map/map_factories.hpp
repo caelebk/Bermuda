@@ -28,6 +28,7 @@ Entity respawnGeyser(RenderSystem *renderer, EntityState es);
 #define CRATE_HEALTH_SCALE vec2(1.4f)
 #define CRATE_HEALTH_BAR_SCALE vec2(1.5f)
 #define CRATE_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+#define CRATE_MASS 20
 
 #define CRATE_DROP_0 createOxygenCanisterPos
 #define CRATE_DROP_CHANCE_0 0.5

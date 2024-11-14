@@ -20,6 +20,7 @@
 #define PLAYER_OXYGEN_RATE -3.f
 #define PLAYER_DASH_COST -25.f
 #define PLAYER_OXYGEN_DEPLETE_TIME_MS 1000.f  // to be balanced later
+#define PLAYER_MASS 10
 #define ARM_OFFSET vec2(20.f, -10.f)
 
 Entity createPlayer(RenderSystem* renderer, vec2 pos);

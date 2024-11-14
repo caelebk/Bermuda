@@ -178,6 +178,7 @@ void CollisionSystem::collision_detection() {
   ComponentContainer<Player>&           player_container = registry.players;
   ComponentContainer<PlayerProjectile>& playerproj_container =
       registry.playerProjectiles;
+  ComponentContainer<Mass>&         mass_container       = registry.masses;
   ComponentContainer<Deadly>&       enemy_container      = registry.deadlys;
   ComponentContainer<ActiveWall>&   wall_container       = registry.activeWalls;
   ComponentContainer<ActiveDoor>&   door_container       = registry.activeDoors;
@@ -317,15 +318,24 @@ void CollisionSystem::collision_detection() {
       }
     }
 
-    for (uint j = 0; j < player_container.size(); j++) {
-      Entity entity_j = player_container.entities[j];
+    
+    for (uint j = 0; j < mass_container.size(); j++) {
+      Entity entity_j = mass_container.entities[j];
       if (!registry.positions.has(entity_j)) {
         continue;
       }
-      Player&   player_comp = registry.players.get(entity_j);
-      Position& position_j  = registry.positions.get(player_comp.collisionMesh);
-      if (box_collides(position_i, position_j)) {
-        if (mesh_collides(player_comp.collisionMesh, entity_i)) {
+      if (registry.players.has(entity_j)) {
+        Player&   player_comp = registry.players.get(entity_j);
+        Position& position_j  = registry.positions.get(player_comp.collisionMesh);
+        if (box_collides(position_i, position_j)) {
+          if (mesh_collides(player_comp.collisionMesh, entity_i)) {
+            registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+            registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+          }
+        }
+      } else {
+        Position& position_j = registry.positions.get(entity_j);
+        if (box_collides(position_i, position_j)) {
           registry.collisions.emplace_with_duplicates(entity_i, entity_j);
           registry.collisions.emplace_with_duplicates(entity_j, entity_i);
         }
@@ -477,9 +487,20 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
   }
 
   if (registry.players.has(other)) {
-    resolveStopOnWall(wall, other);
-    Player& player = registry.players.get(other);
-    resolveStopOnWall(wall, player.collisionMesh);
+    if (registry.masses.has(wall) && registry.masses.has(other)) {
+      resolveMassCollision(wall, other);
+    } else {
+      resolveStopOnWall(wall, other);
+      Player& player = registry.players.get(other);
+      resolveStopOnWall(wall, player.collisionMesh);
+    }
+  }
+  if (registry.activeWalls.has(other)) {
+    if (registry.masses.has(wall) && registry.masses.has(other)) {
+      resolveMassCollision(wall, other);
+    } else {
+      resolveStopOnWall(wall, other);
+    }
   }
   if (registry.playerProjectiles.has(other)) {
     resolveWallPlayerProjCollision(wall, other);
@@ -772,6 +793,9 @@ void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
                    ? -1 * overlapX
                    : overlapX;
     entity_position.position.x += overlapX;
+    if (registry.motions.has(entity) && !registry.players.has(entity)) {
+      registry.motions.get(entity).velocity.x = 0;
+    }
   } else {
     // Respective to the wall,
     // If the entity is above the wall, then we need to push up left.
@@ -780,6 +804,63 @@ void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
                    ? -1 * overlapY
                    : overlapY;
     entity_position.position.y += overlapY;
+    if (registry.motions.has(entity) && !registry.players.has(entity)) {
+      registry.motions.get(entity).velocity.y = 0;
+    }
+  }
+}
+
+void CollisionSystem::resolveMassCollision(Entity wall, Entity other) {
+  Motion& wall_motion = registry.motions.get(wall);
+  Motion& other_motion = registry.motions.get(other);
+  Position& wall_pos     = registry.positions.get(wall);
+  Position& other_pos    = registry.positions.get(other);
+
+  bool is_horizontal_collision = false;
+  // Determine if this a horizontal or vertical collision
+  vec2 pos_diff = wall_pos.position - other_pos.position;
+
+  if (abs(pos_diff.x) > abs(pos_diff.y)) {
+    is_horizontal_collision = true;
+  }
+
+  // This is here because sometimes it still counts as a collision, even if they aren't colliding
+  float wall_position =
+      is_horizontal_collision ? wall_pos.position.x : wall_pos.position.y;
+  float wall_velo =
+      is_horizontal_collision ? wall_motion.velocity.x : wall_motion.velocity.y;
+  float other_position =
+      is_horizontal_collision ? other_pos.position.x : other_pos.position.y;
+  float other_velo = is_horizontal_collision ? other_motion.velocity.x
+                                             : other_motion.velocity.y;
+  if ((other_position > wall_position && other_velo > wall_velo) ||
+      (other_position < wall_position && other_velo < wall_velo)) {
+    return;
+  }
+
+  // Assume these collisions are inelastic - that is, that kinetic energy is
+  // preserved
+
+  float wall_mass = registry.masses.get(wall).mass;
+  float other_mass = registry.masses.get(other).mass;
+  // p = momentum
+  float p_wall =
+      is_horizontal_collision
+          ? wall_mass * wall_motion.velocity.x
+          : wall_mass * wall_motion.velocity.y;
+  float p_other =
+      is_horizontal_collision
+          ? other_mass * other_motion.velocity.x
+          : other_mass * other_motion.velocity.y;
+
+  float v_final = (p_wall + p_other)/(wall_mass + other_mass);
+
+  if (is_horizontal_collision) {
+    wall_motion.velocity.x = v_final;
+    other_motion.velocity.x = v_final;
+  } else {
+    wall_motion.velocity.y  = v_final;
+    other_motion.velocity.y = v_final;
   }
 }
 

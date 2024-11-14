@@ -27,6 +27,10 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos) {
   motion.velocity     = {0.f, 0.f};
   motion.acceleration = {0, 0};
 
+  // Set Player Mass
+  Mass& mass = registry.masses.emplace(entity);
+  mass.mass  = PLAYER_MASS;
+
   // Make Player and Harpoon Gun
   Player& player = registry.players.emplace(entity);
   player.weapon =
