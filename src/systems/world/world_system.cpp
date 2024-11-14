@@ -295,8 +295,12 @@ void WorldSystem::restart_game() {
 
   createOxygenTank(
       renderer, player,
-      {47.5, window_height_px / 2});
+      {47.5, window_height_px * 0.45f});
 
+  //ugly number for the y position but the spacing looks fairly even
+  createDashIndicator(
+      renderer, player,
+      {47.5, window_height_px * 0.78f});
   /////////////////////////////////////////////
   // Enemy + Drops
   /////////////////////////////////////////////

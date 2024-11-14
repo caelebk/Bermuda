@@ -18,7 +18,7 @@
 #define PLAYER_OXYGEN_BOUNDING_BOX vec2(100.f, 500.f)
 #define PLAYER_OXYGEN_TANK_BOUNDING_BOX vec2(110.f, 570.f)
 #define PLAYER_OXYGEN_RATE -3.f
-#define PLAYER_DASH_COST -25.f
+#define PLAYER_DASH_COST -50.f
 #define PLAYER_OXYGEN_DEPLETE_TIME_MS 1000.f  // to be balanced later
 #define PLAYER_MASS 10
 #define ARM_OFFSET vec2(20.f, -10.f)
@@ -27,6 +27,8 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos);
 
 // create oxygen tank for player
 void createOxygenTank(RenderSystem* renderer, Entity& player, vec2 pos);
+
+void createDashIndicator(RenderSystem* renderer, Entity& player, vec2 pos);
 
 // create GUNS :eagle: :eagle: :eagle:
 Entity createLoadedGun(RenderSystem* renderer, vec2 ammoPosition,

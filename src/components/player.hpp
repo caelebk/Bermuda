@@ -55,6 +55,7 @@ struct Inventory {
 struct Player {
   Entity weapon;
   Entity collisionMesh;
+  Entity dashIndicator;
   // Controls
   bool upHeld    = false;
   bool downHeld  = false;

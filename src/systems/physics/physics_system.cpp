@@ -25,6 +25,19 @@ void PhysicsSystem::step(float elapsed_ms) {
     registry.motions.get(player).acceleration = {0.f, 0.f};
   }
 
+  //If dash is on cooldown, we need to decrement the dash cooldown timer
+  if (registry.players.get(player).dashCooldownTimer > 0) {
+    Player& player_comp = registry.players.get(player);
+    player_comp.dashCooldownTimer -= elapsed_ms;
+    //change color intensity based on cooldown timer and original cooldown duration
+    if (player_comp.dashCooldownTimer <= 0) {
+      registry.colors.get(player_comp.dashIndicator) = vec3(1.0f);
+    } else {
+      float time_proportion = 1.0f - (player_comp.dashCooldownTimer / DASH_COOLDOWN_DURATION);
+      registry.colors.get(player_comp.dashIndicator) = vec3(time_proportion);
+    }
+  }
+
   // Apply water friction
   applyWaterFriction(player);
   for (Entity entity : registry.masses.entities) {
@@ -35,12 +48,13 @@ void PhysicsSystem::step(float elapsed_ms) {
     }
   }
   
-  // Apply dash if player is dashing or increment cooldown for dash
-  playerDash();
 
-  // Update player velocity with lerp
+  // Update player velocity with lerp if player not dashing
   if (!registry.players.get(player).dashing) {
     calculatePlayerVelocity(lerp);
+  } else {
+    // apply Dash or decrement the current dash timer (length of the dash)
+    playerDash(elapsed_ms);
   }
 
   // Update Entity positions with lerp
@@ -253,20 +267,15 @@ void calculatePlayerVelocity(float lerp) {
       registry.players.get(player).gliding ? MAX_GLIDE_SPEED : MAX_PLAYER_SPEED;
 
   Player& player_comp = registry.players.get(player);
-  // player either activated dash or is in the middle of dash
-  if (player_comp.dashing || player_comp.dashTimer > 0) {
-    playerDash();
-  } else {
-    if (motion.velocity.x > max_velocity) {
-      motion.velocity.x = max_velocity;
-    } else if (motion.velocity.x < -max_velocity) {
-      motion.velocity.x = -max_velocity;
-    }
-    if (motion.velocity.y > max_velocity) {
-      motion.velocity.y = max_velocity;
-    } else if (motion.velocity.y < -max_velocity) {
-      motion.velocity.y = -max_velocity;
-    }
+  if (motion.velocity.x > max_velocity) {
+    motion.velocity.x = max_velocity;
+  } else if (motion.velocity.x < -max_velocity) {
+    motion.velocity.x = -max_velocity;
+  }
+  if (motion.velocity.y > max_velocity) {
+    motion.velocity.y = max_velocity;
+  } else if (motion.velocity.y < -max_velocity) {
+    motion.velocity.y = -max_velocity;
   }
 }
 
@@ -285,16 +294,18 @@ void calculateVelocity(Entity entity, float lerp) {
   }
 }
 
-void playerDash() {
+void playerDash(float elapsed_ms) {
   Motion& motion = registry.motions.get(player);
   Player& keys   = registry.players.get(player);
 
   if (keys.dashTimer > 0) {
-    keys.dashTimer -= 1;
+    keys.dashTimer -= elapsed_ms;
+    if (keys.dashTimer <= 0) {
+      keys.dashing = false;
+    }
   }
 
   if (keys.dashCooldownTimer > 0) {
-    keys.dashCooldownTimer -= 1;
     return;
   }
 
@@ -319,8 +330,6 @@ void playerDash() {
   if (keys.rightHeld) {
     motion.velocity.x = DASH_SPEED;
   }
-
-  keys.dashing = false;
 }
 
 void applyWaterFriction(Entity entity) {

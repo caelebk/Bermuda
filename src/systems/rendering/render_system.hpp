@@ -44,6 +44,7 @@ class RenderSystem {
       textures_path("player/player1.png"),
       textures_path("player/player2.png"),
       textures_path("player/player3.png"),
+      textures_path("player/player_dash.png"),
       textures_path("player/harpoon_gun.png"),
       textures_path("player/harpoon.png"),
       textures_path("player/net_gun.png"),

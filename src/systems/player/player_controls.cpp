@@ -118,13 +118,17 @@ bool player_movement(int key, int action, int mod) {
   }
 
   if (key == GLFW_KEY_SPACE) {
-    if (action == GLFW_PRESS) {
+    bool atLeastOneKey = keys.upHeld || keys.downHeld || keys.leftHeld || keys.rightHeld;
+    if (action == GLFW_PRESS && atLeastOneKey) {
       if (registry.players.get(player).dashCooldownTimer <= 0) {
         Player& player_comp = registry.players.get(player);
         Entity burstCost = Entity();
         OxygenModifier& oxyBurstCost = registry.oxygenModifiers.emplace(burstCost);
         oxyBurstCost.amount = PLAYER_DASH_COST;
         player_comp.dashing = true;
+        if (registry.colors.has(player_comp.dashIndicator)) {
+          registry.colors.get(player_comp.dashIndicator) = vec3(0.1f);
+        }
         modifyOxygen(player, burstCost);
       }
     }

@@ -25,9 +25,9 @@
 #define MAX_GLIDE_SPEED MAX_PLAYER_SPEED * 2
 
 // Player Dash
-#define DASH_DURATION 50.f
-#define DASH_COOLDOWN_DURATION 500.f
-#define DASH_SPEED 200
+#define DASH_DURATION 200.f
+#define DASH_COOLDOWN_DURATION 5000.f
+#define DASH_SPEED 300
 // NOTE: WATER_FRICTION SHOULD ALWAYS BE SMALLER THAN PLAYER_ACCELERATION
 
 // Velocity given by pressing movement keys (To be balanced later)
@@ -61,6 +61,7 @@ void calculatePlayerVelocity(float lerp);
 
 void calculateVelocity(Entity entity, float lerp);
 
-void playerDash();
+
+void playerDash(float elapsed_ms);
 
 void applyWaterFriction(Entity entity);

@@ -357,6 +357,41 @@ void createOxygenTank(RenderSystem* renderer, Entity& player, vec2 pos) {
 }
 
 /********************************************************************************
+ * @brief creates a dash indicator HUD element
+ *
+ * @param renderer
+ * @param player
+ * @param pos - determines position of dash indicator on screen
+ ********************************************************************************/
+void createDashIndicator(RenderSystem* renderer, Entity& player, vec2 pos) {
+  auto dashIndicator     = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(dashIndicator, &mesh);
+
+  // Initialize the position, scale, and physics components
+  auto& posComp    = registry.positions.emplace(dashIndicator);
+  posComp.angle    = 0.f;
+  posComp.position = pos;
+  posComp.scale    = PLAYER_SCALE_FACTOR * PLAYER_BOUNDING_BOX * 0.85f;
+  posComp.originalScale = PLAYER_SCALE_FACTOR * PLAYER_BOUNDING_BOX * 0.85f;
+
+  registry.playerHUD.emplace(dashIndicator);
+
+  registry.renderRequests.insert(
+      dashIndicator,
+      {TEXTURE_ASSET_ID::PLAYER_DASH, EFFECT_ASSET_ID::TEXTURED,
+       GEOMETRY_BUFFER_ID::SPRITE});
+
+  if (registry.players.has(player)) {
+    registry.players.get(player).dashIndicator = dashIndicator;
+  }
+
+  registry.colors.insert(dashIndicator, vec3(1.0f));
+}
+
+/********************************************************************************
  * Get Reference to Player Weapon
  *
  * @param player
