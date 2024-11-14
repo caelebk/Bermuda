@@ -5,6 +5,7 @@
 
 #include "abilities.hpp"
 #include "tiny_ecs_registry.hpp"
+#include "player_hud.hpp"
 #include <player_controls.hpp>
 
 /**
@@ -134,6 +135,7 @@ bool update_debuffs(float elapsed_ms_since_last_update) {
       } else {
         destroyGunOrProjectile(knockedback.knockback_proj);
         doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+        changeSelectedCounterColour(INVENTORY::HARPOON);
       }
     }
   }

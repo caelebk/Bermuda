@@ -33,6 +33,20 @@ struct Mesh {
   std::vector<uint16_t>      vertex_indices;
 };
 
+// font character structure
+struct Character {
+  unsigned int TextureID;  // ID handle of the glyph texture
+  glm::ivec2   Size;       // Size of glyph
+  glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
+  unsigned int Advance;    // Offset to advance to next glyph
+  char         character;
+};
+
+struct TextRequest {
+  std::string text;
+  float       textScale;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -60,17 +74,9 @@ struct Mesh {
 
 enum class TEXTURE_ASSET_ID {
   PAUSE                = 0,
-  ZERO                 = PAUSE + 1,
-  ONE                  = ZERO + 1,
-  TWO                  = ONE + 1,
-  THREE                = TWO + 1,
-  FOUR                 = THREE + 1,
-  FIVE                 = FOUR + 1,
-  SIX                  = FIVE + 1,
-  SEVEN                = SIX + 1,
-  EIGHT                = SEVEN + 1,
-  NINE                 = EIGHT + 1,
-  CURSOR               = NINE + 1,
+  HARPOON_COUNTER      = PAUSE + 1,
+  INVENTORY            = HARPOON_COUNTER + 1,
+  CURSOR               = INVENTORY + 1,
   PLAYER1              = CURSOR + 1,
   PLAYER2              = PLAYER1 + 1,
   PLAYER3              = PLAYER2 + 1,
@@ -85,8 +91,10 @@ enum class TEXTURE_ASSET_ID {
   TORPEDO              = TORPEDO_GUN + 1,
   SHRIMP_GUN           = TORPEDO + 1,
   SHRIMP               = SHRIMP_GUN + 1,  // TODO: shrimp gun projectile needed
-  KEY                  = SHRIMP + 1, 
-  PLAYER_OXYGEN_TANK   = KEY + 1,
+  RED_KEY              = SHRIMP + 1,
+  BLUE_KEY             = RED_KEY + 1,
+  YELLOW_KEY           = BLUE_KEY + 1,
+  PLAYER_OXYGEN_TANK   = YELLOW_KEY + 1,
   PLAYER_OXYGEN_BAR    = PLAYER_OXYGEN_TANK + 1,
   ENEMY_BACKGROUND_BAR = PLAYER_OXYGEN_BAR + 1,
   ENEMY_OXYGEN_BAR     = ENEMY_BACKGROUND_BAR + 1,

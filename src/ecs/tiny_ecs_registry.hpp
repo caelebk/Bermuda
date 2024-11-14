@@ -35,7 +35,7 @@ class ECSRegistry {
   ComponentContainer<PlayerProjectile> playerProjectiles;
   ComponentContainer<Inventory>        inventory;
   ComponentContainer<PlayerHUD>        playerHUD;
-  ComponentContainer<InventoryHUD>     invHUD;
+  ComponentContainer<InventoryCounter> inventoryCounters;
 
   // enemy related
   ComponentContainer<Deadly>         deadlys;
@@ -64,6 +64,7 @@ class ECSRegistry {
   ComponentContainer<RenderRequest> renderRequests;
   ComponentContainer<vec3>          colors;
   ComponentContainer<ScreenState>   screenStates;
+  ComponentContainer<TextRequest>   textRequests;
 
   // level related
   ComponentContainer<SpaceBoundingBox> bounding_boxes;
@@ -89,7 +90,7 @@ class ECSRegistry {
 
   // other
   ComponentContainer<Consumable>     consumables;
-  ComponentContainer<Item>     items;
+  ComponentContainer<Item>           items;
   ComponentContainer<Drop>           drops;
   ComponentContainer<DebugComponent> debugComponents;
   ComponentContainer<Emoting>        emoting;
@@ -113,7 +114,7 @@ class ECSRegistry {
     registry_list.push_back(&playerProjectiles);
     registry_list.push_back(&inventory);
     registry_list.push_back(&playerHUD);
-    registry_list.push_back(&invHUD);
+    registry_list.push_back(&inventoryCounters);
     // enemy related
     registry_list.push_back(&deadlys);
     registry_list.push_back(&bosses);
@@ -136,6 +137,7 @@ class ECSRegistry {
     registry_list.push_back(&renderRequests);
     registry_list.push_back(&screenStates);
     registry_list.push_back(&colors);
+    registry_list.push_back(&textRequests);
     // level related
     registry_list.push_back(&bounding_boxes);
     registry_list.push_back(&vectors);
@@ -200,12 +202,6 @@ class ECSRegistry {
     if (emoting.has(e)) {
       Emoting &ee = emoting.get(e); 
       remove_all_components_of(ee.child);
-    }
-
-    if (invHUD.has(e)) {
-      for (auto& pair : invHUD.get(e).count_digits) {
-        remove_all_components_of(pair.second);
-      }
     }
 
     for (ContainerInterface* reg : registry_list) reg->remove(e);

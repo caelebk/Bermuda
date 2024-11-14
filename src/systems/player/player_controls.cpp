@@ -1,7 +1,7 @@
 #include "player_controls.hpp"
 
 #include "collision_system.hpp"
-#include "inventory_HUD.hpp"
+#include "player_hud.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "player_factories.hpp"
@@ -185,9 +185,10 @@ bool updateInventory(RenderSystem* renderer, PROJECTILES type) {
         return false;
       }
       inv.nets--;
-      updateInventoryCounter(renderer, INVENTORY::NET, inv.nets);
+      updateInventoryCounter(renderer, INVENTORY::NET);
       if (!inv.nets) {
         doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+        changeSelectedCounterColour(INVENTORY::HARPOON);
       }
       break;
     case PROJECTILES::CONCUSSIVE:
@@ -195,7 +196,7 @@ bool updateInventory(RenderSystem* renderer, PROJECTILES type) {
         return false;
       }
       inv.concussors--;
-      updateInventoryCounter(renderer, INVENTORY::CONCUSSIVE, inv.concussors);
+      updateInventoryCounter(renderer, INVENTORY::CONCUSSIVE);
       //if inv.concussors is 0 or less, it'll be handled in debuff.cpp
       break;
     case PROJECTILES::TORPEDO:
@@ -203,9 +204,10 @@ bool updateInventory(RenderSystem* renderer, PROJECTILES type) {
         return false;
       }
       inv.torpedos--;
-      updateInventoryCounter(renderer, INVENTORY::TORPEDO, inv.torpedos);
+      updateInventoryCounter(renderer, INVENTORY::TORPEDO);
       if (!inv.torpedos) {
         doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+        changeSelectedCounterColour(INVENTORY::HARPOON);
       }
       break;
     case PROJECTILES::SHRIMP:
@@ -213,7 +215,7 @@ bool updateInventory(RenderSystem* renderer, PROJECTILES type) {
         return false;
       }
       inv.shrimp--;
-      updateInventoryCounter(renderer, INVENTORY::SHRIMP, inv.shrimp);
+      updateInventoryCounter(renderer, INVENTORY::SHRIMP);
       //if inv.shrimp is 0 or less, it'll be handled in collision_system in resolveWallStop
       break;
   }
@@ -333,26 +335,31 @@ void handleWeaponSwapping(int key) {
   // Switch to harpoon gun
   if (key == GLFW_KEY_1 && player_projectile != harpoon) {
     doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+    changeSelectedCounterColour(INVENTORY::HARPOON);
   }
 
   // Switch to Net
   if (key == GLFW_KEY_2 && inv.nets && player_projectile != net) {
     doWeaponSwap(net, net_gun, PROJECTILES::NET);
+    changeSelectedCounterColour(INVENTORY::NET);
   }
 
   // Switch to Concussive
   if (key == GLFW_KEY_3 && inv.concussors && player_projectile != concussive) {
     doWeaponSwap(concussive, concussive_gun, PROJECTILES::CONCUSSIVE);
+    changeSelectedCounterColour(INVENTORY::CONCUSSIVE);
   }
 
   // Switch to Torpedo
   if (key == GLFW_KEY_4 && inv.torpedos && player_projectile != torpedo) {
     doWeaponSwap(torpedo, torpedo_gun, PROJECTILES::TORPEDO);
+    changeSelectedCounterColour(INVENTORY::TORPEDO);
   }
 
   // Switch to Pistol Shrimp
   if (key == GLFW_KEY_5 && inv.shrimp && player_projectile != shrimp) {
     doWeaponSwap(shrimp, shrimp_gun, PROJECTILES::SHRIMP);
+    changeSelectedCounterColour(INVENTORY::SHRIMP);
   }
 }
 

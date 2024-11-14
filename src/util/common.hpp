@@ -5,6 +5,11 @@
 #include <tuple>
 #include <vector>
 
+// fonts
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include <map>				// map of character textures
+
 // glfw (OpenGL)
 #define NOMINMAX
 #include <gl3w.h>
@@ -15,6 +20,9 @@
 #include <glm/ext/vector_int2.hpp>  // ivec2
 #include <glm/vec3.hpp>             // vec3
 #include <glm/mat3x3.hpp>           // mat3
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 using namespace glm;
 
 #include "tiny_ecs.hpp"
@@ -28,6 +36,7 @@ inline std::string shader_path(const std::string& name) {return std::string(PROJ
 inline std::string textures_path(const std::string& name) {return data_path() + "/textures/" + std::string(name);};
 inline std::string audio_path(const std::string& name) {return data_path() + "/audio/" + std::string(name);};
 inline std::string mesh_path(const std::string& name) {return data_path() + "/meshes/" + std::string(name);};
+inline std::string fonts_path(const std::string& name) {return data_path() + "/fonts/" + std::string(name);};
 
 const int window_width_px = 1280;
 const int window_height_px = 720;

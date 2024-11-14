@@ -24,22 +24,14 @@ class RenderSystem {
   // Associated id with .obj path
   const std::vector<std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths = {
       // specify meshes of other assets here
-		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER, mesh_path("player.obj"))
-  };
+      std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER,
+                                                 mesh_path("player.obj"))};
 
   // Make sure these paths remain in sync with the associated enumerators.
   const std::array<std::string, texture_count> texture_paths = {
       textures_path("pause/pause_menu.png"),
-      textures_path("numbers/0.png"),
-      textures_path("numbers/1.png"),
-      textures_path("numbers/2.png"),
-      textures_path("numbers/3.png"),
-      textures_path("numbers/4.png"),
-      textures_path("numbers/5.png"),
-      textures_path("numbers/6.png"),
-      textures_path("numbers/7.png"),
-      textures_path("numbers/8.png"),
-      textures_path("numbers/9.png"),
+      textures_path("player/infinity.png"),
+      textures_path("player/inventory.png"),
       textures_path("cursors/crosshair_cursor.png"),
       textures_path("player/player1.png"),
       textures_path("player/player2.png"),
@@ -53,9 +45,12 @@ class RenderSystem {
       textures_path("player/concussive.png"),
       textures_path("player/torpedo_gun.png"),
       textures_path("player/torpedo.png"),
-      textures_path("player/shrimp_gun.png"), 
-      textures_path("player/shrimp.png"), // TODO: shrimp projectile needed, this is for HUD
-      textures_path("consumables/key.png"),
+      textures_path("player/shrimp_gun.png"),
+      textures_path("player/shrimp.png"),  // TODO: shrimp projectile needed,
+                                           // this is for HUD
+      textures_path("consumables/red_key.png"), 
+      textures_path("consumables/blue_key.png"),    
+      textures_path("consumables/yellow_key.png"),                                  
       textures_path("oxygen_and_health/player_oxygen_tank.png"),
       textures_path("oxygen_and_health/player_oxygen_bar.png"),
       textures_path("oxygen_and_health/enemy_background_bar.png"),
@@ -94,7 +89,7 @@ class RenderSystem {
   const std::array<std::string, effect_count> effect_paths = {
       shader_path("coloured"),        shader_path("textured"),
       shader_path("textured_oxygen"), shader_path("water"),
-      shader_path("player"),          shader_path("enemy"), 
+      shader_path("player"),          shader_path("enemy"),
       shader_path("collision_mesh")};
   std::array<GLuint, geometry_count> vertex_buffers;
   std::array<GLuint, geometry_count> index_buffers;
@@ -107,6 +102,8 @@ class RenderSystem {
   template <class T>
   void bindVBOandIBO(GEOMETRY_BUFFER_ID gid, std::vector<T> vertices,
                      std::vector<uint16_t> indices);
+
+  bool fontInit();
 
   void initializeGlTextures();
 
@@ -139,6 +136,8 @@ class RenderSystem {
   void drawTexturedMesh(Entity entity, const mat3& projection);
   // void drawTexturedMeshTemp(Entity entity, const mat3& projection);
   void drawToScreen();
+  void renderText(std::string text, float x, float y, float scale,
+                  const glm::vec3& color, const glm::mat4& trans);
 
   // Window handle
   GLFWwindow* window;
@@ -147,6 +146,15 @@ class RenderSystem {
   GLuint frame_buffer;
   GLuint off_screen_render_buffer_color;
   GLuint off_screen_render_buffer_depth;
+
+  // render system vao
+  GLuint vao;
+
+  // font-specific elements
+  std::map<char, Character> fontCharacters;
+  GLuint                    font_shaderProgram;
+  GLuint                    font_VAO;
+  GLuint                    font_VBO;
 
   Entity screen_state_entity;
 };
@@ -158,3 +166,5 @@ extern Entity player_weapon;
 
 bool loadEffectFromFile(const std::string& vs_path, const std::string& fs_path,
                         GLuint& out_program);
+
+std::string readShaderFile(const std::string& filename);

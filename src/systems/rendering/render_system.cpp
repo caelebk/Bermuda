@@ -209,6 +209,64 @@ void RenderSystem::drawToScreen() {
   gl_has_errors();
 }
 
+void RenderSystem::renderText(std::string text, float x, float y, float scale,
+                              const glm::vec3& color, const glm::mat4& trans) {
+  // activate the shader program
+  glEnable(GL_BLEND);
+  glUseProgram(font_shaderProgram);
+
+  // get shader uniforms
+  GLint textColor_location =
+      glGetUniformLocation(font_shaderProgram, "textColor");
+  glUniform3f(textColor_location, color.x, color.y, color.z);
+
+  GLint transformLoc = glGetUniformLocation(font_shaderProgram, "transform");
+  glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
+  glBindVertexArray(font_VAO);
+
+  // iterate through all characters
+  std::string::const_iterator c;
+  for (c = text.begin(); c != text.end(); c++) {
+    Character ch = fontCharacters[*c];
+
+    float xpos = x + ch.Bearing.x * scale;
+    float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+    float w = ch.Size.x * scale;
+    float h = ch.Size.y * scale;
+    // update VBO for each character
+    float vertices[6][4] = {
+        {xpos, ypos + h, 0.0f, 0.0f},    {xpos, ypos, 0.0f, 1.0f},
+        {xpos + w, ypos, 1.0f, 1.0f},
+
+        {xpos, ypos + h, 0.0f, 0.0f},    {xpos + w, ypos, 1.0f, 1.0f},
+        {xpos + w, ypos + h, 1.0f, 0.0f}};
+
+    // render glyph texture over quad
+    glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+    // std::cout << "binding texture: " << ch.character << " = " << ch.TextureID
+    // << std::endl;
+
+    // update content of VBO memory
+    glBindBuffer(GL_ARRAY_BUFFER, font_VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // render quad
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // now advance cursors for next glyph (note that advance is number of 1/64
+    // pixels)
+    x += (ch.Advance >> 6) *
+         scale;  // bitshift by 6 to get value in pixels (2^6 = 64)
+  }
+
+  glBindVertexArray(vao);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_BLEND);
+}
+
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
 void RenderSystem::draw() {
@@ -324,6 +382,26 @@ void RenderSystem::draw() {
       drawTexturedMesh(pauseMenu, projection_2D);
   }
   //////////////////////////////////////////////////////////////////////////////////////
+
+  // Render Fonts
+  if (!paused) {
+    for (Entity entity : registry.textRequests.entities) {
+      if (!registry.positions.has(entity) || !registry.colors.has(entity))
+        continue;
+      TextRequest& textRequest = registry.textRequests.get(entity);
+      Position&    position    = registry.positions.get(entity);
+      vec3&        color       = registry.colors.get(entity);
+
+      Transform transform;
+      transform.translate(position.position);
+      transform.rotate(position.angle);
+      transform.scale(position.scale);
+
+      renderText(textRequest.text, position.position.x,
+                 abs(position.position.y - window_height_px),
+                 textRequest.textScale, color, transform.mat);
+    }
+  }
 
   // Truely render to the screen
   drawToScreen();

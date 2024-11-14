@@ -9,7 +9,7 @@
 #include "debuff.hpp"
 #include "enemy_factories.hpp"
 #include "enemy_util.hpp"
-#include "inventory_HUD.hpp"
+#include "player_hud.hpp"
 #include "level_spawn.hpp"
 #include "map_factories.hpp"
 #include "map_util.hpp"
@@ -270,7 +270,7 @@ void WorldSystem::restart_game() {
       renderer,
       {150, window_height_px - 150});  // TODO: get player spawn position
   registry.inventory.emplace(player);
-  createInvHUD(renderer, player);
+  createInventoryHud(renderer);
   // init global variables
   player_weapon     = getPlayerWeapon();
   player_projectile = getPlayerProjectile();

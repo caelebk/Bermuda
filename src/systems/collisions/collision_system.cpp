@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <damage.hpp>
 #include <glm/geometric.hpp>
+#include <player_hud.hpp>
 #include <player_controls.hpp>
 #include <player_factories.hpp>
 
@@ -707,6 +708,7 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
     } else {
       destroyGunOrProjectile(player_proj);
       doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+      changeSelectedCounterColour(INVENTORY::HARPOON);
     }
   } else {
     proj_motion.velocity     = vec2(0.f);

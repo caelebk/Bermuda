@@ -2,7 +2,7 @@
 #include "common.hpp"
 // Data structure for toggling debug mode
 struct Debug {
-  bool in_debug_mode = 0;
+  bool in_debug_mode  = 0;
   bool in_freeze_mode = 0;
 };
 
@@ -13,14 +13,10 @@ struct DebugComponent {
   // Note, an empty struct has size 1
 };
 
-struct GameCursor {
-
-};
+struct GameCursor {};
 
 struct Emoting {
   Entity child;
 };
 
-struct PauseMenu {
-
-};
+struct PauseMenu {};
