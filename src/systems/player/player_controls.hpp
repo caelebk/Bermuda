@@ -4,7 +4,7 @@
 #include "tiny_ecs_registry.hpp"
 
 // Movement speed (To be balanced later)
-#define SPEED_INC 2.0f
+#define SPEED_INC 6.0f
 
 bool player_movement(int key, int action, int mod);
 

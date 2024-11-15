@@ -7,7 +7,7 @@
 #include <random>
 #include <vector>
 
-#include "level.hpp"
+#include "level_system.hpp"
 #include "render_system.hpp"
 
 // Loop Duration
@@ -23,7 +23,7 @@ class WorldSystem {
   GLFWwindow* create_window();
 
   // starts the game
-  void init(RenderSystem* renderer, LevelBuilder* level_builder);
+  void init(RenderSystem* renderer, LevelSystem* level);
 
   // Releases all associated resources
   ~WorldSystem();
@@ -51,7 +51,7 @@ class WorldSystem {
   unsigned int points;
 
   // Game state
-  LevelBuilder* level_builder;
+  LevelSystem* level;
   RenderSystem* renderer;
   float         oxygen_timer;
   vec2          mouse_pos;

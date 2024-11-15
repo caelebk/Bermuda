@@ -47,7 +47,7 @@ Entity respawnFish(RenderSystem* renderer, EntityState es);
 // Sharks
 //////////////////////////////////////////////////////////////
 
-#define SHARK_MS 30.0
+#define SHARK_MS 60.0
 #define SHARK_DAMAGE -20.0
 #define SHARK_ATK_SPD 1000.0
 #define SHARK_MIN_SCALE 0.1

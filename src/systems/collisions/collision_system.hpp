@@ -9,7 +9,7 @@
 #include "enemy.hpp"
 #include "environment.hpp"
 #include "items.hpp"
-#include "level.hpp"
+#include "level_system.hpp"
 #include "misc.hpp"
 #include "oxygen.hpp"
 #include "oxygen_system.hpp"
@@ -20,7 +20,7 @@
 
 class CollisionSystem {
   private:
-  LevelBuilder* level;
+  LevelSystem* level;
 
   void collision_detection();
   void collision_resolution();
@@ -77,7 +77,7 @@ class CollisionSystem {
   void detectAndResolveExplosion(Entity proj, Entity enemy);
 
   public:
-  void init(LevelBuilder* level);
+  void init(LevelSystem* level);
   void step(float elapsed_ms);
 
   CollisionSystem() {}

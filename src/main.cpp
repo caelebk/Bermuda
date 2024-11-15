@@ -1,4 +1,3 @@
-
 #include "ai_system.hpp"
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
@@ -9,7 +8,7 @@
 // internal
 #include "audio_system.hpp"
 #include "collision_system.hpp"
-#include "level.hpp"
+#include "level_system.hpp"
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
@@ -42,13 +41,13 @@ Entity shrimp_gun;
 // Entry point
 int main() {
   // Global systems
-  LevelBuilder    level_builder;
   WorldSystem     world;
   RenderSystem    renderer;
   AISystem        ai;
   PhysicsSystem   physics;
   AudioSystem     audios;
   CollisionSystem collisions;
+  LevelSystem     level;
 
   // Initializing window
   GLFWwindow* window = world.create_window();
@@ -59,11 +58,15 @@ int main() {
     return EXIT_FAILURE;
   }
 
+  // Generate a level.
+  LevelBuilder level_builder = LevelBuilder();
+  level_builder.generate_random_level();
+
   // initialize the main systems
-  collisions.init(&level_builder);
+  level.init(&renderer, &level_builder);
+  collisions.init(&level);
   renderer.init(window);
-  level_builder.init(&renderer);
-  world.init(&renderer, &level_builder);
+  world.init(&renderer, &level);
   audios.init();
   ai.init(&renderer);
 

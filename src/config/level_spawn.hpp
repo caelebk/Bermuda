@@ -1,6 +1,41 @@
 #pragma once
+
+#include "map_factories.hpp"
 #include "boss_factories.hpp"
 #include "enemy_factories.hpp"
+#include "consumable_factories.hpp"
+
+const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> EMPTY = {};
+
+const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> LVL_1_RAND_POS =                                                       
+  {createOxygenCanisterPos, createCratePos, createCratePos,  createCratePos, 
+   createCratePos,          createCratePos, createGeyserPos, createSharkPos, 
+   createKrabPos,           createFishPos,  createJellyPos};
+
+// TODO:
+// We don't have any new enemies yet, so just spawn a billion sharks for LVL 2.
+const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> LVL_2_RAND_POS =                                                       
+{createOxygenCanisterPos, createCratePos, createCratePos,  createCratePos, 
+  createCratePos,          createCratePos, createGeyserPos, createFishPos, 
+  createSharkPos,           createSharkPos,  createSharkPos};
+
+// TODO:
+// Ditto.
+const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> LVL_3_RAND_POS =                                                       
+  {createSharkPos, createSharkPos, createSharkPos,  createSharkPos, 
+   createSharkPos,          createSharkPos, createSharkPos, createSharkPos, 
+   createSharkPos,           createSharkPos,  createSharkPos};
+
+const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> TUTORIAL_JELLYFISH_MINIBOSS =                                 
+{                                                                        
+    createJellyBossPos,                                                      
+};
+
+const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> CRAB_MINIBOSS = 
+{                                                                              
+    createCrabBossPos, createKrabPos, createKrabPos, createKrabPos, createKrabPos, createKrabPos, createKrabPos,
+    createOxygenCanisterPos, createOxygenCanisterPos, createOxygenCanisterPos
+};
 
 // currently used as "always spawn"
 #define LVL_1_FIXED                                                      \
@@ -35,27 +70,3 @@
                        {window_width_px - 650, window_height_px - 200}); \
       },                                                                 \
   }
-
-#define CRAB_MINIBOSS                                                            \
-  {                                                                              \
-      createCrabBossPos,       createCratePos,          createOxygenCanisterPos, \
-      createOxygenCanisterPos, createOxygenCanisterPos, createOxygenCanisterPos, \
-  }
-
-#define LVL_1_RAND_POS                                                       \
-  {createOxygenCanisterPos, createCratePos, createCratePos,  createCratePos, \
-   createCratePos,          createCratePos, createGeyserPos, createSharkPos, \
-   createKrabPos,           createFishPos, createJellyPos, createJellyPos}
-// createJellyPos,          createJellyPos,  createJellyPos,          \
-      // createJellyPos,          createJellyPos,  createOxygenCanisterPos, \
-      // createOxygenCanisterPos, createGeyserPos, createGeyserPos,         \
-      // createCratePos,          createCratePos,  createCratePos,          \
-      // createCratePos,          createCratePos,  createCratePos,          \
-      // createFishPos,           createFishPos,   createFishPos,           \
-      // createFishPos,           createFishPos,   createFishPos,           \
-      //
-
-#define LVL_1_RAND_POS_CRATELESS                                            \
-  {createOxygenCanisterPos, createGeyserPos, createSharkPos, createKrabPos, \
-   createFishPos,           createSharkPos,  createKrabPos,  createFishPos, \
-   createJellyPos, createJellyPos}

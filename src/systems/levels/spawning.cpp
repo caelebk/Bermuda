@@ -1,7 +1,35 @@
 #include "spawning.hpp"
 
+#include <iostream>
 #include "random.hpp"
 #include "tiny_ecs_registry.hpp"
+
+void execute_config_rand(
+    const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>>
+        &funcs,
+    RoomBuilder &room_builder, RenderSystem *renderer) {
+  for (const auto &func : funcs) {
+    vec2 loc;
+    do {
+      loc = room_builder.get_random_position();
+    } while ((unsigned int)func(renderer, loc, true) ==
+             0); // Call each function until spawn is successful
+  }
+}
+
+void execute_config_rand_chance(
+    const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>>
+        &funcs,
+    RoomBuilder &room_builder, RenderSystem *renderer, float chance) {
+  for (const auto &func : funcs) {
+    if (randomSuccess(chance)) {
+      vec2 loc;
+      do {
+        loc = room_builder.get_random_position();
+      } while ((unsigned int)func(renderer, loc, true) == 0); // Call each function until spawn is successful
+    }
+  }
+}
 
 /**
  * @brief executes a config used to generate things in a level

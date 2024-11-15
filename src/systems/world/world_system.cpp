@@ -107,9 +107,9 @@ GLFWwindow* WorldSystem::create_window() {
   return window;
 }
 
-void WorldSystem::init(RenderSystem* renderer_arg, LevelBuilder* level_builder) {
+void WorldSystem::init(RenderSystem* renderer_arg, LevelSystem* level) {
   this->renderer = renderer_arg;
-  this->level_builder = level_builder;
+  this->level = level;
 
   restart_game();
   restart_game();
@@ -197,7 +197,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       screen.darken_screen_factor = min(1.f, screen.darken_screen_factor + 0.001f * elapsed_ms_since_last_update);
     } else if (screen.darken_screen_factor >= 1.f && registry.roomTransitions.has(rt_entity)) {
       RoomTransition& roomTransition = registry.roomTransitions.get(rt_entity);
-      level_builder->enter_room(roomTransition.door_connection);
+      level->enter_room(roomTransition.door_connection);
       registry.remove_all_components_of(rt_entity);
     } else if (screen.darken_screen_factor > 0.f && !registry.roomTransitions.has(rt_entity)) {
       screen.darken_screen_factor = max(0.f, screen.darken_screen_factor - 0.001f * elapsed_ms_since_last_update);
@@ -306,7 +306,7 @@ void WorldSystem::restart_game() {
   /////////////////////////////////////////////
   // spawn at random places in the room
 
-  level_builder->activate_starting_room();
+  level->activate_starting_room();
 
   paused = false;
 }

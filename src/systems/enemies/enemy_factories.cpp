@@ -7,7 +7,7 @@
 #include "oxygen_system.hpp"
 #include "physics.hpp"
 #include "random.hpp"
-#include "space.hpp"
+#include "room_builder.hpp"
 #include "tiny_ecs_registry.hpp"
 
 /////////////////////////////////////////////////////////////////

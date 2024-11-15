@@ -9,14 +9,12 @@
 #include "oxygen_system.hpp"
 #include "physics.hpp"
 #include "random.hpp"
-#include "space.hpp"
 #include "tiny_ecs_registry.hpp"
-
 
 //////////////////////////////////////////////////////////////
 // Crab Boss
 //////////////////////////////////////////////////////////////
-#define KRAB_BOSS_MS 20.0
+#define KRAB_BOSS_MS 80.0
 #define KRAB_BOSS_DAMAGE -300.0
 #define KRAB_BOSS_ATK_SPD 1000.0
 #define KRAB_BOSS_SCALE vec2(0.1)
@@ -32,8 +30,10 @@
 #define KRAB_BOSS_HEALTH_SCALE vec2(1.4f)
 #define KRAB_BOSS_HEALTH_BAR_SCALE vec2(1.5f)
 #define KRAB_BOSS_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
-#define KRAB_BOSS_AI_CD 10000 // switch every 10 seconds
+#define KRAB_BOSS_AI_CD 5000 // switch every 10 seconds
 
+// Create tutorial jellyfish.
+Entity createJellyBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions);
 Entity createCrabBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
 Entity respawnCrabBoss(RenderSystem* renderer, EntityState es);
 

@@ -163,7 +163,7 @@ bool mesh_collides(Entity mesh, Entity other) {
   return false;
 }
 
-void CollisionSystem::init(LevelBuilder* level) {
+void CollisionSystem::init(LevelSystem* level) {
   this->level = level;
 }
 
@@ -867,8 +867,6 @@ void CollisionSystem::resolveMassCollision(Entity wall, Entity other) {
 }
 
 void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
-  std::cout << "collided with door" << std::endl;
-
   rt_entity                      = Entity();
   RoomTransition& roomTransition = registry.roomTransitions.emplace(rt_entity);
 

@@ -33,6 +33,5 @@ Entity respawnGeyser(RenderSystem *renderer, EntityState es);
 #define CRATE_DROP_0 createOxygenCanisterPos
 #define CRATE_DROP_CHANCE_0 0.5
 
-
 Entity createCratePos(RenderSystem *renderer, vec2 position, bool checkCollisions = true);
 Entity respawnCrate(RenderSystem *renderer, EntityState es);

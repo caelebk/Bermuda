@@ -1,8 +1,8 @@
 #include "boss_factories.hpp"
+#include "enemy_factories.hpp"
 
 #include <functional>
 #include <vector>
-#include "map_factories.hpp"
 
 /////////////////////////////////////////////////////////////////
 // Util
@@ -98,7 +98,13 @@ static void addCrabRanged() {
   addCrabBossWander();
 }
 
-Entity createCrabBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+Entity createJellyBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+  vec2 pos = {window_width_px / 2, window_height_px / 2};
+  createJellyPos(renderer, pos, checkCollisions);
+};
+
+Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
+                         bool checkCollisions) {
   // Reserve an entity
   auto  entity = Entity();
   auto& pos    = registry.positions.emplace(entity);
@@ -138,7 +144,7 @@ Entity createCrabBossPos(RenderSystem* renderer, vec2 position, bool checkCollis
   boss.ai    = std::vector<std::function<void()>>(
       {addCrabMelee, addCrabMelee, addCrabMelee, addCrabMelee, addCrabMelee,
           addCrabMelee, addCrabMelee, addCrabMelee, addCrabRanged, addCrabRanged,
-          addCrabBossWander});
+        addCrabBossWander});
 
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::KRAB_BOSS, EFFECT_ASSET_ID::ENEMY,
@@ -149,7 +155,6 @@ Entity createCrabBossPos(RenderSystem* renderer, vec2 position, bool checkCollis
                          KRAB_BOSS_HEALTH_BOUNDING_BOX);
   return entity;
 }
-
 
 /**
  * @brief Respawns a boss based on it's entity state

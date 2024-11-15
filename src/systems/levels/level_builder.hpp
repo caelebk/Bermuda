@@ -6,11 +6,8 @@
 #include <unordered_map>
 #include <set>
 
+#include "room_builder.hpp"
 #include "respawn.hpp"
-#include "room.hpp"
-#include "hallway.hpp"
-
-#define STARTING_ROOM_ID "0"
 
 /**
  * The Following Define Standardized Units For Room Building
@@ -53,68 +50,36 @@
 #define Y_9U 9.f * Y_1U
 #define Y_10U 10.f * Y_1U
 
-int get_random(int x, int y);
 Direction get_opposite_direction(Direction direction);
 
 /**
- * A high-level OOP to ECS wrapper API that deals with levels. Facilitates the construction of levels as well as switching between them.
+ * Deals only with the building of levels.
  */
-// May need to be refactored into a LevelSystem and a LevelBuilder module; where the LevelSystem handles gameplay related level functionality instead of having LevelBuilder double as 
-// a system.
 class LevelBuilder
 {
 private:
-    std::string current_room_id;
-    RenderSystem* renderer;
-
-    std::set<std::string> entered_rooms;
-    std::set<std::string> boss_rooms;
-
-    // TODO: componentize this
-    std::map<std::string, std::vector<EntitySave>> saved_entities;
-
     std::unordered_map<std::string, RoomBuilder> rooms;
-    std::unordered_map<std::string, HallwayBuilder> hallways;
 
-    void mark_boss_rooms(std::vector<int> rooms);
-    void spawn_miniboss();
+    void connect_doors(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
 
-    void mark_room_entered(std::string room_id);
-    bool has_entered_room(std::string room_id);
+    void mark_difficulty_regions();
+    void mark_tutorial_room();
+    void mark_miniboss_rooms();
+    void mark_final_boss_room();
 
-    void activate_room(std::string room_id);
-    void deactivate_room();
-        
-    void activate_boundary(Entity& boundary);
-    void deactivate_boundary(Entity& boundary);
-
-    // May not belong here in this class.
-    void move_player_to_door(Direction direction, Entity& door);
-
-    void build_wall_with_random_doors(RoomBuilder& room,
-                                Direction direction,
+    void build_wall_with_random_doors(Direction direction,
                                 std::unordered_map<int, Direction> directed_adjacencies,
                                 int max_units,
                                 int unit_size,
                                 std::function<void(int)> draw_segment,
                                 std::function<void(std::string, int)> draw_door);
-
     void randomize_room_shapes(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
-    void connect_doors(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
 public:
-    void init(RenderSystem* renderer);
-
     /**
      * Returns the RoomBuilder for a room, making a new one if one under the given key does not exist.
      * @param s_id: the room's key.
      */
-    RoomBuilder &room(std::string s_id);
-
-    /**
-     * Returns the HallwayBuilder for a hallway, making a new one if one under the given key does not exist.
-     * @param s_id: the room's key.
-     */
-    HallwayBuilder &hallway(std::string s_id);
+    RoomBuilder &get_room_by_editor_id(std::string s_id);
 
     /**
      * Connects two doors together.
@@ -128,15 +93,9 @@ public:
 
     /**
      * Generates a randomized level.
-     * @param rooms: a vector of the number of rooms for each difficulty area, i.e {5,5,5} = 15 rooms, each grouped by ascending difficulty class.
-     * @param densities: a weighting on the probability of a room to have connections. Must match the length of rooms. e.g {80, 50, 0} makes easy rooms low on connections
-     *                   and later rooms heavy on connections.
+     * @param rooms: a vector of the number of rooms for each difficulty area, i.e {1,5,5,5} = 16 rooms, each grouped by ascending difficulty class.
      */
-    void generate_random_level(std::vector<int> rooms, std::vector<int> densities);
-    
-    // Switches to the room pointed at by the given DoorConnection.
-    void enter_room(DoorConnection& door_connection);
+    void generate_random_level();
 
-    // Activates the starting room.
-    void activate_starting_room();
+    void mark_all_rooms_unvisited();
 };
