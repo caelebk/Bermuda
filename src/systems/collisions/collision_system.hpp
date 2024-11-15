@@ -77,6 +77,9 @@ class CollisionSystem {
   ***********************************************************************/
 
   void detectAndResolveExplosion(Entity proj, Entity enemy);
+  
+  // Note: The actual angle window used is really 2 times the angle (position.angle += angle)
+  void detectAndResolveConeAOE(Entity proj, Entity enemy, float angle);
 
   public:
   void init(LevelSystem* level);

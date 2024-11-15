@@ -298,6 +298,9 @@ Entity loadShrimp(RenderSystem* renderer) {
   OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
   oxyCost.amount          = SHRIMP_OXYGEN_COST;
 
+  AreaOfEffect& aoe = registry.aoe.emplace(entity);
+  aoe.radius        = SHRIMP_DAMAGE_RADIUS;
+
   return entity;
 }
 

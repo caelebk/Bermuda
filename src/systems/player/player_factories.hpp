@@ -111,6 +111,8 @@ Entity loadTorpedo(RenderSystem* renderer);
 #define SHRIMP_BOUNDING_BOX vec2(242.f, 130.f)
 #define SHRIMP_RELATIVE_POS_FROM_GUN vec2(18.f, 0.f)
 #define SHRIMP_OXYGEN_COST -100.f
+#define SHRIMP_DAMAGE_RADIUS 300;
+#define SHRIMP_DAMAGE_ANGLE M_PI/2.f
 
 Entity loadShrimp(RenderSystem* renderer);
 

@@ -62,7 +62,11 @@ struct Interactable {
 
 struct Floor {};
 
-struct Geyser {};
+struct Geyser {
+  float bubble_timer;
+};
+
+struct Bubble {};
 
 struct Breakable {
   std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;

@@ -17,6 +17,7 @@ enum class PROJECTILES {
 struct PlayerProjectile {
   bool is_loaded = false;  // flags whether to follow a weapon's position or act
                            // as a projectile
+  bool        is_flipped;
   PROJECTILES type;
 };
 

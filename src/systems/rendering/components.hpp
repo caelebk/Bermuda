@@ -134,7 +134,8 @@ enum class TEXTURE_ASSET_ID {
   METAL_CRATE          = BREAKABLE_CRATE + 1,
   OXYGEN_CANISTER      = METAL_CRATE + 1,
   GEYSER               = OXYGEN_CANISTER + 1,
-  TEXTURE_COUNT        = GEYSER + 1
+  GEYSER_BUBBLE        = GEYSER + 1,
+  TEXTURE_COUNT        = GEYSER_BUBBLE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

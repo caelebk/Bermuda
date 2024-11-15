@@ -38,6 +38,14 @@ void PhysicsSystem::step(float elapsed_ms) {
     }
   }
 
+  // Poof bubbles
+  for (Entity entity : registry.bubbles.entities) {
+    calculateVelocity(entity, lerp);
+    if (registry.motions.has(entity) && registry.motions.get(entity).velocity.y > 0) {
+      registry.remove_all_components_of(entity);
+    }
+  }
+
   // Apply water friction
   applyWaterFriction(player);
   for (Entity entity : registry.masses.entities) {
@@ -101,7 +109,7 @@ void updateWepProjPos(vec2 mouse_pos) {
   float     angle      = atan2(pos_cursor_vec.y, pos_cursor_vec.x);
   Position& weapon_pos = registry.positions.get(player_weapon);
   Position& proj_pos   = registry.positions.get(player_projectile);
-  weapon_pos.angle     = (player_comp.scale.x < 0) ? angle + 3.14159 : angle;
+  weapon_pos.angle     = (player_comp.scale.x < 0) ? angle + M_PI : angle;
 
   float flipped = (player_comp.scale.x < 0) ? -1 : 1;
   switch (wep_type) {
@@ -198,6 +206,8 @@ void updatePlayerDirection(vec2 mouse_pos) {
 void setFiredProjVelo() {
   PlayerProjectile& proj = registry.playerProjectiles.get(player_projectile);
   proj.is_loaded         = false;
+  registry.positions.get(player).scale.x < 0 ? proj.is_flipped = true
+                                                     : proj.is_flipped = false;
   float   angle          = registry.positions.get(player_projectile).angle;
   Motion& proj_motion    = registry.motions.get(player_projectile);
   vec2&   proj_scale     = registry.positions.get(player_projectile).scale;
@@ -350,4 +360,30 @@ void applyWaterFriction(Entity entity) {
     motion.velocity.y > 0 ? motion.acceleration.y -= water_friction
                           : motion.acceleration.y += water_friction;
   }
+}
+
+Entity createGeyserBubble(RenderSystem* renderer, vec2 position) {
+  // Reserve an entity
+  auto entity = Entity();
+  // physics and pos
+  Position& pos = registry.positions.emplace(entity);
+  pos.angle     = 0.f;
+  pos.position  = position;
+  pos.scale     = BUBBLE_SCALE_FACTOR * BUBBLE_BOUNDING_BOX;
+
+  Motion& motion      = registry.motions.emplace(entity);
+  motion.acceleration = {0.f, WATER_FRICTION};
+  motion.velocity     = INITIAL_BUBBLE_VELOCITY;
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  registry.bubbles.emplace(entity);
+
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::GEYSER_BUBBLE, EFFECT_ASSET_ID::TEXTURED,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
 }

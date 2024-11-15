@@ -37,6 +37,12 @@
 // Acceleration applies on player by force of friction
 #define WATER_FRICTION MAX_PLAYER_SPEED / 2.f
 
+// Geyser Bubbles
+#define BUBBLE_SCALE_FACTOR vec2(1.f)
+#define BUBBLE_BOUNDING_BOX vec2(14.f, 14.f)
+#define BUBBLE_INTERVAL 500.f
+#define INITIAL_BUBBLE_VELOCITY {0.f, -30.f} 
+
 // A simple physics system that moves rigid bodies and checks for collision
 class PhysicsSystem {
   private:
@@ -48,6 +54,8 @@ class PhysicsSystem {
 
 extern bool   paused;
 extern Entity player;
+
+Entity createGeyserBubble(RenderSystem* renderer, vec2 pos);
 
 void updateWepProjPos(vec2 mouse_pos);
 

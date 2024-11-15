@@ -145,6 +145,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       }
     }
 
+    // Geyser bubbles
+    for (Entity entity : registry.geysers.entities) {
+      Geyser& timer = registry.geysers.get(entity);
+      timer.bubble_timer -= elapsed_ms_since_last_update;
+      if (timer.bubble_timer <= 0.f) {
+        timer.bubble_timer = BUBBLE_INTERVAL;
+        Position& pos      = registry.positions.get(entity);
+        createGeyserBubble(renderer,
+                           {pos.position.x + randomFloat(-10.f, 10.f), pos.position.y});
+      }
+    }
+
     update_debuffs(elapsed_ms_since_last_update);
     update_attack(elapsed_ms_since_last_update);
     update_collision_timers(elapsed_ms_since_last_update);

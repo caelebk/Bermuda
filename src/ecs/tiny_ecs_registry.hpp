@@ -76,6 +76,7 @@ class ECSRegistry {
   ComponentContainer<Interactable>     interactable;
   ComponentContainer<Floor>            floors;
   ComponentContainer<Geyser>           geysers;
+  ComponentContainer<Bubble>           bubbles;
   ComponentContainer<Breakable>        breakables;
 
   // status related
@@ -147,6 +148,7 @@ class ECSRegistry {
     registry_list.push_back(&activeDoors);
     registry_list.push_back(&interactable);
     registry_list.push_back(&geysers);
+    registry_list.push_back(&bubbles);
     registry_list.push_back(&floors);
     registry_list.push_back(&breakables);
     // status related

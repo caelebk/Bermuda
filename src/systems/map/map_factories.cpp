@@ -119,7 +119,8 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position,
   i.respawnFn     = respawnGeyser;
 
   // designate this as a geyser; facilitates room transitions.
-  registry.geysers.emplace(entity);
+  Geyser& geyser = registry.geysers.emplace(entity);
+  geyser.bubble_timer = BUBBLE_INTERVAL;
 
   // Add stats
   auto& refill              = registry.oxygenModifiers.emplace(entity);

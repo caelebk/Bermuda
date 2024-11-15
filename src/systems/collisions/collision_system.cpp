@@ -5,6 +5,7 @@
 #include <glm/geometric.hpp>
 #include <player_controls.hpp>
 #include <player_factories.hpp>
+#include <physics_system.hpp>
 #include <player_hud.hpp>
 
 #include "ai.hpp"
@@ -90,6 +91,45 @@ bool circle_box_collides(const Position& circle_pos, float radius,
 
   return distanceSquared <= radiusSquared;
 }
+
+//bool cone_box_collides(const Position& circle_pos, float radius,
+//  const Position& box_pos, float angle) {
+//  vec4 box_bound = get_bounds(box_pos);
+//
+//  float box_left  = box_bound[0];
+//  float box_right = box_bound[1];
+//  float box_top   = box_bound[2];
+//  float box_bot   = box_bound[3];
+//
+//  float closestX = clamp(circle_pos.position.x, box_left, box_right);
+//  float closestY = clamp(circle_pos.position.y, box_top, box_bot);
+//
+//  float distanceX = circle_pos.position.x - closestX;
+//  float distanceY = circle_pos.position.y - closestY;
+//
+//  float distanceSquared = distanceX * distanceX + distanceY * distanceY;
+//  float radiusSquared   = radius * radius;
+//
+//  float circle_angle   = circle_pos.angle;
+//  float proj_ent_angle =
+//      atan2(distanceY, distanceX);
+//
+//  proj_ent_angle = std::fmod(2.f * M_PI + proj_ent_angle, 2.f * M_PI);
+//  float min   = std::fmod(2000.f * M_PI + circle_angle - angle, 2.f * M_PI);
+//  float max   = std::fmod(2000.f * M_PI + circle_angle + angle, 2.f * M_PI);
+//
+//  bool is_inbetween = (min <= proj_ent_angle) || (proj_ent_angle <= max);
+//
+//  if (min < max) {
+//    is_inbetween = (min <= proj_ent_angle) && (proj_ent_angle <= max);
+//  }
+//
+//  /*float angle_diff = fmod((abs(circle_angle) - proj_ent_angle + 3 * M_PI), (2.f * M_PI)) - M_PI;*/
+//
+//  printf("Proj angle %f\n Distance Angle %f\n", circle_angle, min);
+//
+//  return distanceSquared <= radiusSquared && is_inbetween;
+//}
 
 bool mesh_collides(Entity mesh, Entity other) {
   // ignore player collision mesh - player collisions
@@ -657,6 +697,7 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
       detectAndResolveExplosion(player_proj, enemy);
       break;
     case PROJECTILES::SHRIMP:
+      /*detectAndResolveConeAOE(player_proj, enemy, SHRIMP_DAMAGE_ANGLE);*/
       break;
   }
 
@@ -669,8 +710,7 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
     tracks.active_track  = true;
   }
 
-  if (playerproj_comp.type != PROJECTILES::CONCUSSIVE &&
-      playerproj_comp.type != PROJECTILES::SHRIMP) {
+  if (playerproj_comp.type != PROJECTILES::CONCUSSIVE && playerproj_comp.type != PROJECTILES::SHRIMP) {
     playerproj_motion.velocity = vec2(0.0f, 0.0f);
     playerproj_comp.is_loaded  = true;
   }
@@ -703,6 +743,57 @@ void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity enemy) {
 
     if (circle_box_collides(playerproj_position, playerproj_aoe.radius,
                             enemy_position)) {
+      modifyOxygen(enemy_check, proj);
+      addDamageIndicatorTimer(enemy_check);
+    }
+  }
+}
+
+void CollisionSystem::detectAndResolveConeAOE(Entity proj, Entity enemy, float angle) {
+  for (Entity enemy_check : registry.deadlys.entities) {
+    if (enemy_check == enemy || !registry.positions.has(enemy)) {
+      continue;
+    }
+    Position&     playerproj_position = registry.positions.get(proj);
+    AreaOfEffect& playerproj_aoe      = registry.aoe.get(proj);
+    Position&     enemy_position      = registry.positions.get(enemy_check);
+
+    float circle_angle   = playerproj_position.angle;
+    vec2  pos_diff       = playerproj_position.position - enemy_position.position;
+    float proj_ent_angle = atan2(pos_diff.y, pos_diff.x);
+    if (registry.playerProjectiles.get(proj).is_flipped) {
+      circle_angle -= M_PI;
+    }
+    if (circle_angle < 0) {
+      circle_angle += 2 * M_PI;
+    }
+    if (proj_ent_angle < 0) {
+      proj_ent_angle += 2 * M_PI;
+    }
+
+    float anglediff =
+        fmod((circle_angle - proj_ent_angle + 3 * M_PI), 2 * M_PI);
+
+    float is_inbetween = abs(anglediff) <= angle;
+
+
+    /*proj_ent_angle = std::fmod(2.f * M_PI + proj_ent_angle, 2.f * M_PI);
+    float min      = std::fmod(20.f * M_PI + circle_angle - angle, 2.f * M_PI);
+    float max      = std::fmod(20.f * M_PI + circle_angle + angle, 2.f * M_PI);
+
+    bool is_inbetween = !(min <= proj_ent_angle) || (proj_ent_angle <= max);
+
+    if (min < max) {
+      is_inbetween = !(min <= proj_ent_angle) && (proj_ent_angle <= max);
+    }*/
+
+    /*if (circle_box_collides(playerproj_position, playerproj_aoe.radius,
+                            enemy_position)) {
+      printf("Proj angle %f\n Distance Angle %f\n", anglediff, angle);
+    }*/
+
+    if (circle_box_collides(playerproj_position, playerproj_aoe.radius,
+                            enemy_position) && is_inbetween) {
       modifyOxygen(enemy_check, proj);
       addDamageIndicatorTimer(enemy_check);
     }

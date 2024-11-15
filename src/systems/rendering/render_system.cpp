@@ -335,6 +335,10 @@ void RenderSystem::draw() {
     if (registry.renderRequests.has(interactable))
       drawTexturedMesh(interactable, projection_2D);
   }
+  for (Entity bubble : registry.bubbles.entities) {
+    if (registry.renderRequests.has(bubble))
+      drawTexturedMesh(bubble, projection_2D);
+  }
   for (Entity player : registry.players.entities) {
     if (registry.renderRequests.has(player))
       drawTexturedMesh(player, projection_2D);
