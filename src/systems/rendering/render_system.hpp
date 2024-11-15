@@ -79,7 +79,16 @@ class RenderSystem {
       textures_path("enemy/krab.png"),       // source: Vecteezy.com
       textures_path("enemy/krab_boss.png"),  // source: Vecteezy.com
       textures_path("enemy/krab_boss_chase.png"),
+      textures_path("enemy/sharkman/sharkman0.png"),
+      textures_path("enemy/sharkman/sharkman1.png"),
+      textures_path("enemy/sharkman/sharkman2.png"),
+      textures_path("enemy/sharkman/sharkman3.png"),
+      textures_path("enemy/sharkman/sharkman4.png"),
+      textures_path("enemy/sharkman/sharkman5.png"),
+      textures_path("enemy/sharkman/sharkman6.png"),
+      textures_path("enemy/sharkman/sharkman7.png"),
       textures_path("map_interactable/breakable_crate.png"),
+      textures_path("map_interactable/metal_crate.png"),
       textures_path("consumables/oxygen_canister.png"),
       textures_path("map_interactable/geyser.png"),
   };

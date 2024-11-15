@@ -37,3 +37,24 @@ Entity createJellyBossPos(RenderSystem* renderer, vec2 position, bool checkColli
 Entity createCrabBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
 Entity respawnCrabBoss(RenderSystem* renderer, EntityState es);
 
+//////////////////////////////////////////////////////////////
+// SHARKMAN
+//////////////////////////////////////////////////////////////
+#define SHARKMAN_MS 125.0
+#define SHARKMAN_MS_INC 25.0
+#define SHARKMAN_DAMAGE -200.0
+#define SHARKMAN_ATK_SPD 500.0
+#define SHARKMAN_SCALE vec2(0.35)
+#define SHARKMAN_BOUNDING_BOX vec2(301.f, 246.f)
+#define SHARKMAN_HEALTH 12000.0
+#define SHARKMAN_SELF_DMG -2000.0
+#define SHARKMAN_TRACKING_CD 9999999.f
+#define SHARKMAN_SPOT_RADIUS 250.f
+#define SHARKMAN_HEALTH_SCALE vec2(1.4f)
+#define SHARKMAN_HEALTH_BAR_SCALE vec2(1.5f)
+#define SHARKMAN_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+#define SHARKMAN_AI_CD 5000 // switch every 5 seconds
+
+Entity createSharkmanPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity createInitSharkmanPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity respawnSharkman(RenderSystem* renderer, EntityState es);

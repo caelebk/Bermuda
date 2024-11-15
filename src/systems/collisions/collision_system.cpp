@@ -3,9 +3,9 @@
 #include <cstdio>
 #include <damage.hpp>
 #include <glm/geometric.hpp>
-#include <player_hud.hpp>
 #include <player_controls.hpp>
 #include <player_factories.hpp>
+#include <player_hud.hpp>
 
 #include "ai.hpp"
 #include "debuff.hpp"
@@ -161,6 +161,32 @@ bool mesh_collides(Entity mesh, Entity other) {
   }
 
   return false;
+}
+
+vec2 find_closest_point(const Position& pos1, const Position& pos2) {
+  vec4 wall_box  = get_bounds(pos2);
+  vec2 closest_p = {0.f, 0.f};
+  // find closest x point
+  if (wall_box[0] < pos1.position.x && wall_box[1] > pos1.position.x) {
+    closest_p.x = pos1.position.x;
+  } else if (abs(wall_box[0] - pos1.position.x) <
+             abs(wall_box[1] - pos1.position.x)) {
+    closest_p.x = wall_box[0];
+  } else {
+    closest_p.x = wall_box[1];
+  }
+
+  // find closest y point
+  if (wall_box[2] < pos1.position.y && wall_box[3] > pos1.position.y) {
+    closest_p.y = pos1.position.y;
+  } else if (abs(wall_box[2] - pos1.position.y) <
+             abs(wall_box[3] - pos1.position.y)) {
+    closest_p.y = wall_box[2];
+  } else {
+    closest_p.y = wall_box[3];
+  }
+
+  return closest_p;
 }
 
 void CollisionSystem::init(LevelSystem* level) {
@@ -319,7 +345,6 @@ void CollisionSystem::collision_detection() {
       }
     }
 
-    
     for (uint j = 0; j < mass_container.size(); j++) {
       Entity entity_j = mass_container.entities[j];
       if (!registry.positions.has(entity_j)) {
@@ -327,7 +352,8 @@ void CollisionSystem::collision_detection() {
       }
       if (registry.players.has(entity_j)) {
         Player&   player_comp = registry.players.get(entity_j);
-        Position& position_j  = registry.positions.get(player_comp.collisionMesh);
+        Position& position_j =
+            registry.positions.get(player_comp.collisionMesh);
         if (box_collides(position_i, position_j)) {
           if (mesh_collides(player_comp.collisionMesh, entity_i)) {
             registry.collisions.emplace_with_duplicates(entity_i, entity_j);
@@ -471,8 +497,8 @@ void CollisionSystem::routeEnemyCollisions(Entity enemy, Entity other) {
     resolveEnemyPlayerProjCollision(enemy, other);
   }
   if (registry.activeWalls.has(other)) {
-    routed = true;
     resolveWallEnemyCollision(other, enemy);
+    routed = true;
   }
 
   // if an enemy is acting as a projectile and hits something, it
@@ -513,7 +539,6 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
 }
 
 void CollisionSystem::routeDoorCollisions(Entity door, Entity other) {
-  // std::cout << "something collided" << std::endl;
   if (!registry.motions.has(other)) {
     return;
   }
@@ -663,7 +688,7 @@ void CollisionSystem::resolveBreakablePlayerProjCollision(Entity breakable,
   modifyOxygen(breakable, player_proj);
 
   if (playerproj_comp.type == PROJECTILES::TORPEDO) {
-      detectAndResolveExplosion(player_proj, breakable);
+    detectAndResolveExplosion(player_proj, breakable);
   }
 }
 
@@ -751,6 +776,29 @@ void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
   if (enemy_motion.velocity.x > 0) {
     enemy_position.scale.x *= -1.0f;
   }
+
+  if (registry.bosses.has(enemy)) {
+    Boss& boss = registry.bosses.get(enemy);
+    if (boss.type == BossType::SHARKMAN) {
+      // break crates if sharkman hits them while targeting player
+      if (registry.breakables.has(wall) && registry.trackPlayer.has(enemy) &&
+          is_tracking(enemy)) {
+        modifyOxygenAmount(enemy, SHARKMAN_SELF_DMG);
+        modifyOxygenAmount(wall, SHARKMAN_SELF_DMG);
+        Motion& motion = registry.motions.get(enemy);
+        float   speed  = sqrt(dot(motion.velocity, motion.velocity));
+        motion.velocity =
+            normalize(motion.velocity) * (speed + (float)SHARKMAN_MS_INC);
+
+        // reset sharkman to wander
+        printf("Sharkman hit a crate, resetting to wander\n");
+        boss.curr_cd = SHARKMAN_AI_CD;
+        removeFromAI(enemy);
+        addSharkmanWander();
+      }
+      choose_new_direction(enemy, wall);
+    }
+  }
 }
 
 void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
@@ -813,8 +861,8 @@ void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
 }
 
 void CollisionSystem::resolveMassCollision(Entity wall, Entity other) {
-  Motion& wall_motion = registry.motions.get(wall);
-  Motion& other_motion = registry.motions.get(other);
+  Motion&   wall_motion  = registry.motions.get(wall);
+  Motion&   other_motion = registry.motions.get(other);
   Position& wall_pos     = registry.positions.get(wall);
   Position& other_pos    = registry.positions.get(other);
 
@@ -826,7 +874,8 @@ void CollisionSystem::resolveMassCollision(Entity wall, Entity other) {
     is_horizontal_collision = true;
   }
 
-  // This is here because sometimes it still counts as a collision, even if they aren't colliding
+  // This is here because sometimes it still counts as a collision, even if they
+  // aren't colliding
   float wall_position =
       is_horizontal_collision ? wall_pos.position.x : wall_pos.position.y;
   float wall_velo =
@@ -843,22 +892,19 @@ void CollisionSystem::resolveMassCollision(Entity wall, Entity other) {
   // Assume these collisions are inelastic - that is, that kinetic energy is
   // preserved
 
-  float wall_mass = registry.masses.get(wall).mass;
+  float wall_mass  = registry.masses.get(wall).mass;
   float other_mass = registry.masses.get(other).mass;
   // p = momentum
-  float p_wall =
-      is_horizontal_collision
-          ? wall_mass * wall_motion.velocity.x
-          : wall_mass * wall_motion.velocity.y;
-  float p_other =
-      is_horizontal_collision
-          ? other_mass * other_motion.velocity.x
-          : other_mass * other_motion.velocity.y;
+  float p_wall  = is_horizontal_collision ? wall_mass * wall_motion.velocity.x
+                                          : wall_mass * wall_motion.velocity.y;
+  float p_other = is_horizontal_collision
+                      ? other_mass * other_motion.velocity.x
+                      : other_mass * other_motion.velocity.y;
 
-  float v_final = (p_wall + p_other)/(wall_mass + other_mass);
+  float v_final = (p_wall + p_other) / (wall_mass + other_mass);
 
   if (is_horizontal_collision) {
-    wall_motion.velocity.x = v_final;
+    wall_motion.velocity.x  = v_final;
     other_motion.velocity.x = v_final;
   } else {
     wall_motion.velocity.y  = v_final;

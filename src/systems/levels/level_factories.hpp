@@ -19,6 +19,6 @@ const std::vector<SpawnFunction> ROOM_CLUSTER_SPAWN_FUNCTIONS = {EMPTY, LVL_1_RA
 const std::vector<int> MINIBOSS_ROOMS = {0, 5, 10};
 // This vector controls index-wise the spawn functions of miniboss rooms you defined in the above line, i.e the first (tutorial level) 
 // spawns the tutorial boss, the next spawns the giant crab, etc. Must have size == to MINIBOSS_ROOMS.size().
-const std::vector<SpawnFunction> MINIBOSS_SPAWN_FUNCTIONS = {TUTORIAL_JELLYFISH_MINIBOSS, CRAB_MINIBOSS, CRAB_MINIBOSS};
+const std::vector<SpawnFunction> MINIBOSS_SPAWN_FUNCTIONS = {TUTORIAL_JELLYFISH_MINIBOSS, CRAB_MINIBOSS, SHARKMAN_MINIBOSS};
 
 const int FINAL_BOSS_ROOM = 15;

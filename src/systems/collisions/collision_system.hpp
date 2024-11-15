@@ -2,7 +2,9 @@
 
 #include "abilities.hpp"
 #include "ai.hpp"
+#include "ai_system.hpp"
 #include "audio_system.hpp"
+#include "boss_factories.hpp"
 #include "common.hpp"
 #include "components.hpp"
 #include "debuff.hpp"
@@ -90,6 +92,7 @@ bool box_collides(const Position& position1, const Position& position2);
 bool circle_box_collides(const Position& position1, float radius,
                          const Position& position2);
 bool mesh_collides(Entity mesh, Entity other);
+vec2 find_closest_point(const Position &pos1, const Position &pos2);
 
 extern Entity player_projectile;
 extern Entity player;

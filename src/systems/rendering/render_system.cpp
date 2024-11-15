@@ -73,6 +73,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3& projection) {
         render_request.used_effect == EFFECT_ASSET_ID::ENEMY) {
       GLuint damage_timer_uloc = glGetUniformLocation(program, "damageTimer");
       GLuint stun_timer_uloc   = glGetUniformLocation(program, "stunned");
+      GLuint angry_timer_uloc  = glGetUniformLocation(program, "is_angry");
       gl_has_errors();
       glUniform1f(damage_timer_uloc, registry.attacked.has(entity)
                                          ? registry.attacked.get(entity).timer
@@ -85,6 +86,9 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3& projection) {
                                            ? registry.attacked.get(player).timer
                                            : 0.0f);
       }
+      glUniform1f(angry_timer_uloc, registry.bosses.has(entity)
+                                        ? registry.bosses.get(entity).is_angry
+                                        : false);
       gl_has_errors();
     }
 

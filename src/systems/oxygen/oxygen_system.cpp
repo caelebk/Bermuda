@@ -59,13 +59,13 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
       isModOnCooldown(oxygenModifier)) {
     return;
   }
-  printf("Modifying oxygen\n");
+  // printf("Modifying oxygen\n");
   Oxygen& entity_oxygen = registry.oxygen.get(entity);
   float   oxyModAmount  = registry.oxygenModifiers.get(oxygenModifier).amount;
   float   deltaOxygen   = calcDeltaOxygen(entity_oxygen, oxyModAmount);
 
   if (!entity_oxygen.isRendered) {
-    printf("Rendering Oxygen\n");
+    // printf("Rendering Oxygen\n");
     renderHealthBar(entity_oxygen);
     entity_oxygen.isRendered = true;
   }
@@ -89,7 +89,7 @@ void modifyOxygenAmount(Entity& entity, float amount) {
   float   deltaOxygen   = calcDeltaOxygen(entity_oxygen, amount);
 
   if (!entity_oxygen.isRendered) {
-    printf("Rendering Oxygen\n");
+    // printf("Rendering Oxygen\n");
     renderHealthBar(entity_oxygen);
     entity_oxygen.isRendered = true;
   }

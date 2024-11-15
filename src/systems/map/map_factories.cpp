@@ -52,9 +52,9 @@ static bool checkSpawnCollisions(Entity entity) {
     if (!registry.positions.has(door)) {
       continue;
     }
-    const Position doorPos = registry.positions.get(door);
-    vec2 dist_vec = entityPos.position - doorPos.position;
-    float dist = sqrt(dot(dist_vec, dist_vec));
+    const Position doorPos  = registry.positions.get(door);
+    vec2           dist_vec = entityPos.position - doorPos.position;
+    float          dist     = sqrt(dot(dist_vec, dist_vec));
     if (dist < DOOR_SPAWN_RADIUS) {
       return false;
     }
@@ -94,7 +94,8 @@ static bool checkSpawnCollisions(Entity entity) {
  * @param position
  * @return
  */
-Entity createGeyserPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+Entity createGeyserPos(RenderSystem* renderer, vec2 position,
+                       bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
 
@@ -114,8 +115,8 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position, bool checkCollisio
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make consumable
-  Interactable &i = registry.interactable.emplace(entity);
-  i.respawnFn = respawnGeyser;
+  Interactable& i = registry.interactable.emplace(entity);
+  i.respawnFn     = respawnGeyser;
 
   // designate this as a geyser; facilitates room transitions.
   registry.geysers.emplace(entity);
@@ -138,16 +139,14 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position, bool checkCollisio
 /**
  * @brief Respawns a Geyser based on it's entity state
  *
- * @param renderer 
- * @param es 
- * @return 
+ * @param renderer
+ * @param es
+ * @return
  */
-Entity respawnGeyser(RenderSystem *renderer, EntityState es) {
+Entity respawnGeyser(RenderSystem* renderer, EntityState es) {
   Entity entity = createGeyserPos(renderer, es.position.position, false);
   return entity;
 }
-
-
 
 /////////////////////////////////////////////////////////////////
 // crate
@@ -160,22 +159,102 @@ Entity respawnGeyser(RenderSystem *renderer, EntityState es) {
  * @return
  */
 
-Entity createCratePos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+Entity createCratePos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
   // physics and pos
-  Position& pos    = registry.positions.emplace(entity);
-  pos.angle    = 0.f;
-  pos.position = position;
-  pos.scale    = CRATE_SCALE_FACTOR * CRATE_BOUNDING_BOX;
-  pos.scale *= 4.f;
+  Position& pos = registry.positions.emplace(entity);
+  pos.angle     = 0.f;
+  pos.position  = position;
+  pos.scale     = CRATE_SCALE_FACTOR * CRATE_BOUNDING_BOX;
 
-  Motion& motion = registry.motions.emplace(entity);
+  Motion& motion      = registry.motions.emplace(entity);
   motion.acceleration = {0.f, 0.f};
   motion.velocity     = {0.f, 0.f};
 
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
   Mass& mass = registry.masses.emplace(entity);
   mass.mass  = CRATE_MASS;
+
+  // reuse wall code
+  registry.activeWalls.emplace(entity);
+  Breakable& b = registry.breakables.emplace(entity);
+  b.respawnFn  = respawnCrate;
+
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::BREAKABLE_CRATE, EFFECT_ASSET_ID::TEXTURED,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  createDefaultHealthbar(renderer, entity, CRATE_HEALTH, CRATE_HEALTH_SCALE,
+                         CRATE_HEALTH_BAR_SCALE, CRATE_HEALTH_BOUNDING_BOX);
+
+  // assign drops
+  if (randomSuccess(CRATE_DROP_CHANCE_0)) {
+    Drop& drop  = registry.drops.emplace(entity);
+    drop.dropFn = CRATE_DROP_0;
+  }
+
+  return entity;
+}
+
+/**
+ * @brief Respawns a Crate based on its entity state
+ *
+ * @param renderer
+ * @param es
+ * @return
+ */
+Entity respawnCrate(RenderSystem* renderer, EntityState es) {
+  Entity entity = createCratePos(renderer, es.position.position, false);
+
+  // respawn failed, ignore
+  if ((unsigned int)entity == 0) {
+    return Entity(0);
+  }
+
+  // Restore State
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}
+
+/**
+ * @brief creates a metal crate at a specific position
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createMetalCratePos(RenderSystem* renderer, vec2 position,
+                           bool checkCollisions) {
+  // Reserve an entity
+  auto entity = Entity();
+  // physics and pos
+  Position& pos = registry.positions.emplace(entity);
+  pos.angle     = 0.f;
+  pos.position  = position;
+  pos.scale     = METAL_CRATE_SCALE_FACTOR * METAL_CRATE_BOUNDING_BOX;
 
   if (checkCollisions && !checkSpawnCollisions(entity)) {
     // returns invalid entity, since id's start from 1
@@ -189,49 +268,40 @@ Entity createCratePos(RenderSystem* renderer, vec2 position, bool checkCollision
 
   // reuse wall code
   registry.activeWalls.emplace(entity);
-  Breakable &b = registry.breakables.emplace(entity);
-  b.respawnFn = respawnCrate;
+  Breakable& b = registry.breakables.emplace(entity);
+  b.respawnFn  = respawnMetalCrate;
 
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::BREAKABLE_CRATE, EFFECT_ASSET_ID::TEXTURED,
+      entity, {TEXTURE_ASSET_ID::METAL_CRATE, EFFECT_ASSET_ID::TEXTURED,
                GEOMETRY_BUFFER_ID::SPRITE});
 
-  createDefaultHealthbar(renderer, entity, CRATE_HEALTH, CRATE_HEALTH_SCALE,
-                         CRATE_HEALTH_BAR_SCALE, CRATE_HEALTH_BOUNDING_BOX);
+  createDefaultHealthbar(renderer, entity, METAL_CRATE_HEALTH,
+                         CRATE_HEALTH_SCALE, CRATE_HEALTH_BAR_SCALE,
+                         CRATE_HEALTH_BOUNDING_BOX);
 
-  // assign drops
-  if (randomSuccess(CRATE_DROP_CHANCE_0)) {
-    Drop& drop  = registry.drops.emplace(entity);
-    drop.dropFn = CRATE_DROP_0;
-    return entity;
-  }
+  // guarantee canisters in metal crates
+  Drop& drop  = registry.drops.emplace(entity);
+  drop.dropFn = CRATE_DROP_0;
 
   return entity;
 }
 
-/**
- * @brief Respawns a Crate based on it's entity state
- *
- * @param renderer 
- * @param es 
- * @return 
- */
-Entity respawnCrate(RenderSystem *renderer, EntityState es) {
-  Entity entity = createCratePos(renderer, es.position.position, false);
+Entity respawnMetalCrate(RenderSystem* renderer, EntityState es) {
+  Entity entity = createMetalCratePos(renderer, es.position.position, false);
 
   // respawn failed, ignore
-  if ((unsigned int) entity == 0) {
+  if ((unsigned int)entity == 0) {
     return Entity(0);
   }
 
   // Restore State
-  Position &pos = registry.positions.get(entity);
-  pos.angle = es.position.angle;
-  pos.scale = es.position.scale;
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
   pos.originalScale = es.position.originalScale;
 
-  Oxygen &o = registry.oxygen.get(entity);
-  float diff = es.oxygen - o.level;
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
 
   // This will also update the health bar
   if (diff < 0) {
@@ -241,4 +311,15 @@ Entity respawnCrate(RenderSystem *renderer, EntityState es) {
   return entity;
 }
 
-
+// create sharkman's crates
+Entity createSharkmanCratesPos(RenderSystem* renderer, vec2 position,
+                               bool checkCollisions) {
+  float top_row    = 125;
+  float bottom_row = window_height_px - 220;
+  createMetalCratePos(renderer, {250, top_row}, false);
+  createMetalCratePos(renderer, {window_width_px / 2, top_row}, false);
+  createMetalCratePos(renderer, {window_width_px - 175, top_row}, false);
+  createMetalCratePos(renderer, {window_width_px / 2 - 420, bottom_row}, false);
+  createMetalCratePos(renderer, {window_width_px / 2 + 50, bottom_row}, false);
+  createMetalCratePos(renderer, {window_width_px / 2 + 480, bottom_row}, false);
+}

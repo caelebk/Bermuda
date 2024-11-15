@@ -17,9 +17,16 @@ class AISystem {
   void do_wander_ai_square(float elapsed_ms);
   void do_track_player(float elapsed_ms);
   void do_track_player_ranged(float elapsed_ms);
-  bool can_see_player(Position &pos, Position &player_pos);
   bool in_range_of_player(Position &pos, Position &player_pos, float range);
+
+  float sharkman_texture_num = 0.f;
   public:
   void step(float elapsed_ms);
   void init(RenderSystem* renderer_arg);
 };
+
+bool is_tracking(Entity e);
+void choose_new_direction(Entity enemy, Entity other);
+bool can_see_player(Position &pos, Position &player_pos);
+void removeFromAI(Entity& e);
+void addSharkmanWander();
