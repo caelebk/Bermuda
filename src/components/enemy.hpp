@@ -14,6 +14,11 @@ struct Deadly {
   std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;
 };
 
+struct EnemyProjectile {
+  bool has_max_range = false;
+  float max_range;
+};
+
 struct Boss {
   enum BossType type;
   float curr_cd      = 0.f;

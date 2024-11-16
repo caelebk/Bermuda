@@ -39,6 +39,7 @@ class ECSRegistry {
 
   // enemy related
   ComponentContainer<Deadly>         deadlys;
+  ComponentContainer<EnemyProjectile> enemyProjectiles;
   ComponentContainer<Boss>           bosses;
   ComponentContainer<ModifyOxygenCD> modifyOxygenCd;
 
@@ -118,6 +119,7 @@ class ECSRegistry {
     registry_list.push_back(&inventoryCounters);
     // enemy related
     registry_list.push_back(&deadlys);
+    registry_list.push_back(&enemyProjectiles);
     registry_list.push_back(&bosses);
     registry_list.push_back(&modifyOxygenCd);
     // oxygen related

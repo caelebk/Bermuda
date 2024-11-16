@@ -322,5 +322,5 @@ Entity createSharkmanCratesPos(RenderSystem* renderer, vec2 position,
   createMetalCratePos(renderer, {window_width_px - 175, top_row}, false);
   createMetalCratePos(renderer, {window_width_px / 2 - 420, bottom_row}, false);
   createMetalCratePos(renderer, {window_width_px / 2 + 50, bottom_row}, false);
-  createMetalCratePos(renderer, {window_width_px / 2 + 480, bottom_row}, false);
+  return createMetalCratePos(renderer, {window_width_px / 2 + 480, bottom_row}, false);
 }

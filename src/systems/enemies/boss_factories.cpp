@@ -133,7 +133,7 @@ static void addSharkmanTarget() {
 
 Entity createJellyBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
   vec2 pos = {window_width_px / 2, window_height_px / 2};
-  createJellyPos(renderer, pos, checkCollisions);
+  return createJellyPos(renderer, pos, checkCollisions);
 };
 
 Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
@@ -274,7 +274,7 @@ Entity createSharkmanPos(RenderSystem* renderer, vec2 position,
 }
 
 Entity createInitSharkmanPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
-  createSharkmanPos(renderer, {window_width_px / 2, window_height_px / 2}, false);
+  return createSharkmanPos(renderer, {window_width_px / 2, window_height_px / 2}, false);
 }
 
 /**
