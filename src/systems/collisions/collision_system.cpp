@@ -732,9 +732,13 @@ void CollisionSystem::resolveBreakablePlayerProjCollision(Entity breakable,
   }
 }
 
-void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity enemy) {
+//hit_entity is the entity that got hit
+void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity hit_entity) {
+  if (!registry.sounds.has(proj)) {
+    registry.sounds.insert(proj, Sound(SOUND_ASSET_ID::EXPLOSION));
+  }
   for (Entity enemy_check : registry.deadlys.entities) {
-    if (enemy_check == enemy || !registry.positions.has(enemy)) {
+    if (enemy_check == hit_entity || !registry.positions.has(hit_entity)) {
       continue;
     }
     Position&     playerproj_position = registry.positions.get(proj);
@@ -745,6 +749,21 @@ void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity enemy) {
                             enemy_position)) {
       modifyOxygen(enemy_check, proj);
       addDamageIndicatorTimer(enemy_check);
+    }
+  }
+
+  for (Entity breakable_check : registry.breakables.entities) {
+    if (breakable_check == hit_entity || !registry.positions.has(hit_entity)) {
+      continue;
+    }
+    Position&     playerproj_position = registry.positions.get(proj);
+    AreaOfEffect& playerproj_aoe      = registry.aoe.get(proj);
+    Position&     enemy_position      = registry.positions.get(breakable_check);
+
+    if (circle_box_collides(playerproj_position, playerproj_aoe.radius,
+                            enemy_position)) {
+      modifyOxygen(breakable_check, proj);
+      addDamageIndicatorTimer(breakable_check);
     }
   }
 }
@@ -827,6 +846,9 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
       changeSelectedCounterColour(INVENTORY::HARPOON);
     }
   } else {
+    if (proj_component.type == PROJECTILES::TORPEDO) {
+      detectAndResolveExplosion(player_proj, wall);
+    }
     proj_motion.velocity     = vec2(0.f);
     proj_component.is_loaded = true;
   }
@@ -1011,6 +1033,8 @@ void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
   roomTransition.door_connection  = door_connection;
 
   transitioning = true;
+
+  registry.sounds.insert(rt_entity, Sound(SOUND_ASSET_ID::DOOR));
 
   PlayerProjectile& pp   = registry.playerProjectiles.get(player_projectile);
   Motion&           pp_m = registry.motions.get(player_projectile);

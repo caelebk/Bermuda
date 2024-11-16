@@ -110,7 +110,9 @@ bool player_movement(int key, int action, int mod) {
     if (action == GLFW_PRESS) {
       registry.players.get(player).gliding = true;
       player_oxygen.rate                   = PLAYER_OXYGEN_RATE * 3;
-      registry.sounds.insert(Entity(), Sound(dash_sound));
+      if (!registry.sounds.has(player)) {
+        registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_GLIDE));
+      }
     } else if (action == GLFW_RELEASE) {
       registry.players.get(player).gliding = false;
       player_oxygen.rate                   = PLAYER_OXYGEN_RATE;
@@ -141,6 +143,9 @@ bool player_mouse(RenderSystem* renderer, int button, int action, int mods,
                   Entity& default_wep, Entity& default_gun) {
   // Shooting the projectile
   if (button == GLFW_MOUSE_BUTTON_LEFT) {
+    if (!registry.playerProjectiles.has(player_projectile)) {
+      return false;
+    }
     if (action == GLFW_PRESS &&
         registry.playerProjectiles.get(player_projectile).is_loaded) {
       if (registry.deathTimers.has(player)) {
@@ -167,6 +172,8 @@ bool player_mouse(RenderSystem* renderer, int button, int action, int mods,
       if (!successfulInventoryUpdate) {
         return successfulInventoryUpdate;
       }
+    } else if (action == GLFW_PRESS && !registry.playerProjectiles.get(player_projectile).is_loaded) {
+        registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_EMPTY_GUN));
     }
   }
 

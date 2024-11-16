@@ -1,13 +1,13 @@
 #pragma once
 
 struct Sound {
-    std::string name;
+    SOUND_ASSET_ID id;
 
-    Sound(std::string name) : name(name) {}
+    Sound(SOUND_ASSET_ID asset_id) : id(asset_id) {}
 };
 
 struct Music {
-    std::string name;
+    MUSIC_ASSET_ID id;
 
-    Music(std::string name) : name(name) {}
+    Music(MUSIC_ASSET_ID asset_id) : id(asset_id) {}
 };

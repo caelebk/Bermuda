@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <iostream>
 
-#include "audio_system.hpp"
 #include "enemy_factories.hpp"
 #include "player_factories.hpp"
 #include "tiny_ecs_registry.hpp"
@@ -28,11 +27,11 @@ void depleteOxygen(Entity& entity) {
   updateDeathStatus(entity, entity_oxygen);
 
   if (registry.players.has(entity) && !registry.deathTimers.has(entity)) {
-    registry.sounds.insert(Entity(), Sound(deplete_audio));
+    registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_DEPLETE));
     if (registry.lowOxygen.has(entity_oxygen.oxygenBar)) {
-      registry.sounds.insert(Entity(), Sound(fast_heart_audio));
+      registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_FAST_HEART));
     } else {
-      registry.sounds.insert(Entity(), Sound(slow_heart_audio));
+      registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_SLOW_HEART));
     }
   }
 }
@@ -79,8 +78,18 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
   if (registry.players.has(entity) &&
       !registry.playerWeapons.has(oxygenModifier) &&
       !registry.deathTimers.has(entity) && oxyModAmount <= 0 &&
-      !registry.players.get(entity).dashing) {
-    registry.sounds.insert(Entity(), Sound(hurt_sound));
+      !registry.players.get(entity).dashing &&
+      !registry.sounds.has(entity)) {
+    registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::PLAYER_HURT));
+  }
+
+  if (registry.breakables.has(entity) &&
+      !registry.sounds.has(entity)) {
+    if (entity_oxygen.level <= 0) {
+      registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::CRATE_DEATH));
+    } else {
+      registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::CRATE_HIT));
+    }
   }
 }
 
@@ -230,11 +239,14 @@ void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen) {
 
   if (!registry.deathTimers.has(entity) && registry.players.has(entity)) {
     registry.deathTimers.insert(entity, {4000.f});
-    registry.sounds.insert(Entity(), Sound(death_sound));
-    registry.sounds.insert(Entity(), Sound(flat_line_sound));
+    registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_DEATH));
+    registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_FLATLINE));
   } else if (!registry.deathTimers.has(entity) &&
              !registry.players.has(entity)) {
     registry.deathTimers.emplace(entity);
+    if (!registry.sounds.has(entity) && registry.deadlys.has(entity)) {
+      registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::ENEMY_DEATH));
+    }
   }
 }
 

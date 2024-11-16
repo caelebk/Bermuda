@@ -219,18 +219,41 @@ void setFiredProjVelo() {
     case PROJECTILES::SHRIMP:
       proj_motion.velocity = {SHRIMP_SPEED * cos(angle) * direction,
                               SHRIMP_SPEED * sin(angle) * direction};
+      if (!registry.sounds.has(player_projectile)) {
+        registry.sounds.insert(player_projectile, Sound(SOUND_ASSET_ID::PROJECTILE_SHRIMP));
+      }  
       break;
     case PROJECTILES::CONCUSSIVE:
       proj_scale = vec2(5.f) * proj_original_scale;
       if (registry.positions.get(player).scale.x < 0) {
         proj_scale.x = -proj_scale.x;
       }
+      if (!registry.sounds.has(player_projectile)) {
+        registry.sounds.insert(player_projectile, Sound(SOUND_ASSET_ID::PROJECTILE_CONCUSSIVE));
+      }
+      break;
+    case PROJECTILES::TORPEDO:
+      if (!registry.sounds.has(player_projectile)) {
+        registry.sounds.insert(player_projectile, Sound(SOUND_ASSET_ID::PROJECTILE_TORPEDO));
+      }      
+      break;
+    case PROJECTILES::NET:
+      if (!registry.sounds.has(player_projectile)) {
+        registry.sounds.insert(player_projectile, Sound(SOUND_ASSET_ID::PROJECTILE_NET));
+      }       
+      break;
     default:
-      proj_motion.velocity = {HARPOON_SPEED * cos(angle) * direction,
-                              HARPOON_SPEED * sin(angle) * direction};
+      if (!registry.sounds.has(player_projectile)) {
+        registry.sounds.insert(player_projectile, Sound(SOUND_ASSET_ID::PLAYER_OXYGEN_BLAST));
+      }
       break;
   }
-  registry.sounds.insert(player_projectile, Sound(blast_sound));
+  if (proj.type != PROJECTILES::SHRIMP) {
+    proj_motion.velocity = {HARPOON_SPEED * cos(angle) * direction,
+                            HARPOON_SPEED * sin(angle) * direction};
+  }
+
+
 }
 
 void setPlayerAcceleration() {
@@ -323,8 +346,9 @@ void playerDash(float elapsed_ms) {
   if (!activated_and_can_dash) {
     return;
   }
-
-  registry.sounds.insert(Entity(), Sound(blast_sound));
+  if (!registry.sounds.has(player)) {
+    registry.sounds.insert(player, Sound(SOUND_ASSET_ID::PLAYER_OXYGEN_BLAST));
+  }
   keys.dashCooldownTimer = DASH_COOLDOWN_DURATION;
   keys.dashTimer         = DASH_DURATION;
 

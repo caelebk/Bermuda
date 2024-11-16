@@ -1,11 +1,5 @@
 #include "audio_system.hpp"
 
-/******INSTRUCTIONS FOR ADDING AUDIO*******
- * 1. Add audio to ./data/audio/
- * 2. Define a name for the audio in the header
- * 3. Add a mapping to init_audio_maps()
- ********************************************/
-
 AudioSystem::~AudioSystem() {
   for (auto it = music_map.begin(); it != music_map.end(); ++it) {
     Mix_FreeMusic(music_map[it->first]);
@@ -18,31 +12,16 @@ AudioSystem::~AudioSystem() {
   Mix_CloseAudio();
 }
 
-/*FORMAT for adding mappings for sound/music:
+void AudioSystem::init_audio_maps() {  
+  for (uint i = 0; i < music_count; ++i) {
+    const std::string path = music_path(music_names[i] + ".wav");
+    music_map[static_cast<MUSIC_ASSET_ID>(i)] = Mix_LoadMUS(path.c_str());
+  }
 
-   Music:
-   music_map[<defined_music_name>] =
-   Mix_LoadMUS(audio_path(<filename>).c_str());
-
-   Sound:
-   sound_map[<defined_sound_name>] =
-   Mix_LoadWAV(audio_path(<filename>).c_str());
-
-*/
-void AudioSystem::init_audio_maps() {
-  music_map[background_music] = Mix_LoadMUS(audio_path("music.wav").c_str());
-
-  sound_map[death_sound] = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
-  sound_map[eat_sound]   = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
-  sound_map[blast_sound] = Mix_LoadWAV(audio_path("blast_sound.wav").c_str());
-  sound_map[dash_sound]  = Mix_LoadWAV(audio_path("dash.wav").c_str());
-  sound_map[flat_line_sound] = Mix_LoadWAV(audio_path("flatline.wav").c_str());
-  sound_map[hurt_sound]    = Mix_LoadWAV(audio_path("hurt_sound.wav").c_str());
-  sound_map[deplete_audio] = Mix_LoadWAV(audio_path("deplete.wav").c_str());
-  sound_map[fast_heart_audio] =
-      Mix_LoadWAV(audio_path("fastheart.wav").c_str());
-  sound_map[slow_heart_audio] =
-      Mix_LoadWAV(audio_path("slowheart.wav").c_str());
+  for (uint i = 0; i < sound_count; ++i) {
+    const std::string path = sound_path(sound_names[i] + ".wav");
+    sound_map[static_cast<SOUND_ASSET_ID>(i)] = Mix_LoadWAV(path.c_str());
+  }
 }
 
 void AudioSystem::init() {
@@ -55,37 +34,48 @@ void AudioSystem::init() {
     return;
   }
 
+  int num_channels = 16;
+  Mix_AllocateChannels(num_channels);
+
   init_audio_maps();
 
   for (auto it = music_map.begin(); it != music_map.end(); ++it) {
     if (music_map[it->first] == nullptr) {
-      fprintf(stderr, "Failed to load music: %s\n", it->first.c_str());
+      fprintf(stderr, "Failed to load music: %s\n", music_names[static_cast<int>(it->first)].c_str());
     }
   }
 
   for (auto it = sound_map.begin(); it != sound_map.end(); ++it) {
     if (sound_map[it->first] == nullptr) {
-      fprintf(stderr, "Failed to load sound: %s\n", it->first.c_str());
+      fprintf(stderr, "Failed to load sound: %s\n", sound_names[static_cast<int>(it->first)].c_str());
     }
   }
 
   // Initial background music
-  Mix_PlayMusic(music_map[background_music], -1);
+  Mix_PlayMusic(music_map[MUSIC_ASSET_ID::MUSIC1], -1);
   fprintf(stderr, "Loaded music\n");
 }
 
 void AudioSystem::step(float elapsed_ms) {
   for (Entity entity : registry.sounds.entities) {
     Sound sound   = registry.sounds.get(entity);
-    int   channel = Mix_PlayChannelTimed(-1, sound_map[sound.name], 0, 4000);
+    int channel = Mix_PlayChannelTimed(-1, sound_map[sound.id], 0, 2000);
+
+    //uncomment this to see debug info
+    printf("Play Sound: %s\n", sound_names[static_cast<int>(sound.id)].c_str());
+    printf("Channel: %d\n", channel);
+    printf("Size: %zu\n", registry.sounds.entities.size());
+    if (channel == -1) {
+      printf("All audio channels are allocated. %s was not played\n", sound_names[static_cast<int>(sound.id)].c_str());
+    }
     Mix_Volume(channel, 64);
-    registry.sounds.remove(entity);
   }
+  registry.sounds.clear();
 
   for (Entity entity : registry.musics.entities) {
     Music music = registry.musics.get(entity);
     // This replaces the current looping background music.
-    Mix_PlayMusic(music_map[music.name], -1);
-    registry.musics.remove(entity);
+    Mix_PlayMusic(music_map[music.id], -1);
   }
+  registry.musics.clear();
 }

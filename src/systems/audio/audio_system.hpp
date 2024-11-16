@@ -11,28 +11,46 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-// sound name definitions
-#define death_sound "death_sound"
-#define eat_sound "eat_sound"
-#define blast_sound "blast_sound"
-#define dash_sound "dash_sound"
-#define flat_line_sound "flat_line_sound"
-#define hurt_sound "hurt_sound"
+/******INSTRUCTIONS FOR ADDING AUDIO*******
+ * 1. Add audio to ./data/audio/sound/ or ./data/audio/music
+ * 2. Add to SOUND_ASSET_ID + sound_names or MUSIC_ASSET_ID + music_names
+ ********************************************/
 
-// background audio name definitions
-#define deplete_audio "deplete_audio"
-#define fast_heart_audio "fast_heart_audio"
-#define slow_heart_audio "slow_heart_audio"
+//order matters, filename
+const std::array<std::string, sound_count> sound_names = {
+	"blast",
+	"glide",
+	"slow_heart",
+	"fast_heart",
+	"hurt",
+	"death",
+	"flatline",
+	"eat",
+	"deplete",
+	"empty_gun",
+	"concussive",
+	"torpedo",
+	"explosion",
+	"shrimp",
+	"enemy_death",
+	"door",
+	"key",
+	"net",
+	"crate_death",
+	"crate_hit"
+};
 
-// music name definitions
-#define background_music "music"
+//order matters
+const std::array<std::string, music_count> music_names = {
+	"music",
+};
 
 class AudioSystem
 {
 
 private:
-	std::unordered_map<std::string, Mix_Chunk*> sound_map;
-	std::unordered_map<std::string, Mix_Music*> music_map;
+	std::unordered_map<SOUND_ASSET_ID, Mix_Chunk*> sound_map;
+	std::unordered_map<MUSIC_ASSET_ID, Mix_Music*> music_map;
 
 	void init_audio_maps();
 
