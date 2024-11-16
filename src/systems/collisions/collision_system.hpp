@@ -19,12 +19,30 @@
 #include "player.hpp"
 #include "tiny_ecs.hpp"
 #include "tiny_ecs_registry.hpp"
+#include "collision_util.hpp"
 
 class CollisionSystem {
   private:
   LevelSystem* level;
 
+  /********************
+  COLLISION DETECTION
+  *********************/
   void collision_detection();
+
+  void detectPlayerProjectileCollisions();
+  void detectPlayerCollisions();
+  void detectWallCollisions();
+  void detectDoorCollisions();
+
+  bool checkBoxCollision(Entity entity_i, Entity entity_j);
+  bool checkCircleCollision(Entity entity_i, Entity entity_j);
+  bool checkPlayerMeshCollision(Entity entity_i, Entity entity_j, Entity collisionMesh);
+
+  /********************
+  COLLISION RESOLUTION
+  *********************/
+
   void collision_resolution();
   void collision_resolution_debug_info(Entity entity, Entity entity_other);
 
@@ -95,7 +113,6 @@ bool box_collides(const Position& position1, const Position& position2);
 bool circle_box_collides(const Position& position1, float radius,
                          const Position& position2);
 bool mesh_collides(Entity mesh, Entity other);
-vec2 find_closest_point(const Position &pos1, const Position &pos2);
 
 extern Entity player_projectile;
 extern Entity player;

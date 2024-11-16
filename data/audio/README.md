@@ -27,3 +27,7 @@ Sources for files:
 [crate_death](https://freesound.org/people/Deathscyp/sounds/443293/)
 
 [crate_hit](https://freesound.org/people/NeoSpica/sounds/504618/)
+
+[metal_crate_hit](https://freesound.org/people/Debsound/sounds/168822/)
+
+[metal_crate_death](https://freesound.org/people/JoelAudio/sounds/135463/)

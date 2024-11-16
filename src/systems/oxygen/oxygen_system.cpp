@@ -85,10 +85,23 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
 
   if (registry.breakables.has(entity) &&
       !registry.sounds.has(entity)) {
+    bool metal = false;
+    if (registry.renderRequests.has(entity)) {
+      RenderRequest& request = registry.renderRequests.get(entity);
+      metal = request.used_texture == TEXTURE_ASSET_ID::METAL_CRATE;
+    }
     if (entity_oxygen.level <= 0) {
-      registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::CRATE_DEATH));
+      if (metal) {
+        registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::METAL_CRATE_DEATH));
+      } else {
+        registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::CRATE_DEATH));
+      }
     } else {
-      registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::CRATE_HIT));
+      if (metal) {
+        registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::METAL_CRATE_HIT));
+      } else {
+        registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::CRATE_DEATH));
+      }    
     }
   }
 }

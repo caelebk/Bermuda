@@ -17,7 +17,7 @@
 #include "tiny_ecs_registry.hpp"
 
 // Net Projectile Speed (To be balanced later)
-#define HARPOON_SPEED 100.0f
+#define HARPOON_SPEED 200.0f
 #define SHRIMP_SPEED 500.0f
 
 // Max velocity (To be balanced later)

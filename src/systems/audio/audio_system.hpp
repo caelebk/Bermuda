@@ -37,7 +37,9 @@ const std::array<std::string, sound_count> sound_names = {
 	"key",
 	"net",
 	"crate_death",
-	"crate_hit"
+	"crate_hit",
+	"metal_crate_death",
+	"metal_crate_hit"
 };
 
 //order matters

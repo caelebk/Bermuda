@@ -62,9 +62,9 @@ void AudioSystem::step(float elapsed_ms) {
     int channel = Mix_PlayChannelTimed(-1, sound_map[sound.id], 0, 2000);
 
     //uncomment this to see debug info
-    printf("Play Sound: %s\n", sound_names[static_cast<int>(sound.id)].c_str());
-    printf("Channel: %d\n", channel);
-    printf("Size: %zu\n", registry.sounds.entities.size());
+    // printf("Play Sound: %s\n", sound_names[static_cast<int>(sound.id)].c_str());
+    // printf("Channel: %d\n", channel);
+    // printf("Size: %zu\n", registry.sounds.entities.size());
     if (channel == -1) {
       printf("All audio channels are allocated. %s was not played\n", sound_names[static_cast<int>(sound.id)].c_str());
     }

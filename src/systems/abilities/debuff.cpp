@@ -125,15 +125,13 @@ bool update_debuffs(float elapsed_ms_since_last_update) {
 
       Inventory& inventory = registry.inventory.get(player);
       PlayerProjectile& playerproj_component = registry.playerProjectiles.get(knockedback.knockback_proj);
-      bool checkWepSwapped = player_projectile != knockedback.knockback_proj;
+      bool check_wep_swap = player_projectile != knockedback.knockback_proj;
+      playerproj_component.is_loaded = true;
 
-      if (inventory.concussors > 0) {
-        if (checkWepSwapped) {
-          destroyGunOrProjectile(knockedback.knockback_proj);
-        }
-        registry.playerProjectiles.get(knockedback.knockback_proj).is_loaded = true;
-      } else {
+      if (check_wep_swap) {
         destroyGunOrProjectile(knockedback.knockback_proj);
+      }
+      if (inventory.concussors <= 0) {
         doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
         changeSelectedCounterColour(INVENTORY::HARPOON);
       }

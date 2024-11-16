@@ -6,6 +6,7 @@
 
 #include "ai.hpp"
 #include "collision_system.hpp"
+#include "collision_util.hpp"
 #include "enemy_factories.hpp"
 #include "enemy_util.hpp"
 #include "physics.hpp"

@@ -2,7 +2,7 @@
 #include "common.hpp"
 
 #define STUN_MOVEMENT_THRESHOLD_MS 1000
-#define KNOCKBACK_MULTIPLIER 1.0f
+#define KNOCKBACK_MULTIPLIER 0.75f
 
 bool handle_stun(Entity enemy, Entity player);
 

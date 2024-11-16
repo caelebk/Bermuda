@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "collision_system.hpp"
+#include "collision_util.hpp"
 #include "items.hpp"
 
 /////////////////////////////////////////////////////////////////
