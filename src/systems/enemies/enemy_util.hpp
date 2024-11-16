@@ -1,9 +1,11 @@
 #pragma once
 
+#include <functional>
 #include "render_system.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "enemy_factories.hpp"
 #include "common.hpp"
+
 enum class EMOTE {
   NONE        = 0,
   EXCLAMATION = NONE + 1,

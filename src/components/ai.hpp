@@ -3,6 +3,8 @@
 #include "enemy.hpp"
 
 // A timer that will be associated to the dying
+#include <vector>
+#include "tiny_ecs.hpp"
 struct DeathTimer {
   float counter_ms = 0.f;
 };
@@ -52,4 +54,16 @@ struct Shooter {
 };
 
 struct ActsAsProjectile {
+};
+
+struct EntityGroup {
+  Entity group;
+  float active_dir_cd = 0.f;
+  float change_dir_cd = 1000.f;
+};
+
+struct Group {
+  std::vector<Entity> members;
+  float active_dir_cd = 0.f;
+  float change_dir_cd = 1000.f;
 };

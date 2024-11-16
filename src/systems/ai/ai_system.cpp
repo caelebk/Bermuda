@@ -1,8 +1,10 @@
 // internal
 #include "ai_system.hpp"
+#include "boids.hpp"
 
 #include <cstdio>
 #include <debuff.hpp>
+#include <vector>
 
 #include "ai.hpp"
 #include "collision_system.hpp"
@@ -22,6 +24,24 @@ bool is_tracking(Entity e) {
   if (registry.trackPlayerRanged.has(e)) {
     return registry.trackPlayerRanged.get(e).active_track;
   }
+  return false;
+}
+
+bool any_tracking(std::vector<Entity> entities) {
+  if (entities.size() < 1) {
+    return false;
+  }
+  
+  if (!registry.trackPlayer.has(entities[0]) && !registry.trackPlayerRanged.has(entities[0])) {
+    return false;
+  }
+
+  for (Entity e : entities) {
+    if (is_tracking(e)) {
+      return true;
+    }
+  }
+
   return false;
 }
 
@@ -570,6 +590,7 @@ void AISystem::step(float elapsed_ms) {
   do_wander_ai_square(elapsed_ms);
   do_track_player(elapsed_ms);
   do_track_player_ranged(elapsed_ms);
+  do_boids(elapsed_ms);
   do_projectile_firing(elapsed_ms);
 }
 

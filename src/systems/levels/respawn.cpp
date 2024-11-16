@@ -1,7 +1,9 @@
 #include "respawn.hpp"
+#include "ai.hpp"
 #include "environment.hpp"
 #include "items.hpp"
 #include "physics.hpp"
+#include "random.hpp"
 #include "render_system.hpp"
 #include "tiny_ecs_registry.hpp"
 
@@ -37,8 +39,26 @@ EntitySave::EntitySave(Entity e) {
     } else {
         assert(false); // literally just die
     }
+
+    if (registry.entityGroups.has(e)) {
+        EntityGroup &eg = registry.entityGroups.get(e);
+        this->es.group = eg.group;
+    }
 }
 
 void EntitySave::respawn(RenderSystem *renderer) {
-   this->respawnFn(renderer, this->es);
+   Entity e = this->respawnFn(renderer, this->es);
+
+    // if was in a group, reassign
+    if ((unsigned int)this->es.group != 0) {
+        Entity g = Entity(this->es.group);
+        if (!registry.groups.has(g)) {
+            registry.groups.emplace(g);
+        }
+        Group &group = registry.groups.get(g);
+        EntityGroup &eg = registry.entityGroups.emplace(e);
+        group.members.push_back(e);
+        eg.group = g;
+        eg.active_dir_cd = randomFloat(0.f, eg.change_dir_cd);
+    }
 }

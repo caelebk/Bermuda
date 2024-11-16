@@ -54,6 +54,8 @@ class ECSRegistry {
   ComponentContainer<WanderSquare>       wanderSquares;
   ComponentContainer<TracksPlayer>       trackPlayer;
   ComponentContainer<TracksPlayerRanged> trackPlayerRanged;
+  ComponentContainer<Group> groups;
+  ComponentContainer<EntityGroup> entityGroups;
   ComponentContainer<Shooter>            shooters;
 
   // abilities related
@@ -126,6 +128,8 @@ class ECSRegistry {
     registry_list.push_back(&enemyProjectiles);
     registry_list.push_back(&bosses);
     registry_list.push_back(&modifyOxygenCd);
+    registry_list.push_back(&groups);
+    registry_list.push_back(&entityGroups);
     // oxygen related
     registry_list.push_back(&oxygen);
     registry_list.push_back(&oxygenModifiers);
@@ -202,6 +206,15 @@ class ECSRegistry {
       Oxygen &o = oxygen.get(e);
       remove_all_components_of(o.oxygenBar);
       remove_all_components_of(o.backgroundBar);
+    }
+
+    if (entityGroups.has(e)) {
+      // remove from group if they are in one
+      EntityGroup &eg = entityGroups.get(e);
+      if (groups.has(eg.group)) {
+        Group &g = groups.get(eg.group);
+        g.members.erase(std::remove(g.members.begin(), g.members.end(), e), g.members.end());
+      }
     }
 
     if (players.has(e)) {

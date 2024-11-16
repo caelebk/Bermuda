@@ -57,7 +57,7 @@ struct ActiveWall {};
 struct ActiveDoor {};
 
 struct Interactable {
-  std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;
+  std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
 };
 
 struct Floor {};
@@ -69,5 +69,5 @@ struct Geyser {
 struct Bubble {};
 
 struct Breakable {
-  std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;
+  std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
 };

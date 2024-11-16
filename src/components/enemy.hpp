@@ -15,7 +15,7 @@ enum class RangedEnemies {
 
 // anything that is deadly to the player
 struct Deadly {
-  std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;
+  std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
 };
 
 struct EnemyProjectile {

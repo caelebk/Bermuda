@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "physics.hpp"
 #include "random.hpp"
 #include "render_system.hpp"
 #include "respawn.hpp"
@@ -8,6 +9,11 @@
 
 #define ENEMY_O2_BAR_GAP 20.f
 #define PLAYER_SPAWN_RADIUS 300.f
+
+//////////////////////////////////////////////////////////////
+// Group Spawning
+//////////////////////////////////////////////////////////////
+bool checkEnemySpawnCollisions(struct Position enemyPos);
 
 //////////////////////////////////////////////////////////////
 // JellyFish

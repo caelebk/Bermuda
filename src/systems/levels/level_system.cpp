@@ -9,6 +9,7 @@
 #include <string>
 
 #include "common.hpp"
+#include "enemy_factories.hpp"
 #include "graph.hpp"
 #include "level_factories.hpp"
 #include "level_spawn.hpp"
@@ -117,10 +118,9 @@ void LevelSystem::activate_current_room() {
     } else {
       current_room.has_entered = true;
       // It's the first time in this room, spawn for the first time.
-      execute_config_rand(current_room.room_spawn_function, current_room,
-                          renderer);
-      execute_config_rand_chance(current_room.room_spawn_function, current_room,
-                                 renderer, 0.5);
+      execute_pack_spawning(createSharkPos, current_room, renderer, 10);
+      execute_config_rand(current_room.room_spawn_function, current_room, renderer);
+      execute_config_rand_chance(current_room.room_spawn_function, current_room, renderer, 0.5);
     }
   }
 }
@@ -179,13 +179,28 @@ void LevelSystem::deactivate_current_room() {
     registry.remove_all_components_of(e);
   }
 
+  while (registry.entityGroups.entities.size() > 0) {
+    registry.remove_all_components_of(
+        registry.entityGroups.entities.back());
+  }
+
+  while (registry.groups.entities.size() > 0) {
+    registry.remove_all_components_of(
+        registry.groups.entities.back());
+  }
+
+  while (registry.bubbles.entities.size() > 0) {
+    registry.remove_all_components_of(
+        registry.bubbles.entities.back());
+  }
+
   while (registry.enemyProjectiles.entities.size() > 0) {
     Entity e = registry.enemyProjectiles.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id)
-        .saved_entities.push_back(EntitySave(e));
     registry.remove_all_components_of(e);
   }
 
+  registry.stunned.clear();
+  registry.knockedback.clear();
   registry.collisions.clear();
 }
 

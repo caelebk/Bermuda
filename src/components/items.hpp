@@ -6,12 +6,12 @@
 
 // anything the player can pick up, temp
 struct Consumable {
-  std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;
+  std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
 };
 
 // anything the player can pick up, perm
 struct Item {
-  std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;
+  std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
 };
 
 // drops when entity is dead

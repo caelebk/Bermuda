@@ -19,6 +19,7 @@ class AISystem {
   void do_track_player_ranged(float elapsed_ms);
   void do_projectile_firing(float elapsed_ms);
   bool in_range_of_player(Position &pos, Position &player_pos, float range);
+  void do_group_ai();
 
   float sharkman_texture_num = 0.f;
   public:
@@ -27,6 +28,7 @@ class AISystem {
 };
 
 bool is_tracking(Entity e);
+bool any_tracking(std::vector<Entity> entities);
 void choose_new_direction(Entity enemy, Entity other);
 bool can_see_player(Position &pos, Position &player_pos);
 void removeFromAI(Entity& e);

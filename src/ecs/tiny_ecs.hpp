@@ -24,6 +24,14 @@ public:
   operator unsigned int() {
     return id;
   } // this enables automatic casting to int
+
+  operator unsigned int() const {
+    return id;
+  } // this enables automatic casting to int
+
+  bool operator==(const Entity &other) {
+    return id == (unsigned int) other;
+  }
 };
 
 // Common interface to refer to all containers in the ECS registry

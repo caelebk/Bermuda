@@ -21,12 +21,7 @@
  * @param entity - enemy to check
  * @return true if valid, false otherwise
  */
-static bool checkSpawnCollisions(Entity entity) {
-  if (!registry.positions.has(entity)) {
-    return false;
-  }
-  const Position& enemyPos = registry.positions.get(entity);
-
+bool checkEnemySpawnCollisions(struct Position enemyPos) {
   // Entities can't spawn in the player
   for (Entity player : registry.players.entities) {
     if (!registry.positions.has(player)) {
@@ -73,6 +68,18 @@ static bool checkSpawnCollisions(Entity entity) {
     }
   }
 
+  // Entities can't spawn in other enemies
+  for (Entity deadly : registry.deadlys.entities) {
+    if (!registry.positions.has(deadly)) {
+      continue;
+    }
+    const Position deadlypos = registry.positions.get(deadly);
+    if (box_collides(enemyPos, deadlypos)) {
+      return false;
+    }
+  }
+
+
   return true;
 }
 
@@ -90,16 +97,17 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position, bool checkCollision
   // Reserve an entity
   auto entity = Entity();
 
-  auto& pos    = registry.positions.emplace(entity);
+  Position pos;
   pos.angle    = 0.f;
   pos.position = position;
   pos.scale    = JELLY_SCALE_FACTOR * JELLY_BOUNDING_BOX;
 
-  if (checkCollisions && !checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkEnemySpawnCollisions(pos)) {
     // returns invalid entity, since id's start from 1
-    registry.remove_all_components_of(entity);
     return Entity(0);
   }
+
+  registry.positions.insert(entity, pos);
 
   // Store a reference to the potentially re-used mesh object
   Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -183,15 +191,16 @@ Entity createFishPos(RenderSystem* renderer, vec2 position, bool checkCollisions
   // Reserve an entity
   auto entity = Entity();
 
-  auto& pos    = registry.positions.emplace(entity);
+  Position pos;
   pos.angle    = 0.f;
   pos.position = position;
   pos.scale    = FISH_SCALE_FACTOR * FISH_BOUNDING_BOX;
-  if (checkCollisions && !checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkEnemySpawnCollisions(pos)) {
     // returns invalid entity, since id's start from 1
-    registry.remove_all_components_of(entity);
     return Entity(0);
   }
+
+  registry.positions.insert(entity, pos);
 
   // Store a reference to the potentially re-used mesh object
   Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -277,15 +286,16 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position, bool checkCollision
   auto entity             = Entity();
   vec2 SHARK_SCALE_FACTOR = vec2(randomFloat(SHARK_MIN_SCALE, SHARK_MAX_SCALE));
 
-  auto& pos    = registry.positions.emplace(entity);
+  Position pos;
   pos.angle    = 0.f;
   pos.position = position;
   pos.scale    = SHARK_SCALE_FACTOR * SHARK_BOUNDING_BOX;
-  if (checkCollisions && !checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkEnemySpawnCollisions(pos)) {
     // returns invalid entity, since id's start from 1
-    registry.remove_all_components_of(entity);
     return Entity(0);
   }
+
+  registry.positions.insert(entity, pos);
 
   // Store a reference to the potentially re-used mesh object
   Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -377,15 +387,16 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position, bool checkCollisions
   auto entity            = Entity();
   vec2 KRAB_SCALE_FACTOR = vec2(randomFloat(KRAB_MIN_SCALE, KRAB_MAX_SCALE));
 
-  auto& pos    = registry.positions.emplace(entity);
+  Position pos;
   pos.angle    = 0.f;
   pos.position = position;
   pos.scale    = KRAB_SCALE_FACTOR * KRAB_BOUNDING_BOX;
-  if (checkCollisions && !checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkEnemySpawnCollisions(pos)) {
     // returns invalid entity, since id's start from 1
-    registry.remove_all_components_of(entity);
     return Entity(0);
   }
+
+  registry.positions.insert(entity, pos);
 
   // Store a reference to the potentially re-used mesh object
   Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -488,15 +499,15 @@ Entity createUrchinPos(RenderSystem* renderer, vec2 position,
   vec2 URCHIN_SCALE_FACTOR =
       vec2(randomFloat(URCHIN_MIN_SCALE, URCHIN_MAX_SCALE));
 
-  auto& pos    = registry.positions.emplace(entity);
+  Position pos;
   pos.angle    = 0.f;
   pos.position = position;
   pos.scale    = URCHIN_SCALE_FACTOR * URCHIN_BOUNDING_BOX;
-  if (checkCollisions && !checkSpawnCollisions(entity)) {
+  if (checkCollisions && !checkEnemySpawnCollisions(pos)) {
     // returns invalid entity, since id's start from 1
-    registry.remove_all_components_of(entity);
     return Entity(0);
   }
+  registry.positions.insert(entity, pos);
 
   // Store a reference to the potentially re-used mesh object
   Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
