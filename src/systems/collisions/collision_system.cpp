@@ -192,6 +192,9 @@ void CollisionSystem::detectWallCollisions() {
 
     for (uint j = 0; j < mass_container.size(); j++) {
       Entity entity_j = mass_container.entities[j];
+      if (entity_i == entity_j) {
+        continue;
+      }
       if (registry.players.has(entity_j)) {
         Player&   player_comp = registry.players.get(entity_j);
         checkPlayerMeshCollision(entity_j, entity_i, player_comp.collisionMesh);
@@ -232,6 +235,7 @@ void CollisionSystem::collision_resolution_debug_info(Entity entity,
 
 void CollisionSystem::collision_resolution() {
   auto& collisionsRegistry = registry.collisions;
+  // printf("Collisions size: %d\n", collisionsRegistry.components.size());
   for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
     Entity entity       = collisionsRegistry.entities[i];
     Entity entity_other = collisionsRegistry.components[i].other;
@@ -293,6 +297,8 @@ void CollisionSystem::routePlayerCollisions(Entity player, Entity other) {
   }
   if (registry.activeWalls.has(other)) {
     resolveStopOnWall(other, player);
+    Player& player_comp = registry.players.get(player);
+    resolveStopOnWall(other, player_comp.collisionMesh);
   }
   if (registry.activeDoors.has(other)) {
     resolveDoorPlayerCollision(other, player);
