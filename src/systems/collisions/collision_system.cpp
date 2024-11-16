@@ -124,6 +124,8 @@ void CollisionSystem::detectPlayerProjectileCollisions() {
 void CollisionSystem::detectPlayerCollisions() {
   ComponentContainer<Player>&           player_container = registry.players;
   ComponentContainer<Deadly>&       enemy_container      = registry.deadlys;
+  ComponentContainer<EnemyProjectile>   enemy_proj_container =
+      registry.enemyProjectiles;
   ComponentContainer<Consumable>&   consumable_container = registry.consumables;
   ComponentContainer<Interactable>& interactable_container =
       registry.interactable;
@@ -145,6 +147,11 @@ void CollisionSystem::detectPlayerCollisions() {
           continue;
         }
       }
+      checkPlayerMeshCollision(entity_i, entity_j, player_comp.collisionMesh);
+    }
+
+    for (uint j = 0; j < enemy_proj_container.size(); j++) {
+      Entity entity_j = enemy_proj_container.entities[j];
       checkPlayerMeshCollision(entity_i, entity_j, player_comp.collisionMesh);
     }
 
@@ -278,6 +285,9 @@ void CollisionSystem::routePlayerCollisions(Entity player, Entity other) {
   if (registry.deadlys.has(other)) {
     resolvePlayerEnemyCollision(player, other);
   }
+  if (registry.enemyProjectiles.has(other)) {
+    resolvePlayerEnemyProjCollision(player, other);
+  }
   if (registry.consumables.has(other)) {
     resolvePlayerConsumableCollision(player, other);
   }
@@ -409,6 +419,15 @@ void CollisionSystem::routeInteractableCollisions(Entity interactable,
 void CollisionSystem::resolvePlayerEnemyCollision(Entity player, Entity enemy) {
   handle_debuffs(player, enemy);
   modifyOxygen(player, enemy);
+}
+
+void CollisionSystem::resolvePlayerEnemyProjCollision(Entity player, Entity enemy_proj) {
+  // For now it's almost equal to the above, but make a new function just to open it to changes
+  handle_debuffs(player, enemy_proj);
+  modifyOxygen(player, enemy_proj);
+
+  // Assume the projectile should poof upon impact
+  registry.remove_all_components_of(enemy_proj);
 }
 
 void CollisionSystem::resolvePlayerConsumableCollision(Entity player,

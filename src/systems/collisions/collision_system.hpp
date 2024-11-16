@@ -63,6 +63,9 @@ class CollisionSystem {
   // Player <-> Enemy
   void resolvePlayerEnemyCollision(Entity player, Entity enemy);
 
+  // Player <-> Enemy Projectile
+  void resolvePlayerEnemyProjCollision(Entity player, Entity enemy_proj);
+
   // Player <-> Consumable
   void resolvePlayerConsumableCollision(Entity player, Entity consumable);
 
