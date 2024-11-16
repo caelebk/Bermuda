@@ -50,7 +50,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos) {
   collisionMeshPosition.angle     = 0.f;
   collisionMeshPosition.scale     = PLAYER_SCALE_FACTOR * PLAYER_BOUNDING_BOX;
 
-  PlayerCollisionMesh& collision_mesh_comp = registry.playersCollisionMeshes.emplace(collisionEntity);
+  registry.playersCollisionMeshes.emplace(collisionEntity);
   // Uncomment to render the collision mesh.
   // registry.renderRequests.insert(
   //     collisionEntity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::COLLISION_MESH,

@@ -18,6 +18,9 @@
 bool update_attack(float elapsed_time_ms) {
   for (Entity& e : registry.modifyOxygenCd.entities) {
     ModifyOxygenCD& attackCd = registry.modifyOxygenCd.get(e);
+    if (attackCd.curr_cd == 0.f) {
+      continue;
+    }
     attackCd.curr_cd         = max(attackCd.curr_cd - elapsed_time_ms, 0.f);
   }
 

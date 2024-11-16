@@ -165,7 +165,7 @@ bool player_mouse(RenderSystem* renderer, int button, int action, int mods,
       PROJECTILES type = registry.playerProjectiles.get(player_projectile).type;
 
       // Debug statement
-      printf("Weapon type: %d\n", type);
+      printf("Weapon type: %d\n", (unsigned int) type);
 
       setFiredProjVelo();
       modifyOxygen(player, player_weapon);
@@ -338,9 +338,6 @@ void handleGunSwap(Entity swapped, Entity swapper, PROJECTILES projectile) {
 
 void handleWeaponSwapping(RenderSystem* renderer, int key) {
   Inventory& inv = registry.inventory.get(player);
-
-  PlayerProjectile& playerproj_comp =
-      registry.playerProjectiles.get(player_projectile);
 
   // Switch to harpoon gun
   if (key == GLFW_KEY_1 && player_projectile != harpoon) {

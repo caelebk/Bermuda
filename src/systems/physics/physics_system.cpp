@@ -299,7 +299,6 @@ void calculatePlayerVelocity(float lerp) {
   float max_velocity =
       registry.players.get(player).gliding ? MAX_GLIDE_SPEED : MAX_PLAYER_SPEED;
 
-  Player& player_comp = registry.players.get(player);
   if (motion.velocity.x > max_velocity) {
     motion.velocity.x = max_velocity;
   } else if (motion.velocity.x < -max_velocity) {

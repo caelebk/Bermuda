@@ -43,6 +43,17 @@ static bool checkSpawnCollisions(Entity entity) {
     }
   }
 
+  // Entities can't spawn in doors
+  for (Entity door : registry.activeDoors.entities) {
+    if (!registry.positions.has(door)) {
+      continue;
+    }
+    const Position doorPos = registry.positions.get(door);
+    if (box_collides(enemyPos, doorPos)) {
+      return false;
+    }
+  }
+
   // Entities can't spawn in breakables
   for (Entity wall : registry.breakables.entities) {
     if (!registry.positions.has(wall)) {

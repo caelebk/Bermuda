@@ -51,7 +51,7 @@ void LevelBuilder::mark_difficulty_regions() {
   
   int room_index = 0;
 
-  for (int i = 0; i < ROOM_CLUSTERS.size(); i++) {
+  for (unsigned int i = 0; i < ROOM_CLUSTERS.size(); i++) {
     int rooms_in_cluster = ROOM_CLUSTERS[i];
     
     // Assign the current spawn function to all rooms in the current cluster,
@@ -70,7 +70,7 @@ void LevelBuilder::mark_miniboss_rooms() {
   // TODO:
   // Move this to a preprocessing check that just does sanity checks on all inputs to make sure you don't break it.
   assert(MINIBOSS_ROOMS.size() == MINIBOSS_SPAWN_FUNCTIONS.size());
-  for (int i = 0; i < MINIBOSS_ROOMS.size(); i++) {
+  for (unsigned int i = 0; i < MINIBOSS_ROOMS.size(); i++) {
     rooms[std::to_string(MINIBOSS_ROOMS[i])].is_boss_room = true;
     rooms[std::to_string(MINIBOSS_ROOMS[i])].boss_spawn_function = MINIBOSS_SPAWN_FUNCTIONS[i];
   }

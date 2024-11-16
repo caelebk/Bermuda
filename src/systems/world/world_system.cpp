@@ -32,6 +32,11 @@
 // Game configuration
 /////////////////////////////////////////////////////////////
 
+#define FPS_UPDATE_INTERVAL 500 // update every half-second
+static std::stringstream title_ss;
+static int               fps = 0;
+static float             fps_timer = 0;
+
 // create the underwater world
 WorldSystem::WorldSystem() : oxygen_timer(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
   // Seeding rng with random device
@@ -114,15 +119,27 @@ void WorldSystem::init(RenderSystem* renderer_arg, LevelSystem* level) {
   restart_game();
 }
 
+void WorldSystem::update_fps(float elapsed_ms_since_last_update) {
+  fps_timer -= elapsed_ms_since_last_update;
+  if (fps_timer > 0.f) {
+    return;
+  }
+  fps_timer = FPS_UPDATE_INTERVAL;
+  int curr_fps = int(1000.f / elapsed_ms_since_last_update);
+  if (curr_fps != fps) {
+    title_ss.str("");
+    title_ss << "Bermuda      FPS: " << curr_fps;
+    fps = curr_fps;
+    glfwSetWindowTitle(window, title_ss.str().c_str());
+  }
+}
+
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
   // Updating window title
-  std::stringstream title_ss;
-  title_ss << "Bermuda      FPS: "
-           << int(1000.f / elapsed_ms_since_last_update);
-  glfwSetWindowTitle(window, title_ss.str().c_str());
+  update_fps(elapsed_ms_since_last_update);
 
-  // Remove debug info from the last step
+   // Remove debug info from the last step
   while (registry.debugComponents.entities.size() > 0)
     registry.remove_all_components_of(registry.debugComponents.entities.back());
 

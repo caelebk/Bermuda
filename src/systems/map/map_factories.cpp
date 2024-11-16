@@ -82,6 +82,17 @@ static bool checkSpawnCollisions(Entity entity) {
     }
   }
 
+  // Entities can't spawn in consumables
+  for (Entity consumable : registry.consumables.entities) {
+    if (!registry.positions.has(consumable)) {
+      continue;
+    }
+    const Position consumablePos = registry.positions.get(consumable);
+    if (box_collides(entityPos, consumablePos)) {
+      return false;
+    }
+  }
+
   return true;
 }
 /////////////////////////////////////////////////////////////////

@@ -10,6 +10,9 @@ void Transform::scale(vec2 scale) {
 }
 
 void Transform::rotate(float radians) {
+  if (radians == 0.f) {
+    return;
+  }
   float c = cosf(radians);
   float s = sinf(radians);
   mat3  R = {{c, s, 0.f}, {-s, c, 0.f}, {0.f, 0.f, 1.f}};

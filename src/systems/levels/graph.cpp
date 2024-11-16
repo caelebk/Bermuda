@@ -165,7 +165,7 @@ Graph generate_random_graph() {
     for (int cluster = 0; cluster < (int) ROOM_CLUSTERS.size(); cluster++) {
         int rooms_in_cluster = ROOM_CLUSTERS[cluster];
         normal_rooms = rooms_in_cluster - 1;
-        int max_connections = normal_rooms - 1;
+        unsigned int max_connections = normal_rooms - 1;
 
         // If there is only one room in this cluster for whatever reason, just connect it and continue.
         if (rooms_in_cluster == 1) {
@@ -199,7 +199,7 @@ Graph generate_random_graph() {
         }
 
         // Notice that we skip the boss room because we want to keep it a funnel point that delineates area transitions.
-        for (int i = 0; i < normal_rooms; i++) {
+        for (unsigned int i = 0; i < normal_rooms; i++) {
             int room_number = random_path[i];
 
             // Naturally, skip any rooms that are already too full.

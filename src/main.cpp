@@ -78,7 +78,6 @@ int main() {
     // Processes system messages, if this wasn't present the window would become
     // unresponsive
     glfwPollEvents();
-
     // Calculating elapsed times in milliseconds from the previous iteration
     auto  now = Clock::now();
     float elapsed_ms =

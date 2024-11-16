@@ -40,6 +40,7 @@ class WorldSystem {
   void on_mouse_click(int button, int action, int mods);
   void on_mouse_move(vec2 pos);
   void check_bounds();
+  void update_fps(float elapsed_ms_since_last_update);
 
   // restart level
   void restart_game();
