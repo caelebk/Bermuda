@@ -54,6 +54,7 @@ class ECSRegistry {
   ComponentContainer<WanderSquare>       wanderSquares;
   ComponentContainer<TracksPlayer>       trackPlayer;
   ComponentContainer<TracksPlayerRanged> trackPlayerRanged;
+  ComponentContainer<Shooter>            shooters;
 
   // abilities related
   ComponentContainer<Stun>             stuns;
@@ -133,6 +134,7 @@ class ECSRegistry {
     registry_list.push_back(&wanderSquares);
     registry_list.push_back(&trackPlayer);
     registry_list.push_back(&trackPlayerRanged);
+    registry_list.push_back(&shooters);
     // abilities related
     registry_list.push_back(&stuns);
     registry_list.push_back(&knockbacks);

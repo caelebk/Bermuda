@@ -78,10 +78,16 @@ class CollisionSystem {
   // Breakable <-> Player Projectile
   void resolveBreakablePlayerProjCollision(Entity breakable, Entity player_proj);
 
+  // Breakable <-> Enemy Projectile
+  void resolveBreakableEnemyProjCollision(Entity crate, Entity enemy_proj);
+
   // Wall <-> Player Projectile
   void resolveWallPlayerProjCollision(Entity wall, Entity player_proj);
 
-  // Wall <-> Player Projectile
+  // Wall <-> Enemy Projectile
+  void resolveWallEnemyProjCollision(Entity wall, Entity enemy_proj);
+
+  // Wall <-> Enemy Projectile
   void resolveWallEnemyCollision(Entity wall, Entity enemy);
 
   // Wall <-> Something that should stop on the wall

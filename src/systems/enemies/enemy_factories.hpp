@@ -99,3 +99,33 @@ Entity respawnShark(RenderSystem* renderer, EntityState es);
 Entity createKrabPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
 Entity respawnKrab(RenderSystem* renderer, EntityState es);
 
+///////////////////////////////////////////////////////////////
+// Sea Urchin
+///////////////////////////////////////////////////////////////
+#define URCHIN_MS 175.0
+#define URCHIN_MIN_SCALE 0.4
+#define URCHIN_MAX_SCALE 0.5
+#define URCHIN_BOUNDING_BOX vec2(100.f, 100.f)
+#define URCHIN_HEALTH 100  // two shot
+#define URCHIN_MIN_DIR_CD \
+  1000  // random direction change cooldown so it looks more natural
+#define URCHIN_MAX_DIR_CD 8000
+#define URCHIN_HEALTH_SCALE vec2(1.4f)
+#define URCHIN_HEALTH_BAR_SCALE vec2(1.5f)
+#define URCHIN_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+#define URCHIN_FIRERATE 1500.f
+
+Entity createUrchinPos(RenderSystem* renderer, vec2 position,
+                     bool checkCollisions = true);
+Entity respawnUrchin(RenderSystem* renderer, EntityState es);
+
+///////////////////////////////////////////////////////////////
+// Sea Urchin Needle
+///////////////////////////////////////////////////////////////
+#define URCHIN_NEEDLE_MS 50
+#define URCHIN_NEEDLE_BOUNDING_BOX vec2(30.f, 5.f)
+#define URCHIN_NEEDLE_SCALE_FACTOR vec2(1.f)
+#define URCHIN_NEEDLE_DAMAGE -50
+#define URCHIN_NEEDLE_TIMER 1500.f
+
+Entity launchUrchinNeedle(RenderSystem* renderer, vec2 position, float angle);

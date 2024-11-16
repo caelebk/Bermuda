@@ -173,6 +173,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       }
     }
 
+    // Enemy Projectiles
+    for (Entity entity : registry.enemyProjectiles.entities) {
+      EnemyProjectile& timer = registry.enemyProjectiles.get(entity);
+      if (timer.has_timer) {
+        timer.timer -=
+            elapsed_ms_since_last_update;
+        if (timer.timer < 0.f) {
+          registry.remove_all_components_of(entity);
+        }
+      }
+    }
+
     update_debuffs(elapsed_ms_since_last_update);
     update_attack(elapsed_ms_since_last_update);
     update_collision_timers(elapsed_ms_since_last_update);

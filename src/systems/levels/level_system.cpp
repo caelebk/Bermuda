@@ -140,6 +140,10 @@ void LevelSystem::deactivate_current_room() {
     registry.remove_all_components_of(registry.floors.entities.back());
   }
 
+  while (registry.bubbles.entities.size() > 0) {
+    registry.remove_all_components_of(registry.bubbles.entities.back());
+  }
+
   while (registry.deadlys.entities.size() > 0) {
     Entity e = registry.deadlys.entities.back();
     level->get_room_by_editor_id(current_room_editor_id)
@@ -170,6 +174,13 @@ void LevelSystem::deactivate_current_room() {
 
   while (registry.breakables.entities.size() > 0) {
     Entity e = registry.breakables.entities.back();
+    level->get_room_by_editor_id(current_room_editor_id)
+        .saved_entities.push_back(EntitySave(e));
+    registry.remove_all_components_of(e);
+  }
+
+  while (registry.enemyProjectiles.entities.size() > 0) {
+    Entity e = registry.enemyProjectiles.entities.back();
     level->get_room_by_editor_id(current_room_editor_id)
         .saved_entities.push_back(EntitySave(e));
     registry.remove_all_components_of(e);

@@ -170,6 +170,14 @@ void choose_new_direction(Entity enemy, Entity other) {
   registry.motions.get(enemy).velocity = direction * speed;
 }
 
+void handleUrchinFiring(RenderSystem* renderer, Position& pos) {
+  launchUrchinNeedle(renderer, pos.position + vec2(abs(pos.scale.x), 0), 0);
+  launchUrchinNeedle(renderer, pos.position + vec2(0, abs(pos.scale.y)), M_PI / 2);
+  launchUrchinNeedle(renderer, pos.position + vec2(-abs(pos.scale.x), 0), M_PI);
+  launchUrchinNeedle(renderer, pos.position + vec2(0, -abs(pos.scale.y)),
+                     1.5f * M_PI);
+}
+
 void AISystem::do_boss_ai(float elapsed_ms) {
   for (Entity& b : registry.bosses.entities) {
     Boss& boss = registry.bosses.get(b);
@@ -538,6 +546,19 @@ void AISystem::do_track_player_ranged(float elapsed_ms) {
   }
 }
 
+void AISystem::do_projectile_firing(float elapsed_ms) {
+  for (Entity enemy : registry.shooters.entities) {
+    Shooter& attrs = registry.shooters.get(enemy);
+    attrs.cooldown -= elapsed_ms;
+    if (attrs.cooldown < 0.f) {
+      attrs.cooldown = attrs.default_cd;
+      if (attrs.type == RangedEnemies::URCHIN) {
+        handleUrchinFiring(renderer, registry.positions.get(enemy));
+      }
+    }
+  }
+}
+
 void AISystem::step(float elapsed_ms) {
   // minibosses
   if (registry.bosses.entities.size() > 0) {
@@ -549,6 +570,7 @@ void AISystem::step(float elapsed_ms) {
   do_wander_ai_square(elapsed_ms);
   do_track_player(elapsed_ms);
   do_track_player_ranged(elapsed_ms);
+  do_projectile_firing(elapsed_ms);
 }
 
 void AISystem::init(RenderSystem* renderer_arg) {

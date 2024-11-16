@@ -9,14 +9,18 @@ enum class BossType {
   SHARKMAN
 };
 
+enum class RangedEnemies {
+  URCHIN
+};
+
 // anything that is deadly to the player
 struct Deadly {
   std::function<void(RenderSystem *renderer, EntityState es)> respawnFn;
 };
 
 struct EnemyProjectile {
-  bool has_max_range = false;
-  float max_range;
+  bool has_timer = false;
+  float timer;
 };
 
 struct Boss {

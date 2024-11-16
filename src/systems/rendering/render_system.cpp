@@ -377,6 +377,11 @@ void RenderSystem::draw() {
       }
     }
   }
+  for (Entity enemy_proj : registry.enemyProjectiles.entities) {
+    if (registry.enemyProjectiles.has(enemy_proj)) {
+      drawTexturedMesh(enemy_proj, projection_2D);
+    }
+  }
   for (Entity playerHUDElement : registry.playerHUD.entities) {
     if (registry.renderRequests.has(playerHUDElement))
       drawTexturedMesh(playerHUDElement, projection_2D);

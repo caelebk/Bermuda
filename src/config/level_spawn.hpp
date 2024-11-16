@@ -14,7 +14,7 @@ const std::initializer_list<
     LVL_1_RAND_POS = {createOxygenCanisterPos, createCratePos, createCratePos,
                       createCratePos,          createCratePos, createCratePos,
                       createGeyserPos,         createSharkPos, createKrabPos,
-                      createFishPos,           createJellyPos};
+                      createFishPos,           createJellyPos, createUrchinPos};
 
 // TODO:
 // We don't have any new enemies yet, so just spawn a billion sharks for LVL 2.

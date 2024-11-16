@@ -177,6 +177,8 @@ void CollisionSystem::detectPlayerCollisions() {
 void CollisionSystem::detectWallCollisions() {
   ComponentContainer<Mass>&         mass_container       = registry.masses;
   ComponentContainer<Deadly>&       enemy_container      = registry.deadlys;
+  ComponentContainer<EnemyProjectile> enemy_proj_container =
+      registry.enemyProjectiles;
   ComponentContainer<ActiveWall>&   wall_container       = registry.activeWalls;  
 
   for (uint i = 0; i < wall_container.components.size(); i++) {
@@ -187,6 +189,11 @@ void CollisionSystem::detectWallCollisions() {
 
     for (uint j = 0; j < enemy_container.size(); j++) {
       Entity entity_j = enemy_container.entities[j];
+      checkBoxCollision(entity_i, entity_j);
+    }
+
+    for (uint j = 0; j < enemy_proj_container.size(); j++) {
+      Entity entity_j = enemy_proj_container.entities[j];
       checkBoxCollision(entity_i, entity_j);
     }
 
@@ -358,6 +365,13 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
       resolveBreakablePlayerProjCollision(wall, other);
     }
   }
+  if (registry.enemyProjectiles.has(other)) {
+    if (registry.breakables.has(wall)) {
+      resolveBreakableEnemyProjCollision(wall, other);
+    } else {
+      resolveWallEnemyProjCollision(wall, other);
+    }
+  }
 }
 
 void CollisionSystem::routeDoorCollisions(Entity door, Entity other) {
@@ -524,6 +538,17 @@ void CollisionSystem::resolveBreakablePlayerProjCollision(Entity breakable,
   }
 }
 
+void CollisionSystem::resolveBreakableEnemyProjCollision(Entity breakable,
+                                                          Entity enemy_proj) {
+  if (!registry.motions.has(enemy_proj)) {
+    return;
+  }
+
+  modifyOxygen(breakable, enemy_proj);
+
+  registry.remove_all_components_of(enemy_proj);
+}
+
 //hit_entity is the entity that got hit
 void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity hit_entity) {
   if (!registry.sounds.has(proj)) {
@@ -648,6 +673,11 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
     proj_motion.velocity     = vec2(0.f);
     proj_component.is_loaded = true;
   }
+}
+
+void CollisionSystem::resolveWallEnemyProjCollision(Entity wall,
+  Entity enemy_proj) {
+  registry.remove_all_components_of(enemy_proj);
 }
 
 void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {

@@ -89,6 +89,11 @@ bool remove_all_entities() {
         registry.playerProjectiles.entities.back());
   }
 
+  while (registry.enemyProjectiles.entities.size() > 0) {
+    registry.remove_all_components_of(
+        registry.enemyProjectiles.entities.back());
+  }
+
   while (registry.oxygenModifiers.entities.size() > 0) {
     registry.remove_all_components_of(registry.oxygenModifiers.entities.back());
   }

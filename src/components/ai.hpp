@@ -1,5 +1,7 @@
 #pragma once
 
+#include "enemy.hpp"
+
 // A timer that will be associated to the dying
 struct DeathTimer {
   float counter_ms = 0.f;
@@ -41,6 +43,12 @@ struct TracksPlayerRanged {
   float leash_radius = 0.f;
   float min_distance = 0.f;
   float acceleration = 0.f;
+};
+
+struct Shooter {
+  RangedEnemies type;
+  float default_cd = 100.f;
+  float cooldown   = 0.f;
 };
 
 struct ActsAsProjectile {

@@ -17,6 +17,7 @@ class AISystem {
   void do_wander_ai_square(float elapsed_ms);
   void do_track_player(float elapsed_ms);
   void do_track_player_ranged(float elapsed_ms);
+  void do_projectile_firing(float elapsed_ms);
   bool in_range_of_player(Position &pos, Position &player_pos, float range);
 
   float sharkman_texture_num = 0.f;

@@ -446,3 +446,125 @@ Entity respawnKrab(RenderSystem *renderer, EntityState es) {
   return entity;
 }
 
+// /////////////////////////////////////////////////////////////////
+// // Urchins
+// /////////////////////////////////////////////////////////////////
+/**
+ * @brief creates an urchin at a specific position
+ *
+ * krabs will be created with a random size
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createUrchinPos(RenderSystem* renderer, vec2 position,
+                     bool checkCollisions) {
+  // Reserve an entity
+  auto entity            = Entity();
+  vec2 URCHIN_SCALE_FACTOR =
+      vec2(randomFloat(URCHIN_MIN_SCALE, URCHIN_MAX_SCALE));
+
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = 0.f;
+  pos.position = position;
+  pos.scale    = URCHIN_SCALE_FACTOR * URCHIN_BOUNDING_BOX;
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // make enemy and damage
+  Deadly& d   = registry.deadlys.emplace(entity);
+  d.respawnFn = respawnUrchin;
+
+  // Initialize the position, scale, and physics components
+  auto& motion        = registry.motions.emplace(entity);
+  motion.velocity     = {-URCHIN_MS, 0};
+  motion.acceleration = {0, 0};
+
+  // ai
+  auto& wander         = registry.wanders.emplace(entity);
+  wander.active_dir_cd = 0;  // immediately picks a new direction
+  wander.change_dir_cd = getRandInt(SHARK_MIN_DIR_CD, SHARK_MAX_DIR_CD);
+
+  auto& shooter = registry.shooters.emplace(entity);
+  shooter.type  = RangedEnemies::URCHIN;
+  shooter.default_cd = URCHIN_FIRERATE;
+  shooter.cooldown   = URCHIN_FIRERATE;
+
+  // TODO: add the room
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::URCHIN, EFFECT_ASSET_ID::ENEMY,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  createDefaultHealthbar(renderer, entity, URCHIN_HEALTH, URCHIN_HEALTH_SCALE,
+                         URCHIN_HEALTH_BAR_SCALE, URCHIN_HEALTH_BOUNDING_BOX);
+  return entity;
+}
+
+/**
+ * @brief Respawns a Krab based on it's entity state
+ *
+ * @param renderer
+ * @param es
+ * @return
+ */
+Entity respawnUrchin(RenderSystem* renderer, EntityState es) {
+  Entity entity = createUrchinPos(renderer, es.position.position, false);
+
+  // Restore State
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}
+
+Entity launchUrchinNeedle(RenderSystem* renderer, vec2 pos, float angle) {
+  auto entity = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // Setting initial position values
+  Position& position = registry.positions.emplace(entity);
+  position.position  = pos;
+  position.scale     = URCHIN_NEEDLE_SCALE_FACTOR * URCHIN_NEEDLE_BOUNDING_BOX;
+  position.angle     = angle;
+
+  // Setting initial motion values
+  Motion& motion      = registry.motions.emplace(entity);
+  motion.velocity     = {cos(angle) * URCHIN_NEEDLE_MS, sin(angle) * URCHIN_NEEDLE_MS};
+
+  OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
+  oxyCost.amount          = URCHIN_NEEDLE_DAMAGE;
+
+  EnemyProjectile& proj = registry.enemyProjectiles.emplace(entity);
+  proj.has_timer    = true;
+  proj.timer        = URCHIN_NEEDLE_TIMER;
+
+  // Request Render
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::URCHIN_NEEDLE, EFFECT_ASSET_ID::PLAYER,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
+
+
