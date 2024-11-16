@@ -9,7 +9,6 @@
 #include "debuff.hpp"
 #include "enemy_factories.hpp"
 #include "enemy_util.hpp"
-#include "player_hud.hpp"
 #include "level_spawn.hpp"
 #include "map_factories.hpp"
 #include "map_util.hpp"
@@ -17,6 +16,7 @@
 #include "physics_system.hpp"
 #include "player_controls.hpp"
 #include "player_factories.hpp"
+#include "player_hud.hpp"
 #include "spawning.hpp"
 #include "tiny_ecs_registry.hpp"
 
@@ -33,8 +33,7 @@
 /////////////////////////////////////////////////////////////
 
 // create the underwater world
-WorldSystem::WorldSystem()
-    : oxygen_timer(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
+WorldSystem::WorldSystem() : oxygen_timer(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
   // Seeding rng with random device
   rng = std::default_random_engine(std::random_device()());
 }
@@ -109,7 +108,7 @@ GLFWwindow* WorldSystem::create_window() {
 
 void WorldSystem::init(RenderSystem* renderer_arg, LevelSystem* level) {
   this->renderer = renderer_arg;
-  this->level = level;
+  this->level    = level;
 
   restart_game();
   restart_game();
@@ -163,7 +162,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     // Deplete oxygen when it is time...
     oxygen_timer = oxygen_drain(oxygen_timer, elapsed_ms_since_last_update);
-    
+
     // Update the player's direction
     updatePlayerDirection(mouse_pos);
 
@@ -205,15 +204,23 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     check_bounds();
   } else if (transitioning) {
-    if (screen.darken_screen_factor < 1.f && registry.roomTransitions.has(rt_entity)) {
-      screen.darken_screen_factor = min(1.f, screen.darken_screen_factor + 0.001f * elapsed_ms_since_last_update);
-    } else if (screen.darken_screen_factor >= 1.f && registry.roomTransitions.has(rt_entity)) {
+    if (screen.darken_screen_factor < 1.f &&
+        registry.roomTransitions.has(rt_entity)) {
+      screen.darken_screen_factor =
+          min(1.f, screen.darken_screen_factor +
+                       0.001f * elapsed_ms_since_last_update);
+    } else if (screen.darken_screen_factor >= 1.f &&
+               registry.roomTransitions.has(rt_entity)) {
       RoomTransition& roomTransition = registry.roomTransitions.get(rt_entity);
       level->enter_room(roomTransition.door_connection);
       registry.remove_all_components_of(rt_entity);
-    } else if (screen.darken_screen_factor > 0.f && !registry.roomTransitions.has(rt_entity)) {
-      screen.darken_screen_factor = max(0.f, screen.darken_screen_factor - 0.001f * elapsed_ms_since_last_update);
-    } else if (screen.darken_screen_factor <= 0.f && !registry.roomTransitions.has(rt_entity)) {
+    } else if (screen.darken_screen_factor > 0.f &&
+               !registry.roomTransitions.has(rt_entity)) {
+      screen.darken_screen_factor =
+          max(0.f, screen.darken_screen_factor -
+                       0.001f * elapsed_ms_since_last_update);
+    } else if (screen.darken_screen_factor <= 0.f &&
+               !registry.roomTransitions.has(rt_entity)) {
       transitioning = false;
     }
   } else {
@@ -279,10 +286,11 @@ void WorldSystem::restart_game() {
   pause_menu = createPauseMenu(renderer);
 
   player = createPlayer(
-      renderer,
-      {150, window_height_px - 150});  // TODO: get player spawn position
+      renderer, {window_width_px / 2.f + 22.f,
+                 window_height_px / 2.f - 43.f});  // TODO: get player spawn position
   registry.inventory.emplace(player);
   createInventoryHud(renderer);
+  createCommunicationHud(renderer);
   // init global variables
   player_weapon     = getPlayerWeapon();
   player_projectile = getPlayerProjectile();
@@ -305,14 +313,10 @@ void WorldSystem::restart_game() {
   shrimp_gun     = createConsumableGun(renderer, SHRIMP_GUN_OXYGEN_COST,
                                        PROJECTILES::SHRIMP);
 
-  createOxygenTank(
-      renderer, player,
-      {47.5, window_height_px * 0.45f});
+  createOxygenTank(renderer, player, {47.5, window_height_px * 0.45f});
 
-  //ugly number for the y position but the spacing looks fairly even
-  createDashIndicator(
-      renderer, player,
-      {47.5, window_height_px * 0.78f});
+  // ugly number for the y position but the spacing looks fairly even
+  createDashIndicator(renderer, player, {47.5, window_height_px * 0.78f});
   /////////////////////////////////////////////
   // Enemy + Drops
   /////////////////////////////////////////////
@@ -344,7 +348,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   // Help / Pause
   /////////////////////////////////////
   // Toggling game pause
-  if (action == GLFW_RELEASE && key == GLFW_KEY_P && !registry.deathTimers.has(player)) {
+  if (action == GLFW_RELEASE && key == GLFW_KEY_P &&
+      !registry.deathTimers.has(player)) {
     paused = !paused;
     if (paused) {
       depleteOxygen(player);
@@ -375,7 +380,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     }
 
     // Handle weapon swapping
-    handleWeaponSwapping(key);
+    handleWeaponSwapping(renderer, key);
   }
 
   // ESC to close game

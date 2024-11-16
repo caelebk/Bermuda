@@ -56,6 +56,9 @@ struct InventoryCounter {
   INVENTORY inventoryType;
 };
 
+// Communication
+struct Communication {};
+
 // Player component
 struct Player {
   Entity weapon;

@@ -10,17 +10,18 @@
 
 #include "common.hpp"
 #include "graph.hpp"
+#include "level_factories.hpp"
 #include "level_spawn.hpp"
 #include "map_factories.hpp"
 #include "player_factories.hpp"
+#include "player_hud.hpp"
 #include "spawning.hpp"
-#include "level_factories.hpp"
 
 LevelSystem::LevelSystem() {};
 
 void LevelSystem::init(RenderSystem* renderer, LevelBuilder* level) {
   this->renderer = renderer;
-  this->level = level;
+  this->level    = level;
 };
 
 void LevelSystem::deactivate_boundary(Entity& entity) {
@@ -46,7 +47,8 @@ void LevelSystem::spawn_miniboss() {
 }
 
 void LevelSystem::activate_current_room() {
-  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+  RoomBuilder& current_room =
+      level->get_room_by_editor_id(current_room_editor_id);
 
   // Render the walls.
   for (Entity& wall : registry.spaces.get(current_room.entity).walls) {
@@ -61,19 +63,19 @@ void LevelSystem::activate_current_room() {
   for (Entity& door : registry.spaces.get(current_room.entity).doors) {
     // activate_boundary(door);
     registry.activeDoors.emplace(door);
-    Direction direction = registry.doorConnections.get(door).direction;
+    Direction direction     = registry.doorConnections.get(door).direction;
     Position& door_position = registry.positions.get(door);
     if (direction == Direction::SOUTH || direction == Direction::WEST) {
       door_position.angle = M_PI;
     }
     if (direction == Direction::NORTH || direction == Direction::SOUTH) {
-      registry.renderRequests.insert(door, {TEXTURE_ASSET_ID::DOORWAY_H,
-                                            EFFECT_ASSET_ID::TEXTURED,
-                                            GEOMETRY_BUFFER_ID::SPRITE});
+      registry.renderRequests.insert(
+          door, {TEXTURE_ASSET_ID::DOORWAY_H, EFFECT_ASSET_ID::TEXTURED,
+                 GEOMETRY_BUFFER_ID::SPRITE});
     } else {
-      registry.renderRequests.insert(door, {TEXTURE_ASSET_ID::DOORWAY_V,
-                                            EFFECT_ASSET_ID::TEXTURED,
-                                            GEOMETRY_BUFFER_ID::SPRITE});
+      registry.renderRequests.insert(
+          door, {TEXTURE_ASSET_ID::DOORWAY_V, EFFECT_ASSET_ID::TEXTURED,
+                 GEOMETRY_BUFFER_ID::SPRITE});
     }
   }
 
@@ -85,9 +87,20 @@ void LevelSystem::activate_current_room() {
 
   registry.floors.emplace(floor);
 
-  registry.renderRequests.insert(
-      floor, {TEXTURE_ASSET_ID::FLOOR, EFFECT_ASSET_ID::TEXTURED,
-              GEOMETRY_BUFFER_ID::SPRITE});
+  // TODO: Temporary Floor Switching Method
+  if (current_room.is_tutorial_room) {
+    // TODO: Temporary place for tutorial dialogue call
+    tutorialRoomDialogue(renderer);
+    registry.renderRequests.insert(
+        floor, {TEXTURE_ASSET_ID::TUTORIAL_FLOOR, EFFECT_ASSET_ID::TEXTURED,
+                GEOMETRY_BUFFER_ID::SPRITE});
+  } else {
+    // TODO: Temporary place for tutorial dialogue call
+    clearDialogue();
+    registry.renderRequests.insert(
+        floor, {TEXTURE_ASSET_ID::FLOOR, EFFECT_ASSET_ID::TEXTURED,
+                GEOMETRY_BUFFER_ID::SPRITE});
+  }
 
   // Spawn the appropriate entities.
   if (current_room.has_entered) {
@@ -104,8 +117,10 @@ void LevelSystem::activate_current_room() {
     } else {
       current_room.has_entered = true;
       // It's the first time in this room, spawn for the first time.
-      execute_config_rand(current_room.room_spawn_function, current_room, renderer);
-      execute_config_rand_chance(current_room.room_spawn_function, current_room, renderer, 0.5);
+      execute_config_rand(current_room.room_spawn_function, current_room,
+                          renderer);
+      execute_config_rand_chance(current_room.room_spawn_function, current_room,
+                                 renderer, 0.5);
     }
   }
 }
@@ -115,7 +130,9 @@ void LevelSystem::deactivate_current_room() {
   level->get_room_by_editor_id(current_room_editor_id).saved_entities.clear();
 
   for (auto& boundary :
-       registry.spaces.get(level->get_room_by_editor_id(current_room_editor_id).entity).boundaries) {
+       registry.spaces
+           .get(level->get_room_by_editor_id(current_room_editor_id).entity)
+           .boundaries) {
     deactivate_boundary(boundary);
   }
 
@@ -125,31 +142,36 @@ void LevelSystem::deactivate_current_room() {
 
   while (registry.deadlys.entities.size() > 0) {
     Entity e = registry.deadlys.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id).saved_entities.push_back(EntitySave(e));
+    level->get_room_by_editor_id(current_room_editor_id)
+        .saved_entities.push_back(EntitySave(e));
     registry.remove_all_components_of(e);
   }
 
   while (registry.consumables.entities.size() > 0) {
     Entity e = registry.consumables.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id).saved_entities.push_back(EntitySave(e));
+    level->get_room_by_editor_id(current_room_editor_id)
+        .saved_entities.push_back(EntitySave(e));
     registry.remove_all_components_of(e);
   }
 
   while (registry.items.entities.size() > 0) {
     Entity e = registry.items.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id).saved_entities.push_back(EntitySave(e));
+    level->get_room_by_editor_id(current_room_editor_id)
+        .saved_entities.push_back(EntitySave(e));
     registry.remove_all_components_of(e);
   }
 
   while (registry.interactable.entities.size() > 0) {
     Entity e = registry.interactable.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id).saved_entities.push_back(EntitySave(e));
+    level->get_room_by_editor_id(current_room_editor_id)
+        .saved_entities.push_back(EntitySave(e));
     registry.remove_all_components_of(e);
   }
 
   while (registry.breakables.entities.size() > 0) {
     Entity e = registry.breakables.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id).saved_entities.push_back(EntitySave(e));
+    level->get_room_by_editor_id(current_room_editor_id)
+        .saved_entities.push_back(EntitySave(e));
     registry.remove_all_components_of(e);
   }
 
@@ -157,7 +179,10 @@ void LevelSystem::deactivate_current_room() {
 }
 
 void LevelSystem::move_player_to_door(Direction direction, Entity& exit_door) {
-  for (auto& door : registry.spaces.get(level->get_room_by_editor_id(current_room_editor_id).entity).doors) {
+  for (auto& door :
+       registry.spaces
+           .get(level->get_room_by_editor_id(current_room_editor_id).entity)
+           .doors) {
     if (door == exit_door) {
       if (registry.positions.has(door)) {
         Position& door_position = registry.positions.get(door);

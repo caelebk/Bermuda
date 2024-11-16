@@ -333,3 +333,116 @@ bool isKeyCollected(INVENTORY keyType) {
       return false;
   }
 }
+
+//////////////////////////////////////////////////////////////
+// Communications
+//////////////////////////////////////////////////////////////
+
+/********************************************************************************
+ * @brief creates the communications part of the player HUD
+ *
+ * @param renderer
+ ********************************************************************************/
+void createCommunicationHud(RenderSystem* renderer) {
+  auto communicationsHud = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(communicationsHud, &mesh);
+
+  // Initialize the position and scale
+  auto& communicationsHudPos    = registry.positions.emplace(communicationsHud);
+  communicationsHudPos.angle    = 0.f;
+  communicationsHudPos.position = COMMUNICATION_HUD_POS;
+  communicationsHudPos.scale =
+      COMMUNICATION_HUD_SCALE_FACTOR * COMMUNICATION_HUD_BOUNDING_BOX;
+  communicationsHudPos.originalScale = communicationsHudPos.scale;
+
+  // Make player HUD
+  registry.playerHUD.emplace(communicationsHud);
+
+  // request rendering
+  registry.renderRequests.insert(
+      communicationsHud,
+      {TEXTURE_ASSET_ID::COMMUNUCATIONS, EFFECT_ASSET_ID::TEXTURED,
+       GEOMETRY_BUFFER_ID::SPRITE});
+
+  requestText(renderer, "--COMMUNICATIONS--", COMMUNICATIONS_TEXT_SCALE,
+              COMMUNICATIONS_TEXT_COLOUR, COMMUNICATIONS_TITLE_POS);
+}
+
+/********************************************************************************
+ * @brief creates new dialogue in communications HUD
+ *
+ * @param renderer
+ * @param line1 - assert length <= 77 to prevent overflow
+ * @param line2 - assert length <= 77 to prevent overflow
+ ********************************************************************************/
+void createDialogue(RenderSystem* renderer, std::string line1,
+                    std::string line2) {
+  clearDialogue();
+
+  assert(line1.length() <= LINE_LENGTH_LIMIT &&
+         line2.length() <= LINE_LENGTH_LIMIT);
+
+  Entity lineText1 =
+      requestText(renderer, line1, COMMUNICATIONS_TEXT_SCALE,
+                  COMMUNICATIONS_TEXT_COLOUR, COMMUNICATIONS_LINE1_POS);
+  registry.communications.emplace(lineText1);
+
+  // don't create a second entity if not needed
+  if (line2 != NO_SECOND_LINE) {
+    Entity lineText2 =
+        requestText(renderer, line2, COMMUNICATIONS_TEXT_SCALE,
+                    COMMUNICATIONS_TEXT_COLOUR, COMMUNICATIONS_LINE2_POS);
+    registry.communications.emplace(lineText2);
+  }
+}
+
+/********************************************************************************
+ * @brief clear dialogue in communications HUD
+ ********************************************************************************/
+void clearDialogue() {
+  while (registry.communications.entities.size() > 0) {
+    registry.remove_all_components_of(registry.communications.entities.back());
+  }
+}
+
+//////////////////////////////////////////////////////////////
+// Communications - createDialogue(...) prompts
+//                  line length <= 77 to prevent overflow
+//////////////////////////////////////////////////////////////
+
+void tutorialRoomDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, TUTORIAL_LINE1, TUTORIAL_LINE2);
+}
+
+void weaponSwitchingDisabledDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, SWITCH_DISABLED_LINE1, SWITCH_DISABLED_LINE2);
+}
+
+void multiFireDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, MULTI_FIRE_LINE1, MULTI_FIRE_LINE2);
+}
+
+void darkRoomDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, DARK_ROOM_LINE1, DARK_ROOM_LINE2);
+}
+
+void krabBossDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, KRAB_BOSS_LINE1, KRAB_BOSS_LINE2);
+}
+
+void SharkmanBossDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, SHARK_BOSS_LINE1, SHARK_BOSS_LINE2);
+}
+
+void keyLockedDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, KEY_LOCKED_LINE1, KEY_LOCKED_LINE2);
+}
+void plateLockedDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, PLATE_LOCKED_LINE1, PLATE_LOCKED_LINE1);
+}
+void bossLockedDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, BOSS_LOCKED_LINE1, BOSS_LOCKED_LINE2);
+}

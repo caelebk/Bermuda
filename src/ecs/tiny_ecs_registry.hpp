@@ -28,14 +28,15 @@ class ECSRegistry {
   ComponentContainer<Mass>      masses;
 
   // player related
-  ComponentContainer<DeathTimer>       deathTimers;
-  ComponentContainer<Player>           players;
-  ComponentContainer<PlayerCollisionMesh>           playersCollisionMeshes;
-  ComponentContainer<PlayerWeapon>     playerWeapons;
-  ComponentContainer<PlayerProjectile> playerProjectiles;
-  ComponentContainer<Inventory>        inventory;
-  ComponentContainer<PlayerHUD>        playerHUD;
-  ComponentContainer<InventoryCounter> inventoryCounters;
+  ComponentContainer<DeathTimer>          deathTimers;
+  ComponentContainer<Player>              players;
+  ComponentContainer<PlayerCollisionMesh> playersCollisionMeshes;
+  ComponentContainer<PlayerWeapon>        playerWeapons;
+  ComponentContainer<PlayerProjectile>    playerProjectiles;
+  ComponentContainer<Inventory>           inventory;
+  ComponentContainer<PlayerHUD>           playerHUD;
+  ComponentContainer<InventoryCounter>    inventoryCounters;
+  ComponentContainer<Communication>       communications;
 
   // enemy related
   ComponentContainer<Deadly>         deadlys;
@@ -48,16 +49,16 @@ class ECSRegistry {
   ComponentContainer<OxygenModifier> oxygenModifiers;
 
   // ai related
-  ComponentContainer<Wander>       wanders;
-  ComponentContainer<WanderLine>   wanderLines;
-  ComponentContainer<WanderSquare> wanderSquares;
-  ComponentContainer<TracksPlayer> trackPlayer;
+  ComponentContainer<Wander>             wanders;
+  ComponentContainer<WanderLine>         wanderLines;
+  ComponentContainer<WanderSquare>       wanderSquares;
+  ComponentContainer<TracksPlayer>       trackPlayer;
   ComponentContainer<TracksPlayerRanged> trackPlayerRanged;
 
   // abilities related
-  ComponentContainer<Stun> stuns;
-  ComponentContainer<KnockBack> knockbacks;
-  ComponentContainer<AreaOfEffect> aoe;
+  ComponentContainer<Stun>             stuns;
+  ComponentContainer<KnockBack>        knockbacks;
+  ComponentContainer<AreaOfEffect>     aoe;
   ComponentContainer<ActsAsProjectile> actsAsProjectile;
 
   // render related
@@ -81,10 +82,10 @@ class ECSRegistry {
   ComponentContainer<Breakable>        breakables;
 
   // status related
-  ComponentContainer<LowOxygen> lowOxygen;
-  ComponentContainer<Stunned>   stunned;
+  ComponentContainer<LowOxygen>     lowOxygen;
+  ComponentContainer<Stunned>       stunned;
   ComponentContainer<KnockedBack>   knockedback;
-  ComponentContainer<Attacked>  attacked;
+  ComponentContainer<Attacked>      attacked;
 
   // audio related
   ComponentContainer<Sound> sounds;
@@ -117,6 +118,7 @@ class ECSRegistry {
     registry_list.push_back(&inventory);
     registry_list.push_back(&playerHUD);
     registry_list.push_back(&inventoryCounters);
+    registry_list.push_back(&communications);
     // enemy related
     registry_list.push_back(&deadlys);
     registry_list.push_back(&enemyProjectiles);

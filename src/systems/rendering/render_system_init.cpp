@@ -153,7 +153,6 @@ bool RenderSystem::fontInit() {
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    std::cout << "texture: " << c << " = " << texture << std::endl;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width,
                  face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE,
                  face->glyph->bitmap.buffer);

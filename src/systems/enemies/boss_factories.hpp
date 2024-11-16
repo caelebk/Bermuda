@@ -33,7 +33,7 @@
 #define KRAB_BOSS_AI_CD 5000 // switch every 10 seconds
 
 // Create tutorial jellyfish.
-Entity createJellyBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions);
+Entity createTutorial(RenderSystem* renderer, vec2 position, bool checkCollisions);
 Entity createCrabBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
 Entity respawnCrabBoss(RenderSystem* renderer, EntityState es);
 

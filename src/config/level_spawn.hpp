@@ -34,10 +34,9 @@ const std::initializer_list<
                       createSharkPos, createSharkPos, createSharkPos,
                       createSharkPos, createSharkPos};
 
-const std::initializer_list<
-    std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    TUTORIAL_JELLYFISH_MINIBOSS = {
-        createJellyBossPos,
+const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> TUTORIAL_JELLYFISH_MINIBOSS =                                 
+{                                                                        
+    createTutorial,                                                      
 };
 
 const std::initializer_list<

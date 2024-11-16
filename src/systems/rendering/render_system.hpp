@@ -32,6 +32,7 @@ class RenderSystem {
       textures_path("pause/pause_menu.png"),
       textures_path("player/infinity.png"),
       textures_path("player/inventory.png"),
+      textures_path("player/communications.png"),
       textures_path("cursors/crosshair_cursor.png"),
       textures_path("player/player1.png"),
       textures_path("player/player2.png"),
@@ -48,9 +49,9 @@ class RenderSystem {
       textures_path("player/shrimp_gun.png"),
       textures_path("player/shrimp.png"),  // TODO: shrimp projectile needed,
                                            // this is for HUD
-      textures_path("consumables/red_key.png"), 
-      textures_path("consumables/blue_key.png"),    
-      textures_path("consumables/yellow_key.png"),                                  
+      textures_path("consumables/red_key.png"),
+      textures_path("consumables/blue_key.png"),
+      textures_path("consumables/yellow_key.png"),
       textures_path("oxygen_and_health/player_oxygen_tank.png"),
       textures_path("oxygen_and_health/player_oxygen_bar.png"),
       textures_path("oxygen_and_health/enemy_background_bar.png"),
@@ -58,6 +59,9 @@ class RenderSystem {
       textures_path("enemy/exclamation.png"),
       textures_path("enemy/question.png"),
       textures_path("map_non_interactable/wall.png"),
+      textures_path(
+          "map_non_interactable/tutorial_floor.png"),  // partial source:
+                                                       // Vecteezy.com
       textures_path("map_non_interactable/floor.png"),
       textures_path("map_interactable/locked_door_h.png"),
       textures_path("map_interactable/locked_door_v.png"),

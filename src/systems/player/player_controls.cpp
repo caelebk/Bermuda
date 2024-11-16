@@ -1,10 +1,10 @@
 #include "player_controls.hpp"
 
 #include "collision_system.hpp"
-#include "player_hud.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
 #include "player_factories.hpp"
+#include "player_hud.hpp"
 
 /**
  * @brief Checks whether or not the spawn is valid or invalid based on spawn
@@ -92,16 +92,17 @@ bool player_movement(int key, int action, int mod) {
     }
     // choose correct player texture based on player_texture_num
     if (player_texture_num < 2.f) {
-      registry.renderRequests.get(player).used_texture = TEXTURE_ASSET_ID::PLAYER1;
-    }
-    else if (player_texture_num < 4.f) {
-      registry.renderRequests.get(player).used_texture = TEXTURE_ASSET_ID::PLAYER2;
-    }
-    else if (player_texture_num < 6.f) {
-      registry.renderRequests.get(player).used_texture = TEXTURE_ASSET_ID::PLAYER3;
-    }
-    else {
-      registry.renderRequests.get(player).used_texture = TEXTURE_ASSET_ID::PLAYER2;
+      registry.renderRequests.get(player).used_texture =
+          TEXTURE_ASSET_ID::PLAYER1;
+    } else if (player_texture_num < 4.f) {
+      registry.renderRequests.get(player).used_texture =
+          TEXTURE_ASSET_ID::PLAYER2;
+    } else if (player_texture_num < 6.f) {
+      registry.renderRequests.get(player).used_texture =
+          TEXTURE_ASSET_ID::PLAYER3;
+    } else {
+      registry.renderRequests.get(player).used_texture =
+          TEXTURE_ASSET_ID::PLAYER2;
     }
   }
 
@@ -120,12 +121,14 @@ bool player_movement(int key, int action, int mod) {
   }
 
   if (key == GLFW_KEY_SPACE) {
-    bool atLeastOneKey = keys.upHeld || keys.downHeld || keys.leftHeld || keys.rightHeld;
+    bool atLeastOneKey =
+        keys.upHeld || keys.downHeld || keys.leftHeld || keys.rightHeld;
     if (action == GLFW_PRESS && atLeastOneKey) {
       if (registry.players.get(player).dashCooldownTimer <= 0) {
-        Player& player_comp = registry.players.get(player);
-        Entity burstCost = Entity();
-        OxygenModifier& oxyBurstCost = registry.oxygenModifiers.emplace(burstCost);
+        Player&         player_comp = registry.players.get(player);
+        Entity          burstCost   = Entity();
+        OxygenModifier& oxyBurstCost =
+            registry.oxygenModifiers.emplace(burstCost);
         oxyBurstCost.amount = PLAYER_DASH_COST;
         player_comp.dashing = true;
         if (registry.colors.has(player_comp.dashIndicator)) {
@@ -172,8 +175,10 @@ bool player_mouse(RenderSystem* renderer, int button, int action, int mods,
       if (!successfulInventoryUpdate) {
         return successfulInventoryUpdate;
       }
-    } else if (action == GLFW_PRESS && !registry.playerProjectiles.get(player_projectile).is_loaded) {
-        registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_EMPTY_GUN));
+    } else if (action == GLFW_PRESS &&
+               !registry.playerProjectiles.get(player_projectile).is_loaded) {
+      registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_EMPTY_GUN));
+      multiFireDialogue(renderer);
     }
   }
 
@@ -185,7 +190,7 @@ Update inventory based on projectile being fired
 Returns true if had inventory to shoot, returns false if no inventory to shoot.
 */
 bool updateInventory(RenderSystem* renderer, PROJECTILES type) {
-  Inventory&  inv  = registry.inventory.get(player);
+  Inventory& inv = registry.inventory.get(player);
   switch (type) {
     case PROJECTILES::NET:
       if (!inv.nets) {
@@ -204,7 +209,7 @@ bool updateInventory(RenderSystem* renderer, PROJECTILES type) {
       }
       inv.concussors--;
       updateInventoryCounter(renderer, INVENTORY::CONCUSSIVE);
-      //if inv.concussors is 0 or less, it'll be handled in debuff.cpp
+      // if inv.concussors is 0 or less, it'll be handled in debuff.cpp
       break;
     case PROJECTILES::TORPEDO:
       if (!inv.torpedos) {
@@ -223,7 +228,8 @@ bool updateInventory(RenderSystem* renderer, PROJECTILES type) {
       }
       inv.shrimp--;
       updateInventoryCounter(renderer, INVENTORY::SHRIMP);
-      //if inv.shrimp is 0 or less, it'll be handled in collision_system in resolveWallStop
+      // if inv.shrimp is 0 or less, it'll be handled in collision_system in
+      // resolveWallStop
       break;
   }
   // Debug Statements:
@@ -244,19 +250,19 @@ void swapWeps(Entity swapped, Entity swapper, PROJECTILES projectile) {
 
   switch (projectile) {
     case PROJECTILES::NET:
-      scale = NET_SCALE_FACTOR * NET_BOUNDING_BOX;
+      scale      = NET_SCALE_FACTOR * NET_BOUNDING_BOX;
       texture_id = TEXTURE_ASSET_ID::NET;
       break;
     case PROJECTILES::CONCUSSIVE:
-      scale = CONCUSSIVE_SCALE_FACTOR * CONCUSSIVE_BOUNDING_BOX;
+      scale      = CONCUSSIVE_SCALE_FACTOR * CONCUSSIVE_BOUNDING_BOX;
       texture_id = TEXTURE_ASSET_ID::CONCUSSIVE;
       break;
     case PROJECTILES::TORPEDO:
-      scale = TORPEDO_SCALE_FACTOR * TORPEDO_BOUNDING_BOX;
+      scale      = TORPEDO_SCALE_FACTOR * TORPEDO_BOUNDING_BOX;
       texture_id = TEXTURE_ASSET_ID::TORPEDO;
       break;
     case PROJECTILES::SHRIMP:
-      scale = SHRIMP_SCALE_FACTOR * SHRIMP_BOUNDING_BOX;
+      scale      = SHRIMP_SCALE_FACTOR * SHRIMP_BOUNDING_BOX;
       texture_id = TEXTURE_ASSET_ID::SHRIMP;
       break;
   }
@@ -294,19 +300,19 @@ void handleGunSwap(Entity swapped, Entity swapper, PROJECTILES projectile) {
 
   switch (projectile) {
     case PROJECTILES::NET:
-      scale = NET_GUN_SCALE_FACTOR * NET_GUN_BOUNDING_BOX;
+      scale      = NET_GUN_SCALE_FACTOR * NET_GUN_BOUNDING_BOX;
       texture_id = TEXTURE_ASSET_ID::NET_GUN;
       break;
     case PROJECTILES::CONCUSSIVE:
-      scale = CONCUSSIVE_GUN_SCALE_FACTOR * CONCUSSIVE_GUN_BOUNDING_BOX;
+      scale      = CONCUSSIVE_GUN_SCALE_FACTOR * CONCUSSIVE_GUN_BOUNDING_BOX;
       texture_id = TEXTURE_ASSET_ID::CONCUSSIVE_GUN;
       break;
     case PROJECTILES::TORPEDO:
-      scale = TORPEDO_GUN_SCALE_FACTOR * TORPEDO_GUN_BOUNDING_BOX;
+      scale      = TORPEDO_GUN_SCALE_FACTOR * TORPEDO_GUN_BOUNDING_BOX;
       texture_id = TEXTURE_ASSET_ID::TORPEDO_GUN;
       break;
     case PROJECTILES::SHRIMP:
-      scale = SHRIMP_GUN_SCALE_FACTOR * SHRIMP_GUN_BOUNDING_BOX;
+      scale      = SHRIMP_GUN_SCALE_FACTOR * SHRIMP_GUN_BOUNDING_BOX;
       texture_id = TEXTURE_ASSET_ID::SHRIMP_GUN;
       break;
   }
@@ -326,15 +332,15 @@ void handleGunSwap(Entity swapped, Entity swapper, PROJECTILES projectile) {
   motion.acceleration = {0, 0};
 
   // Request Render
-  registry.renderRequests.insert(
-      swapper,
-      {texture_id, EFFECT_ASSET_ID::PLAYER, GEOMETRY_BUFFER_ID::SPRITE});
+  registry.renderRequests.insert(swapper, {texture_id, EFFECT_ASSET_ID::PLAYER,
+                                           GEOMETRY_BUFFER_ID::SPRITE});
 }
 
-void handleWeaponSwapping(int key) {
+void handleWeaponSwapping(RenderSystem* renderer, int key) {
   Inventory& inv = registry.inventory.get(player);
 
-  PlayerProjectile& playerproj_comp = registry.playerProjectiles.get(player_projectile);
+  PlayerProjectile& playerproj_comp =
+      registry.playerProjectiles.get(player_projectile);
 
   // Switch to harpoon gun
   if (key == GLFW_KEY_1 && player_projectile != harpoon) {
@@ -346,6 +352,8 @@ void handleWeaponSwapping(int key) {
   if (key == GLFW_KEY_2 && inv.nets && player_projectile != net) {
     doWeaponSwap(net, net_gun, PROJECTILES::NET);
     changeSelectedCounterColour(INVENTORY::NET);
+  } else if (key == GLFW_KEY_2 && !inv.nets && player_projectile != net) {
+    weaponSwitchingDisabledDialogue(renderer);
   }
 
   // Switch to Concussive
@@ -378,9 +386,9 @@ void doWeaponSwap(Entity swapper_proj, Entity swapper_wep,
 }
 
 bool destroyGunOrProjectile(Entity entity) {
-  bool check_proj_comps = registry.motions.has(entity) && 
-                        registry.positions.has(entity) &&
-                        registry.renderRequests.has(entity);
+  bool check_proj_comps = registry.motions.has(entity) &&
+                          registry.positions.has(entity) &&
+                          registry.renderRequests.has(entity);
   if (check_proj_comps) {
     registry.motions.remove(entity);
     registry.positions.remove(entity);

@@ -17,7 +17,7 @@ void swapWeps(Entity swapped, Entity swapper, PROJECTILES projectile);
 
 void handleGunSwap(Entity swapped, Entity swapper, PROJECTILES projectile);
 
-void handleWeaponSwapping(int key);
+void handleWeaponSwapping(RenderSystem* renderer, int key);
 
 // Helper for handleWeaponSwapping and player_mouse
 void doWeaponSwap(Entity swapper_proj, Entity swapper_wep,

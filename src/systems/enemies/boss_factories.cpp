@@ -1,5 +1,7 @@
 #include "boss_factories.hpp"
 #include "enemy_factories.hpp"
+#include "consumable_factories.hpp"
+#include "map_factories.hpp"
 
 #include <functional>
 #include <vector>
@@ -131,9 +133,15 @@ static void addSharkmanTarget() {
   printf("WATCH OUT WATCH OUT WATCH O-\n");
 }
 
-Entity createJellyBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
-  vec2 pos = {window_width_px / 2, window_height_px / 2};
-  return createJellyPos(renderer, pos, checkCollisions);
+Entity createTutorial(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+  vec2 canisterPos = {200, window_height_px - 250};
+  createOxygenCanisterPos(renderer, canisterPos, checkCollisions);
+
+  vec2 geyserPos = {350, window_height_px - 265};
+  createGeyserPos(renderer, geyserPos, checkCollisions);
+
+  vec2 jellyPos = {window_width_px - 100.f, 100.f};
+  return createJellyPos(renderer, jellyPos, checkCollisions);
 };
 
 Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
