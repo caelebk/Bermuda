@@ -1,5 +1,6 @@
 #pragma once
 #include "common.hpp"
+#include "player.hpp"
 #include "render_system.hpp"
 #include "respawn.hpp"
 
@@ -16,4 +17,8 @@ struct Item {
 // drops when entity is dead
 struct Drop {
   std::function<Entity(RenderSystem *r, vec2 p, bool b)> dropFn;
+};
+
+struct WeaponDrop {
+  INVENTORY type;
 };

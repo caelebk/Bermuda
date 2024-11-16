@@ -15,3 +15,47 @@
 
 Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
 Entity respawnOxygenCanister(RenderSystem* renderer, EntityState es);
+
+//////////////////////////////////////////////////////////////
+// Nets
+//////////////////////////////////////////////////////////////
+#define NET_DROP_SCALE_FACTOR vec2(0.1f)
+#define NET_DROP_BOUNDING_BOX \
+  vec2(201.f, 290.f)  // vec2(PNG_width, PNG_height)
+
+Entity createNetDropPos(RenderSystem* renderer, vec2 position,
+                               bool checkCollisions = true);
+Entity respawnNetDrop(RenderSystem* renderer, EntityState es);
+
+//////////////////////////////////////////////////////////////
+// CONCUSSIVE
+//////////////////////////////////////////////////////////////
+#define CONCUSSIVE_DROP_SCALE_FACTOR vec2(0.1f)
+#define CONCUSSIVE_DROP_BOUNDING_BOX \
+  vec2(271.f, 470.f)  // vec2(PNG_width, PNG_height)
+
+Entity createConcussiveDropPos(RenderSystem* renderer, vec2 position,
+                        bool checkCollisions = true);
+Entity respawnConcussiveDrop(RenderSystem* renderer, EntityState es);
+
+//////////////////////////////////////////////////////////////
+// TORPEDO
+//////////////////////////////////////////////////////////////
+#define TORPEDO_DROP_SCALE_FACTOR vec2(0.1f)
+#define TORPEDO_DROP_BOUNDING_BOX \
+  vec2(420.f, 140.f)  // vec2(PNG_width, PNG_height)
+
+Entity createTorpedoDropPos(RenderSystem* renderer, vec2 position,
+                               bool checkCollisions = true);
+Entity respawnTorpedoDrop(RenderSystem* renderer, EntityState es);
+
+//////////////////////////////////////////////////////////////
+// PISTOL SHRIMP (TO BE ADDED TO ANDY'S ENEMY)
+//////////////////////////////////////////////////////////////
+#define SHRIMP_DROP_SCALE_FACTOR vec2(0.2f)
+#define SHRIMP_DROP_BOUNDING_BOX \
+  vec2(242.f, 130.f)  // vec2(PNG_width, PNG_height)
+
+Entity createShrimpDropPos(RenderSystem* renderer, vec2 position,
+                               bool checkCollisions = true);
+Entity respawnShrimpDrop(RenderSystem* renderer, EntityState es);

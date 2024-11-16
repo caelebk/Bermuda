@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "collision_system.hpp"
+#include "consumable_factories.hpp"
 #include "components.hpp"
 #include "oxygen_system.hpp"
 #include "physics.hpp"
@@ -118,6 +119,16 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position, bool checkCollision
   // add abilities
   auto& stun    = registry.stuns.emplace(entity);
   stun.duration = JELLY_STUN_MS;
+
+  // assign drops
+  if (randomSuccess(JELLY_DROP_CHANCE_0)) {
+    Drop& drop  = registry.drops.emplace(entity);
+    if (randomSuccess(JELLY_DROP_CHANCE_0)) {
+      drop.dropFn = createConcussiveDropPos;
+    } else {
+      drop.dropFn = createNetDropPos;
+    }
+  }
 
   // physics and pos
 
@@ -306,6 +317,12 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position, bool checkCollision
   tracking.leash_radius = SHARK_LEASH_RADIUS;
   tracking.acceleration = SHARK_TRACKING_ACCELERATION;
 
+  // assign drops
+  if (randomSuccess(SHARK_DROP_CHANCE_0)) {
+    Drop& drop = registry.drops.emplace(entity);
+    drop.dropFn = createTorpedoDropPos;
+  }
+
   // TODO: add the room
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::SHARK, EFFECT_ASSET_ID::ENEMY,
@@ -408,6 +425,12 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position, bool checkCollisions
   tracking.leash_radius = KRAB_LEASH_RADIUS;
   tracking.acceleration = KRAB_TRACKING_ACCELERATION;
 
+  // assign drops
+  if (randomSuccess(KRAB_DROP_CHANCE_0)) {
+    Drop& drop  = registry.drops.emplace(entity);
+    drop.dropFn = createTorpedoDropPos;
+  }
+
   // TODO: add the room
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::KRAB, EFFECT_ASSET_ID::ENEMY,
@@ -498,7 +521,12 @@ Entity createUrchinPos(RenderSystem* renderer, vec2 position,
   shooter.default_cd = URCHIN_FIRERATE;
   shooter.cooldown   = URCHIN_FIRERATE;
 
-  // TODO: add the room
+  // assign drops
+  if (randomSuccess(URCHIN_DROP_CHANCE_0)) {
+    Drop& drop  = registry.drops.emplace(entity);
+    drop.dropFn = createTorpedoDropPos;
+  }
+
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::URCHIN, EFFECT_ASSET_ID::ENEMY,
                GEOMETRY_BUFFER_ID::SPRITE});

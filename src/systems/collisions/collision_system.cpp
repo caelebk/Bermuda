@@ -14,8 +14,10 @@
 #include "oxygen.hpp"
 #include "player.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <consumable_utils.hpp>
 
-void CollisionSystem::init(LevelSystem* level) {
+void CollisionSystem::init(RenderSystem* renderer, LevelSystem* level) {
+  this->renderer = renderer;
   this->level = level;
 }
 
@@ -453,15 +455,7 @@ void CollisionSystem::resolvePlayerEnemyProjCollision(Entity player, Entity enem
 
 void CollisionSystem::resolvePlayerConsumableCollision(Entity player,
                                                        Entity consumable) {
-  if (registry.deathTimers.has(player)) {
-    return;
-  }
-
-  // TODO: add more affects M2+
-
-  // will add oxygen to the player if it exists
-  modifyOxygen(player, consumable);
-  registry.remove_all_components_of(consumable);
+  handle_consumable_collisions(player, consumable, renderer);
 }
 
 void CollisionSystem::resolvePlayerInteractableCollision(Entity player,

@@ -96,6 +96,7 @@ class ECSRegistry {
   ComponentContainer<Consumable>     consumables;
   ComponentContainer<Item>           items;
   ComponentContainer<Drop>           drops;
+  ComponentContainer<WeaponDrop>     weaponDrops;
   ComponentContainer<DebugComponent> debugComponents;
   ComponentContainer<Emoting>        emoting;
   ComponentContainer<GameCursor>     cursors;
@@ -167,6 +168,7 @@ class ECSRegistry {
     registry_list.push_back(&musics);
     // other
     registry_list.push_back(&drops);
+    registry_list.push_back(&weaponDrops);
     registry_list.push_back(&cursors);
     registry_list.push_back(&debugComponents);
     registry_list.push_back(&consumables);

@@ -23,6 +23,7 @@
 
 class CollisionSystem {
   private:
+  RenderSystem* renderer;
   LevelSystem* level;
 
   /********************
@@ -109,7 +110,7 @@ class CollisionSystem {
   void detectAndResolveConeAOE(Entity proj, Entity enemy, float angle);
 
   public:
-  void init(LevelSystem* level);
+  void init(RenderSystem* renderer, LevelSystem* level);
   void step(float elapsed_ms);
 
   CollisionSystem() {}

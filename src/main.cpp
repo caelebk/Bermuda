@@ -64,7 +64,7 @@ int main() {
 
   // initialize the main systems
   level.init(&renderer, &level_builder);
-  collisions.init(&level);
+  collisions.init(&renderer, &level);
   renderer.init(window);
   world.init(&renderer, &level);
   audios.init();

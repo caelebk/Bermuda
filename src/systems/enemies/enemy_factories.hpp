@@ -21,6 +21,7 @@
 #define JELLY_HEALTH_SCALE vec2(1.4f)
 #define JELLY_HEALTH_BAR_SCALE vec2(1.5f)
 #define JELLY_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+#define JELLY_DROP_CHANCE_0 0.5f
 
 Entity createJellyPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
 Entity respawnJelly(RenderSystem* renderer, EntityState es);
@@ -63,6 +64,7 @@ Entity respawnFish(RenderSystem* renderer, EntityState es);
 #define SHARK_HEALTH_SCALE vec2(1.4f)
 #define SHARK_HEALTH_BAR_SCALE vec2(1.5f)
 #define SHARK_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+#define SHARK_DROP_CHANCE_0 0.15f
 
 Entity createSharkPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
 Entity respawnShark(RenderSystem* renderer, EntityState es);
@@ -95,6 +97,7 @@ Entity respawnShark(RenderSystem* renderer, EntityState es);
 #define KRAB_HEALTH_SCALE vec2(1.4f)
 #define KRAB_HEALTH_BAR_SCALE vec2(1.5f)
 #define KRAB_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+#define KRAB_DROP_CHANCE_0 0.3f
 
 Entity createKrabPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
 Entity respawnKrab(RenderSystem* renderer, EntityState es);
@@ -114,6 +117,7 @@ Entity respawnKrab(RenderSystem* renderer, EntityState es);
 #define URCHIN_HEALTH_BAR_SCALE vec2(1.5f)
 #define URCHIN_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 #define URCHIN_FIRERATE 1500.f
+#define URCHIN_DROP_CHANCE_0 0.75f
 
 Entity createUrchinPos(RenderSystem* renderer, vec2 position,
                      bool checkCollisions = true);
