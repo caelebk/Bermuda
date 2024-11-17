@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "level_util.hpp"
 #include "tiny_ecs_registry.hpp"
 
 #define ROOM_ORIGIN_POS                                                        \
@@ -10,14 +11,6 @@
        0.25f * (window_height_px) /                                            \
            12.f) // Position of Room Origin (Top-Left Corner)
 #define WALL_THICKNESS 16.f
-
-#define PASS [](){};
-
-enum class Objective {
-  KEY,
-  DARK,
-  PRESSURE_PLATE,
-};
 
 class RoomBuilder {
   protected:
@@ -38,17 +31,21 @@ class RoomBuilder {
       Entity entity; // the room under construction.
 
       std::vector<Entity> walls; // the walls inherent to this room.
-      std::unordered_map<std::string, Entity> doors; // the doors inherent to this room.
+      std::unordered_map<EditorID, Entity> doors; // the doors inherent to this room.
+      std::unordered_map<EditorID, Direction> connections; // the connections inherent to this room.
 
       // A bunch of boolean flags.
-      bool has_entered;
+      bool has_entered = false;
       bool is_tutorial_room = false;
       bool is_boss_room = false;
 
-      // room_spawn_function and fixed_room_spawn_function are always ran when you enter a room for the first time.
-      std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> room_spawn_function;
-      // boss_spawn_function is only ran if is_boss_room is true.
-      std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> boss_spawn_function;
+      std::vector<INVENTORY> key_doors;
+      // room_spawn_functions are always ran when you enter a room for the first time.
+      std::vector<SpawnFunctionGroup> room_spawn_function_groups;
+      std::vector<SpawnFunctionGroup> room_pack_spawn_function_groups;
+      std::vector<SpawnFunctionGroup> room_fixed_spawn_function_groups;
+      // boss_spawn_functions are only ran if is_boss_room is true.
+      std::vector<SpawnFunctionGroup> boss_spawn_function_groups;
       
       std::vector<EntitySave> saved_entities; // the entities inherent to this room.
 
@@ -58,10 +55,9 @@ class RoomBuilder {
       RoomBuilder &down(int magnitude = 0);
       RoomBuilder &left(int magnitude = 0);
       RoomBuilder &right(int magnitude = 0);
-      RoomBuilder &door(std::string s_id, int magnitude = 0);
+      RoomBuilder &door(EditorID s_id, int magnitude = 0);
 
-      // void add_objective(Objective objective);
-
+      std::vector<EditorID> get_connections_with_direction(Direction direction);
       std::vector<Entity> get_doors();
 
       bool is_in_room(vec2 &position);

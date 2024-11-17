@@ -151,7 +151,19 @@ Entity createTutorial(RenderSystem* renderer, vec2 position, bool checkCollision
   createGeyserPos(renderer, geyserPos, checkCollisions);
 
   vec2 jellyPos = {window_width_px - 100.f, 100.f};
-  return createJellyPos(renderer, jellyPos, checkCollisions);
+
+  // Also, make it drop a boss key, which unlocks its room.
+  Entity entity = createJellyPos(renderer, jellyPos, checkCollisions);
+
+  // If it spawned with a drop, get rid of it, otherwise it'll dupe the entity in the ECS.
+  if (registry.drops.has(entity)) {
+    registry.drops.remove(entity);
+  }
+
+  // Replace it with the boss key drop.
+  Drop& drop  = registry.drops.emplace(entity);
+  drop.dropFn = unlockBossDoors;
+  return entity;
 };
 
 Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
@@ -205,6 +217,11 @@ Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
   createDefaultHealthbar(renderer, entity, KRAB_BOSS_HEALTH,
                          KRAB_BOSS_HEALTH_SCALE, KRAB_BOSS_HEALTH_BAR_SCALE,
                          KRAB_BOSS_HEALTH_BOUNDING_BOX);
+
+  // Replace it with the boss key drop.
+  Drop& drop  = registry.drops.emplace(entity);
+  drop.dropFn = unlockBossDoors;
+
   return entity;
 }
 
@@ -287,6 +304,10 @@ Entity createSharkmanPos(RenderSystem* renderer, vec2 position,
   createDefaultHealthbar(renderer, entity, SHARKMAN_HEALTH,
                          SHARKMAN_HEALTH_SCALE, SHARKMAN_HEALTH_BAR_SCALE,
                          SHARKMAN_HEALTH_BOUNDING_BOX);
+
+  // Replace it with the boss key drop.
+  Drop& drop  = registry.drops.emplace(entity);
+  drop.dropFn = unlockBossDoors;
 
   return entity;
 }

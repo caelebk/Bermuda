@@ -5,41 +5,42 @@
 #include "enemy_factories.hpp"
 #include "map_factories.hpp"
 
-const std::initializer_list<
-    std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    EMPTY = {};
+const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> EMPTY = {};
 
-const std::initializer_list<
+const std::vector<
     std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     LVL_1_RAND_POS = {createOxygenCanisterPos, createCratePos, createCratePos,
                       createCratePos,          createCratePos, createCratePos,
                       createGeyserPos,         createSharkPos, createKrabPos,
                       createFishPos,           createJellyPos, createUrchinPos};
 
-// TODO:
-// We don't have any new enemies yet, so just spawn a billion sharks for LVL 2.
-const std::initializer_list<
+const std::vector<
+    std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
+    LVL_1_PACKS = {createFishPos};
+
+const std::vector<
     std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     LVL_2_RAND_POS = {createOxygenCanisterPos, createCratePos, createCratePos,
                       createCratePos,          createCratePos, createCratePos,
-                      createGeyserPos,         createFishPos,  createSharkPos,
-                      createSharkPos,          createSharkPos, createLobsterPos};
+                      createGeyserPos,         createFishPos};
 
-// TODO:
-// Ditto.
-const std::initializer_list<
+const std::vector<
+    std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
+    LVL_2_PACKS = {createSharkPos};
+
+const std::vector<
     std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     LVL_3_RAND_POS = {createSharkPos, createSharkPos, createSharkPos,
-                      createSharkPos, createSharkPos, createSharkPos,
-                      createSharkPos, createSharkPos, createSharkPos,
-                      createLobsterPos, createLobsterPos};
+                      createUrchinPos, createFishPos, createCratePos,
+                      createCratePos, createCratePos, createOxygenCanisterPos,
+                      createLobsterPos};
 
-const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> TUTORIAL_JELLYFISH_MINIBOSS =                                 
+const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> TUTORIAL_JELLYFISH_MINIBOSS =                                 
 {                                                                        
     createTutorial,                                                      
 };
 
-const std::initializer_list<
+const std::vector<
     std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     CRAB_MINIBOSS = {createCrabBossPos,       createKrabPos,
                      createKrabPos,           createKrabPos,
@@ -47,43 +48,21 @@ const std::initializer_list<
                      createKrabPos,           createOxygenCanisterPos,
                      createOxygenCanisterPos, createOxygenCanisterPos};
 
-const std::initializer_list<
+const std::vector<
     std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     SHARKMAN_MINIBOSS = {createInitSharkmanPos, createSharkmanCratesPos,
                          createSharkPos,        createSharkPos,
                          createSharkPos,        createSharkPos,
                          createSharkPos};
 
-// currently used as "always spawn"
-#define LVL_1_FIXED                                                      \
-  {                                                                      \
-      [this]() {                                                         \
-        createJellyPos(renderer,                                         \
-                       {window_width_px - 550, window_height_px - 250}); \
-      },                                                                 \
-      [this]() {                                                         \
-        createJellyPos(renderer,                                         \
-                       {window_width_px - 650, window_height_px - 250}); \
-      },                                                                 \
-  }
+const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> RED_KEY_SPAWN = {
+  createRedKeyPos,
+};
 
-// currently used as "sometimes spawn"
-#define LVL_1_RAND                                                       \
-  {                                                                      \
-      [this]() {                                                         \
-        createJellyPos(renderer,                                         \
-                       {window_width_px - 650, window_height_px - 350}); \
-      },                                                                 \
-      [this]() {                                                         \
-        createJellyPos(renderer,                                         \
-                       {window_width_px - 650, window_height_px - 450}); \
-      },                                                                 \
-      [this]() {                                                         \
-        createJellyPos(renderer,                                         \
-                       {window_width_px - 650, window_height_px - 300}); \
-      },                                                                 \
-      [this]() {                                                         \
-        createJellyPos(renderer,                                         \
-                       {window_width_px - 650, window_height_px - 200}); \
-      },                                                                 \
-  }
+const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> BLUE_KEY_SPAWN = {
+  createBlueKeyPos,
+};
+
+const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> YELLOW_KEY_SPAWN = {
+  createYellowKeyPos,
+};

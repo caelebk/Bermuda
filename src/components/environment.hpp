@@ -1,5 +1,7 @@
 #pragma once
 
+#include "level_util.hpp"
+#include "player.hpp"
 #include "common.hpp"
 #include "respawn.hpp"
 #include <limits>
@@ -44,6 +46,12 @@ struct Space {
 
 struct DoorConnection {
   Direction direction;
+
+  // Disgusting hack; nothing else uses this, so it's safe. Will change in future PR since we need to account for other objectives
+  // like pressure plates too.
+  INVENTORY key = INVENTORY::PROJ_COUNT;
+  bool locked = false;
+
   std::string room_id;
   Entity exit_door;
 };

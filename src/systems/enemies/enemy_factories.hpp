@@ -87,7 +87,7 @@ Entity respawnShark(RenderSystem* renderer, EntityState es);
 ///////////////////////////////////////////////////////////////
 // Krabs
 ///////////////////////////////////////////////////////////////
-#define KRAB_MS 10.0
+#define KRAB_MS 5.0
 #define KRAB_DAMAGE -100.0
 #define KRAB_ATK_SPD 1000.0
 #define KRAB_MIN_SCALE 0.01

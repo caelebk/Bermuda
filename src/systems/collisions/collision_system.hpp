@@ -55,6 +55,7 @@ class CollisionSystem {
   void routeWallCollisions(Entity wall, Entity other);
   void routeDoorCollisions(Entity door, Entity other);
   void routePlayerProjCollisions(Entity player_proj, Entity other);
+  void routeItemCollisions(Entity item, Entity other);
   void routeConsumableCollisions(Entity consumable, Entity other);
   void routeInteractableCollisions(Entity interactable, Entity other);
 
@@ -63,6 +64,9 @@ class CollisionSystem {
   ***********************************************************************/
   // Player <-> Enemy
   void resolvePlayerEnemyCollision(Entity player, Entity enemy);
+
+  // Player <-> Item
+  void resolvePlayerItemCollision(Entity player, Entity item);
 
   // Player <-> Enemy Projectile
   void resolvePlayerEnemyProjCollision(Entity player, Entity enemy_proj);

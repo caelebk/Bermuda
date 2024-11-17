@@ -327,10 +327,8 @@ bool isKeyCollected(INVENTORY keyType) {
 
     case INVENTORY::YELLOW_KEY:
       return playerInventory.yellowKey;
-
     default:
-      printf("Not a valid key type\n");
-      return false;
+      return true;
   }
 }
 

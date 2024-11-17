@@ -4,6 +4,10 @@
 #include "render_system.hpp"
 #include "respawn.hpp"
 
+// struct Key {
+//   INVENTORY color;
+// };
+
 // anything the player can pick up, temp
 struct Consumable {
   std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
@@ -11,6 +15,7 @@ struct Consumable {
 
 // anything the player can pick up, perm
 struct Item {
+  INVENTORY item;
   std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
 };
 

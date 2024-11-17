@@ -24,7 +24,12 @@ private:
     void set_current_room_editor_id(std::string room_editor_id);
 
     void spawn_miniboss();
+    void spawn();
 
+    void activate_walls();
+    void lock_doors(Entity& door, DoorConnection& door_connection);
+    void activate_doors();
+    void activate_floor();
     void activate_current_room();
     void deactivate_current_room();
         
@@ -41,4 +46,6 @@ public:
 
     // Activates the starting room.
     void activate_starting_room();
+
+    void collect_key(INVENTORY color);
 };

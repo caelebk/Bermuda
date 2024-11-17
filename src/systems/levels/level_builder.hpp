@@ -59,8 +59,9 @@ class LevelBuilder
 {
 private:
     std::unordered_map<std::string, RoomBuilder> rooms;
+    std::vector<EditorID> traversal; // An ordered list of the guaranteed path from the start to end of this level.
 
-    void connect_doors(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
+    void connect_doors();
 
     void mark_difficulty_regions();
     void mark_tutorial_room();
@@ -68,18 +69,25 @@ private:
     void mark_final_boss_room();
 
     void build_wall_with_random_doors(Direction direction,
-                                std::unordered_map<int, Direction> directed_adjacencies,
+                                EditorID room_id,
                                 int max_units,
                                 int unit_size,
                                 std::function<void(int)> draw_segment,
                                 std::function<void(std::string, int)> draw_door);
-    void randomize_room_shapes(std::unordered_map<int, std::unordered_map<int, Direction>>& adjacency_list);
+
+    std::vector<int> get_random_door_positions(int num_doors, int min, int max);
+    int count_edges_with_direction(EditorID room, Direction direction);
+
+    void randomize_key_rooms();
+    void randomize_room_shapes();
+    void randomize_connection_directions();
+    void randomize_connections();
 public:
     /**
      * Returns the RoomBuilder for a room, making a new one if one under the given key does not exist.
      * @param s_id: the room's key.
      */
-    RoomBuilder &get_room_by_editor_id(std::string s_id);
+    RoomBuilder &get_room_by_editor_id(EditorID s_id);
 
     /**
      * Connects two doors together.
@@ -89,7 +97,7 @@ public:
      * @param r2_id: the second room's key.
      * @param d1_id: the door in the second room's key.
      */
-    LevelBuilder &connect(Direction direction, std::string r1_id, std::string d1_id, std::string r2_id, std::string d2_id);
+    LevelBuilder &connect(Direction direction, EditorID r1_id, EditorID d1_id, EditorID r2_id, EditorID d2_id);
 
     /**
      * Generates a randomized level.

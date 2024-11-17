@@ -1,6 +1,7 @@
 #include <random>
 #include <iostream>
 
+#include "level_factories.hpp"
 #include "room_builder.hpp"
 
 RoomBuilder::RoomBuilder(): pointer({0, 0}) {
@@ -65,7 +66,7 @@ RoomBuilder& RoomBuilder::add_wall(int magnitude) {
   return *this;
 };
 
-RoomBuilder& RoomBuilder::door(std::string s_id, int magnitude) {
+RoomBuilder& RoomBuilder::door(EditorID s_id, int magnitude) {
   Space &space = registry.spaces.get(entity);
   Entity boundary = make_boundary(magnitude);
 
@@ -118,6 +119,20 @@ RoomBuilder& RoomBuilder::right(int magnitude) {
     return this->get_updated_right_position(magnitude);
   };
   return add_wall(magnitude);
+}
+
+std::vector<EditorID> RoomBuilder::get_connections_with_direction(Direction direction) {
+  std::vector<EditorID> connected_rooms;
+
+  for (const auto& pair : connections) {
+    EditorID  other_room_id  = pair.first;
+    Direction pair_direction = pair.second;
+    if (direction == pair_direction) {
+      connected_rooms.push_back(other_room_id);
+    }
+  }
+
+  return connected_rooms;
 }
 
 std::vector<Entity> RoomBuilder::get_doors() {

@@ -59,3 +59,21 @@ Entity respawnTorpedoDrop(RenderSystem* renderer, EntityState es);
 Entity createShrimpDropPos(RenderSystem* renderer, vec2 position,
                                bool checkCollisions = true);
 Entity respawnShrimpDrop(RenderSystem* renderer, EntityState es);
+
+//////////////////////////////////////////////////////////////
+// KEYS
+//////////////////////////////////////////////////////////////
+// TODO: Move these to item_factories.
+// This extremely disgusting hack for unlockBossDoors doesn't actually render anything, it just unlocks every door in the room you're in
+// and assumes you're in a boss room.
+Entity unlockBossDoors(RenderSystem* renderer, vec2 position,
+                               bool checkCollisions = true);
+
+Entity createRedKeyPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity createRedKeyRespawnFn(RenderSystem *renderer, EntityState es);
+
+Entity createBlueKeyPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity createBlueKeyRespawnFn(RenderSystem *renderer, EntityState es);
+
+Entity createYellowKeyPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity createYellowKeyRespawnFn(RenderSystem *renderer, EntityState es);

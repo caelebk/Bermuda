@@ -10,13 +10,13 @@
 
 #include "common.hpp"
 #include "enemy_factories.hpp"
-#include "graph.hpp"
 #include "level_factories.hpp"
 #include "level_spawn.hpp"
 #include "map_factories.hpp"
 #include "player_factories.hpp"
-#include "player_hud.hpp"
+#include "level_factories.hpp"
 #include "spawning.hpp"
+#include <player_hud.hpp>
 
 LevelSystem::LevelSystem() {};
 
@@ -42,45 +42,146 @@ void LevelSystem::set_current_room_editor_id(std::string room_editor_id) {
 };
 
 void LevelSystem::spawn_miniboss() {
-  execute_config_rand(
-      level->get_room_by_editor_id(current_room_editor_id).boss_spawn_function,
-      level->get_room_by_editor_id(current_room_editor_id), renderer);
+  for (const auto& spawn_function_group : level->get_room_by_editor_id(current_room_editor_id).boss_spawn_function_groups) {
+      execute_config_rand(spawn_function_group, level->get_room_by_editor_id(current_room_editor_id), renderer);
+  }
 }
 
-void LevelSystem::activate_current_room() {
-  RoomBuilder& current_room =
-      level->get_room_by_editor_id(current_room_editor_id);
+void LevelSystem::spawn() {
+  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+  std::cout << "Has entered: " << current_room.has_entered << std::endl;
 
-  // Render the walls.
+  if (current_room.has_entered) {
+    // Retrieve all the saved entities and respawn them as they were
+    while (current_room.saved_entities.size() > 0) {
+      EntitySave es = current_room.saved_entities.back();
+      es.respawn(renderer);
+      current_room.saved_entities.pop_back();
+    }
+  } else {
+    if (current_room.is_boss_room) {
+      current_room.has_entered = true;
+      spawn_miniboss();
+    } else {
+      current_room.has_entered = true;
+      // It's the first time in this room, spawn for the first time.
+      for (const auto& spawn_function_group : current_room.room_pack_spawn_function_groups) {
+        for (const auto& spawn_function : spawn_function_group) {
+          execute_pack_spawning(spawn_function, current_room, renderer, 5);
+        }
+      }
+      for (const auto& spawn_function_group : current_room.room_spawn_function_groups) {
+        // TODO: remove this out of here and pull it into the correct level placements.
+        execute_config_rand(spawn_function_group, current_room, renderer);
+        execute_config_rand_chance(spawn_function_group, current_room, renderer, 0.5);
+      }
+      for (const auto& fixed_spawn_function_group : current_room.room_fixed_spawn_function_groups) {
+        std::cout << "Should have spawned key" << std::endl;
+        execute_config_rand(fixed_spawn_function_group, current_room, renderer);
+      }
+    }
+  }
+}
+
+void LevelSystem::activate_walls() {
+  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+
   for (Entity& wall : registry.spaces.get(current_room.entity).walls) {
-    // activate_boundary(wall);
     registry.activeWalls.emplace(wall);
     registry.renderRequests.insert(
         wall, {TEXTURE_ASSET_ID::WALL, EFFECT_ASSET_ID::TEXTURED,
                GEOMETRY_BUFFER_ID::SPRITE});
-  }
+  }  
+}
 
-  // Render the doors.
+void LevelSystem::lock_doors(Entity& door, DoorConnection& door_connection) {
+  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+
+  // Consider all doors as walls, unless we have the key for them, and recalculate all of these whenever
+  // we pick up any key, or kill a boss.
+  if (current_room.is_boss_room && !current_room.has_entered) { // Only lock these doors if we've not killed the boss.
+    door_connection.locked = true;
+    registry.activeWalls.emplace(door);   
+  } else {
+    if (!isKeyCollected(door_connection.key)) {
+      door_connection.locked = true;
+      registry.activeWalls.emplace(door);   
+    } else {
+      // std::cout << "unlocking" << std::endl;
+      door_connection.locked = false;
+    }
+  }
+}
+
+void LevelSystem::activate_doors() {
+  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+
+  // Activate the doors.
   for (Entity& door : registry.spaces.get(current_room.entity).doors) {
-    // activate_boundary(door);
     registry.activeDoors.emplace(door);
-    Direction direction     = registry.doorConnections.get(door).direction;
+    DoorConnection& door_connection = registry.doorConnections.get(door);
+    Direction direction = door_connection.direction;
     Position& door_position = registry.positions.get(door);
+
+    lock_doors(door, door_connection);
+
+    TEXTURE_ASSET_ID texture;
     if (direction == Direction::SOUTH || direction == Direction::WEST) {
       door_position.angle = M_PI;
     }
     if (direction == Direction::NORTH || direction == Direction::SOUTH) {
-      registry.renderRequests.insert(
-          door, {TEXTURE_ASSET_ID::DOORWAY_H, EFFECT_ASSET_ID::TEXTURED,
-                 GEOMETRY_BUFFER_ID::SPRITE});
+      switch (door_connection.key) {
+        case (INVENTORY::RED_KEY): {
+          texture = TEXTURE_ASSET_ID::LOCKED_RED_H;
+          break;
+        }
+        case (INVENTORY::BLUE_KEY): {
+          texture = TEXTURE_ASSET_ID::LOCKED_BLUE_H;
+          break;
+        }
+        case (INVENTORY::YELLOW_KEY): {
+          texture = TEXTURE_ASSET_ID::LOCKED_YELLOW_H;
+          break;
+        }
+        default:
+          texture = TEXTURE_ASSET_ID::DOORWAY_H;
+      }
+      if (current_room.is_boss_room && !current_room.has_entered) {
+        texture = TEXTURE_ASSET_ID::LOCKED_DOOR_H;
+      }
+      registry.renderRequests.insert(door, {texture,
+                                            EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE});
     } else {
-      registry.renderRequests.insert(
-          door, {TEXTURE_ASSET_ID::DOORWAY_V, EFFECT_ASSET_ID::TEXTURED,
-                 GEOMETRY_BUFFER_ID::SPRITE});
+      switch (door_connection.key) {
+        case (INVENTORY::RED_KEY): {
+          texture = TEXTURE_ASSET_ID::LOCKED_RED_V;
+          break;
+        }
+        case (INVENTORY::BLUE_KEY): {
+          texture = TEXTURE_ASSET_ID::LOCKED_BLUE_V;
+          break;
+        }
+        case (INVENTORY::YELLOW_KEY): {
+          texture = TEXTURE_ASSET_ID::LOCKED_YELLOW_V;
+          break;
+        }
+        default:
+          texture = TEXTURE_ASSET_ID::DOORWAY_V;
+      }
+      if (current_room.is_boss_room && !current_room.has_entered) {
+        texture = TEXTURE_ASSET_ID::LOCKED_DOOR_V;
+      }
+      registry.renderRequests.insert(door, {texture,
+                                            EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE});
     }
   }
+}
 
-  // Render the floor.
+void LevelSystem::activate_floor() {
+  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+
   Entity    floor     = Entity();
   Position& floor_pos = registry.positions.emplace(floor);
   floor_pos.position  = {window_width_px / 2, window_height_px / 2};
@@ -102,27 +203,14 @@ void LevelSystem::activate_current_room() {
         floor, {TEXTURE_ASSET_ID::FLOOR, EFFECT_ASSET_ID::TEXTURED,
                 GEOMETRY_BUFFER_ID::SPRITE});
   }
+}
 
-  // Spawn the appropriate entities.
-  if (current_room.has_entered) {
-    // Retrieve all the saved entities and respawn them as they were
-    while (current_room.saved_entities.size() > 0) {
-      EntitySave es = current_room.saved_entities.back();
-      es.respawn(renderer);
-      current_room.saved_entities.pop_back();
-    }
-  } else {
-    if (current_room.is_boss_room) {
-      current_room.has_entered = true;
-      spawn_miniboss();
-    } else {
-      current_room.has_entered = true;
-      // It's the first time in this room, spawn for the first time.
-      execute_pack_spawning(createSharkPos, current_room, renderer, 10);
-      execute_config_rand(current_room.room_spawn_function, current_room, renderer);
-      execute_config_rand_chance(current_room.room_spawn_function, current_room, renderer, 0.5);
-    }
-  }
+void LevelSystem::activate_current_room() {
+  activate_walls();
+  activate_doors();
+  activate_floor();
+
+  spawn();
 }
 
 void LevelSystem::deactivate_current_room() {
@@ -142,6 +230,10 @@ void LevelSystem::deactivate_current_room() {
 
   while (registry.bubbles.entities.size() > 0) {
     registry.remove_all_components_of(registry.bubbles.entities.back());
+  }
+
+  while (registry.drops.entities.size() > 0) {
+    registry.remove_all_components_of(registry.drops.entities.back());
   }
 
   while (registry.deadlys.entities.size() > 0) {
@@ -261,10 +353,37 @@ void LevelSystem::enter_room(DoorConnection& door_connection) {
 }
 
 void LevelSystem::activate_starting_room() {
-  // Because of the double restarts.
   level->mark_all_rooms_unvisited();
 
   deactivate_current_room();
-  set_current_room_editor_id(STARTING_ROOM_EDITOR_ID);
+  set_current_room_editor_id(STARTING_ROOM);
   activate_current_room();
 }
+
+void LevelSystem::collect_key(INVENTORY color) {
+  switch (color) {
+    case (INVENTORY::RED_KEY): {
+      collectRedKey(renderer);
+      break;
+    }
+    case (INVENTORY::BLUE_KEY): {
+      collectBlueKey(renderer);
+      break;
+    }
+    case (INVENTORY::YELLOW_KEY): {
+      collectYellowKey(renderer);
+      break;
+    }
+  }
+
+  for (const auto& entity : registry.doorConnections.entities) {
+    DoorConnection& door_connection = registry.doorConnections.get(entity);
+    if (door_connection.locked && door_connection.key == color) {
+      // Unlock this door, and stop treating it as a wall.
+      door_connection.locked = false;
+      if (registry.activeWalls.has(entity)) {
+        registry.activeWalls.remove(entity);
+      }
+    }
+  }
+};

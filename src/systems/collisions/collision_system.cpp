@@ -124,10 +124,11 @@ void CollisionSystem::detectPlayerProjectileCollisions() {
 }
 
 void CollisionSystem::detectPlayerCollisions() {
-  ComponentContainer<Player>&           player_container = registry.players;
+  ComponentContainer<Player>&       player_container = registry.players;
   ComponentContainer<Deadly>&       enemy_container      = registry.deadlys;
   ComponentContainer<EnemyProjectile>   enemy_proj_container =
       registry.enemyProjectiles;
+  ComponentContainer<Item>&   item_container = registry.items;    
   ComponentContainer<Consumable>&   consumable_container = registry.consumables;
   ComponentContainer<Interactable>& interactable_container =
       registry.interactable;
@@ -157,6 +158,11 @@ void CollisionSystem::detectPlayerCollisions() {
       checkPlayerMeshCollision(entity_i, entity_j, player_comp.collisionMesh);
     }
 
+    for (uint j = 0; j < item_container.size(); j++) {
+      Entity entity_j = item_container.entities[j];
+      checkPlayerMeshCollision(entity_i, entity_j, player_comp.collisionMesh);
+    }
+
     for (uint j = 0; j < consumable_container.size(); j++) {
       Entity entity_j = consumable_container.entities[j];
       checkPlayerMeshCollision(entity_i, entity_j, player_comp.collisionMesh);
@@ -175,6 +181,7 @@ void CollisionSystem::detectPlayerCollisions() {
     }
   }
 }
+
 
 void CollisionSystem::detectWallCollisions() {
   ComponentContainer<Mass>&         mass_container       = registry.masses;
@@ -221,6 +228,7 @@ void CollisionSystem::detectDoorCollisions() {
 
   for (uint i = 0; i < door_container.components.size(); i++) {
     Entity entity_i = door_container.entities[i];
+
     for (uint j = 0; j < enemy_container.size(); j++) {
       Entity entity_j = enemy_container.entities[j];
       checkBoxCollision(entity_i, entity_j);
@@ -263,7 +271,6 @@ void CollisionSystem::collision_resolution() {
 
     // Door Collision Handling
     if (registry.activeDoors.has(entity)) {
-      // std::cout << "something collided" << std::endl;
       routeDoorCollisions(entity, entity_other);
     }
 
@@ -275,6 +282,11 @@ void CollisionSystem::collision_resolution() {
     // Player Projectile Collision Handling
     if (registry.playerProjectiles.has(entity)) {
       routePlayerProjCollisions(entity, entity_other);
+    }
+
+    // Player Item Collision Handling
+    if (registry.items.has(entity)) {
+      routeItemCollisions(entity, entity_other);
     }
 
     // Consumable Collision Handling
@@ -300,6 +312,9 @@ void CollisionSystem::routePlayerCollisions(Entity player, Entity other) {
   }
   if (registry.enemyProjectiles.has(other)) {
     resolvePlayerEnemyProjCollision(player, other);
+  }
+  if (registry.items.has(other)) {
+    resolvePlayerItemCollision(player, other);
   }
   if (registry.consumables.has(other)) {
     resolvePlayerConsumableCollision(player, other);
@@ -421,6 +436,12 @@ void CollisionSystem::routePlayerProjCollisions(Entity player_proj,
   }
 }
 
+void CollisionSystem::routeItemCollisions(Entity item, Entity other) {
+  if (registry.players.has(other)) {
+    resolvePlayerItemCollision(other, item);
+  } 
+}
+
 void CollisionSystem::routeConsumableCollisions(Entity consumable,
                                                 Entity other) {
   if (registry.players.has(other)) {
@@ -442,6 +463,23 @@ void CollisionSystem::resolvePlayerEnemyCollision(Entity player, Entity enemy) {
   handle_debuffs(player, enemy);
   addDamageIndicatorTimer(player);
   modifyOxygen(player, enemy);
+}
+
+void CollisionSystem::resolvePlayerItemCollision(Entity player, Entity item) {
+  if (registry.deathTimers.has(player)) {
+    return;
+  }
+
+  // will add a key if this is in fact one
+  if (registry.items.has(item)) {
+    Item& i = registry.items.get(item);
+    INVENTORY color = i.item;
+
+    // We need to route this somewhere because the collect functions take a renderer and this class doesn't have one.
+    // Probably doesn't belong in LevelSystem, but it's 2:06 am.
+    level->collect_key(color);
+  }
+  registry.remove_all_components_of(item);
 }
 
 void CollisionSystem::resolvePlayerEnemyProjCollision(Entity player, Entity enemy_proj) {
@@ -846,10 +884,16 @@ void CollisionSystem::resolveMassCollision(Entity wall, Entity other) {
 }
 
 void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
-  rt_entity                      = Entity();
-  RoomTransition& roomTransition = registry.roomTransitions.emplace(rt_entity);
+  // If the door is locked, ignore it.
+  if (registry.doorConnections.has(door)) {
+    if (registry.doorConnections.get(door).locked) {
+      return;
+    }
+  }
 
   DoorConnection& door_connection = registry.doorConnections.get(door);
+  rt_entity                      = Entity();
+  RoomTransition& roomTransition = registry.roomTransitions.emplace(rt_entity);
   roomTransition.door_connection  = door_connection;
 
   transitioning = true;

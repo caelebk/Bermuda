@@ -37,7 +37,7 @@ EntitySave::EntitySave(Entity e) {
         Breakable &b = registry.breakables.get(e);
         this->respawnFn = b.respawnFn;
     } else {
-        assert(false); // literally just die
+        assert("You're trying to record an EntitySave but it isn't configured" && false); // literally just die
     }
 
     if (registry.entityGroups.has(e)) {

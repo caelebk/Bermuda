@@ -6,10 +6,10 @@
 #include "tiny_ecs_registry.hpp"
 
 void execute_config_rand(
-    const std::initializer_list<
-        std::function<Entity(RenderSystem* r, vec2 p, bool b)>>& funcs,
-    RoomBuilder& room_builder, RenderSystem* renderer) {
-  for (const auto& func : funcs) {
+    const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>>
+        &funcs,
+    RoomBuilder &room_builder, RenderSystem *renderer) {
+  for (const auto &func : funcs) {
     vec2 loc;
     do {
       loc = room_builder.get_random_position();
@@ -19,10 +19,10 @@ void execute_config_rand(
 }
 
 void execute_config_rand_chance(
-    const std::initializer_list<
-        std::function<Entity(RenderSystem* r, vec2 p, bool b)>>& funcs,
-    RoomBuilder& room_builder, RenderSystem* renderer, float chance) {
-  for (const auto& func : funcs) {
+    const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>>
+        &funcs,
+    RoomBuilder &room_builder, RenderSystem *renderer, float chance) {
+  for (const auto &func : funcs) {
     if (randomSuccess(chance)) {
       vec2 loc;
       do {

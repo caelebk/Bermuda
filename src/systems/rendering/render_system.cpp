@@ -249,8 +249,6 @@ void RenderSystem::renderText(std::string text, float x, float y, float scale,
 
     // render glyph texture over quad
     glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-    // std::cout << "binding texture: " << ch.character << " = " << ch.TextureID
-    // << std::endl;
 
     // update content of VBO memory
     glBindBuffer(GL_ARRAY_BUFFER, font_VBO);
@@ -326,6 +324,10 @@ void RenderSystem::draw() {
   for (Entity door : registry.activeDoors.entities) {
     if (registry.renderRequests.has(door))
       drawTexturedMesh(door, projection_2D);
+  }
+  for (Entity item : registry.items.entities) {
+    if (registry.renderRequests.has(item))
+      drawTexturedMesh(item, projection_2D);
   }
   for (Entity consumable : registry.consumables.entities) {
     if (registry.renderRequests.has(consumable))

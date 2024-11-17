@@ -47,7 +47,7 @@ enum class INVENTORY {
   RED_KEY    = SHRIMP + 1,
   BLUE_KEY   = RED_KEY + 1,
   YELLOW_KEY = BLUE_KEY + 1,
-  PROJ_COUNT = SHRIMP + 1
+  PROJ_COUNT = YELLOW_KEY + 1
 };
 
 // Inventory Counter

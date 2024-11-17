@@ -8,10 +8,10 @@
 #include <cstdio>
 #include <functional>
 #include <glm/ext/vector_float2.hpp>
-#include <initializer_list>
 #include <random>
 #include <vector>
 
+#include "render_system.hpp"
 #include "room_builder.hpp"
 
 #define MAX_SPAWN_ATTEMPTS 64
@@ -27,7 +27,7 @@
  * @param renderer
  */
 void execute_config_rand(
-    const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>>
+    const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>>
         &funcs,
     RoomBuilder &room_builder, RenderSystem *renderer);
 
@@ -40,7 +40,7 @@ void execute_config_rand(
  * @param chance - float [0,1] describing the % chance of each occuring
  */
 void execute_config_rand_chance(
-    const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>>
+    const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>>
         &funcs,
     RoomBuilder &room_builder, RenderSystem *renderer, float chance);
 
