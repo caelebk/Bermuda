@@ -23,7 +23,7 @@ const std::initializer_list<
     LVL_2_RAND_POS = {createOxygenCanisterPos, createCratePos, createCratePos,
                       createCratePos,          createCratePos, createCratePos,
                       createGeyserPos,         createFishPos,  createSharkPos,
-                      createSharkPos,          createSharkPos};
+                      createSharkPos,          createSharkPos, createLobsterPos};
 
 // TODO:
 // Ditto.
@@ -32,7 +32,7 @@ const std::initializer_list<
     LVL_3_RAND_POS = {createSharkPos, createSharkPos, createSharkPos,
                       createSharkPos, createSharkPos, createSharkPos,
                       createSharkPos, createSharkPos, createSharkPos,
-                      createSharkPos, createSharkPos};
+                      createLobsterPos, createLobsterPos};
 
 const std::initializer_list<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> TUTORIAL_JELLYFISH_MINIBOSS =                                 
 {                                                                        

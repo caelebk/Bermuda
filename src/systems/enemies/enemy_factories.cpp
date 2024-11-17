@@ -607,3 +607,107 @@ Entity launchUrchinNeedle(RenderSystem* renderer, vec2 pos, float angle) {
 }
 
 
+// /////////////////////////////////////////////////////////////////
+// // Lobster
+// /////////////////////////////////////////////////////////////////
+/**
+ * @brief creates a lobster at a specific position
+ *
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createLobsterPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+  // Reserve an entity
+  auto entity            = Entity();
+  vec2 LOBSTER_SCALE_FACTOR = vec2(LOBSTER_SCALE);
+
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = 0.f;
+  pos.position = position;
+  pos.scale    = LOBSTER_SCALE_FACTOR * LOBSTER_BOUNDING_BOX;
+  if (checkCollisions && !checkEnemySpawnCollisions(pos)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // make enemy and damage
+  Deadly &d = registry.deadlys.emplace(entity);
+  d.respawnFn = respawnLobster;
+
+  auto& damage  = registry.oxygenModifiers.emplace(entity);
+  damage.amount = LOBSTER_DAMAGE;
+
+  auto& modifyOxygenCd      = registry.modifyOxygenCd.emplace(entity);
+  modifyOxygenCd.default_cd = LOBSTER_ATK_SPD;
+
+  // Initialize the position, scale, and physics components
+  auto& motion        = registry.motions.emplace(entity);
+  motion.velocity     = {-LOBSTER_MS, 0};
+  motion.acceleration = {0, 0};
+
+  // ai
+  // half of krabs will move in a line, the other half will move in a square
+  // auto& wander         = registry.wanderLines.emplace(entity);
+  // wander.active_dir_cd = 0;  // immediately picks a new direction
+  // wander.change_dir_cd = getRandInt(LOBSTER_MIN_DIR_CD, LOBSTER_MAX_DIR_CD);
+  auto& wander         = registry.wanderSquares.emplace(entity);
+  wander.clockwise     = randomSuccess(0.5);
+  wander.active_dir_cd = 0;  // immediately picks a new direction
+  wander.change_dir_cd = getRandInt(LOBSTER_MIN_DIR_CD, LOBSTER_MAX_DIR_CD);
+
+  auto& tracking        = registry.trackPlayer.emplace(entity);
+  tracking.tracking_cd  = LOBSTER_TRACKING_CD;
+  tracking.spot_radius  = LOBSTER_SPOT_RADIUS;
+  tracking.leash_radius = LOBSTER_LEASH_RADIUS;
+  tracking.acceleration = LOBSTER_TRACKING_ACCELERATION;
+
+  Lobster& lobster_comp = registry.lobsters.emplace(entity);
+  lobster_comp.original_speed = LOBSTER_MS;
+  lobster_comp.block_mitigation = LOBSTER_BLOCK_MITIGATION;
+  lobster_comp.block_duration = LOBSTER_BLOCK_DURATION;
+  lobster_comp.ram_duration = LOBSTER_RAM_DURATION;
+  lobster_comp.ram_speed = LOBSTER_RAM_SPEED;
+
+  // TODO: add the room
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::LOBSTER, EFFECT_ASSET_ID::ENEMY,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  createDefaultHealthbar(renderer, entity, LOBSTER_HEALTH, LOBSTER_HEALTH_SCALE,
+                         LOBSTER_HEALTH_BAR_SCALE, LOBSTER_HEALTH_BOUNDING_BOX);
+  return entity;
+}
+
+/**
+ * @brief Respawns a Lobster based on it's entity state
+ *
+ * @param renderer 
+ * @param es 
+ * @return 
+ */
+Entity respawnLobster(RenderSystem *renderer, EntityState es) {
+  Entity entity = createLobsterPos(renderer, es.position.position, false);
+
+  // Restore State
+  Position &pos = registry.positions.get(entity);
+  pos.angle = es.position.angle;
+  pos.scale = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen &o = registry.oxygen.get(entity);
+  float diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}

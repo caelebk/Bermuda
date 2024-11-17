@@ -18,6 +18,8 @@ class AISystem {
   void do_track_player(float elapsed_ms);
   void do_track_player_ranged(float elapsed_ms);
   void do_projectile_firing(float elapsed_ms);
+  void do_lobster(float elapsed_ms, Entity lobster, Entity player);
+  void update_lobster(float elapsed_ms, Entity lobster);
   bool in_range_of_player(Position &pos, Position &player_pos, float range);
   void do_group_ai();
 

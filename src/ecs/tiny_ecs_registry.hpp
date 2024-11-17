@@ -43,6 +43,7 @@ class ECSRegistry {
   ComponentContainer<EnemyProjectile> enemyProjectiles;
   ComponentContainer<Boss>           bosses;
   ComponentContainer<ModifyOxygenCD> modifyOxygenCd;
+  ComponentContainer<Lobster> lobsters;
 
   // oxygen related
   ComponentContainer<Oxygen>         oxygen;

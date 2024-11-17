@@ -417,6 +417,10 @@ void AISystem::do_track_player(float elapsed_ms) {
     TracksPlayer& tracker = registry.trackPlayer.get(e);
     tracker.curr_cd -= elapsed_ms;
 
+    if (registry.lobsters.has(e)) {
+      update_lobster(elapsed_ms, e);
+    }
+
     if (tracker.curr_cd > 0 || is_proj(e)) {
       continue;
     }
@@ -436,6 +440,9 @@ void AISystem::do_track_player(float elapsed_ms) {
         createEmote(this->renderer, e, EMOTE::QUESTION);
       }
       tracker.active_track = false;
+      if (registry.lobsters.has(e)) {
+        registry.motions.get(e).velocity = vec2(registry.lobsters.get(e).original_speed, 0);
+      }
       continue;
     }
     printf("%d is tracking the player!\n", (unsigned int)e);
@@ -446,9 +453,15 @@ void AISystem::do_track_player(float elapsed_ms) {
     }
     tracker.active_track = true;
 
+    if (registry.lobsters.has(e)) {
+      do_lobster(elapsed_ms, e, player);
+      continue;
+    }
+
     Motion& motion     = registry.motions.get(e);
     float   velocity   = sqrt(dot(motion.velocity, motion.velocity));
     vec2    player_dir = normalize(player_pos.position - entity_pos.position);
+
 
     motion.velocity     = player_dir * velocity;
     motion.acceleration = player_dir * tracker.acceleration;
@@ -575,6 +588,81 @@ void AISystem::do_projectile_firing(float elapsed_ms) {
       if (attrs.type == RangedEnemies::URCHIN) {
         handleUrchinFiring(renderer, registry.positions.get(enemy));
       }
+    }
+  }
+}
+
+/**
+ * @brief updates all entities that are lobsters. this will randomly change
+ * their direction to the other line direction
+ *
+ * @param elapsed_ms
+ */
+void AISystem::do_lobster(float elapsed_ms, Entity lobster, Entity player) {
+  // printf("DO LOBSTER\n");
+  Motion& lob_motion     = registry.motions.get(lobster);
+  Position& lob_pos = registry.positions.get(lobster);
+  Lobster& lob_comp = registry.lobsters.get(lobster);
+
+  if (lob_comp.ram_timer <= 0 && lob_comp.block_timer <= 0) {
+    // printf("LOBSTER START BLOCKING\n");
+    if (registry.stunned.has(lobster)) {
+      return;
+    }
+    if (!registry.sounds.has(lobster)) {
+      registry.sounds.insert(lobster, Sound(SOUND_ASSET_ID::LOBSTER_SHIELD));
+    }
+    lob_comp.block_timer = lob_comp.block_duration;
+    lob_motion.velocity = vec2(0.f);
+    lob_motion.acceleration = vec2(0.f);
+    if (registry.renderRequests.has(lobster)) {
+      RenderRequest& lobster_render = registry.renderRequests.get(lobster);
+      lobster_render.used_texture = TEXTURE_ASSET_ID::LOBSTER_BLOCK;
+    }
+    return;
+  }
+
+
+  Position& player_pos = registry.positions.get(player);
+  float   lob_velocity   = sqrt(dot(lob_motion.velocity, lob_motion.velocity));
+  vec2    player_dir = normalize(player_pos.position - lob_pos.position);
+
+  lob_motion.velocity     = player_dir * lob_comp.ram_speed;
+  lob_motion.acceleration = player_dir * lob_motion.acceleration;
+}
+
+void AISystem::update_lobster(float elapsed_ms, Entity lob) {
+  Lobster& lobster = registry.lobsters.get(lob);
+  if (lobster.block_timer > 0) {
+    // printf("LOBSTER BLOCKING, time: %f\n", lobster.block_timer);
+    lobster.block_timer -= elapsed_ms;
+    if (lobster.block_timer <= 0) {
+      // printf("LOBSTER START RAMMING");
+      lobster.ram_timer = lobster.ram_duration;
+      if (registry.renderRequests.has(lob)) {
+        RenderRequest& lobster_render = registry.renderRequests.get(lob);
+        lobster_render.used_texture = TEXTURE_ASSET_ID::LOBSTER_RAM;
+      }
+    }
+  }
+  if (lobster.ram_timer > 0) {
+    lobster.ram_timer -= elapsed_ms;
+    if (lobster.ram_timer <= 0) {
+      // printf("LOBSTER END RAMMING\n");
+      if (registry.renderRequests.has(lob)) {
+        RenderRequest& lobster_render = registry.renderRequests.get(lob);
+        lobster_render.used_texture = TEXTURE_ASSET_ID::LOBSTER;
+      }
+    }
+  }
+  if (registry.positions.has(lob) && registry.motions.has(lob)) {
+    Position& p = registry.positions.get(lob);
+    Motion& lob_motion = registry.motions.get(lob);
+
+    p.scale.x = abs(p.scale.x);
+    if (lob_motion.velocity.x > 0) {
+      // scale should be opposite of velocity
+      p.scale.x *= -1;
     }
   }
 }

@@ -31,3 +31,5 @@ Sources for files:
 [metal_crate_hit](https://freesound.org/people/Debsound/sounds/168822/)
 
 [metal_crate_death](https://freesound.org/people/JoelAudio/sounds/135463/)
+
+[lobster_shield](https://freesound.org/people/Mrthenoronha/sounds/371922/)

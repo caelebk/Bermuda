@@ -138,4 +138,28 @@ Entity respawnUrchin(RenderSystem* renderer, EntityState es);
 #define URCHIN_NEEDLE_DAMAGE -50
 #define URCHIN_NEEDLE_TIMER 1500.f
 
-Entity launchUrchinNeedle(RenderSystem* renderer, vec2 position, float angle);
+Entity launchUrchinNeedle(RenderSystem* renderer, vec2 position, float angle);///////////////////////////////////////////////////////////////
+// Lobster
+///////////////////////////////////////////////////////////////
+#define LOBSTER_MS 30.0
+#define LOBSTER_DAMAGE -100.0
+#define LOBSTER_ATK_SPD 1000.0
+#define LOBSTER_SCALE 0.2f
+#define LOBSTER_BOUNDING_BOX vec2(595.f, 290.f)
+#define LOBSTER_HEALTH 500.0  // six shot
+#define LOBSTER_MIN_DIR_CD 1000 // random direction change cooldown so it looks more natural
+#define LOBSTER_MAX_DIR_CD 8000
+#define LOBSTER_TRACKING_CD 1000.f
+#define LOBSTER_SPOT_RADIUS 300.f
+#define LOBSTER_LEASH_RADIUS 500.f
+#define LOBSTER_TRACKING_ACCELERATION 10.f
+#define LOBSTER_BLOCK_DURATION 1000.f;
+#define LOBSTER_BLOCK_MITIGATION 1.0f;
+#define LOBSTER_RAM_DURATION 500.f;
+#define LOBSTER_RAM_SPEED 200.f;
+#define LOBSTER_HEALTH_SCALE vec2(1.4f)
+#define LOBSTER_HEALTH_BAR_SCALE vec2(1.5f)
+#define LOBSTER_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+
+Entity createLobsterPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity respawnLobster(RenderSystem* renderer, EntityState es);

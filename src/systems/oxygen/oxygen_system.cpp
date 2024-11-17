@@ -69,6 +69,18 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
     entity_oxygen.isRendered = true;
   }
 
+  if (registry.lobsters.has(entity)) {
+    Lobster& lobster = registry.lobsters.get(entity);
+    if (lobster.block_timer > 0) {
+      // printf("LOBSTER BLOCKED DAMAGE\n");
+      if (!registry.sounds.has(entity)) {
+        registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::METAL_CRATE_HIT));
+      }
+      float block_mitigation = (1.0f - lobster.block_mitigation);
+      deltaOxygen = lobster.block_timer > 0 ? block_mitigation * deltaOxygen : deltaOxygen;
+    }
+  }
+
   entity_oxygen.level += deltaOxygen;
   updateHealthBarRender(entity, entity_oxygen, deltaOxygen);
   updateOxygenLvlStatus(entity_oxygen);

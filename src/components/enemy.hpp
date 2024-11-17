@@ -32,3 +32,13 @@ struct Boss {
   bool is_angry = false;
   std::vector<std::function<void()>> ai;
 };
+
+struct Lobster {
+  float original_speed;
+  float block_duration;
+  float block_timer = 0;
+  float block_mitigation;
+  float ram_duration;
+  float ram_timer = 0;
+  float ram_speed;
+};

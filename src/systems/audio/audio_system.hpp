@@ -39,7 +39,8 @@ const std::array<std::string, sound_count> sound_names = {
 	"crate_death",
 	"crate_hit",
 	"metal_crate_death",
-	"metal_crate_hit"
+	"metal_crate_hit",
+	"lobster_shield"
 };
 
 //order matters
