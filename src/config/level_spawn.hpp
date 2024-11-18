@@ -12,7 +12,7 @@ const std::vector<
     LVL_1_RAND_POS = {createOxygenCanisterPos, createCratePos, createCratePos,
                       createCratePos,          createCratePos, createCratePos,
                       createGeyserPos,         createSharkPos, createKrabPos,
-                      createFishPos,           createJellyPos, createUrchinPos};
+                      createFishPos,           createJellyPos, createJellyPos};
 
 const std::vector<
     std::function<Entity(RenderSystem* r, vec2 p, bool b)>>

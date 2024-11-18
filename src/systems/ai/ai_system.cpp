@@ -1,12 +1,12 @@
 // internal
 #include "ai_system.hpp"
-#include "boids.hpp"
 
 #include <cstdio>
 #include <debuff.hpp>
 #include <vector>
 
 #include "ai.hpp"
+#include "boids.hpp"
 #include "collision_system.hpp"
 #include "collision_util.hpp"
 #include "enemy_factories.hpp"
@@ -31,8 +31,9 @@ bool any_tracking(std::vector<Entity> entities) {
   if (entities.size() < 1) {
     return false;
   }
-  
-  if (!registry.trackPlayer.has(entities[0]) && !registry.trackPlayerRanged.has(entities[0])) {
+
+  if (!registry.trackPlayer.has(entities[0]) &&
+      !registry.trackPlayerRanged.has(entities[0])) {
     return false;
   }
 
@@ -192,7 +193,8 @@ void choose_new_direction(Entity enemy, Entity other) {
 
 void handleUrchinFiring(RenderSystem* renderer, Position& pos) {
   launchUrchinNeedle(renderer, pos.position + vec2(abs(pos.scale.x), 0), 0);
-  launchUrchinNeedle(renderer, pos.position + vec2(0, abs(pos.scale.y)), M_PI / 2);
+  launchUrchinNeedle(renderer, pos.position + vec2(0, abs(pos.scale.y)),
+                     M_PI / 2);
   launchUrchinNeedle(renderer, pos.position + vec2(-abs(pos.scale.x), 0), M_PI);
   launchUrchinNeedle(renderer, pos.position + vec2(0, -abs(pos.scale.y)),
                      1.5f * M_PI);
@@ -441,7 +443,8 @@ void AISystem::do_track_player(float elapsed_ms) {
       }
       tracker.active_track = false;
       if (registry.lobsters.has(e)) {
-        registry.motions.get(e).velocity = vec2(registry.lobsters.get(e).original_speed, 0);
+        registry.motions.get(e).velocity =
+            vec2(registry.lobsters.get(e).original_speed, 0);
       }
       continue;
     }
@@ -461,7 +464,6 @@ void AISystem::do_track_player(float elapsed_ms) {
     Motion& motion     = registry.motions.get(e);
     float   velocity   = sqrt(dot(motion.velocity, motion.velocity));
     vec2    player_dir = normalize(player_pos.position - entity_pos.position);
-
 
     motion.velocity     = player_dir * velocity;
     motion.acceleration = player_dir * tracker.acceleration;
@@ -583,12 +585,32 @@ void AISystem::do_projectile_firing(float elapsed_ms) {
   for (Entity enemy : registry.shooters.entities) {
     Shooter& attrs = registry.shooters.get(enemy);
     attrs.cooldown -= elapsed_ms;
-    if (attrs.cooldown < 0.f) {
-      attrs.cooldown = attrs.default_cd;
-      if (attrs.type == RangedEnemies::URCHIN) {
-        handleUrchinFiring(renderer, registry.positions.get(enemy));
+
+    if (attrs.type == RangedEnemies::URCHIN) {
+        if (attrs.cooldown < 0.f) {
+          attrs.cooldown = attrs.default_cd;
+          registry.sounds.insert(enemy, Sound(SOUND_ASSET_ID::URCHIN));
+          handleUrchinFiring(renderer, registry.positions.get(enemy));
+        }
+      } else if (attrs.type == RangedEnemies::SEAHORSE) {
+        Position& enemy_pos  = registry.positions.get(enemy);
+        Position& player_pos = registry.positions.get(player);
+        if (can_see_player(enemy_pos, player_pos)) {
+          vec2 direction = player_pos.position - enemy_pos.position;
+          if (direction.x > 0) {
+            enemy_pos.scale.x = abs(enemy_pos.scale.x) * -1;
+          } else {
+            enemy_pos.scale.x = abs(enemy_pos.scale.x);
+          }
+          if (attrs.cooldown < 0.f) {
+            attrs.cooldown = attrs.default_cd;
+            registry.sounds.insert(enemy, Sound(SOUND_ASSET_ID::SEAHORSE));
+            fireSeahorseBullet(renderer, enemy_pos.position, direction);
+          }
+        } else if (attrs.cooldown < 0.f) {
+          attrs.cooldown = attrs.default_cd;
+        }
       }
-    }
   }
 }
 
@@ -600,9 +622,9 @@ void AISystem::do_projectile_firing(float elapsed_ms) {
  */
 void AISystem::do_lobster(float elapsed_ms, Entity lobster, Entity player) {
   // printf("DO LOBSTER\n");
-  Motion& lob_motion     = registry.motions.get(lobster);
-  Position& lob_pos = registry.positions.get(lobster);
-  Lobster& lob_comp = registry.lobsters.get(lobster);
+  Motion&   lob_motion = registry.motions.get(lobster);
+  Position& lob_pos    = registry.positions.get(lobster);
+  Lobster&  lob_comp   = registry.lobsters.get(lobster);
 
   if (lob_comp.ram_timer <= 0 && lob_comp.block_timer <= 0) {
     // printf("LOBSTER START BLOCKING\n");
@@ -612,20 +634,19 @@ void AISystem::do_lobster(float elapsed_ms, Entity lobster, Entity player) {
     if (!registry.sounds.has(lobster)) {
       registry.sounds.insert(lobster, Sound(SOUND_ASSET_ID::LOBSTER_SHIELD));
     }
-    lob_comp.block_timer = lob_comp.block_duration;
-    lob_motion.velocity = vec2(0.f);
+    lob_comp.block_timer    = lob_comp.block_duration;
+    lob_motion.velocity     = vec2(0.f);
     lob_motion.acceleration = vec2(0.f);
     if (registry.renderRequests.has(lobster)) {
       RenderRequest& lobster_render = registry.renderRequests.get(lobster);
-      lobster_render.used_texture = TEXTURE_ASSET_ID::LOBSTER_BLOCK;
+      lobster_render.used_texture   = TEXTURE_ASSET_ID::LOBSTER_BLOCK;
     }
     return;
   }
 
-
-  Position& player_pos = registry.positions.get(player);
-  float   lob_velocity   = sqrt(dot(lob_motion.velocity, lob_motion.velocity));
-  vec2    player_dir = normalize(player_pos.position - lob_pos.position);
+  Position& player_pos   = registry.positions.get(player);
+  float     lob_velocity = sqrt(dot(lob_motion.velocity, lob_motion.velocity));
+  vec2      player_dir   = normalize(player_pos.position - lob_pos.position);
 
   lob_motion.velocity     = player_dir * lob_comp.ram_speed;
   lob_motion.acceleration = player_dir * lob_motion.acceleration;
@@ -641,7 +662,7 @@ void AISystem::update_lobster(float elapsed_ms, Entity lob) {
       lobster.ram_timer = lobster.ram_duration;
       if (registry.renderRequests.has(lob)) {
         RenderRequest& lobster_render = registry.renderRequests.get(lob);
-        lobster_render.used_texture = TEXTURE_ASSET_ID::LOBSTER_RAM;
+        lobster_render.used_texture   = TEXTURE_ASSET_ID::LOBSTER_RAM;
       }
     }
   }
@@ -651,13 +672,13 @@ void AISystem::update_lobster(float elapsed_ms, Entity lob) {
       // printf("LOBSTER END RAMMING\n");
       if (registry.renderRequests.has(lob)) {
         RenderRequest& lobster_render = registry.renderRequests.get(lob);
-        lobster_render.used_texture = TEXTURE_ASSET_ID::LOBSTER;
+        lobster_render.used_texture   = TEXTURE_ASSET_ID::LOBSTER;
       }
     }
   }
   if (registry.positions.has(lob) && registry.motions.has(lob)) {
-    Position& p = registry.positions.get(lob);
-    Motion& lob_motion = registry.motions.get(lob);
+    Position& p          = registry.positions.get(lob);
+    Motion&   lob_motion = registry.motions.get(lob);
 
     p.scale.x = abs(p.scale.x);
     if (lob_motion.velocity.x > 0) {

@@ -460,6 +460,10 @@ void CollisionSystem::routeInteractableCollisions(Entity interactable,
     Entity <-> Entity Collision Resolutions
 **********************************************/
 void CollisionSystem::resolvePlayerEnemyCollision(Entity player, Entity enemy) {
+  if (!registry.oxygenModifiers.has(enemy) && registry.shooters.has(enemy)) {
+    // shooters without oxygenModifier don't hurt player on touch
+    return;
+  }
   handle_debuffs(player, enemy);
   addDamageIndicatorTimer(player);
   modifyOxygen(player, enemy);
@@ -485,6 +489,7 @@ void CollisionSystem::resolvePlayerItemCollision(Entity player, Entity item) {
 void CollisionSystem::resolvePlayerEnemyProjCollision(Entity player, Entity enemy_proj) {
   // For now it's almost equal to the above, but make a new function just to open it to changes
   handle_debuffs(player, enemy_proj);
+  addDamageIndicatorTimer(player);
   modifyOxygen(player, enemy_proj);
 
   // Assume the projectile should poof upon impact

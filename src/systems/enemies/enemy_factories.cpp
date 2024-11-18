@@ -3,8 +3,8 @@
 #include <iostream>
 
 #include "collision_system.hpp"
-#include "consumable_factories.hpp"
 #include "components.hpp"
+#include "consumable_factories.hpp"
 #include "oxygen_system.hpp"
 #include "physics.hpp"
 #include "random.hpp"
@@ -28,8 +28,8 @@ bool checkEnemySpawnCollisions(struct Position enemyPos) {
       continue;
     }
     const Position player_pos = registry.positions.get(player);
-    vec2 dist_vec = player_pos.position - enemyPos.position;
-    float dist = sqrt(dot(dist_vec, dist_vec));
+    vec2           dist_vec   = player_pos.position - enemyPos.position;
+    float          dist       = sqrt(dot(dist_vec, dist_vec));
     if (dist < PLAYER_SPAWN_RADIUS) {
       return false;
     }
@@ -79,7 +79,6 @@ bool checkEnemySpawnCollisions(struct Position enemyPos) {
     }
   }
 
-
   return true;
 }
 
@@ -93,7 +92,8 @@ bool checkEnemySpawnCollisions(struct Position enemyPos) {
  * @param position
  * @return the entity if successful, 0 otherwise
  */
-Entity createJellyPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+Entity createJellyPos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
 
@@ -114,7 +114,7 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position, bool checkCollision
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy
-  Deadly &d = registry.deadlys.emplace(entity);
+  Deadly& d   = registry.deadlys.emplace(entity);
   d.respawnFn = respawnJelly;
 
   // Add stats
@@ -130,7 +130,7 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position, bool checkCollision
 
   // assign drops
   if (randomSuccess(JELLY_DROP_CHANCE_0)) {
-    Drop& drop  = registry.drops.emplace(entity);
+    Drop& drop = registry.drops.emplace(entity);
     if (randomSuccess(JELLY_DROP_CHANCE_0)) {
       drop.dropFn = createConcussiveDropPos;
     } else {
@@ -151,23 +151,23 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position, bool checkCollision
 }
 
 /**
- * @brief Respawns a Jelly based on it's entity state
+ * @brief Respawns a Jelly based on its entity state
  *
- * @param renderer 
- * @param es 
- * @return 
+ * @param renderer
+ * @param es
+ * @return
  */
-Entity respawnJelly(RenderSystem *renderer, EntityState es) {
+Entity respawnJelly(RenderSystem* renderer, EntityState es) {
   Entity entity = createJellyPos(renderer, es.position.position, false);
 
   // Restore State
-  Position &pos = registry.positions.get(entity);
-  pos.angle = es.position.angle;
-  pos.scale = es.position.scale;
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
   pos.originalScale = es.position.originalScale;
 
-  Oxygen &o = registry.oxygen.get(entity);
-  float diff = es.oxygen - o.level;
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
 
   // This will also update the health bar
   if (diff < 0) {
@@ -187,7 +187,8 @@ Entity respawnJelly(RenderSystem *renderer, EntityState es) {
  * @param position
  * @return
  */
-Entity createFishPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+Entity createFishPos(RenderSystem* renderer, vec2 position,
+                     bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
 
@@ -207,7 +208,7 @@ Entity createFishPos(RenderSystem* renderer, vec2 position, bool checkCollisions
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly &d = registry.deadlys.emplace(entity);
+  Deadly& d   = registry.deadlys.emplace(entity);
   d.respawnFn = respawnFish;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
@@ -226,16 +227,14 @@ Entity createFishPos(RenderSystem* renderer, vec2 position, bool checkCollisions
   wander.active_dir_cd = 0;  // immediately picks a new direction
   wander.change_dir_cd = getRandInt(FISH_MIN_DIR_CD, FISH_MAX_DIR_CD);
 
-  // TODO: add the room
   TEXTURE_ASSET_ID fish_textures[5] = {
       TEXTURE_ASSET_ID::FISH0, TEXTURE_ASSET_ID::FISH1, TEXTURE_ASSET_ID::FISH2,
       TEXTURE_ASSET_ID::FISH3, TEXTURE_ASSET_ID::FISH4};
 
   TEXTURE_ASSET_ID fish_texture = fish_textures[getRandInt(0, 4)];
 
-  registry.renderRequests.insert(
-      entity,
-      {fish_texture, EFFECT_ASSET_ID::ENEMY, GEOMETRY_BUFFER_ID::SPRITE});
+  registry.renderRequests.insert(entity, {fish_texture, EFFECT_ASSET_ID::ENEMY,
+                                          GEOMETRY_BUFFER_ID::SPRITE});
 
   createDefaultHealthbar(renderer, entity, FISH_HEALTH, FISH_HEALTH_SCALE,
                          FISH_HEALTH_BAR_SCALE, FISH_HEALTH_BOUNDING_BOX);
@@ -243,23 +242,23 @@ Entity createFishPos(RenderSystem* renderer, vec2 position, bool checkCollisions
 }
 
 /**
- * @brief Respawns a Fish based on it's entity state
+ * @brief Respawns a Fish based on its entity state
  *
- * @param renderer 
- * @param es 
- * @return 
+ * @param renderer
+ * @param es
+ * @return
  */
-Entity respawnFish(RenderSystem *renderer, EntityState es) {
+Entity respawnFish(RenderSystem* renderer, EntityState es) {
   Entity entity = createFishPos(renderer, es.position.position, false);
 
   // Restore State
-  Position &pos = registry.positions.get(entity);
-  pos.angle = es.position.angle;
-  pos.scale = es.position.scale;
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
   pos.originalScale = es.position.originalScale;
 
-  Oxygen &o = registry.oxygen.get(entity);
-  float diff = es.oxygen - o.level;
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
 
   // This will also update the health bar
   if (diff < 0) {
@@ -281,7 +280,8 @@ Entity respawnFish(RenderSystem *renderer, EntityState es) {
  * @param position
  * @return
  */
-Entity createSharkPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+Entity createSharkPos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions) {
   // Reserve an entity
   auto entity             = Entity();
   vec2 SHARK_SCALE_FACTOR = vec2(randomFloat(SHARK_MIN_SCALE, SHARK_MAX_SCALE));
@@ -302,7 +302,7 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position, bool checkCollision
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly &d = registry.deadlys.emplace(entity);
+  Deadly& d   = registry.deadlys.emplace(entity);
   d.respawnFn = respawnShark;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
@@ -329,11 +329,10 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position, bool checkCollision
 
   // assign drops
   if (randomSuccess(SHARK_DROP_CHANCE_0)) {
-    Drop& drop = registry.drops.emplace(entity);
+    Drop& drop  = registry.drops.emplace(entity);
     drop.dropFn = createTorpedoDropPos;
   }
 
-  // TODO: add the room
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::SHARK, EFFECT_ASSET_ID::ENEMY,
                GEOMETRY_BUFFER_ID::SPRITE});
@@ -344,23 +343,23 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position, bool checkCollision
 }
 
 /**
- * @brief Respawns a Shark based on it's entity state
+ * @brief Respawns a Shark based on its entity state
  *
- * @param renderer 
- * @param es 
- * @return 
+ * @param renderer
+ * @param es
+ * @return
  */
-Entity respawnShark(RenderSystem *renderer, EntityState es) {
+Entity respawnShark(RenderSystem* renderer, EntityState es) {
   Entity entity = createSharkPos(renderer, es.position.position, false);
 
   // Restore State
-  Position &pos = registry.positions.get(entity);
-  pos.angle = es.position.angle;
-  pos.scale = es.position.scale;
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
   pos.originalScale = es.position.originalScale;
 
-  Oxygen &o = registry.oxygen.get(entity);
-  float diff = es.oxygen - o.level;
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
 
   // This will also update the health bar
   if (diff < 0) {
@@ -382,7 +381,8 @@ Entity respawnShark(RenderSystem *renderer, EntityState es) {
  * @param position
  * @return
  */
-Entity createKrabPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+Entity createKrabPos(RenderSystem* renderer, vec2 position,
+                     bool checkCollisions) {
   // Reserve an entity
   auto entity            = Entity();
   vec2 KRAB_SCALE_FACTOR = vec2(randomFloat(KRAB_MIN_SCALE, KRAB_MAX_SCALE));
@@ -403,7 +403,7 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position, bool checkCollisions
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly &d = registry.deadlys.emplace(entity);
+  Deadly& d   = registry.deadlys.emplace(entity);
   d.respawnFn = respawnKrab;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
@@ -442,7 +442,6 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position, bool checkCollisions
     drop.dropFn = createTorpedoDropPos;
   }
 
-  // TODO: add the room
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::KRAB, EFFECT_ASSET_ID::ENEMY,
                GEOMETRY_BUFFER_ID::SPRITE});
@@ -452,25 +451,24 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position, bool checkCollisions
   return entity;
 }
 
-
 /**
- * @brief Respawns a Krab based on it's entity state
+ * @brief Respawns a Krab based on its entity state
  *
- * @param renderer 
- * @param es 
- * @return 
+ * @param renderer
+ * @param es
+ * @return
  */
-Entity respawnKrab(RenderSystem *renderer, EntityState es) {
+Entity respawnKrab(RenderSystem* renderer, EntityState es) {
   Entity entity = createKrabPos(renderer, es.position.position, false);
 
   // Restore State
-  Position &pos = registry.positions.get(entity);
-  pos.angle = es.position.angle;
-  pos.scale = es.position.scale;
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
   pos.originalScale = es.position.originalScale;
 
-  Oxygen &o = registry.oxygen.get(entity);
-  float diff = es.oxygen - o.level;
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
 
   // This will also update the health bar
   if (diff < 0) {
@@ -486,16 +484,16 @@ Entity respawnKrab(RenderSystem *renderer, EntityState es) {
 /**
  * @brief creates an urchin at a specific position
  *
- * krabs will be created with a random size
+ * urchins will be created with a random size
  *
  * @param renderer
  * @param position
  * @return
  */
 Entity createUrchinPos(RenderSystem* renderer, vec2 position,
-                     bool checkCollisions) {
+                       bool checkCollisions) {
   // Reserve an entity
-  auto entity            = Entity();
+  auto entity = Entity();
   vec2 URCHIN_SCALE_FACTOR =
       vec2(randomFloat(URCHIN_MIN_SCALE, URCHIN_MAX_SCALE));
 
@@ -525,10 +523,10 @@ Entity createUrchinPos(RenderSystem* renderer, vec2 position,
   // ai
   auto& wander         = registry.wanders.emplace(entity);
   wander.active_dir_cd = 0;  // immediately picks a new direction
-  wander.change_dir_cd = getRandInt(SHARK_MIN_DIR_CD, SHARK_MAX_DIR_CD);
+  wander.change_dir_cd = getRandInt(URCHIN_MIN_DIR_CD, URCHIN_MAX_DIR_CD);
 
-  auto& shooter = registry.shooters.emplace(entity);
-  shooter.type  = RangedEnemies::URCHIN;
+  auto& shooter      = registry.shooters.emplace(entity);
+  shooter.type       = RangedEnemies::URCHIN;
   shooter.default_cd = URCHIN_FIRERATE;
   shooter.cooldown   = URCHIN_FIRERATE;
 
@@ -548,7 +546,7 @@ Entity createUrchinPos(RenderSystem* renderer, vec2 position,
 }
 
 /**
- * @brief Respawns a Krab based on it's entity state
+ * @brief Respawns an urchin based on its entity state
  *
  * @param renderer
  * @param es
@@ -588,24 +586,153 @@ Entity launchUrchinNeedle(RenderSystem* renderer, vec2 pos, float angle) {
   position.angle     = angle;
 
   // Setting initial motion values
-  Motion& motion      = registry.motions.emplace(entity);
-  motion.velocity     = {cos(angle) * URCHIN_NEEDLE_MS, sin(angle) * URCHIN_NEEDLE_MS};
+  Motion& motion  = registry.motions.emplace(entity);
+  motion.velocity = {cos(angle) * URCHIN_NEEDLE_MS,
+                     sin(angle) * URCHIN_NEEDLE_MS};
 
   OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
   oxyCost.amount          = URCHIN_NEEDLE_DAMAGE;
 
   EnemyProjectile& proj = registry.enemyProjectiles.emplace(entity);
-  proj.has_timer    = true;
-  proj.timer        = URCHIN_NEEDLE_TIMER;
+  proj.has_timer        = true;
+  proj.timer            = URCHIN_NEEDLE_TIMER;
 
   // Request Render
   registry.renderRequests.insert(
-      entity, {TEXTURE_ASSET_ID::URCHIN_NEEDLE, EFFECT_ASSET_ID::PLAYER,
+      entity, {TEXTURE_ASSET_ID::URCHIN_NEEDLE, EFFECT_ASSET_ID::ENEMY,
                GEOMETRY_BUFFER_ID::SPRITE});
 
   return entity;
 }
 
+// /////////////////////////////////////////////////////////////////
+// // Seahorse
+// /////////////////////////////////////////////////////////////////
+/**
+ * @brief creates a seahorse at a specific position
+ *
+ * seahorses will be created with a random size
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createSeahorsePos(RenderSystem* renderer, vec2 position,
+                         bool checkCollisions) {
+  // Reserve an entity
+  auto entity = Entity();
+  vec2 SEAHORSE_SCALE_FACTOR =
+      vec2(randomFloat(SEAHORSE_MIN_SCALE, SEAHORSE_MAX_SCALE));
+
+  Position pos;
+  pos.angle    = 0.f;
+  pos.position = position;
+  pos.scale    = SEAHORSE_SCALE_FACTOR * SEAHORSE_BOUNDING_BOX;
+  if (checkCollisions && !checkEnemySpawnCollisions(pos)) {
+    // returns invalid entity, since id's start from 1
+    return Entity(0);
+  }
+  registry.positions.insert(entity, pos);
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // make enemy and damage
+  Deadly& d   = registry.deadlys.emplace(entity);
+  d.respawnFn = respawnSeahorse;
+
+  // Initialize the position, scale, and physics components
+  auto& motion        = registry.motions.emplace(entity);
+  motion.velocity     = {-SEAHORSE_MS, 0};
+  motion.acceleration = {0, 0};
+
+  // ai
+  auto& wander         = registry.wanders.emplace(entity);
+  wander.active_dir_cd = 0;  // immediately picks a new direction
+  wander.change_dir_cd = getRandInt(SEAHORSE_MIN_DIR_CD, SEAHORSE_MAX_DIR_CD);
+
+  auto& shooter      = registry.shooters.emplace(entity);
+  shooter.type       = RangedEnemies::SEAHORSE;
+  shooter.default_cd = SEAHORSE_FIRERATE;
+  shooter.cooldown   = SEAHORSE_FIRERATE;
+
+  // assign drops
+  if (randomSuccess(SEAHORSE_DROP_CHANCE_0)) {
+    Drop& drop  = registry.drops.emplace(entity);
+    drop.dropFn = createShrimpDropPos;
+  }
+
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::SEAHORSE, EFFECT_ASSET_ID::ENEMY,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  createDefaultHealthbar(renderer, entity, SEAHORSE_HEALTH,
+                         SEAHORSE_HEALTH_SCALE, SEAHORSE_HEALTH_BAR_SCALE,
+                         SEAHORSE_HEALTH_BOUNDING_BOX);
+  return entity;
+}
+
+/**
+ * @brief Respawns a Seahorse based on its entity state
+ *
+ * @param renderer
+ * @param es
+ * @return
+ */
+Entity respawnSeahorse(RenderSystem* renderer, EntityState es) {
+  Entity entity = createSeahorsePos(renderer, es.position.position, false);
+
+  // Restore State
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}
+
+Entity fireSeahorseBullet(RenderSystem* renderer, vec2 pos, vec2 direction) {
+  auto entity = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // Setting initial position values
+  float     angle    = atan2(direction.y, direction.x);
+  Position& position = registry.positions.emplace(entity);
+  position.position  = pos;
+  position.scale = SEAHORSE_BULLET_SCALE_FACTOR * SEAHORSE_BULLET_BOUNDING_BOX;
+  position.angle = angle;
+
+  // Setting initial motion values
+  Motion& motion  = registry.motions.emplace(entity);
+  motion.velocity = {cos(angle) * SEAHORSE_BULLET_MS,
+                     sin(angle) * SEAHORSE_BULLET_MS};
+
+  OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
+  oxyCost.amount          = SEAHORSE_BULLET_DAMAGE;
+
+  EnemyProjectile& proj = registry.enemyProjectiles.emplace(entity);
+  proj.has_timer        = true;
+  proj.timer            = SEAHORSE_BULLET_TIMER;
+
+  // Request Render
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::SEAHORSE_BULLET, EFFECT_ASSET_ID::ENEMY,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
 
 // /////////////////////////////////////////////////////////////////
 // // Lobster
@@ -618,9 +745,10 @@ Entity launchUrchinNeedle(RenderSystem* renderer, vec2 pos, float angle) {
  * @param position
  * @return
  */
-Entity createLobsterPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+Entity createLobsterPos(RenderSystem* renderer, vec2 position,
+                        bool checkCollisions) {
   // Reserve an entity
-  auto entity            = Entity();
+  auto entity               = Entity();
   vec2 LOBSTER_SCALE_FACTOR = vec2(LOBSTER_SCALE);
 
   auto& pos    = registry.positions.emplace(entity);
@@ -638,7 +766,7 @@ Entity createLobsterPos(RenderSystem* renderer, vec2 position, bool checkCollisi
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly &d = registry.deadlys.emplace(entity);
+  Deadly& d   = registry.deadlys.emplace(entity);
   d.respawnFn = respawnLobster;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
@@ -653,10 +781,6 @@ Entity createLobsterPos(RenderSystem* renderer, vec2 position, bool checkCollisi
   motion.acceleration = {0, 0};
 
   // ai
-  // half of krabs will move in a line, the other half will move in a square
-  // auto& wander         = registry.wanderLines.emplace(entity);
-  // wander.active_dir_cd = 0;  // immediately picks a new direction
-  // wander.change_dir_cd = getRandInt(LOBSTER_MIN_DIR_CD, LOBSTER_MAX_DIR_CD);
   auto& wander         = registry.wanderSquares.emplace(entity);
   wander.clockwise     = randomSuccess(0.5);
   wander.active_dir_cd = 0;  // immediately picks a new direction
@@ -668,14 +792,13 @@ Entity createLobsterPos(RenderSystem* renderer, vec2 position, bool checkCollisi
   tracking.leash_radius = LOBSTER_LEASH_RADIUS;
   tracking.acceleration = LOBSTER_TRACKING_ACCELERATION;
 
-  Lobster& lobster_comp = registry.lobsters.emplace(entity);
-  lobster_comp.original_speed = LOBSTER_MS;
+  Lobster& lobster_comp         = registry.lobsters.emplace(entity);
+  lobster_comp.original_speed   = LOBSTER_MS;
   lobster_comp.block_mitigation = LOBSTER_BLOCK_MITIGATION;
-  lobster_comp.block_duration = LOBSTER_BLOCK_DURATION;
-  lobster_comp.ram_duration = LOBSTER_RAM_DURATION;
-  lobster_comp.ram_speed = LOBSTER_RAM_SPEED;
+  lobster_comp.block_duration   = LOBSTER_BLOCK_DURATION;
+  lobster_comp.ram_duration     = LOBSTER_RAM_DURATION;
+  lobster_comp.ram_speed        = LOBSTER_RAM_SPEED;
 
-  // TODO: add the room
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::LOBSTER, EFFECT_ASSET_ID::ENEMY,
                GEOMETRY_BUFFER_ID::SPRITE});
@@ -686,23 +809,23 @@ Entity createLobsterPos(RenderSystem* renderer, vec2 position, bool checkCollisi
 }
 
 /**
- * @brief Respawns a Lobster based on it's entity state
+ * @brief Respawns a Lobster based on its entity state
  *
- * @param renderer 
- * @param es 
- * @return 
+ * @param renderer
+ * @param es
+ * @return
  */
-Entity respawnLobster(RenderSystem *renderer, EntityState es) {
+Entity respawnLobster(RenderSystem* renderer, EntityState es) {
   Entity entity = createLobsterPos(renderer, es.position.position, false);
 
   // Restore State
-  Position &pos = registry.positions.get(entity);
-  pos.angle = es.position.angle;
-  pos.scale = es.position.scale;
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
   pos.originalScale = es.position.originalScale;
 
-  Oxygen &o = registry.oxygen.get(entity);
-  float diff = es.oxygen - o.level;
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
 
   // This will also update the health bar
   if (diff < 0) {

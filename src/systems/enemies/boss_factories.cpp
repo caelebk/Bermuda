@@ -1,11 +1,10 @@
 #include "boss_factories.hpp"
-#include "enemy_factories.hpp"
-#include "consumable_factories.hpp"
-#include "map_factories.hpp"
 
 #include <functional>
 #include <vector>
 
+#include "consumable_factories.hpp"
+#include "enemy_factories.hpp"
 #include "map_factories.hpp"
 
 /////////////////////////////////////////////////////////////////
@@ -134,7 +133,7 @@ static void addSharkmanTarget() {
   }
   Entity& b = registry.bosses.entities[0];
 
-  auto& tracking        = registry.trackPlayer.emplace(b);
+  auto& tracking = registry.trackPlayer.emplace(b);
   // *almost* never chase player, only target on "bounce"
   tracking.curr_cd      = SHARKMAN_TRACKING_CD;
   tracking.tracking_cd  = SHARKMAN_TRACKING_CD;
@@ -143,7 +142,8 @@ static void addSharkmanTarget() {
   printf("WATCH OUT WATCH OUT WATCH O-\n");
 }
 
-Entity createTutorial(RenderSystem* renderer, vec2 position, bool checkCollisions) {
+Entity createTutorial(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions) {
   vec2 canisterPos = {200, window_height_px - 250};
   createOxygenCanisterPos(renderer, canisterPos, checkCollisions);
 
@@ -155,7 +155,8 @@ Entity createTutorial(RenderSystem* renderer, vec2 position, bool checkCollision
   // Also, make it drop a boss key, which unlocks its room.
   Entity entity = createJellyPos(renderer, jellyPos, checkCollisions);
 
-  // If it spawned with a drop, get rid of it, otherwise it'll dupe the entity in the ECS.
+  // If it spawned with a drop, get rid of it, otherwise it'll dupe the entity
+  // in the ECS.
   if (registry.drops.has(entity)) {
     registry.drops.remove(entity);
   }
@@ -208,7 +209,7 @@ Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
   boss.ai    = std::vector<std::function<void()>>(
       {addCrabMelee, addCrabMelee, addCrabMelee, addCrabMelee, addCrabMelee,
           addCrabMelee, addCrabMelee, addCrabMelee, addCrabRanged, addCrabRanged,
-        addCrabBossWander});
+          addCrabBossWander});
 
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::KRAB_BOSS, EFFECT_ASSET_ID::ENEMY,
@@ -312,12 +313,14 @@ Entity createSharkmanPos(RenderSystem* renderer, vec2 position,
   return entity;
 }
 
-Entity createInitSharkmanPos(RenderSystem* renderer, vec2 position, bool checkCollisions) {
-  return createSharkmanPos(renderer, {window_width_px / 2, window_height_px / 2}, false);
+Entity createInitSharkmanPos(RenderSystem* renderer, vec2 position,
+                             bool checkCollisions) {
+  return createSharkmanPos(renderer,
+                           {window_width_px / 2, window_height_px / 2}, false);
 }
 
 /**
- * @brief Respawns a boss based on it's entity state
+ * @brief Respawns a boss based on its entity state
  *
  * @param renderer
  * @param es

@@ -78,6 +78,8 @@ class RenderSystem {
       textures_path("enemy/krab.png"),  // source: Vecteezy.com
       textures_path("enemy/urchin.png"),
       textures_path("enemy/urchin_needle.png"),
+      textures_path("enemy/seahorse.png"),
+      textures_path("enemy/seahorse_bullet.png"),
       textures_path("enemy/krab_boss.png"),  // source: Vecteezy.com
       textures_path("enemy/krab_boss_chase.png"),
       textures_path("enemy/sharkman/sharkman0.png"),

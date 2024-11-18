@@ -29,24 +29,17 @@ void depleteOxygen(Entity& entity) {
   if (registry.players.has(entity) && !registry.deathTimers.has(entity)) {
     registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_DEPLETE));
     if (registry.lowOxygen.has(entity_oxygen.oxygenBar)) {
-      registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_FAST_HEART));
+      registry.sounds.insert(Entity(),
+                             Sound(SOUND_ASSET_ID::PLAYER_FAST_HEART));
     } else {
-      registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_SLOW_HEART));
+      registry.sounds.insert(Entity(),
+                             Sound(SOUND_ASSET_ID::PLAYER_SLOW_HEART));
     }
   }
 }
 
 /**
  * @brief modifies oxygen from an oxygenModifier, registers death
- * @details tentative plan:
- *  - dash costs 30 per 1s
- *  - firing harpoon costs 25
- *  - various standard weapons cost 30-50
- *  - pistol shrimp costs 100
- *  - non-boss damage can cost anywhere between 20-100
- *  - boss damage can cost 100-500
- *  - geysers fill 100 per 1s
- *  - each oxygen tank fills 50 per 1s for up to 10s (500 max)
  *
  * @param entity
  * @param oxygenModifier - oxygenModifier's amount is (+) if refilling,
@@ -58,13 +51,12 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
       isModOnCooldown(oxygenModifier)) {
     return;
   }
-  // printf("Modifying oxygen\n");
+
   Oxygen& entity_oxygen = registry.oxygen.get(entity);
   float   oxyModAmount  = registry.oxygenModifiers.get(oxygenModifier).amount;
   float   deltaOxygen   = calcDeltaOxygen(entity_oxygen, oxyModAmount);
 
   if (!entity_oxygen.isRendered) {
-    // printf("Rendering Oxygen\n");
     renderHealthBar(entity_oxygen);
     entity_oxygen.isRendered = true;
   }
@@ -72,12 +64,12 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
   if (registry.lobsters.has(entity)) {
     Lobster& lobster = registry.lobsters.get(entity);
     if (lobster.block_timer > 0) {
-      // printf("LOBSTER BLOCKED DAMAGE\n");
       if (!registry.sounds.has(entity)) {
         registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::METAL_CRATE_HIT));
       }
       float block_mitigation = (1.0f - lobster.block_mitigation);
-      deltaOxygen = lobster.block_timer > 0 ? block_mitigation * deltaOxygen : deltaOxygen;
+      deltaOxygen = lobster.block_timer > 0 ? block_mitigation * deltaOxygen
+                                            : deltaOxygen;
     }
   }
 
@@ -90,13 +82,11 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
   if (registry.players.has(entity) &&
       !registry.playerWeapons.has(oxygenModifier) &&
       !registry.deathTimers.has(entity) && oxyModAmount <= 0 &&
-      !registry.players.get(entity).dashing &&
-      !registry.sounds.has(entity)) {
+      !registry.players.get(entity).dashing && !registry.sounds.has(entity)) {
     registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::PLAYER_HURT));
   }
 
-  if (registry.breakables.has(entity) &&
-      !registry.sounds.has(entity)) {
+  if (registry.breakables.has(entity) && !registry.sounds.has(entity)) {
     bool metal = false;
     if (registry.renderRequests.has(entity)) {
       RenderRequest& request = registry.renderRequests.get(entity);
@@ -104,7 +94,8 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
     }
     if (entity_oxygen.level <= 0) {
       if (metal) {
-        registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::METAL_CRATE_DEATH));
+        registry.sounds.insert(entity,
+                               Sound(SOUND_ASSET_ID::METAL_CRATE_DEATH));
       } else {
         registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::CRATE_DEATH));
       }
@@ -113,7 +104,7 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
         registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::METAL_CRATE_HIT));
       } else {
         registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::CRATE_DEATH));
-      }    
+      }
     }
   }
 }
@@ -123,7 +114,6 @@ void modifyOxygenAmount(Entity& entity, float amount) {
   float   deltaOxygen   = calcDeltaOxygen(entity_oxygen, amount);
 
   if (!entity_oxygen.isRendered) {
-    // printf("Rendering Oxygen\n");
     renderHealthBar(entity_oxygen);
     entity_oxygen.isRendered = true;
   }
@@ -139,10 +129,8 @@ void modifyOxygenAmount(Entity& entity, float amount) {
  * entity position
  */
 void updateEnemyHealthBarPos(Entity& enemy) {
-  Position& enemyPos = registry.positions.get(enemy);
-  Oxygen&   enemyOxygen =
-      registry.oxygen.get(enemy);  // TODO: ensure no unexpected behaviour once
-                                   // collision handling is fully implemented
+  Position& enemyPos    = registry.positions.get(enemy);
+  Oxygen&   enemyOxygen = registry.oxygen.get(enemy);
 
   Position& oxygenBarPos = registry.positions.get(enemyOxygen.oxygenBar);
   Position& backgroundBarPos =
@@ -300,10 +288,7 @@ void createDefaultHealthbar(RenderSystem* renderer, Entity& entity,
   // Setting initial positon values
   Position& position = registry.positions.emplace(oxygenBar);
   position.position =
-      entityPos.position -
-      vec2(0.f, entityPos.scale.y / 2 +
-                    ENEMY_O2_BAR_GAP);  // TODO: guesstimate on where the HP
-                                        // should be, update to proper position
+      entityPos.position - vec2(0.f, entityPos.scale.y / 2 + ENEMY_O2_BAR_GAP);
   position.angle         = 0.f;
   position.scale         = healthScale * bounding_box;
   position.originalScale = healthScale * bounding_box;
@@ -324,7 +309,6 @@ void createDefaultHealthbar(RenderSystem* renderer, Entity& entity,
 }
 
 void renderHealthBar(Oxygen& entity_oxygen) {
-  // TODO: change to proper texture
   registry.renderRequests.insert(
       entity_oxygen.oxygenBar,
       {TEXTURE_ASSET_ID::ENEMY_OXYGEN_BAR, EFFECT_ASSET_ID::TEXTURED,

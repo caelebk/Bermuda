@@ -16,7 +16,7 @@
  * 2. Add to SOUND_ASSET_ID + sound_names or MUSIC_ASSET_ID + music_names
  ********************************************/
 
-//order matters, filename
+// order matters, filename
 const std::array<std::string, sound_count> sound_names = {
 	"blast",
 	"glide",
@@ -40,7 +40,9 @@ const std::array<std::string, sound_count> sound_names = {
 	"crate_hit",
 	"metal_crate_death",
 	"metal_crate_hit",
-	"lobster_shield"
+	"lobster_shield",
+	"urchin",
+	"seahorse"
 };
 
 //order matters

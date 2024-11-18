@@ -10,7 +10,8 @@ enum class BossType {
 };
 
 enum class RangedEnemies {
-  URCHIN
+  URCHIN,
+  SEAHORSE
 };
 
 // anything that is deadly to the player

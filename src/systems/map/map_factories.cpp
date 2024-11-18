@@ -130,7 +130,7 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position,
   i.respawnFn     = respawnGeyser;
 
   // designate this as a geyser; facilitates room transitions.
-  Geyser& geyser = registry.geysers.emplace(entity);
+  Geyser& geyser      = registry.geysers.emplace(entity);
   geyser.bubble_timer = BUBBLE_INTERVAL;
 
   // Add stats
@@ -149,7 +149,7 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position,
 }
 
 /**
- * @brief Respawns a Geyser based on it's entity state
+ * @brief Respawns a Geyser based on its entity state
  *
  * @param renderer
  * @param es
@@ -333,5 +333,6 @@ Entity createSharkmanCratesPos(RenderSystem* renderer, vec2 position,
   createMetalCratePos(renderer, {window_width_px - 175, top_row}, false);
   createMetalCratePos(renderer, {window_width_px / 2 - 420, bottom_row}, false);
   createMetalCratePos(renderer, {window_width_px / 2 + 50, bottom_row}, false);
-  return createMetalCratePos(renderer, {window_width_px / 2 + 480, bottom_row}, false);
+  return createMetalCratePos(renderer, {window_width_px / 2 + 480, bottom_row},
+                             false);
 }

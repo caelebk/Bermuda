@@ -293,7 +293,7 @@ Entity createYellowKeyRespawnFn(RenderSystem *renderer, EntityState es) {
 }
 
 /**
- * @brief Respawns an oxygen canister based on it's entity state
+ * @brief Respawns an oxygen canister based on its entity state
  *
  * @param renderer 
  * @param es 
@@ -344,7 +344,7 @@ Entity createNetDropPos(RenderSystem* renderer, vec2 position,
 }
 
 /**
- * @brief Respawns a Geyser based on it's entity state
+ * @brief Respawns a Geyser based on its entity state
  *
  * @param renderer
  * @param es
@@ -396,7 +396,7 @@ Entity createConcussiveDropPos(RenderSystem* renderer, vec2 position,
 }
 
 /**
- * @brief Respawns a Geyser based on it's entity state
+ * @brief Respawns a Geyser based on its entity state
  *
  * @param renderer
  * @param es
@@ -447,7 +447,7 @@ Entity createTorpedoDropPos(RenderSystem* renderer, vec2 position,
 }
 
 /**
- * @brief Respawns a Geyser based on it's entity state
+ * @brief Respawns a Geyser based on its entity state
  *
  * @param renderer
  * @param es
@@ -460,7 +460,7 @@ Entity respawnTorpedoDrop(RenderSystem* renderer, EntityState es) {
 }
 
 /////////////////////////////////////////////////////////////////
-// Shrimp (To be added to Andy's enemy)
+// Shrimp
 /////////////////////////////////////////////////////////////////
 Entity createShrimpDropPos(RenderSystem* renderer, vec2 position,
                                bool checkCollisions) {
@@ -499,7 +499,7 @@ Entity createShrimpDropPos(RenderSystem* renderer, vec2 position,
 }
 
 /**
- * @brief Respawns a Geyser based on it's entity state
+ * @brief Respawns a Geyser based on its entity state
  *
  * @param renderer
  * @param es
