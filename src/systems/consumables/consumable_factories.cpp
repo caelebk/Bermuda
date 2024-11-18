@@ -1,4 +1,5 @@
 #include "consumable_factories.hpp"
+#include "map_factories.hpp"
 
 #include <iostream>
 
@@ -130,6 +131,16 @@ Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position, bool check
 // Unlock the boss room.
 /////////////////////////////////////////////////////////////////
 Entity unlockBossDoors(RenderSystem* renderer, vec2 position,
+                       bool checkCollisions) {
+  for (auto& door_connection : registry.doorConnections.components) {
+    door_connection.locked = false;
+  }
+  createGeyserPos(renderer, position, false);
+  return Entity(0);
+}
+
+// TODO: remove asap
+Entity unlockTutorial(RenderSystem* renderer, vec2 position,
                        bool checkCollisions) {
   for (auto& door_connection : registry.doorConnections.components) {
     door_connection.locked = false;

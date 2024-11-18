@@ -103,37 +103,65 @@ void clearDialogue();
 #define TUTORIAL_LINE2 "Hopefully HQ gets these transmissions eventually, there's no signal here."
 void tutorialRoomDialogue(RenderSystem* renderer);
 
+#define ENEMY_LINE1 "No signs of the crew or our submarine here."
+#define ENEMY_LINE2 NO_SECOND_LINE
+void enemyRoomDialogue(RenderSystem* renderer);
+
 #define SWITCH_DISABLED_LINE1 "Interesting... Groundbreaking even..."
 #define SWITCH_DISABLED_LINE2 "HQ, I can use weapons I have available on-hand, but not imaginary ones..."
 void weaponSwitchingDisabledDialogue(RenderSystem* renderer);
 
 #define MULTI_FIRE_LINE1 "It takes time to reload a gun underwater, around the time my last shot hits."
-#define MULTI_FIRE_LINE2 NO_SECOND_LINE             // TODO: #define MULTI_FIRE_LINE2 "On the other hand, if I have different guns already reloaded..."
+#define MULTI_FIRE_LINE2 "On the other hand, if I have different guns already reloaded..."
 void multiFireDialogue(RenderSystem* renderer);
+
+#define COLLECT_NET_LINE1 "These nets should stun an enemy for awhile."
+#define COLLECT_NET_LINE2 NO_SECOND_LINE
+void collectNetDialogue(RenderSystem* renderer);
+
+#define COLLECT_CONCUSSIVE_LINE1 "These concussives should push back several enemies for a moment."
+#define COLLECT_CONCUSSIVE_LINE2 NO_SECOND_LINE
+void collectConcussiveDialogue(RenderSystem* renderer);
+
+#define COLLECT_TORPEDO_LINE1 "These torpedoes should do damage in an area on impact."
+#define COLLECT_TORPEDO_LINE2 NO_SECOND_LINE
+void collectTorpedoDialogue(RenderSystem* renderer);
+
+#define COLLECT_SHRIMP_LINE1 "There is a lot of power packed in this pistol shrimp."
+#define COLLECT_SHRIMP_LINE2 "Using it should eviscerate almost anything in front of me."
+void collectShrimpDialogue(RenderSystem* renderer);
+
+#define OVER_COLLECT_LINE1 "I don't need that many... I can't carry that many..."
+#define OVER_COLLECT_LINE2 "I don't even know how I acquired that many..."
+void overCollectDialogue(RenderSystem* renderer);
 
 #define DARK_ROOM_LINE1 "It's dark in this part of the caves."
 #define DARK_ROOM_LINE2 "It will be difficult to see without lugging this light source around."
-void darkRoomDialogue(RenderSystem* renderer);      // TODO: call on enter dark room
+void darkRoomDialogue(RenderSystem* renderer);       // TODO: call on enter dark room
 
-#define KRAB_BOSS_LINE1 "That crab is !@#$%&* HUGE."
-#define KRAB_BOSS_LINE2 "Better not get backed into a corner."
-void krabBossDialogue(RenderSystem* renderer);      // TODO: call on enter boss room
+#define KRAB_BOSS_LINE1 "That is not the shadow from before, but those are pieces of our submarine."
+#define KRAB_BOSS_LINE2 "Better not get backed into a corner, this crab is !@#$%&* HUGE."
+void krabBossDialogue(RenderSystem* renderer); 
 
-#define SHARK_BOSS_LINE1 "That shark is !@#$%&* FAST."
+#define SHARK_BOSS_LINE1 "That shark is !@#$%&* FAST, and those limbs belong to some of the crew..."
 #define SHARK_BOSS_LINE2 "I wonder how hard it'll be for it to stop if it's charging straight at me..."
-void SharkmanBossDialogue(RenderSystem* renderer);  // TODO: call on enter boss room
+void SharkmanBossDialogue(RenderSystem* renderer); 
 
-#define KEY_LOCKED_LINE1 "This door appears to need a key"
-#define KEY_LOCKED_LINE2 NO_SECOND_LINE
-void keyLockedDialogue(RenderSystem* renderer);     // TODO: call on door collide
+#define KEY_LOCKED_LINE1 "This door isn't open."
+#define KEY_LOCKED_LINE2 "It appears I need to find a matching key."
+void keyLockedDialogue(RenderSystem* renderer);
 
 #define PLATE_LOCKED_LINE1 "This door isn't open."
 #define PLATE_LOCKED_LINE2 "Maybe the pressure plate I saw earlier will open the door."
-void plateLockedDialogue(RenderSystem* renderer);   // TODO: call on door collide
+void plateLockedDialogue(RenderSystem* renderer);    // TODO: call on door collide
 
-#define BOSS_LOCKED_LINE1 "This door isn't open"
-#define BOSS_LOCKED_LINE2 "I can't work on opening it while fighting this thing."
-void bossLockedDialogue(RenderSystem* renderer);    // TODO: call on door collide
+#define BOSS_LOCKED_LINE1 "This door isn't open."
+#define BOSS_LOCKED_LINE2 "Maybe I can squeeze through the bars, but not while fighting this thing."
+void bossLockedDialogue(RenderSystem* renderer);     // TODO: change dialogue when door render updates are implemented
+
+#define TUTORIAL_LOCKED_LINE1 "This door isn't open."
+#define TUTORIAL_LOCKED_LINE2 "Maybe I can squeeze through the bars, but first let me kill this jellyfish."
+void tutorialLockedDialogue(RenderSystem* renderer); // TODO: change dialogue when door render updates are implemented
 
 //////////////////////////////////////////////////////////////
 // Globals

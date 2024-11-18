@@ -94,7 +94,7 @@ Entity loadConcussive(RenderSystem* renderer);
 #define TORPEDO_SCALE_FACTOR vec2(0.07f)
 #define TORPEDO_BOUNDING_BOX vec2(420.f, 140.f)
 #define TORPEDO_RELATIVE_POS_FROM_GUN vec2(20.f, 0.f)
-#define TORPEDO_OXYGEN_COST -15.f
+#define TORPEDO_OXYGEN_COST -25.f
 #define TORPEDO_DAMAGE_RADIUS 150;
 
 Entity loadTorpedo(RenderSystem* renderer);
@@ -110,7 +110,7 @@ Entity loadTorpedo(RenderSystem* renderer);
 #define SHRIMP_SCALE_FACTOR vec2(0.10f)
 #define SHRIMP_BOUNDING_BOX vec2(242.f, 130.f)
 #define SHRIMP_RELATIVE_POS_FROM_GUN vec2(18.f, 0.f)
-#define SHRIMP_OXYGEN_COST -100.f
+#define SHRIMP_OXYGEN_COST -250.f
 #define SHRIMP_DAMAGE_RADIUS 300;
 #define SHRIMP_DAMAGE_ANGLE M_PI/2.f
 

@@ -438,7 +438,7 @@ void AISystem::do_track_player(float elapsed_ms) {
     if (!in_range_of_player(entity_pos, player_pos, range) ||
         !can_see_player(entity_pos, player_pos)) {
       if (tracker.active_track) {
-        printf("%d stopped tracking the player!\n", (unsigned int)e);
+        // printf("%d stopped tracking the player!\n", (unsigned int)e);
         createEmote(this->renderer, e, EMOTE::QUESTION);
       }
       tracker.active_track = false;
@@ -448,7 +448,7 @@ void AISystem::do_track_player(float elapsed_ms) {
       }
       continue;
     }
-    printf("%d is tracking the player!\n", (unsigned int)e);
+    // printf("%d is tracking the player!\n", (unsigned int)e);
     if (tracker.active_track) {
       createEmote(this->renderer, e, EMOTE::NONE);
     } else {
@@ -517,13 +517,13 @@ void AISystem::do_track_player_ranged(float elapsed_ms) {
     if (!in_range_of_player(entity_pos, player_pos, range) ||
         !can_see_player(entity_pos, player_pos)) {
       if (tracker.active_track) {
-        printf("%d stopped tracking the player!\n", (unsigned int)e);
+        // printf("%d stopped tracking the player!\n", (unsigned int)e);
         createEmote(this->renderer, e, EMOTE::QUESTION);
       }
       tracker.active_track = false;
       continue;
     }
-    printf("%d is tracking the player!\n", (unsigned int)e);
+    // printf("%d is tracking the player!\n", (unsigned int)e);
     if (tracker.active_track) {
       createEmote(this->renderer, e, EMOTE::NONE);
     } else {

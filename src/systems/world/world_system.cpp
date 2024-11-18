@@ -19,6 +19,7 @@
 #include "player_hud.hpp"
 #include "spawning.hpp"
 #include "tiny_ecs_registry.hpp"
+#include "world_state.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>
@@ -32,9 +33,9 @@
 // Game configuration
 /////////////////////////////////////////////////////////////
 
-#define FPS_UPDATE_INTERVAL 500 // update every half-second
+#define FPS_UPDATE_INTERVAL 500  // update every half-second
 static std::stringstream title_ss;
-static int               fps = 0;
+static int               fps       = 0;
 static float             fps_timer = 0;
 
 // create the underwater world
@@ -124,7 +125,7 @@ void WorldSystem::update_fps(float elapsed_ms_since_last_update) {
   if (fps_timer > 0.f) {
     return;
   }
-  fps_timer = FPS_UPDATE_INTERVAL;
+  fps_timer    = FPS_UPDATE_INTERVAL;
   int curr_fps = int(1000.f / elapsed_ms_since_last_update);
   if (curr_fps != fps) {
     title_ss.str("");
@@ -139,19 +140,23 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
   // Updating window title
   update_fps(elapsed_ms_since_last_update);
 
-   // Remove debug info from the last step
+  // Remove debug info from the last step
   while (registry.debugComponents.entities.size() > 0)
     registry.remove_all_components_of(registry.debugComponents.entities.back());
 
   assert(registry.screenStates.components.size() <= 1);
   ScreenState& screen = registry.screenStates.components[0];
 
-  if (!paused && !transitioning) {
+  bool is_frozen_state = is_intro || is_start || is_paused ||
+                         is_krab_cutscene || is_sharkman_cutscene || is_death ||
+                         is_end || room_transitioning;
+
+  if (!is_frozen_state) {
     ////////////////////////////////////////////////////////
     // Processing the player state
     ////////////////////////////////////////////////////////
-    if (registry.renderRequests.has(pause_menu)) {
-      registry.remove_all_components_of(pause_menu);
+    if (registry.renderRequests.has(overlay)) {
+      registry.remove_all_components_of(overlay);
     }
 
     for (Entity cursor : registry.cursors.entities) {
@@ -168,8 +173,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       if (timer.bubble_timer <= 0.f) {
         timer.bubble_timer = BUBBLE_INTERVAL;
         Position& pos      = registry.positions.get(entity);
-        createGeyserBubble(renderer,
-                           {pos.position.x + randomFloat(-10.f, 10.f), pos.position.y});
+        createGeyserBubble(renderer, {pos.position.x + randomFloat(-10.f, 10.f),
+                                      pos.position.y});
       }
     }
 
@@ -177,8 +182,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     for (Entity entity : registry.enemyProjectiles.entities) {
       EnemyProjectile& timer = registry.enemyProjectiles.get(entity);
       if (timer.has_timer) {
-        timer.timer -=
-            elapsed_ms_since_last_update;
+        timer.timer -= elapsed_ms_since_last_update;
         if (timer.timer < 0.f) {
           registry.remove_all_components_of(entity);
         }
@@ -207,12 +211,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         min_counter_ms = counter.counter_ms;
       }
 
-      // restart the game once the death timer expired
       if (counter.counter_ms < 0) {
         if (entity == player) {
+          // show death overlay
           registry.deathTimers.remove(entity);
-          screen.darken_screen_factor = 0;
-          restart_game();
+          overlay               = createOverlay(renderer);
+          is_death              = true;
+          overlay_transitioning = true;
           return true;
         } else if (registry.drops.has(entity) &&
                    registry.positions.has(entity)) {
@@ -232,32 +237,133 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
     check_bounds();
-  } else if (transitioning) {
-    if (screen.darken_screen_factor < 1.f &&
-        registry.roomTransitions.has(rt_entity)) {
-      screen.darken_screen_factor =
-          min(1.f, screen.darken_screen_factor +
-                       0.001f * elapsed_ms_since_last_update);
-    } else if (screen.darken_screen_factor >= 1.f &&
-               registry.roomTransitions.has(rt_entity)) {
-      RoomTransition& roomTransition = registry.roomTransitions.get(rt_entity);
-      level->enter_room(roomTransition.door_connection);
-      registry.remove_all_components_of(rt_entity);
-    } else if (screen.darken_screen_factor > 0.f &&
-               !registry.roomTransitions.has(rt_entity)) {
-      screen.darken_screen_factor =
-          max(0.f, screen.darken_screen_factor -
-                       0.001f * elapsed_ms_since_last_update);
-    } else if (screen.darken_screen_factor <= 0.f &&
-               !registry.roomTransitions.has(rt_entity)) {
-      transitioning = false;
+  } else if (is_start) {
+    overlayState(TEXTURE_ASSET_ID::START_OVERLAY);
+    // if intro triggered, darken the screen
+    if (is_intro) {
+      bool transition_complete =
+          darkenTransitionState(screen, elapsed_ms_since_last_update);
+      if (transition_complete) {
+        // remove start overlay when transition is complete
+        is_start = false;
+        // transition intro screen in
+        overlay_transitioning = true;
+      }
     }
+  } else if (is_intro) {
+    if (overlay_transitioning) {
+      bool brighten_complete =
+          brightenTransitionState(screen, elapsed_ms_since_last_update);
+      if (brighten_complete) {
+        overlay_transitioning = false;
+      }
+    } else {
+      // start timer after overlay transition complete
+      overlay_timer = min(OVERLAY_TIMER_DURATION,
+                          overlay_timer + elapsed_ms_since_last_update);
+      if (overlay_timer >= OVERLAY_TIMER_DURATION) {
+        bool transition_complete =
+            darkenTransitionState(screen, elapsed_ms_since_last_update);
+        if (transition_complete) {
+          is_intro      = false;
+          overlay_timer = 0.f;
+        }
+      }
+    }
+
+    if (registry.renderRequests.has(overlay)) {
+      registry.renderRequests.remove(overlay);
+    }
+    overlayState(TEXTURE_ASSET_ID::INTRO_OVERLAY);
+  } else if (is_krab_cutscene) {
+    if (!registry.positions.has(overlay)) {
+      overlay = createOverlay(renderer);
+    }
+
+    if (room_transitioning) {
+      roomTransitionState(renderer, screen, level,
+                          elapsed_ms_since_last_update);
+    } else {
+      // start the timer when transition completes
+      overlay_timer = min(OVERLAY_TIMER_DURATION,
+                          overlay_timer + elapsed_ms_since_last_update);
+      if (overlay_timer >= OVERLAY_TIMER_DURATION) {
+        bool transition_complete =
+            darkenTransitionState(screen, elapsed_ms_since_last_update);
+        if (transition_complete) {
+          is_krab_cutscene = false;
+          overlay_timer    = 0.f;
+        }
+      }
+    }
+
+    if (registry.renderRequests.has(overlay)) {
+      registry.renderRequests.remove(overlay);
+    }
+    overlayState(TEXTURE_ASSET_ID::KRAB_OVERLAY);
+  } else if (is_sharkman_cutscene) {
+    if (!registry.positions.has(overlay)) {
+      overlay = createOverlay(renderer);
+    }
+
+    if (room_transitioning) {
+      roomTransitionState(renderer, screen, level,
+                          elapsed_ms_since_last_update);
+    } else {
+      // start the timer when transition completes
+      overlay_timer = min(OVERLAY_TIMER_DURATION,
+                          overlay_timer + elapsed_ms_since_last_update);
+      if (overlay_timer >= OVERLAY_TIMER_DURATION) {
+        bool transition_complete =
+            darkenTransitionState(screen, elapsed_ms_since_last_update);
+        if (transition_complete) {
+          is_sharkman_cutscene = false;
+          overlay_timer        = 0.f;
+        }
+      }
+    }
+
+    if (registry.renderRequests.has(overlay)) {
+      registry.renderRequests.remove(overlay);
+    }
+    overlayState(TEXTURE_ASSET_ID::SHARKMAN_OVERLAY);
+  } else if (is_death) {
+    if (overlay_transitioning) {
+      bool brighten_complete =
+          brightenTransitionState(screen, elapsed_ms_since_last_update);
+      if (brighten_complete) {
+        overlay_transitioning = false;
+      }
+    }
+    if (registry.renderRequests.has(overlay)) {
+      registry.renderRequests.remove(overlay);
+    }
+    overlayState(TEXTURE_ASSET_ID::DEATH_OVERLAY);
+  } else if (is_end) {
+    if (!registry.positions.has(overlay)) {
+      overlay = createOverlay(renderer);
+    }
+
+    if (room_transitioning) {
+      roomTransitionState(renderer, screen, level,
+                          elapsed_ms_since_last_update);
+    }
+    // TODO: adjust when final boss implemented
+    // if (overlay_transitioning) {
+    //   bool brighten_complete =
+    //       brightenTransitionState(screen, elapsed_ms_since_last_update);
+    //   if (brighten_complete) {
+    //     overlay_transitioning = false;
+    //   }
+    // }
+    if (registry.renderRequests.has(overlay)) {
+      registry.renderRequests.remove(overlay);
+    }
+    overlayState(TEXTURE_ASSET_ID::END_OVERLAY);
+  } else if (room_transitioning) {
+    roomTransitionState(renderer, screen, level, elapsed_ms_since_last_update);
   } else {
-    if (!registry.renderRequests.has(pause_menu)) {
-      registry.renderRequests.insert(
-          pause_menu, {TEXTURE_ASSET_ID::PAUSE, EFFECT_ASSET_ID::TEXTURED,
-                       GEOMETRY_BUFFER_ID::SPRITE});
-    }
+    overlayState(TEXTURE_ASSET_ID::PAUSE_OVERLAY);
   }
 
   return true;
@@ -299,7 +405,7 @@ void WorldSystem::restart_game() {
   /////////////////////////////////////////////
   // Debugging
   /////////////////////////////////////////////
-  registry.list_all_components();
+  // registry.list_all_components();
   printf("Restarting\n");
 
   /////////////////////////////////////////////
@@ -309,14 +415,18 @@ void WorldSystem::restart_game() {
   // Debugging for memory/component leaks
   remove_all_entities();
 
-  registry.list_all_components();
+  // registry.list_all_components();
 
-  registry.remove_all_components_of(pause_menu);
-  pause_menu = createPauseMenu(renderer);
+  registry.remove_all_components_of(overlay);
+  overlay   = createOverlay(renderer);
+  is_death  = false;
+  is_end    = false;
+  is_paused = false;
 
   player = createPlayer(
-      renderer, {window_width_px / 2.f + 22.f,
-                 window_height_px / 2.f - 43.f});  // TODO: get player spawn position
+      renderer,
+      {window_width_px / 2.f + 22.f,
+       window_height_px / 2.f - 43.f});  // TODO: get player spawn position
   registry.inventory.emplace(player);
   createInventoryHud(renderer);
   createCommunicationHud(renderer);
@@ -352,8 +462,6 @@ void WorldSystem::restart_game() {
   // spawn at random places in the room
 
   level->activate_starting_room();
-
-  paused = false;
 }
 
 /**
@@ -376,28 +484,46 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   /////////////////////////////////////
   // Help / Pause
   /////////////////////////////////////
+  bool is_frozen_state = is_intro || is_start || is_paused ||
+                         is_krab_cutscene || is_sharkman_cutscene || is_death ||
+                         is_end || room_transitioning;
+  bool cannot_pause_state = is_intro || is_start || is_krab_cutscene ||
+                            is_sharkman_cutscene || is_death || is_end ||
+                            room_transitioning;
+  bool cannot_reset_state = is_intro || is_start || is_krab_cutscene ||
+                            is_sharkman_cutscene || room_transitioning;
+
+  // ESC to close game (unconditional quit)
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, GL_TRUE);
+  }
+
+  // Start Game
+  if (action == GLFW_RELEASE && key == GLFW_KEY_SPACE &&
+      !registry.deathTimers.has(player) && is_start) {
+    is_intro = true;
+  }
+
+  // Resetting game
+  if (action == GLFW_RELEASE && key == GLFW_KEY_R && !cannot_reset_state) {
+    int w, h;
+    glfwGetWindowSize(window, &w, &h);
+    krab_boss_encountered = false;
+    sharkman_encountered = false;
+    restart_game();
+  }
+
   // Toggling game pause
   if (action == GLFW_RELEASE && key == GLFW_KEY_P &&
-      !registry.deathTimers.has(player)) {
-    paused = !paused;
-    if (paused) {
+      !registry.deathTimers.has(player) && !cannot_pause_state) {
+    is_paused = !is_paused;
+    if (is_paused) {
       depleteOxygen(player);
-      pause_menu = createPauseMenu(renderer);
+      overlay = createOverlay(renderer);
     }
   }
 
-  if (!paused) {
-    /////////////////////////////////////
-    // Menu
-    /////////////////////////////////////
-    // Resetting game
-    if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-      int w, h;
-      glfwGetWindowSize(window, &w, &h);
-
-      restart_game();
-    }
-
+  if (!is_frozen_state) {
     /////////////////////////////////////
     // Debugging
     /////////////////////////////////////
@@ -410,11 +536,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
     // Handle weapon swapping
     handleWeaponSwapping(renderer, key);
-  }
-
-  // ESC to close game
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, GL_TRUE);
   }
 
   /////////////////////////////////////
@@ -431,7 +552,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  * @param mods
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
-  if (!paused && !registry.stunned.has(player)) {
+  bool is_frozen_state = is_intro || is_start || is_paused ||
+                         is_krab_cutscene || is_sharkman_cutscene || is_death ||
+                         is_end || room_transitioning;
+  if (!is_frozen_state && !registry.stunned.has(player)) {
     player_mouse(renderer, button, action, mods, harpoon, harpoon_gun);
   }
 }

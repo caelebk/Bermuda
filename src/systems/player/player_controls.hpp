@@ -25,8 +25,6 @@ void doWeaponSwap(Entity swapper_proj, Entity swapper_wep,
 
 bool destroyGunOrProjectile(Entity entity);
 
-Entity createPauseMenu(RenderSystem* renderer);
-
 extern Entity      player;
 extern Entity      player_weapon;
 extern Entity      player_projectile;

@@ -191,7 +191,7 @@ void RenderSystem::drawToScreen() {
   ScreenState& screen = registry.screenStates.get(screen_state_entity);
   glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
   GLuint is_paused_uloc = glGetUniformLocation(water_program, "is_paused");
-  glUniform1i(is_paused_uloc, paused);
+  glUniform1i(is_paused_uloc, is_paused);
   gl_has_errors();
   // Set the vertex position and vertex texture coordinates (both stored in the
   // same VBO)
@@ -392,14 +392,18 @@ void RenderSystem::draw() {
     if (registry.renderRequests.has(cursor))
       drawTexturedMesh(cursor, projection_2D);
   }
-  for (Entity pauseMenu : registry.pauseMenus.entities) {
-    if (registry.renderRequests.has(pauseMenu))
-      drawTexturedMesh(pauseMenu, projection_2D);
+  for (Entity overlay : registry.overlays.entities) {
+    if (registry.renderRequests.has(overlay))
+      drawTexturedMesh(overlay, projection_2D);
   }
   //////////////////////////////////////////////////////////////////////////////////////
 
   // Render Fonts
-  if (!paused) {
+  bool is_frozen_state = is_intro || is_start || is_paused ||
+                         is_krab_cutscene || is_sharkman_cutscene || is_death ||
+                         is_end || room_transitioning;
+  // will need separate case for death/end game freetype
+  if (!is_frozen_state) {
     for (Entity entity : registry.textRequests.entities) {
       if (!registry.positions.has(entity) || !registry.colors.has(entity))
         continue;

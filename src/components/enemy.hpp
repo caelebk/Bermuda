@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <vector>
+
 #include "render_system.hpp"
 #include "respawn.hpp"
 
@@ -25,12 +26,12 @@ struct EnemyProjectile {
 };
 
 struct Boss {
-  enum BossType type;
-  float curr_cd      = 0.f;
-  float ai_cd  = 0.f;
-  float max_proj_count;
-  float curr_proj_count = 0.f;
-  bool is_angry = false;
+  enum BossType                      type;
+  float                              curr_cd = 0.f;
+  float                              ai_cd   = 0.f;
+  float                              max_proj_count;
+  float                              curr_proj_count = 0.f;
+  bool                               is_angry        = false;
   std::vector<std::function<void()>> ai;
 };
 

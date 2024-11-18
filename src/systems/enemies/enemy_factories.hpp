@@ -22,8 +22,8 @@ bool checkEnemySpawnCollisions(struct Position enemyPos);
 #define JELLY_ATK_SPD 1000.0
 #define JELLY_STUN_MS 2000.0
 #define JELLY_SCALE_FACTOR vec2(0.15f)
-#define JELLY_BOUNDING_BOX vec2(266.f, 400.f)  // vec2(PNG_width, PNG_height)
-#define JELLY_HEALTH 50.0                      // two shot to show workin
+#define JELLY_BOUNDING_BOX vec2(266.f, 400.f)
+#define JELLY_HEALTH 50.0
 #define JELLY_HEALTH_SCALE vec2(1.4f)
 #define JELLY_HEALTH_BAR_SCALE vec2(1.5f)
 #define JELLY_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
@@ -41,7 +41,7 @@ Entity respawnJelly(RenderSystem* renderer, EntityState es);
 #define FISH_ATK_SPD 1000.0
 #define FISH_SCALE_FACTOR vec2(0.09f)
 #define FISH_BOUNDING_BOX vec2(512.f, 288.f)
-#define FISH_HEALTH 1.0  // one shot
+#define FISH_HEALTH 1.0
 #define FISH_MIN_DIR_CD 1000
 #define FISH_MAX_DIR_CD 8000
 #define FISH_HEALTH_SCALE vec2(1.4f)
@@ -62,7 +62,7 @@ Entity respawnFish(RenderSystem* renderer, EntityState es);
 #define SHARK_MIN_SCALE 0.1
 #define SHARK_MAX_SCALE 0.2
 #define SHARK_BOUNDING_BOX vec2(765.f, 306.f)
-#define SHARK_HEALTH 200.0  // four shot
+#define SHARK_HEALTH 75.0
 #define SHARK_MIN_DIR_CD 1000
 #define SHARK_MAX_DIR_CD 8000
 #define SHARK_TRACKING_CD 1000.f
@@ -96,7 +96,7 @@ Entity respawnShark(RenderSystem* renderer, EntityState es);
 #define KRAB_MIN_SCALE 0.01
 #define KRAB_MAX_SCALE 0.02
 #define KRAB_BOUNDING_BOX vec2(3445.f, 2494.f)
-#define KRAB_HEALTH 250.0  // three shot
+#define KRAB_HEALTH 125.0
 #define KRAB_MIN_DIR_CD 1000
 #define KRAB_MAX_DIR_CD 8000
 #define KRAB_TRACKING_CD 1000.f
@@ -115,11 +115,11 @@ Entity respawnKrab(RenderSystem* renderer, EntityState es);
 ///////////////////////////////////////////////////////////////
 // Sea Urchin
 ///////////////////////////////////////////////////////////////
-#define URCHIN_MS 175.0
+#define URCHIN_MS 50.0
 #define URCHIN_MIN_SCALE 0.4
 #define URCHIN_MAX_SCALE 0.5
 #define URCHIN_BOUNDING_BOX vec2(100.f, 100.f)
-#define URCHIN_HEALTH 100  // two shot
+#define URCHIN_HEALTH 50
 #define URCHIN_MIN_DIR_CD 1000
 #define URCHIN_MAX_DIR_CD 8000
 #define URCHIN_HEALTH_SCALE vec2(1.4f)
@@ -150,7 +150,7 @@ Entity launchUrchinNeedle(RenderSystem* renderer, vec2 position, float angle);
 #define SEAHORSE_MIN_SCALE 0.1
 #define SEAHORSE_MAX_SCALE 0.15
 #define SEAHORSE_BOUNDING_BOX vec2(255.f, 384.f)
-#define SEAHORSE_HEALTH 100
+#define SEAHORSE_HEALTH 50
 #define SEAHORSE_MIN_DIR_CD 3000
 #define SEAHORSE_MAX_DIR_CD 6000
 #define SEAHORSE_HEALTH_SCALE vec2(1.4f)
@@ -184,7 +184,7 @@ Entity fireSeahorseBullet(RenderSystem* renderer, vec2 position,
 #define LOBSTER_ATK_SPD 1000.0
 #define LOBSTER_SCALE 0.2f
 #define LOBSTER_BOUNDING_BOX vec2(595.f, 290.f)
-#define LOBSTER_HEALTH 500.0  // six shot
+#define LOBSTER_HEALTH 100.0
 #define LOBSTER_MIN_DIR_CD 1000
 #define LOBSTER_MAX_DIR_CD 8000
 #define LOBSTER_TRACKING_CD 1000.f

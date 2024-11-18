@@ -19,4 +19,15 @@ struct Emoting {
   Entity child;
 };
 
-struct PauseMenu {};
+struct Overlay {};
+
+// Enum for overlay types
+enum class OVERLAY {
+  INTRO    = 0,
+  START    = INTRO + 1,
+  PAUSE    = START + 1,
+  KRAB     = PAUSE + 1,
+  SHARKMAN = KRAB + 1,
+  DEATH    = SHARKMAN + 1,
+  END      = DEATH + 1,
+};

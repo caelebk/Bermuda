@@ -8,8 +8,9 @@
 //////////////////////////////////////////////////////////////
 // Oxygen_Canister
 //////////////////////////////////////////////////////////////
-#define OXYGEN_CANISTER_QTY 100.0  // heals
+#define OXYGEN_CANISTER_QTY 200.0  // heals
 #define OXYGEN_CANISTER_SCALE_FACTOR vec2(0.2f)
+#define OXYGEN_CANISTER_BOUNDING_BOX vec2(240.f, 112.f)
 #define OXYGEN_CANISTER_BOUNDING_BOX vec2(240.f, 112.f)
 
 Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position,
@@ -65,6 +66,9 @@ Entity respawnShrimpDrop(RenderSystem* renderer, EntityState es);
 // in a boss room.
 Entity unlockBossDoors(RenderSystem* renderer, vec2 position,
                        bool checkCollisions = true);
+
+Entity unlockTutorial(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions = true);
 
 Entity createRedKeyPos(RenderSystem* renderer, vec2 position,
                        bool checkCollisions = true);

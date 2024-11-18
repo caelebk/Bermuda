@@ -18,9 +18,6 @@ class LevelSystem {
 private:
     RenderSystem* renderer;
 
-    LevelBuilder* level;
-    std::string current_room_editor_id;
-
     void set_current_room_editor_id(std::string room_editor_id);
 
     void spawn_miniboss();
@@ -38,6 +35,10 @@ private:
     void move_player_to_door(Direction direction, Entity& door);
 public:
     LevelSystem();
+    
+    LevelBuilder* level;
+
+    std::string current_room_editor_id;
 
     void init(RenderSystem* renderer, LevelBuilder* level);
     

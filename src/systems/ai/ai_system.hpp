@@ -34,4 +34,3 @@ bool any_tracking(std::vector<Entity> entities);
 void choose_new_direction(Entity enemy, Entity other);
 bool can_see_player(Position &pos, Position &player_pos);
 void removeFromAI(Entity& e);
-void addSharkmanWander();

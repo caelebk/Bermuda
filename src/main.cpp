@@ -15,9 +15,17 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
-bool   paused;
-Entity pause_menu;
-bool   transitioning = false;
+bool   krab_boss_encountered = false;
+bool   sharkman_encountered  = false;
+bool   is_intro              = false;
+bool   is_start              = false;
+bool   is_paused             = false;
+bool   is_krab_cutscene      = false;
+bool   is_sharkman_cutscene  = false;
+bool   is_death              = false;
+bool   is_end                = false;
+Entity overlay;
+bool   room_transitioning = false;
 Entity rt_entity;
 
 Entity player;
@@ -70,7 +78,7 @@ int main() {
   audios.init();
   ai.init(&renderer);
 
-  paused = true;
+  is_start = true;
 
   // variable timestep loop
   auto t = Clock::now();
@@ -87,7 +95,10 @@ int main() {
     t = now;
 
     world.step(elapsed_ms);
-    if (!paused && !transitioning) {
+    bool is_frozen_state = is_intro || is_start || is_paused ||
+                           is_krab_cutscene || is_sharkman_cutscene ||
+                           is_death || is_end || room_transitioning;
+    if (!is_frozen_state) {
       // Note: WorldSystem::step runs simply to update FPS counter, but is
       // mostly disabled
       ai.step(elapsed_ms);

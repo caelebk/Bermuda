@@ -107,8 +107,14 @@ const int music_count = (int)MUSIC_ASSET_ID::MUSIC_COUNT;
  */
 
 enum class TEXTURE_ASSET_ID {
-  PAUSE                = 0,
-  HARPOON_COUNTER      = PAUSE + 1,
+  INTRO_OVERLAY        = 0,
+  START_OVERLAY        = INTRO_OVERLAY + 1,
+  PAUSE_OVERLAY        = START_OVERLAY + 1,
+  KRAB_OVERLAY         = PAUSE_OVERLAY + 1,
+  SHARKMAN_OVERLAY     = KRAB_OVERLAY + 1,
+  DEATH_OVERLAY        = SHARKMAN_OVERLAY + 1,
+  END_OVERLAY          = DEATH_OVERLAY + 1,
+  HARPOON_COUNTER      = END_OVERLAY + 1,
   INVENTORY            = HARPOON_COUNTER + 1,
   COMMUNUCATIONS       = INVENTORY + 1,
   CURSOR               = COMMUNUCATIONS + 1,

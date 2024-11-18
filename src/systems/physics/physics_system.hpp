@@ -52,7 +52,7 @@ class PhysicsSystem {
   PhysicsSystem() {}
 };
 
-extern bool   paused;
+extern bool   is_paused;
 extern Entity player;
 
 Entity createGeyserBubble(RenderSystem* renderer, vec2 pos);

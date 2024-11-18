@@ -1,11 +1,12 @@
 #include "collision_system.hpp"
 
+#include <consumable_utils.hpp>
 #include <cstdio>
 #include <damage.hpp>
 #include <glm/geometric.hpp>
+#include <physics_system.hpp>
 #include <player_controls.hpp>
 #include <player_factories.hpp>
-#include <physics_system.hpp>
 #include <player_hud.hpp>
 
 #include "ai.hpp"
@@ -14,11 +15,10 @@
 #include "oxygen.hpp"
 #include "player.hpp"
 #include "tiny_ecs_registry.hpp"
-#include <consumable_utils.hpp>
 
 void CollisionSystem::init(RenderSystem* renderer, LevelSystem* level) {
   this->renderer = renderer;
-  this->level = level;
+  this->level    = level;
 }
 
 bool CollisionSystem::checkBoxCollision(Entity entity_i, Entity entity_j) {
@@ -35,7 +35,8 @@ bool CollisionSystem::checkBoxCollision(Entity entity_i, Entity entity_j) {
   return false;
 }
 
-bool CollisionSystem::checkPlayerMeshCollision(Entity entity_i, Entity entity_j, Entity collisionMesh) {
+bool CollisionSystem::checkPlayerMeshCollision(Entity entity_i, Entity entity_j,
+                                               Entity collisionMesh) {
   if (!registry.positions.has(entity_i) || !registry.positions.has(entity_j)) {
     return false;
   }
@@ -56,7 +57,7 @@ bool CollisionSystem::checkCircleCollision(Entity entity_i, Entity entity_j) {
     return false;
   }
   Position& position_i = registry.positions.get(entity_i);
-  Position& position_j = registry.positions.get(entity_j); 
+  Position& position_j = registry.positions.get(entity_j);
   if (circle_collides(position_i, position_j)) {
     registry.collisions.emplace_with_duplicates(entity_i, entity_j);
     registry.collisions.emplace_with_duplicates(entity_j, entity_i);
@@ -74,7 +75,6 @@ void CollisionSystem::step(float elapsed_ms) {
 Collision Detection (has precedence noted below)
 ************************************/
 void CollisionSystem::collision_detection() {
-
   // 1. Detect player projectile collisions
   detectPlayerProjectileCollisions();
 
@@ -91,12 +91,12 @@ void CollisionSystem::collision_detection() {
 void CollisionSystem::detectPlayerProjectileCollisions() {
   ComponentContainer<PlayerProjectile>& playerproj_container =
       registry.playerProjectiles;
-  ComponentContainer<Deadly>&       enemy_container      = registry.deadlys;
-  ComponentContainer<ActiveWall>&   wall_container       = registry.activeWalls;
+  ComponentContainer<Deadly>&     enemy_container = registry.deadlys;
+  ComponentContainer<ActiveWall>& wall_container  = registry.activeWalls;
 
   for (uint i = 0; i < playerproj_container.components.size(); i++) {
     Entity entity_i = playerproj_container.entities[i];
-    if (!registry.positions.has(entity_i) || 
+    if (!registry.positions.has(entity_i) ||
         registry.playerProjectiles.get(entity_i).is_loaded) {
       continue;
     }
@@ -110,13 +110,13 @@ void CollisionSystem::detectPlayerProjectileCollisions() {
     // detect player projectile and enemy collisions
     for (uint j = 0; j < enemy_container.size(); j++) {
       Entity entity_j = enemy_container.entities[j];
-      bool collided = checkCircleCollision(entity_i, entity_j);
-      //if the projectile is single target and collided, don't check for anymore enemies.
+      bool   collided = checkCircleCollision(entity_i, entity_j);
+      // if the projectile is single target and collided, don't check for
+      // anymore enemies.
       PlayerProjectile& playerproj_comp = playerproj_container.components[i];
-      if (collided &&
-          (playerproj_comp.type == PROJECTILES::HARPOON ||
-           playerproj_comp.type == PROJECTILES::NET ||
-           playerproj_comp.type == PROJECTILES::TORPEDO)) {
+      if (collided && (playerproj_comp.type == PROJECTILES::HARPOON ||
+                       playerproj_comp.type == PROJECTILES::NET ||
+                       playerproj_comp.type == PROJECTILES::TORPEDO)) {
         break;
       }
     }
@@ -124,21 +124,21 @@ void CollisionSystem::detectPlayerProjectileCollisions() {
 }
 
 void CollisionSystem::detectPlayerCollisions() {
-  ComponentContainer<Player>&       player_container = registry.players;
-  ComponentContainer<Deadly>&       enemy_container      = registry.deadlys;
-  ComponentContainer<EnemyProjectile>   enemy_proj_container =
+  ComponentContainer<Player>&         player_container = registry.players;
+  ComponentContainer<Deadly>&         enemy_container  = registry.deadlys;
+  ComponentContainer<EnemyProjectile> enemy_proj_container =
       registry.enemyProjectiles;
-  ComponentContainer<Item>&   item_container = registry.items;    
+  ComponentContainer<Item>&         item_container       = registry.items;
   ComponentContainer<Consumable>&   consumable_container = registry.consumables;
   ComponentContainer<Interactable>& interactable_container =
       registry.interactable;
-      
+
   for (uint i = 0; i < player_container.components.size(); i++) {
     Entity entity_i = player_container.entities[i];
     if (!registry.positions.has(entity_i)) {
       continue;
     }
-    Player    player_comp = registry.players.get(entity_i);
+    Player player_comp = registry.players.get(entity_i);
 
     // detect player and enemy collisions
     for (uint j = 0; j < enemy_container.size(); j++) {
@@ -182,13 +182,12 @@ void CollisionSystem::detectPlayerCollisions() {
   }
 }
 
-
 void CollisionSystem::detectWallCollisions() {
-  ComponentContainer<Mass>&         mass_container       = registry.masses;
-  ComponentContainer<Deadly>&       enemy_container      = registry.deadlys;
+  ComponentContainer<Mass>&           mass_container  = registry.masses;
+  ComponentContainer<Deadly>&         enemy_container = registry.deadlys;
   ComponentContainer<EnemyProjectile> enemy_proj_container =
       registry.enemyProjectiles;
-  ComponentContainer<ActiveWall>&   wall_container       = registry.activeWalls;  
+  ComponentContainer<ActiveWall>& wall_container = registry.activeWalls;
 
   for (uint i = 0; i < wall_container.components.size(); i++) {
     Entity entity_i = wall_container.entities[i];
@@ -212,7 +211,7 @@ void CollisionSystem::detectWallCollisions() {
         continue;
       }
       if (registry.players.has(entity_j)) {
-        Player&   player_comp = registry.players.get(entity_j);
+        Player& player_comp = registry.players.get(entity_j);
         checkPlayerMeshCollision(entity_j, entity_i, player_comp.collisionMesh);
       } else {
         checkBoxCollision(entity_i, entity_j);
@@ -222,9 +221,9 @@ void CollisionSystem::detectWallCollisions() {
 }
 
 void CollisionSystem::detectDoorCollisions() {
-  ComponentContainer<ActiveDoor>&   door_container       = registry.activeDoors;
-  ComponentContainer<Deadly>&       enemy_container      = registry.deadlys;
-  ComponentContainer<Player>&           player_container = registry.players;
+  ComponentContainer<ActiveDoor>& door_container   = registry.activeDoors;
+  ComponentContainer<Deadly>&     enemy_container  = registry.deadlys;
+  ComponentContainer<Player>&     player_container = registry.players;
 
   for (uint i = 0; i < door_container.components.size(); i++) {
     Entity entity_i = door_container.entities[i];
@@ -235,8 +234,8 @@ void CollisionSystem::detectDoorCollisions() {
     }
 
     for (uint j = 0; j < player_container.size(); j++) {
-      Entity entity_j = player_container.entities[j];
-      Player&   player_comp = registry.players.get(entity_j);
+      Entity  entity_j    = player_container.entities[j];
+      Player& player_comp = registry.players.get(entity_j);
       checkPlayerMeshCollision(entity_j, entity_i, player_comp.collisionMesh);
     }
   }
@@ -340,7 +339,7 @@ void CollisionSystem::routeEnemyCollisions(Entity enemy, Entity other) {
   }
   if (registry.playerProjectiles.has(other)) {
     routed = true;
-    resolveEnemyPlayerProjCollision(enemy, other);
+    // resolveEnemyPlayerProjCollision(enemy, other);
   }
   if (registry.activeWalls.has(other)) {
     resolveWallEnemyCollision(other, enemy);
@@ -378,9 +377,9 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
   if (registry.playerProjectiles.has(other)) {
     resolveWallPlayerProjCollision(wall, other);
 
-    if (registry.breakables.has(wall)) {
-      resolveBreakablePlayerProjCollision(wall, other);
-    }
+    // if (registry.breakables.has(wall)) {
+    //   resolveBreakablePlayerProjCollision(wall, other);
+    // }
   }
   if (registry.enemyProjectiles.has(other)) {
     if (registry.breakables.has(wall)) {
@@ -419,7 +418,7 @@ void CollisionSystem::routePlayerProjCollisions(Entity player_proj,
     resolveWallPlayerProjCollision(other, player_proj);
   }
   if (registry.breakables.has(other)) {
-    modifyOxygen(other, player_proj);
+    resolveBreakablePlayerProjCollision(other, player_proj);
   }
 
   PlayerProjectile& player_proj_component =
@@ -439,7 +438,7 @@ void CollisionSystem::routePlayerProjCollisions(Entity player_proj,
 void CollisionSystem::routeItemCollisions(Entity item, Entity other) {
   if (registry.players.has(other)) {
     resolvePlayerItemCollision(other, item);
-  } 
+  }
 }
 
 void CollisionSystem::routeConsumableCollisions(Entity consumable,
@@ -476,18 +475,21 @@ void CollisionSystem::resolvePlayerItemCollision(Entity player, Entity item) {
 
   // will add a key if this is in fact one
   if (registry.items.has(item)) {
-    Item& i = registry.items.get(item);
+    Item&     i     = registry.items.get(item);
     INVENTORY color = i.item;
 
-    // We need to route this somewhere because the collect functions take a renderer and this class doesn't have one.
-    // Probably doesn't belong in LevelSystem, but it's 2:06 am.
+    // We need to route this somewhere because the collect functions take a
+    // renderer and this class doesn't have one. Probably doesn't belong in
+    // LevelSystem, but it's 2:06 am.
     level->collect_key(color);
   }
   registry.remove_all_components_of(item);
 }
 
-void CollisionSystem::resolvePlayerEnemyProjCollision(Entity player, Entity enemy_proj) {
-  // For now it's almost equal to the above, but make a new function just to open it to changes
+void CollisionSystem::resolvePlayerEnemyProjCollision(Entity player,
+                                                      Entity enemy_proj) {
+  // For now it's almost equal to the above, but make a new function just to
+  // open it to changes
   handle_debuffs(player, enemy_proj);
   addDamageIndicatorTimer(player);
   modifyOxygen(player, enemy_proj);
@@ -553,7 +555,21 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
     tracks.active_track  = true;
   }
 
-  if (playerproj_comp.type != PROJECTILES::CONCUSSIVE && playerproj_comp.type != PROJECTILES::SHRIMP) {
+  if (registry.bosses.has(enemy)) {
+    Boss& boss = registry.bosses.get(enemy);
+    // if sharkman hit, instantly charge at player
+    if (boss.type == BossType::SHARKMAN) {
+      if (!registry.trackPlayer.has(enemy)) {
+        boss.curr_cd = SHARKMAN_AI_CD;
+        removeFromAI(enemy);
+        addSharkmanTarget();
+      }
+      choose_new_direction(enemy, player_proj);
+    }
+  }
+
+  if (playerproj_comp.type != PROJECTILES::CONCUSSIVE &&
+      playerproj_comp.type != PROJECTILES::SHRIMP) {
     playerproj_motion.velocity = vec2(0.0f, 0.0f);
     playerproj_comp.is_loaded  = true;
   }
@@ -576,7 +592,7 @@ void CollisionSystem::resolveBreakablePlayerProjCollision(Entity breakable,
 }
 
 void CollisionSystem::resolveBreakableEnemyProjCollision(Entity breakable,
-                                                          Entity enemy_proj) {
+                                                         Entity enemy_proj) {
   if (!registry.motions.has(enemy_proj)) {
     return;
   }
@@ -586,8 +602,9 @@ void CollisionSystem::resolveBreakableEnemyProjCollision(Entity breakable,
   registry.remove_all_components_of(enemy_proj);
 }
 
-//hit_entity is the entity that got hit
-void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity hit_entity) {
+// hit_entity is the entity that got hit
+void CollisionSystem::detectAndResolveExplosion(Entity proj,
+                                                Entity hit_entity) {
   if (!registry.sounds.has(proj)) {
     registry.sounds.insert(proj, Sound(SOUND_ASSET_ID::EXPLOSION));
   }
@@ -622,7 +639,8 @@ void CollisionSystem::detectAndResolveExplosion(Entity proj, Entity hit_entity) 
   }
 }
 
-void CollisionSystem::detectAndResolveConeAOE(Entity proj, Entity enemy, float angle) {
+void CollisionSystem::detectAndResolveConeAOE(Entity proj, Entity enemy,
+                                              float angle) {
   for (Entity enemy_check : registry.deadlys.entities) {
     if (enemy_check == enemy || !registry.positions.has(enemy)) {
       continue;
@@ -631,8 +649,8 @@ void CollisionSystem::detectAndResolveConeAOE(Entity proj, Entity enemy, float a
     AreaOfEffect& playerproj_aoe      = registry.aoe.get(proj);
     Position&     enemy_position      = registry.positions.get(enemy_check);
 
-    float circle_angle   = playerproj_position.angle;
-    vec2  pos_diff       = playerproj_position.position - enemy_position.position;
+    float circle_angle = playerproj_position.angle;
+    vec2  pos_diff     = playerproj_position.position - enemy_position.position;
     float proj_ent_angle = atan2(pos_diff.y, pos_diff.x);
     if (registry.playerProjectiles.get(proj).is_flipped) {
       circle_angle -= M_PI;
@@ -648,7 +666,6 @@ void CollisionSystem::detectAndResolveConeAOE(Entity proj, Entity enemy, float a
         fmod((circle_angle - proj_ent_angle + 3 * M_PI), 2 * M_PI);
 
     float is_inbetween = abs(anglediff) <= angle;
-
 
     /*proj_ent_angle = std::fmod(2.f * M_PI + proj_ent_angle, 2.f * M_PI);
     float min      = std::fmod(20.f * M_PI + circle_angle - angle, 2.f * M_PI);
@@ -666,7 +683,8 @@ void CollisionSystem::detectAndResolveConeAOE(Entity proj, Entity enemy, float a
     }*/
 
     if (circle_box_collides(playerproj_position, playerproj_aoe.radius,
-                            enemy_position) && is_inbetween) {
+                            enemy_position) &&
+        is_inbetween) {
       modifyOxygen(enemy_check, proj);
       addDamageIndicatorTimer(enemy_check);
     }
@@ -684,7 +702,7 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
       registry.playerProjectiles.get(player_proj);
   Inventory& inventory = registry.inventory.get(player);
 
-  bool check_wep_swap = player_projectile != player_proj;
+  bool check_wep_swap      = player_projectile != player_proj;
   proj_motion.velocity     = vec2(0.f);
   proj_component.is_loaded = true;
   if (proj_component.type == PROJECTILES::SHRIMP) {
@@ -713,7 +731,7 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
 }
 
 void CollisionSystem::resolveWallEnemyProjCollision(Entity wall,
-  Entity enemy_proj) {
+                                                    Entity enemy_proj) {
   registry.remove_all_components_of(enemy_proj);
 }
 
@@ -891,17 +909,31 @@ void CollisionSystem::resolveMassCollision(Entity wall, Entity other) {
 void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
   // If the door is locked, ignore it.
   if (registry.doorConnections.has(door)) {
-    if (registry.doorConnections.get(door).locked) {
+    DoorConnection& doorConnection = registry.doorConnections.get(door);
+    DoorConnection& otherDoorConnection =
+        registry.doorConnections.get(doorConnection.exit_door);
+    bool is_boss_room = otherDoorConnection.room_id == "5" ||
+                        otherDoorConnection.room_id == "10" ||
+                        otherDoorConnection.room_id == "15";
+
+    if (doorConnection.locked && is_boss_room) {
+      bossLockedDialogue(renderer);
+      return;
+    } else if (doorConnection.locked && otherDoorConnection.room_id == "0") {
+      tutorialLockedDialogue(renderer);
+      return;
+    } else if (doorConnection.locked) {
+      keyLockedDialogue(renderer);
       return;
     }
   }
 
   DoorConnection& door_connection = registry.doorConnections.get(door);
-  rt_entity                      = Entity();
-  RoomTransition& roomTransition = registry.roomTransitions.emplace(rt_entity);
+  rt_entity                       = Entity();
+  RoomTransition& roomTransition  = registry.roomTransitions.emplace(rt_entity);
   roomTransition.door_connection  = door_connection;
 
-  transitioning = true;
+  room_transitioning = true;
 
   registry.sounds.insert(rt_entity, Sound(SOUND_ASSET_ID::DOOR));
 

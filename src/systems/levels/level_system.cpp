@@ -49,7 +49,7 @@ void LevelSystem::spawn_miniboss() {
 
 void LevelSystem::spawn() {
   RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
-  std::cout << "Has entered: " << current_room.has_entered << std::endl;
+  // std::cout << "Has entered: " << current_room.has_entered << std::endl;
 
   if (current_room.has_entered) {
     // Retrieve all the saved entities and respawn them as they were
@@ -62,12 +62,16 @@ void LevelSystem::spawn() {
     if (current_room.is_boss_room) {
       current_room.has_entered = true;
       spawn_miniboss();
+      for (const auto& fixed_spawn_function_group : current_room.room_fixed_spawn_function_groups) {
+        std::cout << "Should have spawned key" << std::endl;
+        execute_config_rand(fixed_spawn_function_group, current_room, renderer);
+      }
     } else {
       current_room.has_entered = true;
       // It's the first time in this room, spawn for the first time.
       for (const auto& spawn_function_group : current_room.room_pack_spawn_function_groups) {
         for (const auto& spawn_function : spawn_function_group) {
-          execute_pack_spawning(spawn_function, current_room, renderer, 5);
+          execute_pack_spawning(spawn_function, current_room, renderer, 8);
         }
       }
       for (const auto& spawn_function_group : current_room.room_spawn_function_groups) {
@@ -198,7 +202,7 @@ void LevelSystem::activate_floor() {
                 GEOMETRY_BUFFER_ID::SPRITE});
   } else {
     // TODO: Temporary place for tutorial dialogue call
-    clearDialogue();
+    enemyRoomDialogue(renderer);
     registry.renderRequests.insert(
         floor, {TEXTURE_ASSET_ID::FLOOR, EFFECT_ASSET_ID::TEXTURED,
                 GEOMETRY_BUFFER_ID::SPRITE});
@@ -349,7 +353,7 @@ void LevelSystem::enter_room(DoorConnection& door_connection) {
   move_player_to_door(direction, exit_door);
   activate_current_room();
 
-  std::cout << "Player entered room: " << current_room_editor_id << std::endl;
+  // std::cout << "Player entered room: " << current_room_editor_id << std::endl;
 }
 
 void LevelSystem::activate_starting_room() {

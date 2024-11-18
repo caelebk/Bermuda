@@ -36,14 +36,14 @@ void createEmote(RenderSystem* renderer, Entity& e, EMOTE emote) {
     Emoting& temp = registry.emoting.get(e);
     registry.remove_all_components_of(temp.child);
     registry.emoting.remove(e);
-    printf("Removing Emote!\n");
+    // printf("Removing Emote!\n");
   }
 
   if (emote == EMOTE::NONE) {
     return;
   }
 
-  printf("Creating Emote!\n");
+  // printf("Creating Emote!\n");
 
   Position&        entityPos  = registry.positions.get(e);
   Emoting&         curr_emote = registry.emoting.emplace(e);

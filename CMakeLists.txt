@@ -73,6 +73,8 @@ file(
   src/systems/texts/*.hpp  
   src/systems/world/*.cpp
   src/systems/world/*.hpp
+  src/systems/world_state/*.cpp
+  src/systems/world_state/*.hpp
   src/util/*.cpp
   src/util/*.hpp
   src/components/*.cpp
@@ -110,6 +112,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE src/systems/audio)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/rendering)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/texts)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/world)
+target_include_directories(${PROJECT_NAME} PRIVATE src/systems/world_state)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/entities)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/consumables)
 target_include_directories(${PROJECT_NAME} PRIVATE src/util)

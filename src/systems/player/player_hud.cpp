@@ -9,6 +9,7 @@
 //////////////////////////////////////////////////////////////
 // Inventory
 //////////////////////////////////////////////////////////////
+
 /********************************************************************************
  * @brief creates the inventory part of the player HUD
  *
@@ -415,6 +416,10 @@ void tutorialRoomDialogue(RenderSystem* renderer) {
   createDialogue(renderer, TUTORIAL_LINE1, TUTORIAL_LINE2);
 }
 
+void enemyRoomDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, ENEMY_LINE1, ENEMY_LINE2);
+}
+
 void weaponSwitchingDisabledDialogue(RenderSystem* renderer) {
   createDialogue(renderer, SWITCH_DISABLED_LINE1, SWITCH_DISABLED_LINE2);
 }
@@ -443,4 +448,28 @@ void plateLockedDialogue(RenderSystem* renderer) {
 }
 void bossLockedDialogue(RenderSystem* renderer) {
   createDialogue(renderer, BOSS_LOCKED_LINE1, BOSS_LOCKED_LINE2);
+}
+
+void tutorialLockedDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, TUTORIAL_LOCKED_LINE1, TUTORIAL_LOCKED_LINE2);
+}
+
+void collectNetDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, COLLECT_NET_LINE1, COLLECT_NET_LINE2);
+}
+
+void collectConcussiveDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, COLLECT_CONCUSSIVE_LINE1, COLLECT_CONCUSSIVE_LINE2);
+}
+
+void collectTorpedoDialogue(RenderSystem* renderer) { 
+  createDialogue(renderer, COLLECT_TORPEDO_LINE1, COLLECT_TORPEDO_LINE2);
+}
+
+void collectShrimpDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, COLLECT_SHRIMP_LINE1, COLLECT_SHRIMP_LINE2);
+}
+
+void overCollectDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, OVER_COLLECT_LINE1, OVER_COLLECT_LINE2);
 }

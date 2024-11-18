@@ -103,7 +103,7 @@ class ECSRegistry {
   ComponentContainer<DebugComponent> debugComponents;
   ComponentContainer<Emoting>        emoting;
   ComponentContainer<GameCursor>     cursors;
-  ComponentContainer<PauseMenu>      pauseMenus;
+  ComponentContainer<Overlay>        overlays;
   ComponentContainer<RoomTransition> roomTransitions;
 
   // constructor that adds all containers for looping over them
@@ -179,7 +179,7 @@ class ECSRegistry {
     registry_list.push_back(&consumables);
     registry_list.push_back(&items);
     registry_list.push_back(&emoting);
-    registry_list.push_back(&pauseMenus);
+    registry_list.push_back(&overlays);
     registry_list.push_back(&roomTransitions);
   }
 

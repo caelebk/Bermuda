@@ -29,7 +29,13 @@ class RenderSystem {
 
   // Make sure these paths remain in sync with the associated enumerators.
   const std::array<std::string, texture_count> texture_paths = {
-      textures_path("pause/pause_menu.png"),
+      textures_path("overlays/intro_overlay.png"),
+      textures_path("overlays/start_overlay.png"),
+      textures_path("overlays/pause_overlay.png"),
+      textures_path("overlays/krab_overlay.png"),
+      textures_path("overlays/sharkman_overlay.png"),
+      textures_path("overlays/death_overlay.png"),
+      textures_path("overlays/end_overlay.png"),
       textures_path("player/infinity.png"),
       textures_path("player/inventory.png"),
       textures_path("player/communications.png"),
@@ -175,7 +181,14 @@ class RenderSystem {
   Entity screen_state_entity;
 };
 
-extern bool paused;
+extern bool        is_intro;
+extern bool        is_start;
+extern bool        is_paused;
+extern bool        is_krab_cutscene;
+extern bool        is_sharkman_cutscene;
+extern bool        is_death;
+extern bool        is_end;
+extern bool        room_transitioning;
 
 extern Entity player;
 extern Entity player_weapon;

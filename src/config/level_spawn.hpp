@@ -21,7 +21,7 @@ const std::vector<
 const std::vector<
     std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     LVL_2_RAND_POS = {createOxygenCanisterPos, createCratePos, createCratePos,
-                      createCratePos,          createCratePos, createCratePos,
+                      createCratePos,          createCratePos, createSeahorsePos,
                       createGeyserPos,         createFishPos};
 
 const std::vector<
@@ -30,7 +30,7 @@ const std::vector<
 
 const std::vector<
     std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_3_RAND_POS = {createSharkPos, createSharkPos, createSharkPos,
+    LVL_3_RAND_POS = {createSharkPos, createSharkPos, createSeahorsePos,
                       createUrchinPos, createFishPos, createCratePos,
                       createCratePos, createCratePos, createOxygenCanisterPos,
                       createLobsterPos};
@@ -46,7 +46,8 @@ const std::vector<
                      createKrabPos,           createKrabPos,
                      createKrabPos,           createKrabPos,
                      createKrabPos,           createOxygenCanisterPos,
-                     createOxygenCanisterPos, createOxygenCanisterPos};
+                     createOxygenCanisterPos, createOxygenCanisterPos,
+                     createOxygenCanisterPos};
 
 const std::vector<
     std::function<Entity(RenderSystem* r, vec2 p, bool b)>>

@@ -127,7 +127,7 @@ void addSharkmanWander() {
   printf("Sharkman is cooking...\n");
 }
 
-static void addSharkmanTarget() {
+void addSharkmanTarget() {
   if (registry.bosses.entities.size() != 1) {
     return;
   }
@@ -144,11 +144,14 @@ static void addSharkmanTarget() {
 
 Entity createTutorial(RenderSystem* renderer, vec2 position,
                       bool checkCollisions) {
-  vec2 canisterPos = {200, window_height_px - 250};
+  vec2 canisterPos = {160.f, window_height_px - 250.f};
   createOxygenCanisterPos(renderer, canisterPos, checkCollisions);
 
-  vec2 geyserPos = {350, window_height_px - 265};
+  vec2 geyserPos = {273.f, window_height_px - 265.f};
   createGeyserPos(renderer, geyserPos, checkCollisions);
+
+  vec2 cratePos = {386.f, window_height_px - 260.f};
+  createCratePos(renderer, cratePos, checkCollisions);
 
   vec2 jellyPos = {window_width_px - 100.f, 100.f};
 
@@ -163,7 +166,7 @@ Entity createTutorial(RenderSystem* renderer, vec2 position,
 
   // Replace it with the boss key drop.
   Drop& drop  = registry.drops.emplace(entity);
-  drop.dropFn = unlockBossDoors;
+  drop.dropFn = unlockTutorial;
   return entity;
 };
 
@@ -188,7 +191,9 @@ Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = respawnCrabBoss;
+  d.respawnFn = [](RenderSystem* renderer, EntityState es) {
+    return Entity(0);
+  };
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = KRAB_BOSS_DAMAGE;
@@ -268,7 +273,9 @@ Entity createSharkmanPos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = respawnSharkman;
+  d.respawnFn = [](RenderSystem* renderer, EntityState es) {
+    return Entity(0);
+  };
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = SHARKMAN_DAMAGE;

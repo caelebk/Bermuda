@@ -7,6 +7,7 @@
 #include <random>
 #include <vector>
 
+#include "world_state.hpp"
 #include "level_system.hpp"
 #include "render_system.hpp"
 
@@ -52,8 +53,10 @@ class WorldSystem {
   unsigned int points;
 
   // Game state
-  LevelSystem* level;
+  LevelSystem*  level;
   RenderSystem* renderer;
+  bool          overlay_transitioning = false;
+  float         overlay_timer = 0.f;
   float         oxygen_timer;
   vec2          mouse_pos;
 
@@ -62,9 +65,15 @@ class WorldSystem {
   std::uniform_real_distribution<float> uniform_dist;  // number between 0..1
 };
 
-extern bool        paused;
-extern Entity      pause_menu;
-extern bool        transitioning;
+extern bool        is_intro;
+extern bool        is_start;
+extern bool        is_paused;
+extern bool        is_krab_cutscene;
+extern bool        is_sharkman_cutscene;
+extern bool        is_death;
+extern bool        is_end;
+extern Entity      overlay;
+extern bool        room_transitioning;
 extern Entity      rt_entity;
 extern Entity      player;
 extern Entity      player_weapon;

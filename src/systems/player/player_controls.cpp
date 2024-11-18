@@ -165,7 +165,7 @@ bool player_mouse(RenderSystem* renderer, int button, int action, int mods,
       PROJECTILES type = registry.playerProjectiles.get(player_projectile).type;
 
       // Debug statement
-      printf("Weapon type: %d\n", (unsigned int) type);
+      // printf("Weapon type: %d\n", (unsigned int) type);
 
       setFiredProjVelo();
       modifyOxygen(player, player_weapon);
@@ -233,10 +233,10 @@ bool updateInventory(RenderSystem* renderer, PROJECTILES type) {
       break;
   }
   // Debug Statements:
-  printf("Nets: %d\n", inv.nets);
-  printf("Concussive charges: %d\n", inv.concussors);
-  printf("Torpedos: %d\n", inv.torpedos);
-  printf("Shrimp Charges: %d\n\n", inv.shrimp);
+  // printf("Nets: %d\n", inv.nets);
+  // printf("Concussive charges: %d\n", inv.concussors);
+  // printf("Torpedos: %d\n", inv.torpedos);
+  // printf("Shrimp Charges: %d\n\n", inv.shrimp);
   return true;
 }
 
@@ -393,22 +393,4 @@ bool destroyGunOrProjectile(Entity entity) {
     return true;
   }
   return false;
-}
-
-Entity createPauseMenu(RenderSystem* renderer) {
-  auto pause_menu = Entity();
-
-  // Store a reference to the potentially re-used mesh object
-  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-  registry.meshPtrs.emplace(pause_menu, &mesh);
-
-  // Setting initial position values
-  Position& position = registry.positions.emplace(pause_menu);
-  position.position  = vec2(window_width_px / 2.f, window_height_px / 2.f);
-  position.angle     = 0.f;
-  position.scale     = vec2(window_width_px, window_height_px);
-
-  registry.pauseMenus.emplace(pause_menu);
-
-  return pause_menu;
 }

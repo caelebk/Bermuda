@@ -131,5 +131,5 @@ bool mesh_collides(Entity mesh, Entity other);
 extern Entity player_projectile;
 extern Entity player;
 
-extern bool   transitioning;
+extern bool   room_transitioning;
 extern Entity rt_entity;

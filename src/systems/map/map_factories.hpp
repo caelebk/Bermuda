@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////
 // Geyser
 //////////////////////////////////////////////////////////////
-#define GEYSER_QTY 40.0       // heals
+#define GEYSER_QTY 15.0       // heals
 #define GEYSER_RATE_MS 500.0  // heals
 #define GEYSER_SCALE_FACTOR vec2(0.15f)
 #define GEYSER_BOUNDING_BOX vec2(329.f, 344.f)  // vec2(PNG_width, PNG_height)
@@ -32,7 +32,7 @@ Entity respawnGeyser(RenderSystem* renderer, EntityState es);
 #define CRATE_MASS 20
 
 #define CRATE_DROP_0 createOxygenCanisterPos
-#define CRATE_DROP_CHANCE_0 0.5
+#define CRATE_DROP_CHANCE_0 0.25
 
 Entity createCratePos(RenderSystem* renderer, vec2 position,
                       bool checkCollisions = true);
