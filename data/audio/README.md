@@ -34,6 +34,14 @@ Sources for files:
 
 [lobster_shield](https://freesound.org/people/Mrthenoronha/sounds/371922/)
 
+[pressure_plate](https://freesound.org/people/DustyWind/sounds/697806/)
+
 [urchin](https://freesound.org/people/JohanDeecke/sounds/369528/)
 
 [seahorse](https://freesound.org/people/CosmicEmbers/sounds/387477/)
+
+[boss](https://freesound.org/people/qubodup/sounds/222517/)
+
+[end_screen](https://freesound.org/people/PatrickLieberkind/sounds/414266/)
+
+[notification](https://freesound.org/people/yfjesse/sounds/235911/)

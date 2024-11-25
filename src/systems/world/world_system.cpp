@@ -267,6 +267,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         if (transition_complete) {
           is_intro      = false;
           overlay_timer = 0.f;
+          tutorialRoomDialogue(renderer);
         }
       }
     }
@@ -280,6 +281,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       overlay = createOverlay(renderer);
     }
 
+    //play sound effect at start of transition
+    if (!registry.renderRequests.has(overlay)) {
+      registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::BOSS_INTRO, 10000));
+    }
     if (room_transitioning) {
       roomTransitionState(renderer, screen, level,
                           elapsed_ms_since_last_update);
@@ -293,6 +298,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         if (transition_complete) {
           is_krab_cutscene = false;
           overlay_timer    = 0.f;
+          krabBossDialogue(renderer);
         }
       }
     }
@@ -304,6 +310,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
   } else if (is_sharkman_cutscene) {
     if (!registry.positions.has(overlay)) {
       overlay = createOverlay(renderer);
+    }
+    
+    //play sound effect at start of transition
+    if (!registry.renderRequests.has(overlay)) {
+      registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::BOSS_INTRO, 10000));
     }
 
     if (room_transitioning) {
@@ -319,6 +330,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         if (transition_complete) {
           is_sharkman_cutscene = false;
           overlay_timer        = 0.f;
+          sharkmanBossDialogue(renderer);
         }
       }
     }
@@ -328,6 +340,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     }
     overlayState(TEXTURE_ASSET_ID::SHARKMAN_OVERLAY);
   } else if (is_death) {
+    //play sound effect at start of transition
+    if (!registry.renderRequests.has(overlay)) {
+      registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::END_SCREEN, 10000));
+    }
     if (overlay_transitioning) {
       bool brighten_complete =
           brightenTransitionState(screen, elapsed_ms_since_last_update);
@@ -511,6 +527,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     krab_boss_encountered = false;
     sharkman_encountered = false;
     restart_game();
+    tutorialRoomDialogue(renderer);
   }
 
   // Toggling game pause

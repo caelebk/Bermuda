@@ -104,6 +104,9 @@ class RenderSystem {
       textures_path("consumables/oxygen_canister.png"),
       textures_path("map_interactable/geyser.png"),
       textures_path("map_interactable/geyser_bubble.png"),
+      textures_path("map_interactable/pressure_plate/pressure_on.png"),
+      textures_path("map_interactable/pressure_plate/pressure_off.png"),
+      textures_path("map_interactable/rock.png"),
   };
 
   std::array<GLuint, effect_count> effects;

@@ -68,6 +68,11 @@ struct Interactable {
   std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
 };
 
+struct PressurePlate {
+  bool active;
+  float mass_activation = 30;
+};
+
 struct Floor {};
 
 struct Geyser {

@@ -84,6 +84,7 @@ class ECSRegistry {
   ComponentContainer<Geyser>           geysers;
   ComponentContainer<Bubble>           bubbles;
   ComponentContainer<Breakable>        breakables;
+  ComponentContainer<PressurePlate>    pressurePlates;
 
   // status related
   ComponentContainer<LowOxygen>     lowOxygen;
@@ -163,6 +164,7 @@ class ECSRegistry {
     registry_list.push_back(&bubbles);
     registry_list.push_back(&floors);
     registry_list.push_back(&breakables);
+    registry_list.push_back(&pressurePlates);
     // status related
     registry_list.push_back(&lowOxygen);
     registry_list.push_back(&stunned);

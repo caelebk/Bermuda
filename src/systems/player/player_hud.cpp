@@ -379,31 +379,50 @@ void createCommunicationHud(RenderSystem* renderer) {
  ********************************************************************************/
 void createDialogue(RenderSystem* renderer, std::string line1,
                     std::string line2) {
-  clearDialogue();
+  bool isLine1New = true;
+  bool isLine2New = true;
+
+  clearOldDialogue(isLine1New, isLine2New, line1, line2);
 
   assert(line1.length() <= LINE_LENGTH_LIMIT &&
          line2.length() <= LINE_LENGTH_LIMIT);
 
-  Entity lineText1 =
-      requestText(renderer, line1, COMMUNICATIONS_TEXT_SCALE,
-                  COMMUNICATIONS_TEXT_COLOUR, COMMUNICATIONS_LINE1_POS);
-  registry.communications.emplace(lineText1);
+  if (isLine1New || isLine2New) {
+    registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::NOTIFICATION));
+  }
+
+  if (isLine1New) {
+    Entity lineText1 =
+        requestText(renderer, line1, COMMUNICATIONS_TEXT_SCALE,
+                    COMMUNICATIONS_TEXT_COLOUR, COMMUNICATIONS_LINE1_POS);
+    Communication& communication = registry.communications.emplace(lineText1);
+    communication.line = line1;
+  }
 
   // don't create a second entity if not needed
-  if (line2 != NO_SECOND_LINE) {
+  if (line2 != NO_SECOND_LINE && isLine2New) {
     Entity lineText2 =
         requestText(renderer, line2, COMMUNICATIONS_TEXT_SCALE,
                     COMMUNICATIONS_TEXT_COLOUR, COMMUNICATIONS_LINE2_POS);
-    registry.communications.emplace(lineText2);
+    Communication& communication2 = registry.communications.emplace(lineText2);
+    communication2.line = line2;
   }
 }
 
 /********************************************************************************
- * @brief clear dialogue in communications HUD
+ * @brief clear dialogue in communications HUD if it is a new line
  ********************************************************************************/
-void clearDialogue() {
-  while (registry.communications.entities.size() > 0) {
-    registry.remove_all_components_of(registry.communications.entities.back());
+void clearOldDialogue(bool& isLine1New, bool& isLine2New, std::string line1, std::string line2) {
+  for (Entity entity : registry.communications.entities) {
+    if (registry.communications.has(entity)) {
+      if (registry.communications.get(entity).line.compare(line1) == 0) {
+        isLine1New = false;
+      } else if (registry.communications.get(entity).line.compare(line2) == 0) {
+        isLine2New = false;
+      } else {
+        registry.remove_all_components_of(entity);
+      }
+    }
   }
 }
 
@@ -436,7 +455,7 @@ void krabBossDialogue(RenderSystem* renderer) {
   createDialogue(renderer, KRAB_BOSS_LINE1, KRAB_BOSS_LINE2);
 }
 
-void SharkmanBossDialogue(RenderSystem* renderer) {
+void sharkmanBossDialogue(RenderSystem* renderer) {
   createDialogue(renderer, SHARK_BOSS_LINE1, SHARK_BOSS_LINE2);
 }
 

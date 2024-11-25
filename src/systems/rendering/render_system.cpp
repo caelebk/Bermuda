@@ -308,6 +308,10 @@ void RenderSystem::draw() {
     if (registry.renderRequests.has(floor))
       drawTexturedMesh(floor, projection_2D);
   }
+  for (Entity interactable : registry.interactable.entities) {
+    if (registry.renderRequests.has(interactable))
+      drawTexturedMesh(interactable, projection_2D);
+  }
   for (Entity wall : registry.activeWalls.entities) {
     if (registry.renderRequests.has(wall)) {
       if (registry.breakables.has(wall) && registry.oxygen.has(wall)) {
@@ -332,10 +336,6 @@ void RenderSystem::draw() {
   for (Entity consumable : registry.consumables.entities) {
     if (registry.renderRequests.has(consumable))
       drawTexturedMesh(consumable, projection_2D);
-  }
-  for (Entity interactable : registry.interactable.entities) {
-    if (registry.renderRequests.has(interactable))
-      drawTexturedMesh(interactable, projection_2D);
   }
   for (Entity bubble : registry.bubbles.entities) {
     if (registry.renderRequests.has(bubble))

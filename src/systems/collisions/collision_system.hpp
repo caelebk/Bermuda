@@ -27,6 +27,11 @@ class CollisionSystem {
   LevelSystem* level;
 
   /********************
+  COLLISION END DETECTION 
+  *********************/
+  void handle_collision_end();
+
+  /********************
   COLLISION DETECTION
   *********************/
   void collision_detection();
@@ -34,6 +39,7 @@ class CollisionSystem {
   void detectPlayerProjectileCollisions();
   void detectPlayerCollisions();
   void detectWallCollisions();
+  void detectMassCollisions();
   void detectDoorCollisions();
 
   bool checkBoxCollision(Entity entity_i, Entity entity_j);
@@ -103,6 +109,9 @@ class CollisionSystem {
 
   // Door <-> Player
   void resolveDoorPlayerCollision(Entity door, Entity player);
+
+  // Mass <-> Interactable
+  void resolveMassInteractableCollision(Entity mass, Entity interactable);
 
   /***********************************************************************
       Special Detection & Resolutions

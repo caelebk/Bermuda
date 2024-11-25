@@ -68,7 +68,25 @@ bool CollisionSystem::checkCircleCollision(Entity entity_i, Entity entity_j) {
 
 void CollisionSystem::step(float elapsed_ms) {
   collision_detection();
+
+  handle_collision_end();
+
   collision_resolution();
+}
+
+//Check if collision has ended here.
+void CollisionSystem::handle_collision_end() {
+  //Check if pressure plate collision has ended.
+  for (Entity entity : registry.pressurePlates.entities) {
+    bool pressurePlateCollisionExists = registry.collisions.has(entity);
+    if (!pressurePlateCollisionExists) {
+      if (!registry.sounds.has(entity) && registry.pressurePlates.get(entity).active) {
+        registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
+      }
+      registry.pressurePlates.get(entity).active = false;
+      registry.renderRequests.get(entity).used_texture = TEXTURE_ASSET_ID::PRESSURE_PLATE_OFF;
+    }
+  }
 }
 
 /***********************************
@@ -80,6 +98,9 @@ void CollisionSystem::collision_detection() {
 
   // 2. Detect player collisions
   detectPlayerCollisions();
+
+  // 3. Detect mass collisions
+  detectMassCollisions();
 
   // 3. Detect wall collisions
   detectWallCollisions();
@@ -183,7 +204,6 @@ void CollisionSystem::detectPlayerCollisions() {
 }
 
 void CollisionSystem::detectWallCollisions() {
-  ComponentContainer<Mass>&           mass_container  = registry.masses;
   ComponentContainer<Deadly>&         enemy_container = registry.deadlys;
   ComponentContainer<EnemyProjectile> enemy_proj_container =
       registry.enemyProjectiles;
@@ -203,19 +223,6 @@ void CollisionSystem::detectWallCollisions() {
     for (uint j = 0; j < enemy_proj_container.size(); j++) {
       Entity entity_j = enemy_proj_container.entities[j];
       checkBoxCollision(entity_i, entity_j);
-    }
-
-    for (uint j = 0; j < mass_container.size(); j++) {
-      Entity entity_j = mass_container.entities[j];
-      if (entity_i == entity_j) {
-        continue;
-      }
-      if (registry.players.has(entity_j)) {
-        Player& player_comp = registry.players.get(entity_j);
-        checkPlayerMeshCollision(entity_j, entity_i, player_comp.collisionMesh);
-      } else {
-        checkBoxCollision(entity_i, entity_j);
-      }
     }
   }
 }
@@ -237,6 +244,40 @@ void CollisionSystem::detectDoorCollisions() {
       Entity  entity_j    = player_container.entities[j];
       Player& player_comp = registry.players.get(entity_j);
       checkPlayerMeshCollision(entity_j, entity_i, player_comp.collisionMesh);
+    }
+  }
+}
+
+void CollisionSystem::detectMassCollisions() {
+  ComponentContainer<Mass>&           mass_container  = registry.masses;
+  ComponentContainer<Interactable>& interactable_container =
+      registry.interactable;
+  ComponentContainer<ActiveWall>& wall_container = registry.activeWalls;
+
+  for (uint i = 0; i < mass_container.size(); i++) {
+    Entity entity_i = mass_container.entities[i];
+
+    for (uint j = 0; j < interactable_container.size(); j++) {
+      Entity entity_j = interactable_container.entities[j];
+      if (registry.players.has(entity_i)) {
+        Player& player_comp = registry.players.get(entity_i);
+        checkPlayerMeshCollision(entity_i, entity_j, player_comp.collisionMesh);
+      } else {
+        checkBoxCollision(entity_i, entity_j);
+      }    
+    }
+
+    for (uint j = 0; j < wall_container.size(); j++) {
+      Entity entity_j = wall_container.entities[j];
+      if (entity_i == entity_j) {
+        continue;
+      }
+      if (registry.players.has(entity_i)) {
+        Player& player_comp = registry.players.get(entity_i);
+        checkPlayerMeshCollision(entity_i, entity_j, player_comp.collisionMesh);
+      } else {
+        checkBoxCollision(entity_i, entity_j);
+      }
     }
   }
 }
@@ -453,6 +494,10 @@ void CollisionSystem::routeInteractableCollisions(Entity interactable,
   if (registry.players.has(other)) {
     resolvePlayerInteractableCollision(other, interactable);
   }
+
+  if (registry.masses.has(other)) {
+    resolveMassInteractableCollision(other, interactable);
+  }
 }
 
 /*********************************************
@@ -509,7 +554,15 @@ void CollisionSystem::resolvePlayerInteractableCollision(Entity player,
     return;
   }
   // TODO: add more affects M2+
-
+  if (registry.pressurePlates.has(interactable)) {
+    if (!registry.pressurePlates.get(interactable).active) {
+      registry.renderRequests.get(interactable).used_texture = TEXTURE_ASSET_ID::PRESSURE_PLATE_ON;
+      registry.pressurePlates.get(interactable).active = true;
+      if (!registry.sounds.has(interactable)) {
+        registry.sounds.insert(interactable, Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
+      }
+    }
+  }
   // will add oxygen to the player if it exists
   modifyOxygen(player, interactable);
 }
@@ -733,6 +786,25 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
 void CollisionSystem::resolveWallEnemyProjCollision(Entity wall,
                                                     Entity enemy_proj) {
   registry.remove_all_components_of(enemy_proj);
+}
+
+void CollisionSystem::resolveMassInteractableCollision(Entity mass,
+  Entity interactable) {
+  if (!registry.masses.has(mass)) {
+    return;
+  }
+
+  Mass& mass_comp = registry.masses.get(mass);
+  if (registry.pressurePlates.has(interactable)) {
+    PressurePlate& pp = registry.pressurePlates.get(interactable);
+    if (!pp.active && pp.mass_activation <= mass_comp.mass) {
+      registry.renderRequests.get(interactable).used_texture = TEXTURE_ASSET_ID::PRESSURE_PLATE_ON;
+      pp.active = true;
+      if (!registry.sounds.has(interactable)) {
+        registry.sounds.insert(interactable, Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
+      }
+    }
+  }
 }
 
 void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {

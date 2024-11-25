@@ -90,7 +90,7 @@ void createCommunicationHud(RenderSystem* renderer);
 
 void createDialogue(RenderSystem* renderer, std::string line1, std::string line2);
 
-void clearDialogue();
+void clearOldDialogue(bool& isLine1New, bool& isLine2New, std::string line1, std::string line2);
 
 //////////////////////////////////////////////////////////////
 // Communications - createDialogue(...) prompts
@@ -145,7 +145,7 @@ void krabBossDialogue(RenderSystem* renderer);
 
 #define SHARK_BOSS_LINE1 "That shark is !@#$%&* FAST, and those limbs belong to some of the crew..."
 #define SHARK_BOSS_LINE2 "I wonder how hard it'll be for it to stop if it's charging straight at me..."
-void SharkmanBossDialogue(RenderSystem* renderer); 
+void sharkmanBossDialogue(RenderSystem* renderer); 
 
 #define KEY_LOCKED_LINE1 "This door isn't open."
 #define KEY_LOCKED_LINE2 "It appears I need to find a matching key."

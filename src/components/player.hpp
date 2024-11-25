@@ -56,7 +56,9 @@ struct InventoryCounter {
 };
 
 // Communication
-struct Communication {};
+struct Communication {
+  std::string line;
+};
 
 // Player component
 struct Player {

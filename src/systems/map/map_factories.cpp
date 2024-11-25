@@ -251,6 +251,74 @@ Entity respawnCrate(RenderSystem* renderer, EntityState es) {
   return entity;
 }
 
+/////////////////////////////////////////////////////////////////
+// rock
+/////////////////////////////////////////////////////////////////
+/**
+ * @brief creates a breakable crate at a specific position
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+
+Entity createRockPos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions) {
+  // Reserve an entity
+  auto entity = Entity();
+  // physics and pos
+  Position& pos = registry.positions.emplace(entity);
+  pos.angle     = 0.f;
+  pos.position  = position;
+  pos.scale     = ROCK_SCALE_FACTOR * ROCK_BOUNDING_BOX;
+
+  Motion& motion      = registry.motions.emplace(entity);
+  motion.acceleration = {0.f, 0.f};
+  motion.velocity     = {0.f, 0.f};
+
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  Mass& mass = registry.masses.emplace(entity);
+  mass.mass  = ROCK_MASS;
+
+  // reuse wall code
+  registry.activeWalls.emplace(entity);
+  Breakable& b = registry.breakables.emplace(entity);
+  b.respawnFn  = respawnRock;
+
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::ROCK, EFFECT_ASSET_ID::TEXTURED,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
+
+/**
+ * @brief Respawns a Crate based on its entity state
+ *
+ * @param renderer
+ * @param es
+ * @return
+ */
+Entity respawnRock(RenderSystem* renderer, EntityState es) {
+  Entity entity = createRockPos(renderer, es.position.position, false);
+
+  // respawn failed, ignore
+  if ((unsigned int)entity == 0) {
+    return Entity(0);
+  }
+
+  return entity;
+}
+
 /**
  * @brief creates a metal crate at a specific position
  *
@@ -335,4 +403,50 @@ Entity createSharkmanCratesPos(RenderSystem* renderer, vec2 position,
   createMetalCratePos(renderer, {window_width_px / 2 + 50, bottom_row}, false);
   return createMetalCratePos(renderer, {window_width_px / 2 + 480, bottom_row},
                              false);
+}
+
+/**
+ * @brief creates a pressure plate at a specific position
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createPressurePlatePos(RenderSystem* renderer, vec2 position,
+                           bool checkCollisions) {
+  // Reserve an entity
+  auto entity = Entity();
+
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = 0.f;
+  pos.position = position;
+  pos.scale    = PRESSURE_PLATE_BOUNDING_BOX * PRESSURE_PLATE_SCALE_FACTOR;
+
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // make consumable
+  Interactable& i = registry.interactable.emplace(entity);
+  i.respawnFn     = respawnPressurePlate;
+
+  PressurePlate& pp = registry.pressurePlates.emplace(entity);
+  pp.active = false;
+
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::PRESSURE_PLATE_OFF, EFFECT_ASSET_ID::TEXTURED,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
+
+Entity respawnPressurePlate(RenderSystem* renderer, EntityState es) {
+  Entity entity = createPressurePlatePos(renderer, es.position.position, false);
+  return entity;
 }

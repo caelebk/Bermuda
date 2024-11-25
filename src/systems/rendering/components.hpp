@@ -73,7 +73,11 @@ enum class SOUND_ASSET_ID {
   LOBSTER_SHIELD        = METAL_CRATE_HIT + 1,
   URCHIN                = LOBSTER_SHIELD + 1,
   SEAHORSE              = URCHIN + 1,
-  SOUND_COUNT           = SEAHORSE + 1
+  PRESSURE_PLATE        = SEAHORSE + 1,
+  BOSS_INTRO            = PRESSURE_PLATE + 1,
+  END_SCREEN            = BOSS_INTRO + 1,
+  NOTIFICATION          = END_SCREEN + 1,
+  SOUND_COUNT           = NOTIFICATION + 1
 };
 
 const int sound_count = (int)SOUND_ASSET_ID::SOUND_COUNT;
@@ -184,7 +188,10 @@ enum class TEXTURE_ASSET_ID {
   OXYGEN_CANISTER      = METAL_CRATE + 1,
   GEYSER               = OXYGEN_CANISTER + 1,
   GEYSER_BUBBLE        = GEYSER + 1,
-  TEXTURE_COUNT        = GEYSER_BUBBLE + 1
+  PRESSURE_PLATE_ON    = GEYSER_BUBBLE + 1,
+  PRESSURE_PLATE_OFF   = PRESSURE_PLATE_ON + 1,
+  ROCK                 = PRESSURE_PLATE_OFF + 1,
+  TEXTURE_COUNT        = ROCK + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

@@ -195,14 +195,10 @@ void LevelSystem::activate_floor() {
 
   // TODO: Temporary Floor Switching Method
   if (current_room.is_tutorial_room) {
-    // TODO: Temporary place for tutorial dialogue call
-    tutorialRoomDialogue(renderer);
     registry.renderRequests.insert(
         floor, {TEXTURE_ASSET_ID::TUTORIAL_FLOOR, EFFECT_ASSET_ID::TEXTURED,
                 GEOMETRY_BUFFER_ID::SPRITE});
   } else {
-    // TODO: Temporary place for tutorial dialogue call
-    enemyRoomDialogue(renderer);
     registry.renderRequests.insert(
         floor, {TEXTURE_ASSET_ID::FLOOR, EFFECT_ASSET_ID::TEXTURED,
                 GEOMETRY_BUFFER_ID::SPRITE});

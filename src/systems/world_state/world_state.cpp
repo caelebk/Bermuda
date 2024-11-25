@@ -87,14 +87,11 @@ void roomTransitionState(RenderSystem* renderer, ScreenState& screen,
     if (level->current_room_editor_id == "5" && !krab_boss_encountered) {
       is_krab_cutscene = true;
       krab_boss_encountered = true;
-      krabBossDialogue(renderer);
     } else if (level->current_room_editor_id == "10" && !sharkman_encountered) {
       is_sharkman_cutscene = true;
       sharkman_encountered = true;
-      SharkmanBossDialogue(renderer);
     } else if (level->current_room_editor_id == "15") {
       is_end = true;
-      // TODO: add final boss diaglogue
     }
     registry.remove_all_components_of(rt_entity);
   } else if (screen.darken_screen_factor > 0.f &&
@@ -105,6 +102,12 @@ void roomTransitionState(RenderSystem* renderer, ScreenState& screen,
   } else if (screen.darken_screen_factor <= 0.f &&
              !registry.roomTransitions.has(rt_entity)) {
     room_transitioning = false;
+    if (level->current_room_editor_id != "0" &&
+        level->current_room_editor_id != "5" &&
+        level->current_room_editor_id != "10" &&
+        level->current_room_editor_id != "15") {
+      enemyRoomDialogue(renderer);
+    }
   }
 }
 

@@ -59,7 +59,7 @@ void AudioSystem::init() {
 void AudioSystem::step(float elapsed_ms) {
   for (Entity entity : registry.sounds.entities) {
     Sound sound   = registry.sounds.get(entity);
-    int channel = Mix_PlayChannelTimed(-1, sound_map[sound.id], 0, 2000);
+    int channel = Mix_PlayChannelTimed(-1, sound_map[sound.id], 0, sound.max_time);
 
     //uncomment this to see debug info
     // printf("Play Sound: %s\n", sound_names[static_cast<int>(sound.id)].c_str());

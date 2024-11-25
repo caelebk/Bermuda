@@ -42,7 +42,11 @@ const std::array<std::string, sound_count> sound_names = {
 	"metal_crate_hit",
 	"lobster_shield",
 	"urchin",
-	"seahorse"
+	"seahorse",
+	"pressure_plate",
+	"boss",
+	"end_screen",
+	"notification"
 };
 
 //order matters
