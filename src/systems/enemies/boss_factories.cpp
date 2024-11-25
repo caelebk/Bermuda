@@ -5,6 +5,7 @@
 
 #include "consumable_factories.hpp"
 #include "enemy_factories.hpp"
+#include "entity_type.hpp"
 #include "map_factories.hpp"
 
 /////////////////////////////////////////////////////////////////
@@ -191,9 +192,7 @@ Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = [](RenderSystem* renderer, EntityState es) {
-    return Entity(0);
-  };
+  d.type = ENTITY_TYPE::KRAB_BOSS;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = KRAB_BOSS_DAMAGE;
@@ -207,7 +206,8 @@ Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
   motion.acceleration = {0, 0};
 
   Boss& boss = registry.bosses.emplace(entity);
-  boss.type  = BossType::KRAB_BOSS;
+  boss.type  = ENTITY_TYPE::KRAB_BOSS;
+
   addCrabBossWander();
 
   boss.ai_cd = KRAB_BOSS_AI_CD;
@@ -273,9 +273,7 @@ Entity createSharkmanPos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = [](RenderSystem* renderer, EntityState es) {
-    return Entity(0);
-  };
+  d.type = ENTITY_TYPE::SHARKMAN;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = SHARKMAN_DAMAGE;
@@ -297,7 +295,8 @@ Entity createSharkmanPos(RenderSystem* renderer, vec2 position,
   motion.acceleration = {0, 0};
 
   Boss& boss = registry.bosses.emplace(entity);
-  boss.type  = BossType::SHARKMAN;
+  boss.type  = ENTITY_TYPE::SHARKMAN;
+
   addSharkmanWander();
 
   boss.ai_cd   = SHARKMAN_AI_CD;

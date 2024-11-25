@@ -10,3 +10,4 @@ Makefile
 bermuda
 bermuda.exe
 .vscode/
+*.json

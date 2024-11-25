@@ -6,6 +6,7 @@
 #include "player.hpp"
 #include "render_system.hpp"
 #include "tiny_ecs.hpp"
+#include "respawn.hpp"
 
 //////////////////////////////////////////////////////////////
 // Player

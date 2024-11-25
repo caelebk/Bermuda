@@ -5,6 +5,7 @@
 #include "collision_system.hpp"
 #include "components.hpp"
 #include "consumable_factories.hpp"
+#include "entity_type.hpp"
 #include "oxygen_system.hpp"
 #include "physics.hpp"
 #include "random.hpp"
@@ -115,7 +116,7 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position,
 
   // make enemy
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = respawnJelly;
+  d.type = ENTITY_TYPE::JELLY;
 
   // Add stats
   auto& damage  = registry.oxygenModifiers.emplace(entity);
@@ -209,7 +210,7 @@ Entity createFishPos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = respawnFish;
+  d.type = ENTITY_TYPE::FISH;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = FISH_DAMAGE;
@@ -303,7 +304,7 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = respawnShark;
+  d.type = ENTITY_TYPE::SHARK;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = SHARK_DAMAGE;
@@ -404,7 +405,7 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = respawnKrab;
+  d.type = ENTITY_TYPE::KRAB;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = KRAB_DAMAGE;
@@ -513,7 +514,7 @@ Entity createUrchinPos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = respawnUrchin;
+  d.type = ENTITY_TYPE::URCHIN;
 
   // Initialize the position, scale, and physics components
   auto& motion        = registry.motions.emplace(entity);
@@ -640,7 +641,7 @@ Entity createSeahorsePos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = respawnSeahorse;
+  d.type = ENTITY_TYPE::SEAHORSE;
 
   // Initialize the position, scale, and physics components
   auto& motion        = registry.motions.emplace(entity);
@@ -767,7 +768,7 @@ Entity createLobsterPos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d   = registry.deadlys.emplace(entity);
-  d.respawnFn = respawnLobster;
+  d.type = ENTITY_TYPE::LOBSTER;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = LOBSTER_DAMAGE;

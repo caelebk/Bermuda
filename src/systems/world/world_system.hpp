@@ -4,7 +4,6 @@
 #include "common.hpp"
 
 // stlib
-#include <random>
 #include <vector>
 
 #include "world_state.hpp"
@@ -59,10 +58,6 @@ class WorldSystem {
   float         overlay_timer = 0.f;
   float         oxygen_timer;
   vec2          mouse_pos;
-
-  // C++ random number generator
-  std::default_random_engine            rng;
-  std::uniform_real_distribution<float> uniform_dist;  // number between 0..1
 };
 
 extern bool        is_intro;

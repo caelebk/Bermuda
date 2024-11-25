@@ -1,4 +1,5 @@
 #include "consumable_factories.hpp"
+#include "entity_type.hpp"
 #include "map_factories.hpp"
 
 #include <iostream>
@@ -112,7 +113,7 @@ Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position, bool check
 
   // make consumable
   Consumable &c = registry.consumables.emplace(entity);
-  c.respawnFn = respawnOxygenCanister;
+  c.type = ENTITY_TYPE::OXYGEN_CANISTER;
 
   // Add stats
   auto& refill  = registry.oxygenModifiers.emplace(entity);
@@ -183,7 +184,7 @@ Entity createRedKeyPos(RenderSystem* renderer, vec2 position,
   Item &i = registry.items.emplace(entity);
   i.item = INVENTORY::RED_KEY;
   EntityState es;
-  i.respawnFn = createRedKeyRespawnFn;
+  i.type = ENTITY_TYPE::RED_KEY;
 
   // physics and pos
   registry.renderRequests.insert(
@@ -234,7 +235,7 @@ Entity createBlueKeyPos(RenderSystem* renderer, vec2 position, bool checkCollisi
   Item &i = registry.items.emplace(entity);
   i.item = INVENTORY::BLUE_KEY;
   EntityState es;
-  i.respawnFn = createBlueKeyRespawnFn;
+  i.type = ENTITY_TYPE::BLUE_KEY;
 
   // physics and pos
   registry.renderRequests.insert(
@@ -285,7 +286,7 @@ Entity createYellowKeyPos(RenderSystem* renderer, vec2 position, bool checkColli
   Item &i = registry.items.emplace(entity);
   i.item = INVENTORY::YELLOW_KEY;
   EntityState es;
-  i.respawnFn = createYellowKeyRespawnFn;
+  i.type = ENTITY_TYPE::YELLOW_KEY;
 
   // physics and pos
   registry.renderRequests.insert(
@@ -339,7 +340,7 @@ Entity createNetDropPos(RenderSystem* renderer, vec2 position,
 
   // make consumable
   Consumable& c = registry.consumables.emplace(entity);
-  c.respawnFn   = respawnNetDrop;
+  c.type = ENTITY_TYPE::NET;
 
   // Add stats
   auto& weapon_drop  = registry.weaponDrops.emplace(entity);
@@ -391,7 +392,7 @@ Entity createConcussiveDropPos(RenderSystem* renderer, vec2 position,
 
   // make consumable
   Consumable& c = registry.consumables.emplace(entity);
-  c.respawnFn   = respawnConcussiveDrop;
+  c.type = ENTITY_TYPE::CONCUSSIVE;
 
   // Add stats
   auto& weapon_drop = registry.weaponDrops.emplace(entity);
@@ -442,7 +443,7 @@ Entity createTorpedoDropPos(RenderSystem* renderer, vec2 position,
 
   // make consumable
   Consumable& c = registry.consumables.emplace(entity);
-  c.respawnFn   = respawnTorpedoDrop;
+  c.type = ENTITY_TYPE::TORPEDO;
 
   // Add stats
   auto& weapon_drop = registry.weaponDrops.emplace(entity);
@@ -494,7 +495,7 @@ Entity createShrimpDropPos(RenderSystem* renderer, vec2 position,
 
   // make consumable
   Consumable& c = registry.consumables.emplace(entity);
-  c.respawnFn   = respawnShrimpDrop;
+  c.type = ENTITY_TYPE::SHRIMP;
 
   // Add stats
   auto& weapon_drop = registry.weaponDrops.emplace(entity);

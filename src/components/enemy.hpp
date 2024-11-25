@@ -5,11 +5,6 @@
 #include "render_system.hpp"
 #include "respawn.hpp"
 
-enum class BossType {
-  KRAB_BOSS,
-  SHARKMAN
-};
-
 enum class RangedEnemies {
   URCHIN,
   SEAHORSE
@@ -17,7 +12,7 @@ enum class RangedEnemies {
 
 // anything that is deadly to the player
 struct Deadly {
-  std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
+  ENTITY_TYPE type;
 };
 
 struct EnemyProjectile {
@@ -26,7 +21,7 @@ struct EnemyProjectile {
 };
 
 struct Boss {
-  enum BossType                      type;
+  ENTITY_TYPE type;
   float                              curr_cd = 0.f;
   float                              ai_cd   = 0.f;
   float                              max_proj_count;

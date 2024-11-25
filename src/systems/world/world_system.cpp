@@ -20,6 +20,7 @@
 #include "spawning.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "world_state.hpp"
+#include "saving_system.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>
@@ -39,10 +40,7 @@ static int               fps       = 0;
 static float             fps_timer = 0;
 
 // create the underwater world
-WorldSystem::WorldSystem() : oxygen_timer(PLAYER_OXYGEN_DEPLETE_TIME_MS) {
-  // Seeding rng with random device
-  rng = std::default_random_engine(std::random_device()());
-}
+WorldSystem::WorldSystem() : oxygen_timer(PLAYER_OXYGEN_DEPLETE_TIME_MS) {}
 
 WorldSystem::~WorldSystem() {
   // Destroy all created components
@@ -116,7 +114,6 @@ void WorldSystem::init(RenderSystem* renderer_arg, LevelSystem* level) {
   this->renderer = renderer_arg;
   this->level    = level;
 
-  restart_game();
   restart_game();
 }
 
@@ -539,6 +536,17 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
       overlay = createOverlay(renderer);
     }
   }
+
+  if (action == GLFW_RELEASE && key == GLFW_KEY_K &&
+      !registry.deathTimers.has(player) && !cannot_pause_state) {
+    save_game_to_file();
+  }
+
+  if (action == GLFW_RELEASE && key == GLFW_KEY_L &&
+      !registry.deathTimers.has(player) && !cannot_pause_state) {
+    load_game_from_file();
+  }
+
 
   if (!is_frozen_state) {
     /////////////////////////////////////

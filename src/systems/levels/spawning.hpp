@@ -8,7 +8,6 @@
 #include <cstdio>
 #include <functional>
 #include <glm/ext/vector_float2.hpp>
-#include <random>
 #include <vector>
 
 #include "render_system.hpp"

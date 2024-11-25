@@ -11,6 +11,7 @@
 #include "collision_util.hpp"
 #include "enemy_factories.hpp"
 #include "enemy_util.hpp"
+#include "entity_type.hpp"
 #include "physics.hpp"
 #include "random.hpp"
 #include "tiny_ecs.hpp"
@@ -205,7 +206,7 @@ void AISystem::do_boss_ai(float elapsed_ms) {
     Boss& boss = registry.bosses.get(b);
     boss.curr_cd -= elapsed_ms;
 
-    if (boss.type == BossType::SHARKMAN) {
+    if (boss.type == ENTITY_TYPE::SHARKMAN) {
       sharkman_texture_num += 0.075f;
       if (sharkman_texture_num >= 8.f) {
         sharkman_texture_num = 0.f;

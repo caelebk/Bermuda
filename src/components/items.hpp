@@ -3,6 +3,7 @@
 #include "player.hpp"
 #include "render_system.hpp"
 #include "respawn.hpp"
+#include "entity_type.hpp"
 
 // struct Key {
 //   INVENTORY color;
@@ -10,13 +11,13 @@
 
 // anything the player can pick up, temp
 struct Consumable {
-  std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
+  ENTITY_TYPE type;
 };
 
 // anything the player can pick up, perm
 struct Item {
   INVENTORY item;
-  std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
+  ENTITY_TYPE type;
 };
 
 // drops when entity is dead

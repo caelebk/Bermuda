@@ -5,7 +5,7 @@
 #include <iostream>
 #include <iterator>
 #include <numeric>
-#include <random>
+#include <player_hud.hpp>
 #include <string>
 
 #include "common.hpp"
@@ -14,9 +14,7 @@
 #include "level_spawn.hpp"
 #include "map_factories.hpp"
 #include "player_factories.hpp"
-#include "level_factories.hpp"
 #include "spawning.hpp"
-#include <player_hud.hpp>
 
 LevelSystem::LevelSystem() {};
 
@@ -42,13 +40,18 @@ void LevelSystem::set_current_room_editor_id(std::string room_editor_id) {
 };
 
 void LevelSystem::spawn_miniboss() {
-  for (const auto& spawn_function_group : level->get_room_by_editor_id(current_room_editor_id).boss_spawn_function_groups) {
-      execute_config_rand(spawn_function_group, level->get_room_by_editor_id(current_room_editor_id), renderer);
+  for (const auto& spawn_function_group :
+       level->get_room_by_editor_id(current_room_editor_id)
+           .boss_spawn_function_groups) {
+    execute_config_rand(spawn_function_group,
+                        level->get_room_by_editor_id(current_room_editor_id),
+                        renderer);
   }
 }
 
 void LevelSystem::spawn() {
-  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+  RoomBuilder& current_room =
+      level->get_room_by_editor_id(current_room_editor_id);
   // std::cout << "Has entered: " << current_room.has_entered << std::endl;
 
   if (current_room.has_entered) {
@@ -59,27 +62,32 @@ void LevelSystem::spawn() {
       current_room.saved_entities.pop_back();
     }
   } else {
+    current_room.has_entered = true;
     if (current_room.is_boss_room) {
-      current_room.has_entered = true;
       spawn_miniboss();
-      for (const auto& fixed_spawn_function_group : current_room.room_fixed_spawn_function_groups) {
+      for (const auto& fixed_spawn_function_group :
+           current_room.room_fixed_spawn_function_groups) {
         std::cout << "Should have spawned key" << std::endl;
         execute_config_rand(fixed_spawn_function_group, current_room, renderer);
       }
     } else {
-      current_room.has_entered = true;
       // It's the first time in this room, spawn for the first time.
-      for (const auto& spawn_function_group : current_room.room_pack_spawn_function_groups) {
+      for (const auto& spawn_function_group :
+           current_room.room_pack_spawn_function_groups) {
         for (const auto& spawn_function : spawn_function_group) {
           execute_pack_spawning(spawn_function, current_room, renderer, 8);
         }
       }
-      for (const auto& spawn_function_group : current_room.room_spawn_function_groups) {
-        // TODO: remove this out of here and pull it into the correct level placements.
+      for (const auto& spawn_function_group :
+           current_room.room_spawn_function_groups) {
+        // TODO: remove this out of here and pull it into the correct level
+        // placements.
         execute_config_rand(spawn_function_group, current_room, renderer);
-        execute_config_rand_chance(spawn_function_group, current_room, renderer, 0.5);
+        execute_config_rand_chance(spawn_function_group, current_room, renderer,
+                                   0.5);
       }
-      for (const auto& fixed_spawn_function_group : current_room.room_fixed_spawn_function_groups) {
+      for (const auto& fixed_spawn_function_group :
+           current_room.room_fixed_spawn_function_groups) {
         std::cout << "Should have spawned key" << std::endl;
         execute_config_rand(fixed_spawn_function_group, current_room, renderer);
       }
@@ -88,28 +96,32 @@ void LevelSystem::spawn() {
 }
 
 void LevelSystem::activate_walls() {
-  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+  RoomBuilder& current_room =
+      level->get_room_by_editor_id(current_room_editor_id);
 
   for (Entity& wall : registry.spaces.get(current_room.entity).walls) {
     registry.activeWalls.emplace(wall);
     registry.renderRequests.insert(
         wall, {TEXTURE_ASSET_ID::WALL, EFFECT_ASSET_ID::TEXTURED,
                GEOMETRY_BUFFER_ID::SPRITE});
-  }  
+  }
 }
 
 void LevelSystem::lock_doors(Entity& door, DoorConnection& door_connection) {
-  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+  RoomBuilder& current_room =
+      level->get_room_by_editor_id(current_room_editor_id);
 
-  // Consider all doors as walls, unless we have the key for them, and recalculate all of these whenever
-  // we pick up any key, or kill a boss.
-  if (current_room.is_boss_room && !current_room.has_entered) { // Only lock these doors if we've not killed the boss.
+  // Consider all doors as walls, unless we have the key for them, and
+  // recalculate all of these whenever we pick up any key, or kill a boss.
+  if (current_room.is_boss_room &&
+      !current_room.has_entered) {  // Only lock these doors if we've not killed
+                                    // the boss.
     door_connection.locked = true;
-    registry.activeWalls.emplace(door);   
+    registry.activeWalls.emplace(door);
   } else {
     if (!isKeyCollected(door_connection.key)) {
       door_connection.locked = true;
-      registry.activeWalls.emplace(door);   
+      registry.activeWalls.emplace(door);
     } else {
       // std::cout << "unlocking" << std::endl;
       door_connection.locked = false;
@@ -118,14 +130,15 @@ void LevelSystem::lock_doors(Entity& door, DoorConnection& door_connection) {
 }
 
 void LevelSystem::activate_doors() {
-  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+  RoomBuilder& current_room =
+      level->get_room_by_editor_id(current_room_editor_id);
 
   // Activate the doors.
   for (Entity& door : registry.spaces.get(current_room.entity).doors) {
     registry.activeDoors.emplace(door);
     DoorConnection& door_connection = registry.doorConnections.get(door);
-    Direction direction = door_connection.direction;
-    Position& door_position = registry.positions.get(door);
+    Direction       direction       = door_connection.direction;
+    Position&       door_position   = registry.positions.get(door);
 
     lock_doors(door, door_connection);
 
@@ -153,8 +166,7 @@ void LevelSystem::activate_doors() {
       if (current_room.is_boss_room && !current_room.has_entered) {
         texture = TEXTURE_ASSET_ID::LOCKED_DOOR_H;
       }
-      registry.renderRequests.insert(door, {texture,
-                                            EFFECT_ASSET_ID::TEXTURED,
+      registry.renderRequests.insert(door, {texture, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE});
     } else {
       switch (door_connection.key) {
@@ -176,15 +188,15 @@ void LevelSystem::activate_doors() {
       if (current_room.is_boss_room && !current_room.has_entered) {
         texture = TEXTURE_ASSET_ID::LOCKED_DOOR_V;
       }
-      registry.renderRequests.insert(door, {texture,
-                                            EFFECT_ASSET_ID::TEXTURED,
+      registry.renderRequests.insert(door, {texture, EFFECT_ASSET_ID::TEXTURED,
                                             GEOMETRY_BUFFER_ID::SPRITE});
     }
   }
 }
 
 void LevelSystem::activate_floor() {
-  RoomBuilder& current_room = level->get_room_by_editor_id(current_room_editor_id);
+  RoomBuilder& current_room =
+      level->get_room_by_editor_id(current_room_editor_id);
 
   Entity    floor     = Entity();
   Position& floor_pos = registry.positions.emplace(floor);
@@ -213,7 +225,7 @@ void LevelSystem::activate_current_room() {
   spawn();
 }
 
-void LevelSystem::deactivate_current_room() {
+void LevelSystem::deactivate_current_room(bool save) {
   // clear, may have entities from a restart
   level->get_room_by_editor_id(current_room_editor_id).saved_entities.clear();
 
@@ -222,6 +234,51 @@ void LevelSystem::deactivate_current_room() {
            .get(level->get_room_by_editor_id(current_room_editor_id).entity)
            .boundaries) {
     deactivate_boundary(boundary);
+  }
+
+  while (registry.deadlys.entities.size() > 0) {
+    Entity e = registry.deadlys.entities.back();
+    if (save) {
+      level->get_room_by_editor_id(current_room_editor_id)
+          .saved_entities.push_back(EntitySave(e));
+    }
+    registry.remove_all_components_of(e);
+  }
+
+  while (registry.consumables.entities.size() > 0) {
+    Entity e = registry.consumables.entities.back();
+    if (save) {
+      level->get_room_by_editor_id(current_room_editor_id)
+          .saved_entities.push_back(EntitySave(e));
+    }
+    registry.remove_all_components_of(e);
+  }
+
+  while (registry.items.entities.size() > 0) {
+    Entity e = registry.items.entities.back();
+    if (save) {
+      level->get_room_by_editor_id(current_room_editor_id)
+          .saved_entities.push_back(EntitySave(e));
+    }
+    registry.remove_all_components_of(e);
+  }
+
+  while (registry.interactable.entities.size() > 0) {
+    Entity e = registry.interactable.entities.back();
+    if (save) {
+      level->get_room_by_editor_id(current_room_editor_id)
+          .saved_entities.push_back(EntitySave(e));
+    }
+    registry.remove_all_components_of(e);
+  }
+
+  while (registry.breakables.entities.size() > 0) {
+    Entity e = registry.breakables.entities.back();
+    if (save) {
+      level->get_room_by_editor_id(current_room_editor_id)
+          .saved_entities.push_back(EntitySave(e));
+    }
+    registry.remove_all_components_of(e);
   }
 
   while (registry.floors.entities.size() > 0) {
@@ -236,54 +293,16 @@ void LevelSystem::deactivate_current_room() {
     registry.remove_all_components_of(registry.drops.entities.back());
   }
 
-  while (registry.deadlys.entities.size() > 0) {
-    Entity e = registry.deadlys.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id)
-        .saved_entities.push_back(EntitySave(e));
-    registry.remove_all_components_of(e);
-  }
-
-  while (registry.consumables.entities.size() > 0) {
-    Entity e = registry.consumables.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id)
-        .saved_entities.push_back(EntitySave(e));
-    registry.remove_all_components_of(e);
-  }
-
-  while (registry.items.entities.size() > 0) {
-    Entity e = registry.items.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id)
-        .saved_entities.push_back(EntitySave(e));
-    registry.remove_all_components_of(e);
-  }
-
-  while (registry.interactable.entities.size() > 0) {
-    Entity e = registry.interactable.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id)
-        .saved_entities.push_back(EntitySave(e));
-    registry.remove_all_components_of(e);
-  }
-
-  while (registry.breakables.entities.size() > 0) {
-    Entity e = registry.breakables.entities.back();
-    level->get_room_by_editor_id(current_room_editor_id)
-        .saved_entities.push_back(EntitySave(e));
-    registry.remove_all_components_of(e);
-  }
-
   while (registry.entityGroups.entities.size() > 0) {
-    registry.remove_all_components_of(
-        registry.entityGroups.entities.back());
+    registry.remove_all_components_of(registry.entityGroups.entities.back());
   }
 
   while (registry.groups.entities.size() > 0) {
-    registry.remove_all_components_of(
-        registry.groups.entities.back());
+    registry.remove_all_components_of(registry.groups.entities.back());
   }
 
   while (registry.bubbles.entities.size() > 0) {
-    registry.remove_all_components_of(
-        registry.bubbles.entities.back());
+    registry.remove_all_components_of(registry.bubbles.entities.back());
   }
 
   while (registry.enemyProjectiles.entities.size() > 0) {
@@ -294,6 +313,10 @@ void LevelSystem::deactivate_current_room() {
   registry.stunned.clear();
   registry.knockedback.clear();
   registry.collisions.clear();
+
+  printf("Saved %d entities\n",
+         level->get_room_by_editor_id(current_room_editor_id)
+             .saved_entities.size());
 }
 
 void LevelSystem::move_player_to_door(Direction direction, Entity& exit_door) {
@@ -344,18 +367,21 @@ void LevelSystem::enter_room(DoorConnection& door_connection) {
   std::string room_id   = door_connection.room_id;
   Entity&     exit_door = door_connection.exit_door;
 
-  deactivate_current_room();
+  RoomBuilder& room = level->get_room_by_editor_id(room_id);
+  std::cout << room.has_entered << std::endl;
+
+  deactivate_current_room(true);
   set_current_room_editor_id(room_id);
   move_player_to_door(direction, exit_door);
   activate_current_room();
 
-  // std::cout << "Player entered room: " << current_room_editor_id << std::endl;
+  std::cout << "Player entered room: " << current_room_editor_id << std::endl;
 }
 
 void LevelSystem::activate_starting_room() {
   level->mark_all_rooms_unvisited();
 
-  deactivate_current_room();
+  deactivate_current_room(false);
   set_current_room_editor_id(STARTING_ROOM);
   activate_current_room();
 }
@@ -387,3 +413,17 @@ void LevelSystem::collect_key(INVENTORY color) {
     }
   }
 };
+
+void LevelSystem::clear_all_state() {
+  deactivate_current_room(false);
+  level->mark_all_rooms_unvisited();
+}
+
+void LevelSystem::activate_from_save(std::string id) {
+  // player should already be in the position we want them in so we can ignore
+  // should also already be marked as visited
+  // RoomBuilder &room = level->get_room_by_editor_id(id);
+  // room.has_entered = true;
+  set_current_room_editor_id(id);
+  activate_current_room();
+}

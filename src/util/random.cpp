@@ -1,8 +1,54 @@
 #include "random.hpp"
 
+#include <cstdio>
 #include <ctime>
 
 #include "assert.h"
+
+// I refuse to make this an object
+// - MLK
+
+// Global Mersenne Twister RNG
+static std::mt19937 rng;
+static unsigned int globalSeed = 0;
+
+/**
+ * @brief Sets the global random seed
+ *
+ * @param seed
+ */
+void setGlobalSeed(unsigned int seed) {
+  printf("Setting seed to %d\n", seed);
+  rng.seed(seed);
+  globalSeed = seed;
+}
+
+/**
+ * @brief Sets the global random seed
+ *
+ * @param seed 
+ */
+void setGlobalRandomSeed() {
+  setGlobalSeed(static_cast<unsigned>(std::time(nullptr)));
+}
+
+/**
+ * @brief Sets the global random seed
+ *
+ * @param seed
+ */
+unsigned int getGlobalRandomSeed() {
+  return globalSeed;
+}
+
+/**
+ * @brief Gets the global rng
+ *
+ * @return 
+ */
+std::mt19937 getGlobalRNG() {
+  return rng;
+}
 
 /**
  * @brief Generates a random float between min and max
@@ -12,11 +58,8 @@
  * @return
  */
 float randomFloat(float min, float max) {
-  std::random_device                    rd;         // seed generator
-  std::mt19937                          gen(rd());  // mersenne twister rng
   std::uniform_real_distribution<float> distrib(min, max);
-
-  return distrib(gen);
+  return distrib(rng);
 }
 
 /**
@@ -27,7 +70,8 @@ float randomFloat(float min, float max) {
  * @return
  */
 int getRandInt(int min, int max) {
-  return min + std::rand() % (max - min + 1);
+  std::uniform_int_distribution<int> distrib(min, max);
+  return distrib(rng);
 }
 
 /**
@@ -38,9 +82,5 @@ int getRandInt(int min, int max) {
  */
 bool randomSuccess(float chance) {
   assert(chance >= 0.0 && chance <= 1.0);
-  static std::default_random_engine rng(
-      static_cast<unsigned>(std::time(nullptr)));  // Seed with current time
-  // std::default_random_engine            rng;
-  std::uniform_real_distribution<float> uniform_dist;  // number between 0..1
-  return (chance > uniform_dist(rng));
+  return (chance > randomFloat(0.f, 1.f));
 }

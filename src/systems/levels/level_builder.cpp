@@ -5,12 +5,12 @@
 #include <iostream>
 #include <iterator>
 #include <numeric>
-#include <random>
 #include <string>
 
 #include "level_factories.hpp"
 #include "level_util.hpp"
 #include "map_factories.hpp"
+#include "random.hpp"
 #include "room_builder.hpp"
 #include "spawning.hpp"
 
@@ -40,8 +40,7 @@ LevelBuilder& LevelBuilder::connect(Direction direction, EditorID r_id,
     door_connection_2.room_id   = r_id;
     door_connection_2.exit_door = door_1;
 
-    std::random_device         rd;
-    std::default_random_engine rng(rd());
+    std::mt19937 rng = getGlobalRNG();
 
     // If the door is marked as possibly having key types and neither are boss
     // rooms, then possibly mark this door connection as that color. Shuffle the
@@ -61,13 +60,12 @@ LevelBuilder& LevelBuilder::connect(Direction direction, EditorID r_id,
       }
     }
   } else {
-    if (registry.doorConnections.has(door_1) && registry.doorConnections.has(door_2)) {
-      DoorConnection& door_connection_1 =
-        registry.doorConnections.get(door_1);
-      DoorConnection& door_connection_2 =
-        registry.doorConnections.get(door_2);
-      door_connection_1.key = door_connection_2.key;
-      door_connection_2.key = door_connection_1.key;
+    if (registry.doorConnections.has(door_1) &&
+        registry.doorConnections.has(door_2)) {
+      DoorConnection& door_connection_1 = registry.doorConnections.get(door_1);
+      DoorConnection& door_connection_2 = registry.doorConnections.get(door_2);
+      door_connection_1.key             = door_connection_2.key;
+      door_connection_2.key             = door_connection_1.key;
     }
   }
 
@@ -188,8 +186,7 @@ void LevelBuilder::build_wall_with_random_doors(
 void LevelBuilder::randomize_key_rooms() {
   assert(KEYS.size() == KEY_SPAWN_FUNCTIONS.size());
 
-  std::random_device         rd;
-  std::default_random_engine rng(rd());
+  std::mt19937 rng = getGlobalRNG();
 
   // Randomly sample rooms to place our keys in. Skip the first and last rooms,
   // and copy the traversal vector.
@@ -343,7 +340,9 @@ void LevelBuilder::generate_random_level() {
 
 void LevelBuilder::mark_all_rooms_unvisited() {
   for (const auto& pair : rooms) {
-    get_room_by_editor_id(pair.first).has_entered = false;
+    RoomBuilder &room = get_room_by_editor_id(pair.first);
+    room.has_entered = false;
+    room.saved_entities.clear();
   }
 }
 
@@ -359,10 +358,9 @@ int LevelBuilder::count_edges_with_direction(EditorID  room,
 }
 
 void LevelBuilder::randomize_connection_directions() {
-  std::random_device         rd;
-  std::default_random_engine rng(rd());
-  std::vector<Direction>     directions = {Direction::NORTH, Direction::EAST,
-                                           Direction::SOUTH, Direction::WEST};
+  std::mt19937           rng        = getGlobalRNG();
+  std::vector<Direction> directions = {Direction::NORTH, Direction::EAST,
+                                       Direction::SOUTH, Direction::WEST};
 
   // For each edge in the adjacency list, associate each to one of four
   // randomized directions. Also, expand the adjacency list into a directed
@@ -441,8 +439,7 @@ void LevelBuilder::randomize_connection_directions() {
 }
 
 void LevelBuilder::randomize_connections() {
-  std::random_device         rd;
-  std::default_random_engine rng(rd());
+  std::mt19937 rng = getGlobalRNG();
 
   int  first_room_in_cluster = 0;
   uint normal_rooms;

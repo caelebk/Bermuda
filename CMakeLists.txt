@@ -69,6 +69,8 @@ file(
   src/systems/oxygen/*.hpp
   src/systems/rendering/*.cpp
   src/systems/rendering/*.hpp
+  src/systems/saving/*.cpp
+  src/systems/saving/*.hpp
   src/systems/texts/*.cpp
   src/systems/texts/*.hpp  
   src/systems/world/*.cpp
@@ -110,6 +112,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE src/systems/collisions)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/player)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/audio)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/rendering)
+target_include_directories(${PROJECT_NAME} PRIVATE src/systems/saving)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/texts)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/world)
 target_include_directories(${PROJECT_NAME} PRIVATE src/systems/world_state)
@@ -123,6 +126,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES ENABLE_EXPORTS 0)
 # External header-only libraries in the ext/
 target_include_directories(${PROJECT_NAME} PUBLIC ext/stb_image/)
 target_include_directories(${PROJECT_NAME} PUBLIC ext/gl3w)
+target_include_directories(${PROJECT_NAME} PUBLIC ext/json)
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
@@ -262,3 +266,15 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES}
 if(IS_OS_LINUX)
     target_link_libraries(${PROJECT_NAME} PUBLIC glfw ${CMAKE_DL_LIBS})
 endif()
+
+# This might cause problems but I'm a sweat, add git hash to the save files
+# We ball
+# - Ghadhi
+execute_process(
+    COMMAND git rev-parse HEAD
+    OUTPUT_VARIABLE GIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE GIT_HASH="${GIT_HASH}")
+message(STATUS "Git hash: ${GIT_HASH}")

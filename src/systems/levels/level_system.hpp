@@ -28,7 +28,7 @@ private:
     void activate_doors();
     void activate_floor();
     void activate_current_room();
-    void deactivate_current_room();
+    void deactivate_current_room(bool save=true);
         
     void deactivate_boundary(Entity& boundary);
 
@@ -47,6 +47,9 @@ public:
 
     // Activates the starting room.
     void activate_starting_room();
+
+    void activate_from_save(std::string id);
+    void clear_all_state();
 
     void collect_key(INVENTORY color);
 };

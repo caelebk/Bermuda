@@ -5,6 +5,7 @@
 
 #include "collision_system.hpp"
 #include "enemy_factories.hpp"
+#include "entity_type.hpp"
 #include "environment.hpp"
 #include "oxygen_system.hpp"
 #include "physics_system.hpp"
@@ -127,7 +128,7 @@ Entity createGeyserPos(RenderSystem* renderer, vec2 position,
 
   // make consumable
   Interactable& i = registry.interactable.emplace(entity);
-  i.respawnFn     = respawnGeyser;
+  i.type          = ENTITY_TYPE::GEYSER;
 
   // designate this as a geyser; facilitates room transitions.
   Geyser& geyser      = registry.geysers.emplace(entity);
@@ -201,7 +202,7 @@ Entity createCratePos(RenderSystem* renderer, vec2 position,
   // reuse wall code
   registry.activeWalls.emplace(entity);
   Breakable& b = registry.breakables.emplace(entity);
-  b.respawnFn  = respawnCrate;
+  b.type       = ENTITY_TYPE::BREAKABLE_CRATE;
 
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::BREAKABLE_CRATE, EFFECT_ASSET_ID::TEXTURED,
@@ -234,12 +235,6 @@ Entity respawnCrate(RenderSystem* renderer, EntityState es) {
     return Entity(0);
   }
 
-  // Restore State
-  Position& pos     = registry.positions.get(entity);
-  pos.angle         = es.position.angle;
-  pos.scale         = es.position.scale;
-  pos.originalScale = es.position.originalScale;
-
   Oxygen& o    = registry.oxygen.get(entity);
   float   diff = es.oxygen - o.level;
 
@@ -263,7 +258,7 @@ Entity respawnCrate(RenderSystem* renderer, EntityState es) {
  */
 
 Entity createRockPos(RenderSystem* renderer, vec2 position,
-                      bool checkCollisions) {
+                     bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
   // physics and pos
@@ -292,7 +287,7 @@ Entity createRockPos(RenderSystem* renderer, vec2 position,
   // reuse wall code
   registry.activeWalls.emplace(entity);
   Breakable& b = registry.breakables.emplace(entity);
-  b.respawnFn  = respawnRock;
+  b.type       = ENTITY_TYPE::ROCK;
 
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::ROCK, EFFECT_ASSET_ID::TEXTURED,
@@ -349,7 +344,7 @@ Entity createMetalCratePos(RenderSystem* renderer, vec2 position,
   // reuse wall code
   registry.activeWalls.emplace(entity);
   Breakable& b = registry.breakables.emplace(entity);
-  b.respawnFn  = respawnMetalCrate;
+  b.type       = ENTITY_TYPE::METAL_CRATE;
 
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::METAL_CRATE, EFFECT_ASSET_ID::TEXTURED,
@@ -413,7 +408,7 @@ Entity createSharkmanCratesPos(RenderSystem* renderer, vec2 position,
  * @return
  */
 Entity createPressurePlatePos(RenderSystem* renderer, vec2 position,
-                           bool checkCollisions) {
+                              bool checkCollisions) {
   // Reserve an entity
   auto entity = Entity();
 
@@ -434,10 +429,10 @@ Entity createPressurePlatePos(RenderSystem* renderer, vec2 position,
 
   // make consumable
   Interactable& i = registry.interactable.emplace(entity);
-  i.respawnFn     = respawnPressurePlate;
+  i.type          = ENTITY_TYPE::PRESSURE_PLATE;
 
   PressurePlate& pp = registry.pressurePlates.emplace(entity);
-  pp.active = false;
+  pp.active         = false;
 
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::PRESSURE_PLATE_OFF, EFFECT_ASSET_ID::TEXTURED,

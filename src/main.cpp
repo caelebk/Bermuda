@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "ai_system.hpp"
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
@@ -10,7 +12,9 @@
 #include "collision_system.hpp"
 #include "level_system.hpp"
 #include "physics_system.hpp"
+#include "random.hpp"
 #include "render_system.hpp"
+#include "saving_system.hpp"
 #include "world_system.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
@@ -47,7 +51,7 @@ Entity torpedo_gun;
 Entity shrimp_gun;
 
 // Entry point
-int main() {
+int main(int argc, char* argv[]) {
   // Global systems
   WorldSystem     world;
   RenderSystem    renderer;
@@ -66,9 +70,28 @@ int main() {
     return EXIT_FAILURE;
   }
 
+  // optionally parse a seed input
+  if (argc == 2) {
+    // Convert argument to unsigned int
+    char*         end;
+    unsigned long value = std::strtoul(argv[1], &end, 10);
+
+    // Validate the input
+    if (*end != '\0' || value > std::numeric_limits<unsigned int>::max()) {
+      // not a number use random seed
+      setGlobalRandomSeed();
+    } else {
+      setGlobalSeed(static_cast<unsigned int>(value));
+    }
+  } else {
+    setGlobalRandomSeed();
+  }
+
   // Generate a level.
   LevelBuilder level_builder = LevelBuilder();
   level_builder.generate_random_level();
+
+  init_save_system(&level_builder, &level, &renderer);
 
   // initialize the main systems
   level.init(&renderer, &level_builder);

@@ -12,6 +12,7 @@
 #include "ai.hpp"
 #include "debuff.hpp"
 #include "enemy.hpp"
+#include "entity_type.hpp"
 #include "oxygen.hpp"
 #include "player.hpp"
 #include "tiny_ecs_registry.hpp"
@@ -611,7 +612,7 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
   if (registry.bosses.has(enemy)) {
     Boss& boss = registry.bosses.get(enemy);
     // if sharkman hit, instantly charge at player
-    if (boss.type == BossType::SHARKMAN) {
+    if (boss.type == ENTITY_TYPE::SHARKMAN) {
       if (!registry.trackPlayer.has(enemy)) {
         boss.curr_cd = SHARKMAN_AI_CD;
         removeFromAI(enemy);
@@ -845,7 +846,7 @@ void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
 
   if (registry.bosses.has(enemy)) {
     Boss& boss = registry.bosses.get(enemy);
-    if (boss.type == BossType::SHARKMAN) {
+    if (boss.type == ENTITY_TYPE::SHARKMAN) {
       // break crates if sharkman hits them while targeting player
       if (registry.breakables.has(wall) && registry.trackPlayer.has(enemy) &&
           is_tracking(enemy)) {

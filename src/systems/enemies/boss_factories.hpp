@@ -35,6 +35,7 @@
 // Create the tutorial
 Entity createTutorial(RenderSystem* renderer, vec2 position, bool checkCollisions);
 Entity createCrabBossPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity respawnCrabBoss(RenderSystem* renderer, EntityState es);
 
 //////////////////////////////////////////////////////////////
 // SHARKMAN
@@ -56,5 +57,6 @@ Entity createCrabBossPos(RenderSystem* renderer, vec2 position, bool checkCollis
 
 Entity createSharkmanPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
 Entity createInitSharkmanPos(RenderSystem* renderer, vec2 position, bool checkCollisions = true);
+Entity respawnSharkman(RenderSystem* renderer, EntityState es);
 void addSharkmanWander();
 void addSharkmanTarget();

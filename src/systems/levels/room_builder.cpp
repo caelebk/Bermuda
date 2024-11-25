@@ -1,7 +1,7 @@
-#include <random>
 #include <iostream>
 
 #include "level_factories.hpp"
+#include "random.hpp"
 #include "room_builder.hpp"
 
 RoomBuilder::RoomBuilder(): pointer({0, 0}) {
@@ -184,20 +184,14 @@ bool RoomBuilder::is_in_room(vec2& position) {
 
 vec2 RoomBuilder::rejection_sample() {
   SpaceBoundingBox &box = registry.bounding_boxes.get(entity);
-  std::random_device rd;
-  std::mt19937 generate(rd());
   // We generate random coordinates inside the bounding box. Theoretically, this
   // could be slow if the bounding box's area is far larger than a room; think
   // of a case like an 'L'-shaped room. Since randomized levels are only
   // generated once, and we can always code level generation so that our rooms
   // are 'decently' rectangular however, it should suffice.
-  std::uniform_int_distribution<> random_x_generator(box.minimum_x,
-                                                     box.maximum_x);
-  std::uniform_int_distribution<> random_y_generator(box.minimum_y,
-                                                     box.maximum_y);
   while (true) {
-    vec2 position = {random_x_generator(generate),
-                     random_y_generator(generate)};
+    vec2 position = {randomFloat(box.minimum_x, box.maximum_x),
+                     randomFloat(box.minimum_y, box.maximum_y)};
     if (is_in_room(position)) {
       position += ROOM_ORIGIN_POS;
       return position;

@@ -58,7 +58,7 @@ Direction get_opposite_direction(Direction direction);
 class LevelBuilder
 {
 private:
-    std::unordered_map<std::string, RoomBuilder> rooms;
+    // std::unordered_map<std::string, RoomBuilder> rooms;
     std::vector<EditorID> traversal; // An ordered list of the guaranteed path from the start to end of this level.
 
     void connect_doors();
@@ -106,4 +106,7 @@ public:
     void generate_random_level();
 
     void mark_all_rooms_unvisited();
+
+    // for i have become death
+    std::unordered_map<std::string, RoomBuilder> rooms;
 };
