@@ -511,12 +511,20 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
 
-  // Start Game
-  if (action == GLFW_RELEASE && key == GLFW_KEY_SPACE &&
-      !registry.deathTimers.has(player) && is_start) {
-    is_intro = true;
+  // Start Game or skip cutscene.
+  if (action == GLFW_RELEASE && 
+      key == GLFW_KEY_SPACE && 
+      !registry.deathTimers.has(player)) {
+    if (is_start) {
+      is_intro = true;
+    } else if (is_intro) {
+      is_intro = false;
+    } else if (is_krab_cutscene) {
+      is_krab_cutscene = false;
+    } else if (is_sharkman_cutscene) {
+      is_sharkman_cutscene = false;
+    }
   }
-
   // Resetting game
   if (action == GLFW_RELEASE && key == GLFW_KEY_R && !cannot_reset_state) {
     int w, h;

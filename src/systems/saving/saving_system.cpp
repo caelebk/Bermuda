@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <iostream>
 #include <ostream>
+#include <sstream>
 
 #include "common.hpp"
 #include "json.hpp"
