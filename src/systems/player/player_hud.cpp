@@ -232,6 +232,9 @@ void collectRedKey(RenderSystem* renderer) {
   redKeyPos.scale         = RED_KEY_SCALE_FACTOR * RED_KEY_BOUNDING_BOX;
   redKeyPos.originalScale = redKeyPos.scale;
 
+  // add to keys
+  registry.keys.emplace(redKey);
+
   // make playerHUD
   registry.playerHUD.emplace(redKey);
 
@@ -265,6 +268,9 @@ void collectBlueKey(RenderSystem* renderer) {
   blueKeyPos.scale         = BLUE_KEY_SCALE_FACTOR * BLUE_KEY_BOUNDING_BOX;
   blueKeyPos.originalScale = blueKeyPos.scale;
 
+  // add to keys
+  registry.keys.emplace(blueKey);
+
   // make playerHUD
   registry.playerHUD.emplace(blueKey);
 
@@ -297,6 +303,9 @@ void collectYellowKey(RenderSystem* renderer) {
   yellowKeyPos.position  = YELLOW_KEY_POS;
   yellowKeyPos.scale     = YELLOW_KEY_SCALE_FACTOR * YELLOW_KEY_BOUNDING_BOX;
   yellowKeyPos.originalScale = yellowKeyPos.scale;
+
+  // add to keys
+  registry.keys.emplace(yellowKey);
 
   // make playerHUD
   registry.playerHUD.emplace(yellowKey);

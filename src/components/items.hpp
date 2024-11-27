@@ -5,9 +5,7 @@
 #include "respawn.hpp"
 #include "entity_type.hpp"
 
-// struct Key {
-//   INVENTORY color;
-// };
+struct Key {};
 
 // anything the player can pick up, temp
 struct Consumable {

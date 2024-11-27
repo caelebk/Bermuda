@@ -16,6 +16,7 @@
 #include "level_system.hpp"
 #include "physics.hpp"
 #include "player.hpp"
+#include "player_controls.hpp"
 #include "player_hud.hpp"
 #include "random.hpp"
 #include "render_system.hpp"
@@ -203,6 +204,21 @@ static bool save_level_info(json& save_file) {
 }
 
 /**
+ * @brief Saves the whether or not we've encountered certain things
+ *
+ * @param save_file
+ * @return
+ */
+bool save_globals_to_file(json& save_file) {
+  save_file["globals"] = {
+      {"krab_boss_encountered", krab_boss_encountered},
+      {"sharkman_encountered", sharkman_encountered},
+  };
+
+  return true;
+}
+
+/**
  * @brief Saves all game state to a json file
  *
  * @return
@@ -220,6 +236,11 @@ bool save_game_to_file() {
   }
 
   if (!save_level_info(save_file)) {
+    std::cout << "Error saving to file" << std::endl;
+    return false;
+  }
+
+  if (!save_globals_to_file(save_file)) {
     std::cout << "Error saving to file" << std::endl;
     return false;
   }
@@ -305,6 +326,7 @@ static bool validate_enemies(json& save_file) {
  * @return
  */
 static bool valid_save_file(json& save_file) {
+  // meta data sanity checks
   if (!save_file.contains("meta") || !save_file["meta"].contains("hash") ||
       !save_file["meta"].contains("seed")) {
     std::cout << "Invalid meta-data" << std::endl;
@@ -373,6 +395,13 @@ static bool valid_save_file(json& save_file) {
     }
   }
 
+  // global specific checks
+  if (!save_file.contains("globals") ||
+      !save_file["globals"].contains("krab_boss_encountered") ||
+      !save_file["globals"].contains("sharkman_encountered")) {
+    return false;
+  }
+
   return true;
 }
 
@@ -390,6 +419,10 @@ static struct Position load_position_from_json(json& save_file) {
 }
 
 static bool load_player_from_json(json& save_file) {
+  // make them hold the harpoon because it's too annoying
+  doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+  changeSelectedCounterColour(INVENTORY::HARPOON);
+
   // update the player position
   Position pos = load_position_from_json(save_file);
   registry.positions.remove(player);
@@ -397,8 +430,8 @@ static bool load_player_from_json(json& save_file) {
   registry.positions.insert(player, pos);
 
   // update the weapon
-  Position& weapon = registry.positions.get(player_weapon);
-  weapon.scale.x = abs(weapon.scale.x);
+  Position& weapon  = registry.positions.get(player_weapon);
+  weapon.scale.x    = abs(weapon.scale.x);
   weapon.position.x = abs(weapon.position.x);
   if (pos.position.x < 0) {
     weapon.position.x *= -1;
@@ -413,23 +446,39 @@ static bool load_player_from_json(json& save_file) {
   registry.positions.remove(p.collisionMesh);
   registry.positions.insert(p.collisionMesh, pos);
 
-  // update inventory
+  // update Weapons
   Inventory& inventory = registry.inventory.emplace(player);
   inventory.nets       = save_file["inventory"]["nets"];
   inventory.shrimp     = save_file["inventory"]["shrimp"];
   inventory.torpedos   = save_file["inventory"]["torpedos"];
   inventory.concussors = save_file["inventory"]["concussors"];
-  inventory.redKey     = save_file["inventory"]["redKey"];
-  inventory.blueKey    = save_file["inventory"]["blueKey"];
-  inventory.yellowKey  = save_file["inventory"]["yellowKey"];
 
   updateInventoryCounter(renderer, INVENTORY::NET);
   updateInventoryCounter(renderer, INVENTORY::SHRIMP);
   updateInventoryCounter(renderer, INVENTORY::TORPEDO);
   updateInventoryCounter(renderer, INVENTORY::CONCUSSIVE);
-  updateInventoryCounter(renderer, INVENTORY::RED_KEY);
-  updateInventoryCounter(renderer, INVENTORY::BLUE_KEY);
-  updateInventoryCounter(renderer, INVENTORY::YELLOW_KEY);
+
+  // Update Keys
+  for (Entity e : registry.keys.entities) {
+    // remove all key entities in case you pick up a key before you reload
+    registry.remove_all_components_of(e);
+  }
+
+  inventory.redKey    = save_file["inventory"]["redKey"];
+  inventory.blueKey   = save_file["inventory"]["blueKey"];
+  inventory.yellowKey = save_file["inventory"]["yellowKey"];
+
+  if (inventory.redKey) {
+    collectRedKey(renderer);
+  }
+
+  if (inventory.blueKey) {
+    collectBlueKey(renderer);
+  }
+
+  if (inventory.yellowKey) {
+    collectYellowKey(renderer);
+  }
 
   // update oxygen
   Oxygen& oxygen = registry.oxygen.get(player);
@@ -490,8 +539,17 @@ bool load_game_from_file() {
       // validate it
       if (!valid_save_file(save_file)) {
         std::cout << "Failed to load save file: Invalid" << std::endl;
+        file.close();
         return false;
       }
+
+      if (save_file["meta"]["seed"] != getGlobalRandomSeed()) {
+        std::cout << "Failed to load save file: Seed doesn't match"
+                  << std::endl;
+        file.close();
+        return false;
+      }
+
       std::cout << "Json is validated" << std::endl;
 
       // assume it's good from here, just nuke everything
@@ -515,12 +573,19 @@ bool load_game_from_file() {
         std::cout << "loaded room " << id << std::endl;
       }
 
+      // set globals again
+      krab_boss_encountered = save_file["globals"]["krab_boss_encountered"];
+      sharkman_encountered = save_file["globals"]["sharkman_encountered"];
+
       std::cout << "activating from save" << std::endl;
       level_system->activate_from_save(save_file["current_room"]);
+
+      registry.list_all_components();
 
     } catch (const nlohmann::json::parse_error& e) {
       std::cerr << "JSON parsing error: " << e.what() << std::endl;
     }
+    file.close();
   } else {
     std::cout << "Failed to load save file: Failed to open" << std::endl;
     return false;
@@ -528,4 +593,28 @@ bool load_game_from_file() {
 
   std::cout << "Successfully loaded from file" << std::endl;
   return true;
+}
+
+/**
+ * @brief loads from a fresh state
+ *
+ * @return
+ */
+unsigned int get_seed_from_save_file() {
+  std::ifstream file(BERMUDA_SAVE_NAME);
+  unsigned int  seed = 0;
+  if (file.is_open()) {
+    try {
+      json save_file;
+      file >> save_file;
+      if (save_file.contains("meta") && save_file["meta"].contains("seed")) {
+        seed = save_file["meta"]["seed"];
+      }
+    } catch (const nlohmann::json::parse_error& e) {
+      std::cerr << "JSON parsing error: " << e.what() << std::endl;
+    }
+    file.close();
+  }
+
+  return seed;
 }

@@ -3,6 +3,7 @@
 
 #include "abilities.hpp"
 #include "ai.hpp"
+#include "audio.hpp"
 #include "components.hpp"
 #include "enemy.hpp"
 #include "environment.hpp"
@@ -11,9 +12,8 @@
 #include "oxygen.hpp"
 #include "physics.hpp"
 #include "player.hpp"
-#include "tiny_ecs.hpp"
-#include "audio.hpp"
 #include "status.hpp"
+#include "tiny_ecs.hpp"
 
 class ECSRegistry {
   // Callbacks to remove a particular or all entities in the system
@@ -34,16 +34,17 @@ class ECSRegistry {
   ComponentContainer<PlayerWeapon>        playerWeapons;
   ComponentContainer<PlayerProjectile>    playerProjectiles;
   ComponentContainer<Inventory>           inventory;
+  ComponentContainer<Key>                 keys;
   ComponentContainer<PlayerHUD>           playerHUD;
   ComponentContainer<InventoryCounter>    inventoryCounters;
   ComponentContainer<Communication>       communications;
 
   // enemy related
-  ComponentContainer<Deadly>         deadlys;
+  ComponentContainer<Deadly>          deadlys;
   ComponentContainer<EnemyProjectile> enemyProjectiles;
-  ComponentContainer<Boss>           bosses;
-  ComponentContainer<ModifyOxygenCD> modifyOxygenCd;
-  ComponentContainer<Lobster> lobsters;
+  ComponentContainer<Boss>            bosses;
+  ComponentContainer<ModifyOxygenCD>  modifyOxygenCd;
+  ComponentContainer<Lobster>         lobsters;
 
   // oxygen related
   ComponentContainer<Oxygen>         oxygen;
@@ -55,8 +56,8 @@ class ECSRegistry {
   ComponentContainer<WanderSquare>       wanderSquares;
   ComponentContainer<TracksPlayer>       trackPlayer;
   ComponentContainer<TracksPlayerRanged> trackPlayerRanged;
-  ComponentContainer<Group> groups;
-  ComponentContainer<EntityGroup> entityGroups;
+  ComponentContainer<Group>              groups;
+  ComponentContainer<EntityGroup>        entityGroups;
   ComponentContainer<Shooter>            shooters;
 
   // abilities related
@@ -87,10 +88,10 @@ class ECSRegistry {
   ComponentContainer<PressurePlate>    pressurePlates;
 
   // status related
-  ComponentContainer<LowOxygen>     lowOxygen;
-  ComponentContainer<Stunned>       stunned;
-  ComponentContainer<KnockedBack>   knockedback;
-  ComponentContainer<Attacked>      attacked;
+  ComponentContainer<LowOxygen>   lowOxygen;
+  ComponentContainer<Stunned>     stunned;
+  ComponentContainer<KnockedBack> knockedback;
+  ComponentContainer<Attacked>    attacked;
 
   // audio related
   ComponentContainer<Sound> sounds;
@@ -122,6 +123,7 @@ class ECSRegistry {
     registry_list.push_back(&playerWeapons);
     registry_list.push_back(&playerProjectiles);
     registry_list.push_back(&inventory);
+    registry_list.push_back(&keys);
     registry_list.push_back(&playerHUD);
     registry_list.push_back(&inventoryCounters);
     registry_list.push_back(&communications);
@@ -206,27 +208,28 @@ class ECSRegistry {
   void remove_all_components_of(Entity e) {
     // player, collision, emoting oxygen
     if (oxygen.has(e)) {
-      Oxygen &o = oxygen.get(e);
+      Oxygen& o = oxygen.get(e);
       remove_all_components_of(o.oxygenBar);
       remove_all_components_of(o.backgroundBar);
     }
 
     if (entityGroups.has(e)) {
       // remove from group if they are in one
-      EntityGroup &eg = entityGroups.get(e);
+      EntityGroup& eg = entityGroups.get(e);
       if (groups.has(eg.group)) {
-        Group &g = groups.get(eg.group);
-        g.members.erase(std::remove(g.members.begin(), g.members.end(), e), g.members.end());
+        Group& g = groups.get(eg.group);
+        g.members.erase(std::remove(g.members.begin(), g.members.end(), e),
+                        g.members.end());
       }
     }
 
     if (players.has(e)) {
-      Player &p = players.get(e);
+      Player& p = players.get(e);
       remove_all_components_of(p.weapon);
     }
 
     if (emoting.has(e)) {
-      Emoting &ee = emoting.get(e); 
+      Emoting& ee = emoting.get(e);
       remove_all_components_of(ee.child);
     }
 

@@ -15,7 +15,9 @@
 #include "random.hpp"
 #include "render_system.hpp"
 #include "saving_system.hpp"
+#include "world_state.hpp"
 #include "world_system.hpp"
+// #include "game_start_system.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -61,6 +63,9 @@ int main(int argc, char* argv[]) {
   CollisionSystem collisions;
   LevelSystem     level;
 
+  // world seed
+  unsigned int seed = 0;
+
   // Initializing window
   GLFWwindow* window = world.create_window();
   if (!window) {
@@ -77,31 +82,58 @@ int main(int argc, char* argv[]) {
     unsigned long value = std::strtoul(argv[1], &end, 10);
 
     // Validate the input
-    if (*end != '\0' || value > std::numeric_limits<unsigned int>::max()) {
-      // not a number use random seed
-      setGlobalRandomSeed();
-    } else {
-      setGlobalSeed(static_cast<unsigned int>(value));
+    if (!(*end != '\0' || value > std::numeric_limits<unsigned int>::max())) {
+      seed = static_cast<unsigned int>(value);
     }
-  } else {
+  }
+
+  // Initialize the bare minimum to get the menu screen working
+  renderer.init(window);
+  audios.init();
+
+  // Menu Screen
+  is_start = true;
+  registry.remove_all_components_of(overlay);
+  overlay = createOverlay(&renderer);
+  overlayState(TEXTURE_ASSET_ID::START_OVERLAY);
+  while (!world.is_over() && !world.game_started) {
+    glfwPollEvents();
+    renderer.draw();
+  }
+
+  if (world.is_over()) {
+    return EXIT_SUCCESS;
+  }
+
+  registry.remove_all_components_of(overlay);
+
+  // we loaded from a save file, set the seed again
+  if (world.load_from_save) {
+    seed = get_seed_from_save_file();
+  }
+
+  // seed is 0 if we have a fresh start, or loading failed
+  if (seed == 0) {
     setGlobalRandomSeed();
+  } else {
+    setGlobalSeed(seed);
   }
 
   // Generate a level.
   LevelBuilder level_builder = LevelBuilder();
   level_builder.generate_random_level();
 
-  init_save_system(&level_builder, &level, &renderer);
-
   // initialize the main systems
+  init_save_system(&level_builder, &level, &renderer);
   level.init(&renderer, &level_builder);
   collisions.init(&renderer, &level);
-  renderer.init(window);
   world.init(&renderer, &level);
-  audios.init();
   ai.init(&renderer);
 
-  is_start = true;
+  // if we loaded from a save, load the save file
+  if (seed != 0 && world.load_from_save) {
+    load_game_from_file();
+  }
 
   // variable timestep loop
   auto t = Clock::now();

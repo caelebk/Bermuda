@@ -34,6 +34,8 @@ class WorldSystem {
   // Should the game be over ?
   bool is_over() const;
 
+  bool          game_started = false;
+  bool          load_from_save = false;
   private:
   // Input callback functions
   void on_key(int key, int, int action, int mod);

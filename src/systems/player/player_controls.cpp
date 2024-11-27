@@ -5,6 +5,7 @@
 #include "physics_system.hpp"
 #include "player_factories.hpp"
 #include "player_hud.hpp"
+#include "tiny_ecs_registry.hpp"
 
 /**
  * @brief Checks whether or not the spawn is valid or invalid based on spawn
@@ -50,6 +51,10 @@ float player_texture_num = 0.f;
 bool player_movement(int key, int action, int mod) {
   // Player movement attributes
   // Player oxygen attributes
+  if (!registry.players.has(player) || !registry.oxygen.has(player)) {
+    return false;
+  }
+
   Player& keys          = registry.players.get(player);
   Oxygen& player_oxygen = registry.oxygen.get(player);
 

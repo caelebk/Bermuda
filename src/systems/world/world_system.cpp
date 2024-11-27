@@ -17,10 +17,10 @@
 #include "player_controls.hpp"
 #include "player_factories.hpp"
 #include "player_hud.hpp"
+#include "saving_system.hpp"
 #include "spawning.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "world_state.hpp"
-#include "saving_system.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>
@@ -278,7 +278,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       overlay = createOverlay(renderer);
     }
 
-    //play sound effect at start of transition
+    // play sound effect at start of transition
     if (!registry.renderRequests.has(overlay)) {
       registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::BOSS_INTRO, 10000));
     }
@@ -308,8 +308,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     if (!registry.positions.has(overlay)) {
       overlay = createOverlay(renderer);
     }
-    
-    //play sound effect at start of transition
+
+    // play sound effect at start of transition
     if (!registry.renderRequests.has(overlay)) {
       registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::BOSS_INTRO, 10000));
     }
@@ -337,7 +337,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     }
     overlayState(TEXTURE_ASSET_ID::SHARKMAN_OVERLAY);
   } else if (is_death) {
-    //play sound effect at start of transition
+    // play sound effect at start of transition
     if (!registry.renderRequests.has(overlay)) {
       registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::END_SCREEN, 10000));
     }
@@ -431,10 +431,12 @@ void WorldSystem::restart_game() {
   // registry.list_all_components();
 
   registry.remove_all_components_of(overlay);
-  overlay   = createOverlay(renderer);
-  is_death  = false;
-  is_end    = false;
-  is_paused = false;
+  overlay               = createOverlay(renderer);
+  is_death              = false;
+  is_end                = false;
+  is_paused             = false;
+  krab_boss_encountered = false;
+  sharkman_encountered  = false;
 
   player = createPlayer(
       renderer,
@@ -511,9 +513,26 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
 
+  // Start Game
+  if (is_start) {
+    if (action == GLFW_RELEASE && key == GLFW_KEY_SPACE) {
+      // start fresh
+      is_intro       = true;
+      game_started   = true;
+      load_from_save = false;
+    } else if (action == GLFW_RELEASE && key == GLFW_KEY_L) {
+      // start from save
+      is_start = false;  // remove start overlay
+      is_intro =
+          false;  // no cutscene because andy said "nah" and requested changes
+      game_started   = true;
+      load_from_save = true;
+    }
+    return;
+  }
+
   // Start Game or skip cutscene.
-  if (action == GLFW_RELEASE && 
-      key == GLFW_KEY_SPACE && 
+  if (action == GLFW_RELEASE && key == GLFW_KEY_SPACE &&
       !registry.deathTimers.has(player)) {
     if (is_start) {
       is_intro = true;
@@ -525,14 +544,18 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
       is_sharkman_cutscene = false;
     }
   }
+  if (is_death && action == GLFW_RELEASE && GLFW_KEY_L) {
+    restart_game();
+    load_game_from_file();
+    return;
+  }
   // Resetting game
   if (action == GLFW_RELEASE && key == GLFW_KEY_R && !cannot_reset_state) {
-    int w, h;
-    glfwGetWindowSize(window, &w, &h);
-    krab_boss_encountered = false;
-    sharkman_encountered = false;
+    // int w, h;
+    // glfwGetWindowSize(window, &w, &h);
     restart_game();
     tutorialRoomDialogue(renderer);
+    return;
   }
 
   // Toggling game pause
@@ -546,15 +569,18 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   }
 
   if (action == GLFW_RELEASE && key == GLFW_KEY_K &&
-      !registry.deathTimers.has(player) && !cannot_pause_state) {
+      !registry.deathTimers.has(player) && is_paused) {
+    depleteOxygen(player);
     save_game_to_file();
   }
 
   if (action == GLFW_RELEASE && key == GLFW_KEY_L &&
-      !registry.deathTimers.has(player) && !cannot_pause_state) {
+      !registry.deathTimers.has(player) && is_paused) {
+    is_death  = false;
+    is_end    = false;
+    is_paused = false;
     load_game_from_file();
   }
-
 
   if (!is_frozen_state) {
     /////////////////////////////////////
