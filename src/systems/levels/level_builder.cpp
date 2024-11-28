@@ -502,7 +502,7 @@ void LevelBuilder::randomize_connections() {
       // Again, since the boss room should be sparse, decrement max_connections
       // by one.
       int num_connections =
-          getRandInt(0, max_connections - rooms[room_id].connections.size());
+          getRandInt(0, max_connections - 1 - rooms[room_id].connections.size());
 
       while (num_connections > 0) {
         int      other_room;
@@ -518,7 +518,8 @@ void LevelBuilder::randomize_connections() {
             // 3. It already has the maximum number of connections.
             other_room_id == room_id ||
             rooms[other_room_id].connections.count(room_id) > 0 ||
-            rooms[other_room_id].connections.size() >= max_connections);
+            rooms[other_room_id].connections.size() >= max_connections ||
+            other_room == random_path.back());
 
         // Add the connection.
         rooms[room_id].connections[other_room_id];
