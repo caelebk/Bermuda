@@ -84,3 +84,7 @@ struct Bubble {};
 struct Breakable {
   ENTITY_TYPE type;
 };
+
+struct Ambient {
+  ENTITY_TYPE type;
+};

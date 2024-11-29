@@ -38,6 +38,10 @@ const std::unordered_map<
         {ENTITY_TYPE::YELLOW_KEY, createYellowKeyRespawnFn},
         {ENTITY_TYPE::KRAB_BOSS, respawnCrabBoss},
         {ENTITY_TYPE::SHARKMAN, respawnSharkman},
+        {ENTITY_TYPE::KELP, respawnKelp},
+        {ENTITY_TYPE::CORAL, respawnCoral},
+        {ENTITY_TYPE::JUNK, respawnJunk},
+        {ENTITY_TYPE::BONES, respawnBones},
 };
 
 EntitySave::EntitySave(EntityState es) {
@@ -73,6 +77,9 @@ EntitySave::EntitySave(Entity e) {
   } else if (registry.breakables.has(e)) {
     Breakable& b  = registry.breakables.get(e);
     this->es.type = b.type;
+  } else if (registry.ambient.has(e)) {
+    Ambient& a  = registry.ambient.get(e);
+    this->es.type = a.type;
   } else {
     assert("You're trying to record an EntitySave but it isn't configured" &&
            false);  // literally just die

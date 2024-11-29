@@ -172,6 +172,11 @@ static bool save_current_room(json& save_file, std::string id,
     entity_state_to_json(save_file[id]["saved_enemies"][idx++], es.es);
   }
 
+  for (Entity e : registry.ambient.entities) {
+    EntitySave es = EntitySave(e);
+    entity_state_to_json(save_file[id]["saved_enemies"][idx++], es.es);
+  }
+
   return true;
 }
 

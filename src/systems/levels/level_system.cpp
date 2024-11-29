@@ -86,6 +86,13 @@ void LevelSystem::spawn() {
         execute_config_rand_chance(spawn_function_group, current_room, renderer,
                                    0.5);
       }
+      for (const auto& ambient_function_group :
+           current_room.room_ambient_function_groups) {
+        // TODO: remove this out of here and pull it into the correct level
+        // placements.
+        execute_config_rand_chance(ambient_function_group, current_room,
+                                   renderer, 0.25);
+      }
       for (const auto& fixed_spawn_function_group :
            current_room.room_fixed_spawn_function_groups) {
         std::cout << "Should have spawned key" << std::endl;
@@ -274,6 +281,15 @@ void LevelSystem::deactivate_current_room(bool save) {
 
   while (registry.breakables.entities.size() > 0) {
     Entity e = registry.breakables.entities.back();
+    if (save) {
+      level->get_room_by_editor_id(current_room_editor_id)
+          .saved_entities.push_back(EntitySave(e));
+    }
+    registry.remove_all_components_of(e);
+  }
+
+  while (registry.ambient.entities.size() > 0) {
+    Entity e = registry.ambient.entities.back();
     if (save) {
       level->get_room_by_editor_id(current_room_editor_id)
           .saved_entities.push_back(EntitySave(e));

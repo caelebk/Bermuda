@@ -27,6 +27,7 @@
 #include <GLFW/glfw3.h>
 
 #include <cassert>
+#include <cstdio>
 #include <damage.hpp>
 #include <iostream>
 #include <sstream>
@@ -546,7 +547,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
       overlay_timer = OVERLAY_TIMER_DURATION;
     }
   }
-  if (is_death && action == GLFW_RELEASE && GLFW_KEY_L) {
+
+  if (is_death && action == GLFW_RELEASE && key == GLFW_KEY_L) {
     restart_game();
     load_game_from_file();
     return;
@@ -573,13 +575,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   }
 
   if (action == GLFW_RELEASE && key == GLFW_KEY_S &&
-      !registry.deathTimers.has(player) && is_paused) {
+      !registry.deathTimers.has(player) && is_paused && !cannot_pause_state) {
     depleteOxygen(player);
     displaySaveStatus(renderer, save_game_to_file());
   }
 
   if (action == GLFW_RELEASE && key == GLFW_KEY_L &&
-      !registry.deathTimers.has(player) && is_paused) {
+      !registry.deathTimers.has(player) && is_paused && !cannot_pause_state) {
     is_death  = false;
     is_end    = false;
     is_paused = false;

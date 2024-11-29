@@ -87,6 +87,8 @@ void LevelBuilder::mark_difficulty_regions() {
       EditorID room = std::to_string(room_index);
       rooms[room].room_spawn_function_groups.push_back(
           ROOM_CLUSTER_SPAWN_FUNCTION_GROUPS[i]);
+      rooms[room].room_ambient_function_groups.push_back(
+          ROOM_CLUSTER_AMBIENT_FUNCTION_GROUPS[i]);
       rooms[room].room_pack_spawn_function_groups.push_back(
           ROOM_CLUSTER_PACK_SPAWN_FUNCTION_GROUPS[i]);
       room_index++;

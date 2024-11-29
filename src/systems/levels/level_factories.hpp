@@ -25,6 +25,7 @@ const std::vector<int> ROOM_CLUSTERS = {1, 5, 5, 5}; // 16 rooms total.
 // This vector controls index-wise the spawn function groups of the levels you defined in the above line, i.e the first (tutorial level) 
 // spawns nothing, the next spawns LVL_1 enemies, etc. Must have size == to ROOM_CLUSTERS.size().
 const std::vector<SpawnFunctionGroup> ROOM_CLUSTER_SPAWN_FUNCTION_GROUPS = {EMPTY, LVL_1_RAND_POS, LVL_2_RAND_POS, LVL_3_RAND_POS};
+const std::vector<SpawnFunctionGroup> ROOM_CLUSTER_AMBIENT_FUNCTION_GROUPS = {EMPTY, LVL_1_AMBIENT, LVL_2_AMBIENT, LVL_3_AMBIENT};
 const std::vector<SpawnFunctionGroup> ROOM_CLUSTER_PACK_SPAWN_FUNCTION_GROUPS = {EMPTY, LVL_1_PACKS, LVL_2_PACKS, EMPTY};
 
 const std::vector<int> MINIBOSS_ROOMS = {0, 5, 10};

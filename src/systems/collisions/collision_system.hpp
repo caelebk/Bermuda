@@ -95,6 +95,9 @@ class CollisionSystem {
   // Wall <-> Player Projectile
   void resolveWallPlayerProjCollision(Entity wall, Entity player_proj);
 
+  // Canister <-> Player Projectile
+  void resolveCanisterPlayerProjCollision(Entity canister, Entity player_proj);
+
   // Wall <-> Enemy Projectile
   void resolveWallEnemyProjCollision(Entity wall, Entity enemy_proj);
 

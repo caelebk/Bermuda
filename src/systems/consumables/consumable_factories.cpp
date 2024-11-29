@@ -119,7 +119,9 @@ Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position, bool check
   auto& refill  = registry.oxygenModifiers.emplace(entity);
   refill.amount = OXYGEN_CANISTER_QTY;
 
-  // physics and pos
+  // aoe for explosion
+  AreaOfEffect& aoe      = registry.aoe.emplace(entity);
+  aoe.radius = OXYGEN_CANISTER_DAMAGE_RADIUS;
 
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::OXYGEN_CANISTER, EFFECT_ASSET_ID::TEXTURED,

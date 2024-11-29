@@ -37,6 +37,7 @@ Entity respawnGeyser(RenderSystem* renderer, EntityState es);
 Entity createCratePos(RenderSystem* renderer, vec2 position,
                       bool checkCollisions = true);
 Entity respawnCrate(RenderSystem* renderer, EntityState es);
+
 //////////////////////////////////////////////////////////////
 // ROCK
 //////////////////////////////////////////////////////////////
@@ -64,3 +65,47 @@ Entity createSharkmanCratesPos(RenderSystem* renderer, vec2 position,
 Entity createPressurePlatePos(RenderSystem* renderer, vec2 position,
                            bool checkCollisions = true);
 Entity respawnPressurePlate(RenderSystem* renderer, EntityState es);
+
+
+//////////////////////////////////////////////////////////////
+// Shells
+//////////////////////////////////////////////////////////////
+#define AMBIENT_MIN_SCALE 0.1
+#define AMBIENT_MAX_SCALE 0.2
+#define SHELL_BOUNDING_BOX vec2(200.f, 200.f)  // vec2(PNG_width, PNG_height)
+Entity createShellPos(RenderSystem* renderer, vec2 position,
+                           bool checkCollisions = true);
+Entity respawnShell(RenderSystem* renderer, EntityState es);
+
+
+//////////////////////////////////////////////////////////////
+// Kelp
+//////////////////////////////////////////////////////////////
+#define KELP_BOUNDING_BOX vec2(200.f, 200.f)  // vec2(PNG_width, PNG_height)
+Entity createKelpPos(RenderSystem* renderer, vec2 position,
+                           bool checkCollisions = true);
+Entity respawnKelp(RenderSystem* renderer, EntityState es);
+
+//////////////////////////////////////////////////////////////
+// Bones
+//////////////////////////////////////////////////////////////
+#define BONES_BOUNDING_BOX vec2(200.f, 200.f)  // vec2(PNG_width, PNG_height)
+Entity createBonesPos(RenderSystem* renderer, vec2 position,
+                           bool checkCollisions = true);
+Entity respawnBones(RenderSystem* renderer, EntityState es);
+
+//////////////////////////////////////////////////////////////
+// Junk
+//////////////////////////////////////////////////////////////
+#define JUNK_BOUNDING_BOX vec2(200.f, 200.f)  // vec2(PNG_width, PNG_height)
+Entity createJunkPos(RenderSystem* renderer, vec2 position,
+                           bool checkCollisions = true);
+Entity respawnJunk(RenderSystem* renderer, EntityState es);
+
+//////////////////////////////////////////////////////////////
+// Coral
+//////////////////////////////////////////////////////////////
+#define CORAL_BOUNDING_BOX vec2(200.f, 200.f)  // vec2(PNG_width, PNG_height)
+Entity createCoralPos(RenderSystem* renderer, vec2 position,
+                           bool checkCollisions = true);
+Entity respawnCoral(RenderSystem* renderer, EntityState es);

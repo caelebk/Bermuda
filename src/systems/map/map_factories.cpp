@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "collision_system.hpp"
+#include "components.hpp"
 #include "enemy_factories.hpp"
 #include "entity_type.hpp"
 #include "environment.hpp"
@@ -443,5 +444,241 @@ Entity createPressurePlatePos(RenderSystem* renderer, vec2 position,
 
 Entity respawnPressurePlate(RenderSystem* renderer, EntityState es) {
   Entity entity = createPressurePlatePos(renderer, es.position.position, false);
+  return entity;
+}
+
+/**
+ * @brief creates a Shell at a specific position
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createShellPos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions) {
+  // Reserve an entity
+  auto entity = Entity();
+
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = randomFloat(0.f, 6.283185);
+  pos.position = position;
+  pos.scale    = SHELL_BOUNDING_BOX * randomFloat(AMBIENT_MIN_SCALE, AMBIENT_MAX_SCALE);
+
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  Ambient& ambient = registry.ambient.emplace(entity);
+  ambient.type     = ENTITY_TYPE::SHELL;
+
+  const TEXTURE_ASSET_ID random_textures[] = {TEXTURE_ASSET_ID::SHELL1,
+                                              TEXTURE_ASSET_ID::SHELL2,
+                                              TEXTURE_ASSET_ID::SHELL3};
+
+  registry.renderRequests.insert(
+      entity, {random_textures[getRandInt(
+                   0, ((sizeof(random_textures) / sizeof(*random_textures)) - 1))],
+               EFFECT_ASSET_ID::AMBIENT, GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
+
+Entity respawnShell(RenderSystem* renderer, EntityState es) {
+  Entity entity = createShellPos(renderer, es.position.position, false);
+  return entity;
+}
+
+/**
+ * @brief creates a Kelp at a specific position
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createKelpPos(RenderSystem* renderer, vec2 position,
+                     bool checkCollisions) {
+  // Reserve an entity
+  auto entity = Entity();
+
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = 0.f;
+  pos.position = position;
+  pos.scale    = SHELL_BOUNDING_BOX * randomFloat(AMBIENT_MIN_SCALE, AMBIENT_MAX_SCALE);
+
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  Ambient& ambient = registry.ambient.emplace(entity);
+  ambient.type     = ENTITY_TYPE::KELP;
+
+  const TEXTURE_ASSET_ID random_textures[] = {TEXTURE_ASSET_ID::KELP,
+                                              TEXTURE_ASSET_ID::KELP1};
+
+  registry.renderRequests.insert(
+      entity,
+      {random_textures[getRandInt(
+           0, ((sizeof(random_textures) / sizeof(*random_textures)) - 1))],
+       EFFECT_ASSET_ID::AMBIENT, GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
+
+Entity respawnKelp(RenderSystem* renderer, EntityState es) {
+  Entity entity = createKelpPos(renderer, es.position.position, false);
+  return entity;
+}
+
+/**
+ * @brief creates a Kelp at a specific position
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createJunkPos(RenderSystem* renderer, vec2 position,
+                     bool checkCollisions) {
+  // Reserve an entity
+  auto entity = Entity();
+
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = randomFloat(0.f, 6.283185);
+  pos.position = position;
+  pos.scale    = SHELL_BOUNDING_BOX * randomFloat(AMBIENT_MIN_SCALE, AMBIENT_MAX_SCALE);
+
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  Ambient& ambient = registry.ambient.emplace(entity);
+  ambient.type     = ENTITY_TYPE::JUNK;
+
+  const TEXTURE_ASSET_ID random_textures[] = {
+      TEXTURE_ASSET_ID::TIRE, TEXTURE_ASSET_ID::BOTTLE, TEXTURE_ASSET_ID::BAG,
+      TEXTURE_ASSET_ID::ANCHOR};
+
+  registry.renderRequests.insert(
+      entity,
+      {random_textures[getRandInt(
+           0, ((sizeof(random_textures) / sizeof(*random_textures)) - 1))],
+       EFFECT_ASSET_ID::AMBIENT, GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
+
+Entity respawnJunk(RenderSystem* renderer, EntityState es) {
+  Entity entity = createJunkPos(renderer, es.position.position, false);
+  return entity;
+}
+
+/**
+ * @brief creates a bone at a specific position
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createBonesPos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions) {
+  // Reserve an entity
+  auto entity = Entity();
+
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = randomFloat(0.f, 6.283185);
+  pos.position = position;
+  pos.scale    = SHELL_BOUNDING_BOX * randomFloat(AMBIENT_MIN_SCALE, AMBIENT_MAX_SCALE);
+
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  Ambient& ambient = registry.ambient.emplace(entity);
+  ambient.type     = ENTITY_TYPE::BONES;
+
+  const TEXTURE_ASSET_ID random_textures[] = {TEXTURE_ASSET_ID::BONES,
+                                              TEXTURE_ASSET_ID::BONES1};
+
+  registry.renderRequests.insert(
+      entity,
+      {random_textures[getRandInt(
+           0, ((sizeof(random_textures) / sizeof(*random_textures)) - 1))],
+       EFFECT_ASSET_ID::AMBIENT, GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
+
+Entity respawnBones(RenderSystem* renderer, EntityState es) {
+  Entity entity = createCoralPos(renderer, es.position.position, false);
+  return entity;
+}
+
+/**
+ * @brief creates a coral at a specific position
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createCoralPos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions) {
+  // Reserve an entity
+  auto entity = Entity();
+
+  auto& pos    = registry.positions.emplace(entity);
+  pos.angle    = randomFloat(0.f, 6.283185);
+  pos.position = position;
+  pos.scale    = SHELL_BOUNDING_BOX * randomFloat(AMBIENT_MIN_SCALE, AMBIENT_MAX_SCALE);
+
+  if (checkCollisions && !checkSpawnCollisions(entity)) {
+    // returns invalid entity, since id's start from 1
+    registry.remove_all_components_of(entity);
+    return Entity(0);
+  }
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  Ambient& ambient = registry.ambient.emplace(entity);
+  ambient.type     = ENTITY_TYPE::CORAL;
+
+  const TEXTURE_ASSET_ID random_textures[] = {TEXTURE_ASSET_ID::CORAL1,
+                                              TEXTURE_ASSET_ID::CORAL2};
+
+  registry.renderRequests.insert(
+      entity,
+      {random_textures[getRandInt(
+           0, ((sizeof(random_textures) / sizeof(*random_textures)) - 1))],
+       EFFECT_ASSET_ID::AMBIENT, GEOMETRY_BUFFER_ID::SPRITE});
+
+  return entity;
+}
+
+Entity respawnCoral(RenderSystem* renderer, EntityState es) {
+  Entity entity = createCoralPos(renderer, es.position.position, false);
   return entity;
 }

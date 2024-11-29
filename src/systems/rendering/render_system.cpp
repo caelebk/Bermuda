@@ -40,6 +40,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3& projection) {
   // Input data location as in the vertex buffer
   if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED ||
       render_request.used_effect == EFFECT_ASSET_ID::TEXTURED_OXYGEN ||
+      render_request.used_effect == EFFECT_ASSET_ID::AMBIENT ||
       render_request.used_effect == EFFECT_ASSET_ID::PLAYER ||
       render_request.used_effect == EFFECT_ASSET_ID::ENEMY ||
       render_request.used_effect == EFFECT_ASSET_ID::COMMUNICATIONS) {
@@ -339,6 +340,11 @@ void RenderSystem::draw() {
     if (registry.renderRequests.has(door))
       drawTexturedMesh(door, projection_2D);
   }
+  for (Entity ambient : registry.ambient.entities) {
+    if (registry.positions.has(ambient)) {
+      drawTexturedMesh(ambient, projection_2D);
+    }
+  }
   for (Entity item : registry.items.entities) {
     if (registry.renderRequests.has(item))
       drawTexturedMesh(item, projection_2D);
@@ -390,7 +396,7 @@ void RenderSystem::draw() {
     }
   }
   for (Entity enemy_proj : registry.enemyProjectiles.entities) {
-    if (registry.enemyProjectiles.has(enemy_proj)) {
+    if (registry.renderRequests.has(enemy_proj)) {
       drawTexturedMesh(enemy_proj, projection_2D);
     }
   }

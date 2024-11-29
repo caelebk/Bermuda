@@ -69,6 +69,21 @@ class RenderSystem {
           "map_non_interactable/tutorial_floor.png"),  // partial source:
                                                        // Vecteezy.com
       textures_path("map_non_interactable/floor.png"),
+      textures_path("map_non_interactable/anchor.png"),
+      textures_path("map_non_interactable/bag.png"),
+      textures_path("map_non_interactable/bones.png"),
+      textures_path("map_non_interactable/bones1.png"),
+      textures_path("map_non_interactable/bottle.png"),
+      textures_path("map_non_interactable/coral1.png"),
+      textures_path("map_non_interactable/coral2.png"),
+      textures_path("map_non_interactable/seaweed1.png"),
+      textures_path("map_non_interactable/shell1.png"),
+      textures_path("map_non_interactable/shell2.png"),
+      textures_path("map_non_interactable/shell3.png"),
+      textures_path("map_non_interactable/tire.png"),
+      textures_path("map_non_interactable/seaweed1.png"),
+      textures_path("map_non_interactable/seaweed1.png"),
+
       textures_path("map_interactable/locked_door_h.png"),
       textures_path("map_interactable/locked_door_v.png"),
       textures_path("map_interactable/locked_yellow_h.png"),
@@ -120,7 +135,8 @@ class RenderSystem {
       shader_path("coloured"),        shader_path("textured"),
       shader_path("textured_oxygen"), shader_path("water"),
       shader_path("player"),          shader_path("enemy"),
-      shader_path("collision_mesh"),  shader_path("communications")};
+      shader_path("ambient"),         shader_path("collision_mesh"),
+      shader_path("communications")};
   std::array<GLuint, geometry_count> vertex_buffers;
   std::array<GLuint, geometry_count> index_buffers;
   std::array<Mesh, geometry_count>   meshes;

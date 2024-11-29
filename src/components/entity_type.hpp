@@ -25,4 +25,9 @@ enum class ENTITY_TYPE {
   YELLOW_KEY      = BLUE_KEY + 1,
   KRAB_BOSS       = YELLOW_KEY + 1,
   SHARKMAN        = KRAB_BOSS + 1,
+  CORAL           = SHARKMAN + 1,
+  BONES           = CORAL + 1,
+  KELP            = BONES + 1,
+  JUNK            = KELP + 1,
+  SHELL           = JUNK + 1,
 };

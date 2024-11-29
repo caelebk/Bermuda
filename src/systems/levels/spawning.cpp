@@ -134,6 +134,10 @@ bool remove_all_entities() {
     registry.remove_all_components_of(registry.textRequests.entities.back());
   }
 
+  while (registry.ambient.entities.size() > 0) {
+    registry.remove_all_components_of(registry.ambient.entities.back());
+  }
+
   while (registry.saveStatuses.entities.size() > 0) {
     registry.remove_all_components_of(
         registry.saveStatuses.entities.back());

@@ -10,9 +10,11 @@
 #include <player_hud.hpp>
 
 #include "ai.hpp"
+#include "consumable_factories.hpp"
 #include "debuff.hpp"
 #include "enemy.hpp"
 #include "entity_type.hpp"
+#include "items.hpp"
 #include "oxygen.hpp"
 #include "player.hpp"
 #include "tiny_ecs_registry.hpp"
@@ -75,17 +77,19 @@ void CollisionSystem::step(float elapsed_ms) {
   collision_resolution();
 }
 
-//Check if collision has ended here.
+// Check if collision has ended here.
 void CollisionSystem::handle_collision_end() {
-  //Check if pressure plate collision has ended.
+  // Check if pressure plate collision has ended.
   for (Entity entity : registry.pressurePlates.entities) {
     bool pressurePlateCollisionExists = registry.collisions.has(entity);
     if (!pressurePlateCollisionExists) {
-      if (!registry.sounds.has(entity) && registry.pressurePlates.get(entity).active) {
+      if (!registry.sounds.has(entity) &&
+          registry.pressurePlates.get(entity).active) {
         registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
       }
       registry.pressurePlates.get(entity).active = false;
-      registry.renderRequests.get(entity).used_texture = TEXTURE_ASSET_ID::PRESSURE_PLATE_OFF;
+      registry.renderRequests.get(entity).used_texture =
+          TEXTURE_ASSET_ID::PRESSURE_PLATE_OFF;
     }
   }
 }
@@ -113,8 +117,9 @@ void CollisionSystem::collision_detection() {
 void CollisionSystem::detectPlayerProjectileCollisions() {
   ComponentContainer<PlayerProjectile>& playerproj_container =
       registry.playerProjectiles;
-  ComponentContainer<Deadly>&     enemy_container = registry.deadlys;
-  ComponentContainer<ActiveWall>& wall_container  = registry.activeWalls;
+  ComponentContainer<Deadly>&     enemy_container      = registry.deadlys;
+  ComponentContainer<ActiveWall>& wall_container       = registry.activeWalls;
+  ComponentContainer<Consumable>& consumable_container = registry.consumables;
 
   for (uint i = 0; i < playerproj_container.components.size(); i++) {
     Entity entity_i = playerproj_container.entities[i];
@@ -126,6 +131,16 @@ void CollisionSystem::detectPlayerProjectileCollisions() {
     // detect player projectile and wall collisions
     for (uint j = 0; j < wall_container.size(); j++) {
       Entity entity_j = wall_container.entities[j];
+      checkBoxCollision(entity_i, entity_j);
+    }
+
+    // detect player projectile and oxygen canister collisions
+    for (uint j = 0; j < consumable_container.size(); j++) {
+      Entity      entity_j   = consumable_container.entities[j];
+      Consumable& consumable = consumable_container.get(entity_j);
+      if (consumable.type != ENTITY_TYPE::OXYGEN_CANISTER) {
+        continue;
+      }
       checkBoxCollision(entity_i, entity_j);
     }
 
@@ -250,7 +265,7 @@ void CollisionSystem::detectDoorCollisions() {
 }
 
 void CollisionSystem::detectMassCollisions() {
-  ComponentContainer<Mass>&           mass_container  = registry.masses;
+  ComponentContainer<Mass>&         mass_container = registry.masses;
   ComponentContainer<Interactable>& interactable_container =
       registry.interactable;
   ComponentContainer<ActiveWall>& wall_container = registry.activeWalls;
@@ -265,7 +280,7 @@ void CollisionSystem::detectMassCollisions() {
         checkPlayerMeshCollision(entity_i, entity_j, player_comp.collisionMesh);
       } else {
         checkBoxCollision(entity_i, entity_j);
-      }    
+      }
     }
 
     for (uint j = 0; j < wall_container.size(); j++) {
@@ -462,6 +477,9 @@ void CollisionSystem::routePlayerProjCollisions(Entity player_proj,
   if (registry.breakables.has(other)) {
     resolveBreakablePlayerProjCollision(other, player_proj);
   }
+  if (registry.consumables.has(other)) {
+    resolveCanisterPlayerProjCollision(other, player_proj);
+  }
 
   PlayerProjectile& player_proj_component =
       registry.playerProjectiles.get(player_proj);
@@ -557,10 +575,12 @@ void CollisionSystem::resolvePlayerInteractableCollision(Entity player,
   // TODO: add more affects M2+
   if (registry.pressurePlates.has(interactable)) {
     if (!registry.pressurePlates.get(interactable).active) {
-      registry.renderRequests.get(interactable).used_texture = TEXTURE_ASSET_ID::PRESSURE_PLATE_ON;
+      registry.renderRequests.get(interactable).used_texture =
+          TEXTURE_ASSET_ID::PRESSURE_PLATE_ON;
       registry.pressurePlates.get(interactable).active = true;
       if (!registry.sounds.has(interactable)) {
-        registry.sounds.insert(interactable, Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
+        registry.sounds.insert(interactable,
+                               Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
       }
     }
   }
@@ -656,6 +676,22 @@ void CollisionSystem::resolveBreakableEnemyProjCollision(Entity breakable,
   registry.remove_all_components_of(enemy_proj);
 }
 
+void CollisionSystem::resolveCanisterPlayerProjCollision(Entity canister,
+                                                         Entity player_proj) {
+  // hack, convert the canister's oxygen quantity to be damage instead of
+  // healing
+  OxygenModifier& oxygen = registry.oxygenModifiers.get(canister);
+  oxygen.amount = OXYGEN_CANISTER_DAMAGE;
+  detectAndResolveExplosion(canister, player_proj);
+  // this is a canister, just delete it after
+  registry.remove_all_components_of(canister);
+
+  if (registry.playerProjectiles.has(player_proj)) {
+    PlayerProjectile &playerproj_comp = registry.playerProjectiles.get(player_proj);
+    playerproj_comp.is_loaded  = true;
+  }
+}
+
 // hit_entity is the entity that got hit
 void CollisionSystem::detectAndResolveExplosion(Entity proj,
                                                 Entity hit_entity) {
@@ -690,6 +726,23 @@ void CollisionSystem::detectAndResolveExplosion(Entity proj,
       modifyOxygen(breakable_check, proj);
       addDamageIndicatorTimer(breakable_check);
     }
+  }
+
+  // NOTE: experimental
+  for (Entity canister_check : registry.consumables.entities) {
+    if (!registry.consumables.has(canister_check)) {
+      // since we remove as we iterate, sometimes it might not be inside the registry anymore
+      continue;
+    }
+
+    Consumable &consumable = registry.consumables.get(canister_check);
+    if (consumable.type != ENTITY_TYPE::OXYGEN_CANISTER || canister_check == hit_entity || canister_check == proj || !registry.positions.has(hit_entity)) {
+      continue;
+    }
+
+    // remove to prevent infinite loop
+    registry.consumables.remove(canister_check);
+    resolveCanisterPlayerProjCollision(canister_check, proj);
   }
 }
 
@@ -790,7 +843,7 @@ void CollisionSystem::resolveWallEnemyProjCollision(Entity wall,
 }
 
 void CollisionSystem::resolveMassInteractableCollision(Entity mass,
-  Entity interactable) {
+                                                       Entity interactable) {
   if (!registry.masses.has(mass)) {
     return;
   }
@@ -799,10 +852,12 @@ void CollisionSystem::resolveMassInteractableCollision(Entity mass,
   if (registry.pressurePlates.has(interactable)) {
     PressurePlate& pp = registry.pressurePlates.get(interactable);
     if (!pp.active && pp.mass_activation <= mass_comp.mass) {
-      registry.renderRequests.get(interactable).used_texture = TEXTURE_ASSET_ID::PRESSURE_PLATE_ON;
+      registry.renderRequests.get(interactable).used_texture =
+          TEXTURE_ASSET_ID::PRESSURE_PLATE_ON;
       pp.active = true;
       if (!registry.sounds.has(interactable)) {
-        registry.sounds.insert(interactable, Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
+        registry.sounds.insert(interactable,
+                               Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
       }
     }
   }

@@ -42,6 +42,7 @@ class RoomBuilder {
       std::vector<INVENTORY> key_doors;
       // room_spawn_functions are always ran when you enter a room for the first time.
       std::vector<SpawnFunctionGroup> room_spawn_function_groups;
+      std::vector<SpawnFunctionGroup> room_ambient_function_groups;
       std::vector<SpawnFunctionGroup> room_pack_spawn_function_groups;
       std::vector<SpawnFunctionGroup> room_fixed_spawn_function_groups;
       // boss_spawn_functions are only ran if is_boss_room is true.
