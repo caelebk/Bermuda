@@ -109,6 +109,10 @@ bool remove_all_entities() {
     registry.remove_all_components_of(registry.playerHUD.entities.back());
   }
 
+  while (registry.notifications.entities.size() > 0) {
+    registry.remove_all_components_of(registry.notifications.entities.back());
+  }
+
   while (registry.inventoryCounters.entities.size() > 0) {
     registry.remove_all_components_of(
         registry.inventoryCounters.entities.back());
@@ -128,6 +132,11 @@ bool remove_all_entities() {
 
   while (registry.textRequests.entities.size() > 0) {
     registry.remove_all_components_of(registry.textRequests.entities.back());
+  }
+
+  while (registry.saveStatuses.entities.size() > 0) {
+    registry.remove_all_components_of(
+        registry.saveStatuses.entities.back());
   }
 
   registry.stunned.clear();

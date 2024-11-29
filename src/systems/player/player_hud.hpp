@@ -79,12 +79,12 @@ bool isKeyCollected(INVENTORY keyType);
 
 #define COMMUNICATIONS_TEXT_COLOUR vec3(0.6f, 0.9f, 0.9f)
 
-#define COMMUNICATIONS_TEXT_SCALE 0.16f
+#define COMMUNICATIONS_TEXT_SCALE 0.18
 #define COMMUNICATIONS_TITLE_POS vec2(window_width_px - 625.f, window_height_px - 69.f)
 
 #define LINE_LENGTH_LIMIT (size_t)77
 #define COMMUNICATIONS_LINE1_POS vec2(window_width_px - 625.f, window_height_px - 43.f)
-#define COMMUNICATIONS_LINE2_POS vec2(window_width_px - 625.f, window_height_px - 23.f)
+#define COMMUNICATIONS_LINE2_POS vec2(window_width_px - 625.f, window_height_px - 20.f)
 
 void createCommunicationHud(RenderSystem* renderer);
 
@@ -162,6 +162,15 @@ void bossLockedDialogue(RenderSystem* renderer);     // TODO: change dialogue wh
 #define TUTORIAL_LOCKED_LINE1 "This door isn't open."
 #define TUTORIAL_LOCKED_LINE2 "Maybe I can squeeze through the bars, but first let me kill this jellyfish."
 void tutorialLockedDialogue(RenderSystem* renderer); // TODO: change dialogue when door render updates are implemented
+
+//////////////////////////////////////////////////////////////
+// Notifications
+//////////////////////////////////////////////////////////////
+
+#define NOTIFICATION_TIMER 500.f
+
+// update visual notification timers
+void update_notification_timers(float elapsed_ms_since_last_update);
 
 //////////////////////////////////////////////////////////////
 // Globals

@@ -243,6 +243,9 @@ void collectRedKey(RenderSystem* renderer) {
   registry.renderRequests.insert(
       redKey, {TEXTURE_ASSET_ID::RED_KEY, EFFECT_ASSET_ID::TEXTURED,
                GEOMETRY_BUFFER_ID::SPRITE});
+
+  // collect key sound
+  registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::KEY));
 }
 
 /********************************************************************************
@@ -279,6 +282,9 @@ void collectBlueKey(RenderSystem* renderer) {
   registry.renderRequests.insert(
       blueKey, {TEXTURE_ASSET_ID::BLUE_KEY, EFFECT_ASSET_ID::TEXTURED,
                 GEOMETRY_BUFFER_ID::SPRITE});
+
+  // collect key sound
+  registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::KEY));
 }
 
 /********************************************************************************
@@ -315,6 +321,9 @@ void collectYellowKey(RenderSystem* renderer) {
   registry.renderRequests.insert(
       yellowKey, {TEXTURE_ASSET_ID::YELLOW_KEY, EFFECT_ASSET_ID::TEXTURED,
                   GEOMETRY_BUFFER_ID::SPRITE});
+
+  // collect key sound
+  registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::KEY));
 }
 
 /********************************************************************************
@@ -368,11 +377,14 @@ void createCommunicationHud(RenderSystem* renderer) {
 
   // Make player HUD
   registry.playerHUD.emplace(communicationsHud);
+  Notification& notification =
+      registry.notifications.emplace(communicationsHud);
+  notification.isCommunicationNotification = true;
 
   // request rendering
   registry.renderRequests.insert(
       communicationsHud,
-      {TEXTURE_ASSET_ID::COMMUNUCATIONS, EFFECT_ASSET_ID::TEXTURED,
+      {TEXTURE_ASSET_ID::COMMUNUCATIONS, EFFECT_ASSET_ID::COMMUNICATIONS,
        GEOMETRY_BUFFER_ID::SPRITE});
 
   requestText(renderer, "--COMMUNICATIONS--", COMMUNICATIONS_TEXT_SCALE,
@@ -398,6 +410,12 @@ void createDialogue(RenderSystem* renderer, std::string line1,
 
   if (isLine1New || isLine2New) {
     registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::NOTIFICATION));
+    for (Entity entity : registry.notifications.entities) {
+      Notification& notification = registry.notifications.get(entity);
+      if (notification.isCommunicationNotification) {
+        notification.notificationTimer = NOTIFICATION_TIMER;
+      }
+    }
   }
 
   if (isLine1New) {
@@ -405,7 +423,7 @@ void createDialogue(RenderSystem* renderer, std::string line1,
         requestText(renderer, line1, COMMUNICATIONS_TEXT_SCALE,
                     COMMUNICATIONS_TEXT_COLOUR, COMMUNICATIONS_LINE1_POS);
     Communication& communication = registry.communications.emplace(lineText1);
-    communication.line = line1;
+    communication.line           = line1;
   }
 
   // don't create a second entity if not needed
@@ -414,14 +432,20 @@ void createDialogue(RenderSystem* renderer, std::string line1,
         requestText(renderer, line2, COMMUNICATIONS_TEXT_SCALE,
                     COMMUNICATIONS_TEXT_COLOUR, COMMUNICATIONS_LINE2_POS);
     Communication& communication2 = registry.communications.emplace(lineText2);
-    communication2.line = line2;
+    communication2.line           = line2;
   }
 }
 
 /********************************************************************************
  * @brief clear dialogue in communications HUD if it is a new line
+ *
+ * @param isLine1New
+ * @param isLine2New
+ * @param line1 - assert length <= 77 to prevent overflow
+ * @param line2 - assert length <= 77 to prevent overflow
  ********************************************************************************/
-void clearOldDialogue(bool& isLine1New, bool& isLine2New, std::string line1, std::string line2) {
+void clearOldDialogue(bool& isLine1New, bool& isLine2New, std::string line1,
+                      std::string line2) {
   for (Entity entity : registry.communications.entities) {
     if (registry.communications.has(entity)) {
       if (registry.communications.get(entity).line.compare(line1) == 0) {
@@ -490,7 +514,7 @@ void collectConcussiveDialogue(RenderSystem* renderer) {
   createDialogue(renderer, COLLECT_CONCUSSIVE_LINE1, COLLECT_CONCUSSIVE_LINE2);
 }
 
-void collectTorpedoDialogue(RenderSystem* renderer) { 
+void collectTorpedoDialogue(RenderSystem* renderer) {
   createDialogue(renderer, COLLECT_TORPEDO_LINE1, COLLECT_TORPEDO_LINE2);
 }
 
@@ -500,4 +524,21 @@ void collectShrimpDialogue(RenderSystem* renderer) {
 
 void overCollectDialogue(RenderSystem* renderer) {
   createDialogue(renderer, OVER_COLLECT_LINE1, OVER_COLLECT_LINE2);
+}
+
+//////////////////////////////////////////////////////////////
+// Notifications
+//////////////////////////////////////////////////////////////
+
+/********************************************************************************
+ * @brief update visual notification timers
+ *
+ * @param elapsed_ms_since_last_update
+ ********************************************************************************/
+void update_notification_timers(float elapsed_ms_since_last_update) {
+  for (Entity entity : registry.notifications.entities) {
+    Notification& notification = registry.notifications.get(entity);
+    notification.notificationTimer =
+        max(0.f, notification.notificationTimer - elapsed_ms_since_last_update);
+  }
 }

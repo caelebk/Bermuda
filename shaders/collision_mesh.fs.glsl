@@ -15,6 +15,5 @@ void main()
 {
 	color = vec4(fcolor * vcolor, 1.0);
 
-	// salmon mesh is contained in a 1x1 square
 	float radius = distance(vec2(0.0), vpos);
 }

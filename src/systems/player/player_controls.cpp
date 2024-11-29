@@ -342,6 +342,9 @@ void handleGunSwap(Entity swapped, Entity swapper, PROJECTILES projectile) {
 }
 
 void handleWeaponSwapping(RenderSystem* renderer, int key) {
+  if (!registry.inventory.has(player)) {
+    return;
+  }
   Inventory& inv = registry.inventory.get(player);
 
   // Switch to harpoon gun

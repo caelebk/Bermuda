@@ -41,7 +41,8 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3& projection) {
   if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED ||
       render_request.used_effect == EFFECT_ASSET_ID::TEXTURED_OXYGEN ||
       render_request.used_effect == EFFECT_ASSET_ID::PLAYER ||
-      render_request.used_effect == EFFECT_ASSET_ID::ENEMY) {
+      render_request.used_effect == EFFECT_ASSET_ID::ENEMY ||
+      render_request.used_effect == EFFECT_ASSET_ID::COMMUNICATIONS) {
     GLint in_position_loc = glGetAttribLocation(program, "in_position");
     GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
     gl_has_errors();
@@ -89,6 +90,15 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3& projection) {
       glUniform1f(angry_timer_uloc, registry.bosses.has(entity)
                                         ? registry.bosses.get(entity).is_angry
                                         : false);
+      gl_has_errors();
+    } else if (render_request.used_effect == EFFECT_ASSET_ID::COMMUNICATIONS) {
+      GLuint notification_timer_uloc =
+          glGetUniformLocation(program, "notificationTimer");
+      gl_has_errors();
+      glUniform1f(notification_timer_uloc,
+                  registry.notifications.has(entity)
+                      ? registry.notifications.get(entity).notificationTimer
+                      : 0.0f);
       gl_has_errors();
     }
 
@@ -402,24 +412,17 @@ void RenderSystem::draw() {
   bool is_frozen_state = is_intro || is_start || is_paused ||
                          is_krab_cutscene || is_sharkman_cutscene || is_death ||
                          is_end || room_transitioning;
-  // will need separate case for death/end game freetype
   if (!is_frozen_state) {
     for (Entity entity : registry.textRequests.entities) {
       if (!registry.positions.has(entity) || !registry.colors.has(entity))
         continue;
-      TextRequest& textRequest = registry.textRequests.get(entity);
-      Position&    position    = registry.positions.get(entity);
-      vec3&        color       = registry.colors.get(entity);
-
-      Transform transform;
-      transform.translate(position.position);
-      transform.rotate(position.angle);
-      transform.scale(position.scale);
-
-      renderText(textRequest.text, position.position.x,
-                 abs(position.position.y - window_height_px),
-                 textRequest.textScale, color, transform.mat);
+      processTextRequest(entity);
     }
+  }
+  for (Entity entity : registry.saveStatuses.entities) {
+    if (!registry.positions.has(entity) || !registry.colors.has(entity))
+      continue;
+    processTextRequest(entity);
   }
 
   // Truely render to the screen
@@ -428,6 +431,21 @@ void RenderSystem::draw() {
   // flicker-free display with a double buffer
   glfwSwapBuffers(window);
   gl_has_errors();
+}
+
+void RenderSystem::processTextRequest(Entity& entity) {
+  TextRequest& textRequest = registry.textRequests.get(entity);
+  Position&    position    = registry.positions.get(entity);
+  vec3&        color       = registry.colors.get(entity);
+
+  Transform transform;
+  transform.translate(position.position);
+  transform.rotate(position.angle);
+  transform.scale(position.scale);
+
+  renderText(textRequest.text, position.position.x,
+             abs(position.position.y - window_height_px), textRequest.textScale,
+             color, transform.mat);
 }
 
 mat3 RenderSystem::createProjectionMatrix() {

@@ -46,7 +46,8 @@ const std::array<std::string, sound_count> sound_names = {
 	"pressure_plate",
 	"boss",
 	"end_screen",
-	"notification"
+	"notification",
+	"save"
 };
 
 //order matters

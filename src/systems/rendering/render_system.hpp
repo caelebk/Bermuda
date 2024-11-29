@@ -39,12 +39,14 @@ class RenderSystem {
       textures_path("player/infinity.png"),
       textures_path("player/inventory.png"),
       textures_path("player/communications.png"),
-      textures_path("cursors/crosshair_cursor.png"),
-      textures_path("player/player1.png"), textures_path("player/player2.png"),
+      textures_path("cursors/crosshair_cursor.png"),  // source: kenney.nl
+      textures_path("player/player1.png"),
+      textures_path("player/player2.png"),
       textures_path("player/player3.png"),
       textures_path("player/player_dash.png"),
       textures_path("player/harpoon_gun.png"),
-      textures_path("player/harpoon.png"), textures_path("player/net_gun.png"),
+      textures_path("player/harpoon.png"),
+      textures_path("player/net_gun.png"),
       textures_path("player/net.png"),
       textures_path("player/concussive_gun.png"),
       textures_path("player/concussive.png"),
@@ -77,9 +79,12 @@ class RenderSystem {
       textures_path("map_interactable/locked_red_v.png"),
       textures_path("map_interactable/doorway_h.png"),
       textures_path("map_interactable/doorway_v.png"),
-      textures_path("enemy/jellyfish.png"), textures_path("enemy/fish0.png"),
-      textures_path("enemy/fish1.png"), textures_path("enemy/fish2.png"),
-      textures_path("enemy/fish3.png"), textures_path("enemy/fish4.png"),
+      textures_path("enemy/jellyfish.png"),
+      textures_path("enemy/fish0.png"),
+      textures_path("enemy/fish1.png"),
+      textures_path("enemy/fish2.png"),
+      textures_path("enemy/fish3.png"),
+      textures_path("enemy/fish4.png"),
       textures_path("enemy/shark.png"),
       textures_path("enemy/krab.png"),  // source: Vecteezy.com
       textures_path("enemy/urchin.png"),
@@ -115,7 +120,7 @@ class RenderSystem {
       shader_path("coloured"),        shader_path("textured"),
       shader_path("textured_oxygen"), shader_path("water"),
       shader_path("player"),          shader_path("enemy"),
-      shader_path("collision_mesh")};
+      shader_path("collision_mesh"),  shader_path("communications")};
   std::array<GLuint, geometry_count> vertex_buffers;
   std::array<GLuint, geometry_count> index_buffers;
   std::array<Mesh, geometry_count>   meshes;
@@ -154,6 +159,7 @@ class RenderSystem {
   // Draw all entities
   void draw();
 
+  void processTextRequest(Entity& entity);
   mat3 createProjectionMatrix();
 
   private:
@@ -184,14 +190,14 @@ class RenderSystem {
   Entity screen_state_entity;
 };
 
-extern bool        is_intro;
-extern bool        is_start;
-extern bool        is_paused;
-extern bool        is_krab_cutscene;
-extern bool        is_sharkman_cutscene;
-extern bool        is_death;
-extern bool        is_end;
-extern bool        room_transitioning;
+extern bool is_intro;
+extern bool is_start;
+extern bool is_paused;
+extern bool is_krab_cutscene;
+extern bool is_sharkman_cutscene;
+extern bool is_death;
+extern bool is_end;
+extern bool room_transitioning;
 
 extern Entity player;
 extern Entity player_weapon;

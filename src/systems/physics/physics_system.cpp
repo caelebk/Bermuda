@@ -25,7 +25,7 @@ void PhysicsSystem::step(float elapsed_ms) {
     registry.motions.get(player).acceleration = {0.f, 0.f};
   }
 
-  //If dash is on cooldown, we need to decrement the dash cooldown timer
+  // If dash is on cooldown, we need to decrement the dash cooldown timer
   if (registry.players.get(player).dashCooldownTimer > 0) {
     Player& player_comp = registry.players.get(player);
     player_comp.dashCooldownTimer -= elapsed_ms;

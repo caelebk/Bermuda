@@ -550,6 +550,10 @@ bool load_game_from_file() {
         return false;
       }
 
+      if(!registry.players.has(player)) {
+        return false;
+      }
+
       std::cout << "Json is validated" << std::endl;
 
       // assume it's good from here, just nuke everything

@@ -145,10 +145,10 @@ void addSharkmanTarget() {
 
 Entity createTutorial(RenderSystem* renderer, vec2 position,
                       bool checkCollisions) {
-  vec2 canisterPos = {160.f, window_height_px - 250.f};
+  vec2 canisterPos = {window_width_px - 332.f, window_height_px - 250.f};
   createOxygenCanisterPos(renderer, canisterPos, checkCollisions);
 
-  vec2 geyserPos = {273.f, window_height_px - 265.f};
+  vec2 geyserPos = {window_width_px - 220.f, window_height_px - 265.f};
   createGeyserPos(renderer, geyserPos, checkCollisions);
 
   vec2 cratePos = {386.f, window_height_px - 260.f};

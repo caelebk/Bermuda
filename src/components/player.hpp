@@ -60,6 +60,12 @@ struct Communication {
   std::string line;
 };
 
+// Notifications
+struct Notification {
+  bool  isCommunicationNotification = false;
+  float notificationTimer           = 0.f;
+};
+
 // Player component
 struct Player {
   Entity weapon;

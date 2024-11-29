@@ -38,6 +38,7 @@ class ECSRegistry {
   ComponentContainer<PlayerHUD>           playerHUD;
   ComponentContainer<InventoryCounter>    inventoryCounters;
   ComponentContainer<Communication>       communications;
+  ComponentContainer<Notification>        notifications;
 
   // enemy related
   ComponentContainer<Deadly>          deadlys;
@@ -72,6 +73,7 @@ class ECSRegistry {
   ComponentContainer<vec3>          colors;
   ComponentContainer<ScreenState>   screenStates;
   ComponentContainer<TextRequest>   textRequests;
+  ComponentContainer<SaveStatus>    saveStatuses;
 
   // level related
   ComponentContainer<SpaceBoundingBox> bounding_boxes;
@@ -127,6 +129,7 @@ class ECSRegistry {
     registry_list.push_back(&playerHUD);
     registry_list.push_back(&inventoryCounters);
     registry_list.push_back(&communications);
+    registry_list.push_back(&notifications);
     // enemy related
     registry_list.push_back(&deadlys);
     registry_list.push_back(&enemyProjectiles);
@@ -154,6 +157,7 @@ class ECSRegistry {
     registry_list.push_back(&screenStates);
     registry_list.push_back(&colors);
     registry_list.push_back(&textRequests);
+    registry_list.push_back(&saveStatuses);
     // level related
     registry_list.push_back(&bounding_boxes);
     registry_list.push_back(&vectors);

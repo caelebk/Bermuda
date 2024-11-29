@@ -47,6 +47,8 @@ struct TextRequest {
   float       textScale;
 };
 
+struct SaveStatus {};
+
 enum class SOUND_ASSET_ID {
   PLAYER_OXYGEN_BLAST   = 0,
   PLAYER_GLIDE          = PLAYER_OXYGEN_BLAST + 1,
@@ -77,7 +79,8 @@ enum class SOUND_ASSET_ID {
   BOSS_INTRO            = PRESSURE_PLATE + 1,
   END_SCREEN            = BOSS_INTRO + 1,
   NOTIFICATION          = END_SCREEN + 1,
-  SOUND_COUNT           = NOTIFICATION + 1
+  SAVE                  = NOTIFICATION + 1,
+  SOUND_COUNT           = SAVE + 1
 };
 
 const int sound_count = (int)SOUND_ASSET_ID::SOUND_COUNT;
@@ -203,7 +206,8 @@ enum class EFFECT_ASSET_ID {
   PLAYER          = WATER + 1,
   ENEMY           = PLAYER + 1,
   COLLISION_MESH  = ENEMY + 1,
-  EFFECT_COUNT    = COLLISION_MESH + 1
+  COMMUNICATIONS  = COLLISION_MESH + 1,
+  EFFECT_COUNT    = COMMUNICATIONS + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

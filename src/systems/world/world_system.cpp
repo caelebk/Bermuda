@@ -19,6 +19,7 @@
 #include "player_hud.hpp"
 #include "saving_system.hpp"
 #include "spawning.hpp"
+#include "text_factories.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "world_state.hpp"
 
@@ -189,6 +190,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     update_debuffs(elapsed_ms_since_last_update);
     update_attack(elapsed_ms_since_last_update);
     update_collision_timers(elapsed_ms_since_last_update);
+    update_notification_timers(elapsed_ms_since_last_update);
 
     // Deplete oxygen when it is time...
     oxygen_timer = oxygen_drain(oxygen_timer, elapsed_ms_since_last_update);
@@ -508,10 +510,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   bool cannot_reset_state = is_intro || is_start || is_krab_cutscene ||
                             is_sharkman_cutscene || room_transitioning;
 
-  // ESC to close game (unconditional quit)
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, GL_TRUE);
-  }
+  // ESC to close game (unconditional quit left commented for debugging)
+  // if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+  //   glfwSetWindowShouldClose(window, GL_TRUE);
+  // }
 
   // Start Game
   if (is_start) {
@@ -537,11 +539,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     if (is_start) {
       is_intro = true;
     } else if (is_intro) {
-      is_intro = false;
+      overlay_timer = OVERLAY_TIMER_DURATION;
     } else if (is_krab_cutscene) {
-      is_krab_cutscene = false;
+      overlay_timer = OVERLAY_TIMER_DURATION;
     } else if (is_sharkman_cutscene) {
-      is_sharkman_cutscene = false;
+      overlay_timer = OVERLAY_TIMER_DURATION;
     }
   }
   if (is_death && action == GLFW_RELEASE && GLFW_KEY_L) {
@@ -562,16 +564,18 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   if (action == GLFW_RELEASE && key == GLFW_KEY_P &&
       !registry.deathTimers.has(player) && !cannot_pause_state) {
     is_paused = !is_paused;
+    depleteOxygen(player);
     if (is_paused) {
-      depleteOxygen(player);
       overlay = createOverlay(renderer);
+    } else {
+      clearSaveStatus();
     }
   }
 
-  if (action == GLFW_RELEASE && key == GLFW_KEY_K &&
+  if (action == GLFW_RELEASE && key == GLFW_KEY_S &&
       !registry.deathTimers.has(player) && is_paused) {
     depleteOxygen(player);
-    save_game_to_file();
+    displaySaveStatus(renderer, save_game_to_file());
   }
 
   if (action == GLFW_RELEASE && key == GLFW_KEY_L &&
@@ -579,6 +583,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     is_death  = false;
     is_end    = false;
     is_paused = false;
+    clearSaveStatus();
     load_game_from_file();
   }
 
