@@ -190,6 +190,42 @@ bool player_mouse(RenderSystem* renderer, int button, int action, int mods,
   return true;
 }
 
+bool player_scroll(double xOffset, double yOffset) {
+  if (!yOffset) return false;
+  int curr_wep_type = int(wep_type);
+  if (yOffset > 0) {
+    curr_wep_type--;
+  } else if (yOffset < 0) {
+    curr_wep_type++;
+  }
+  if (curr_wep_type == int(PROJECTILES::PROJ_COUNT)) {
+    curr_wep_type = 0;
+  } else if (curr_wep_type == -1) {
+    curr_wep_type = int(PROJECTILES::SHRIMP);
+  }
+
+  PROJECTILES new_wep_type = PROJECTILES(curr_wep_type);
+
+  if (new_wep_type == PROJECTILES::HARPOON) {
+    doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+    changeSelectedCounterColour(INVENTORY::HARPOON);
+  } else if (new_wep_type == PROJECTILES::NET) {
+    doWeaponSwap(net, net_gun, PROJECTILES::NET);
+    changeSelectedCounterColour(INVENTORY::NET);
+  } else if (new_wep_type == PROJECTILES::CONCUSSIVE) {
+    doWeaponSwap(concussive, concussive_gun, PROJECTILES::CONCUSSIVE);
+    changeSelectedCounterColour(INVENTORY::CONCUSSIVE);
+  } else if (new_wep_type == PROJECTILES::TORPEDO) {
+    doWeaponSwap(torpedo, torpedo_gun, PROJECTILES::TORPEDO);
+    changeSelectedCounterColour(INVENTORY::TORPEDO);
+  } else if (new_wep_type == PROJECTILES::SHRIMP) {
+    doWeaponSwap(shrimp, shrimp_gun, PROJECTILES::SHRIMP);
+    changeSelectedCounterColour(INVENTORY::SHRIMP);
+  }
+
+  return true;
+}
+
 /*
 Update inventory based on projectile being fired
 Returns true if had inventory to shoot, returns false if no inventory to shoot.

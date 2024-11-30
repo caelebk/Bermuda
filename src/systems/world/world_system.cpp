@@ -105,9 +105,13 @@ GLFWwindow* WorldSystem::create_window() {
   auto mouse_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) {
     ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2);
   };
+  auto scroll_redirect = [](GLFWwindow* wnd, double _0, double _1) {
+    ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_scroll(_0, _1);
+  };
   glfwSetKeyCallback(window, key_redirect);
   glfwSetCursorPosCallback(window, cursor_pos_redirect);
   glfwSetMouseButtonCallback(window, mouse_redirect);
+  glfwSetScrollCallback(window, scroll_redirect);
 
   return window;
 }
@@ -623,6 +627,15 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
                          is_end || room_transitioning;
   if (!is_frozen_state && !registry.stunned.has(player)) {
     player_mouse(renderer, button, action, mods, harpoon, harpoon_gun);
+  }
+}
+
+void WorldSystem::on_mouse_scroll(double xOffset, double yOffset) {
+  bool is_frozen_state = is_intro || is_start || is_paused ||
+                         is_krab_cutscene || is_sharkman_cutscene || is_death ||
+                         is_end || room_transitioning;
+  if (!is_frozen_state) {
+    player_scroll(xOffset, yOffset);
   }
 }
 

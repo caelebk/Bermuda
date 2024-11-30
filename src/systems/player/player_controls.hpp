@@ -11,6 +11,8 @@ bool player_movement(int key, int action, int mod);
 bool player_mouse(RenderSystem* renderer, int key, int action, int mod, Entity& default_wep,
                   Entity& default_gun);
 
+bool player_scroll(double xOffset, double yOffset);
+
 bool updateInventory(RenderSystem* renderer, PROJECTILES type);
 
 void swapWeps(Entity swapped, Entity swapper, PROJECTILES projectile);
