@@ -377,8 +377,6 @@ void CollisionSystem::routePlayerCollisions(Entity player, Entity other) {
   }
   if (registry.activeWalls.has(other)) {
     resolveStopOnWall(other, player);
-    Player& player_comp = registry.players.get(player);
-    resolveStopOnWall(other, player_comp.collisionMesh);
   }
   if (registry.activeDoors.has(other)) {
     resolveDoorPlayerCollision(other, player);
@@ -420,8 +418,6 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
       resolveMassCollision(wall, other);
     } else {
       resolveStopOnWall(wall, other);
-      Player& player = registry.players.get(other);
-      resolveStopOnWall(wall, player.collisionMesh);
     }
   }
   if (registry.activeWalls.has(other)) {
@@ -955,27 +951,62 @@ void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
   float overlapY =
       min(entitys_bot_overlaps_top_wall, entitys_top_overlaps_bot_wall);
 
+  bool isLeftOfWall = (entity_position.position.x < wall_position.position.x);
+  bool isAboveWall = (entity_position.position.y < wall_position.position.y);
+  float overlapThreshold = 0.1f;
+  float overlapPushbackPercent = 0.5f;
+
   // If the overlap in the X direction is smaller, it means that the collision
   // occured here. Vice versa for overlap in Y direction.
   if (overlapX < overlapY) {
-    // Respective to the wall,
-    // If the entity is on the left of the wall, then we need to push him left.
-    // If the entity is on the right of the wall, we need to push him right.
-    overlapX = (entity_position.position.x < wall_position.position.x)
-                   ? -1 * overlapX
-                   : overlapX;
+    // If the entity is on the left of the wall, we push left.
+    // If the entity is on the right of the wall, we push right.
+    overlapX = isLeftOfWall ? -1 * overlapX : overlapX;
+
+    // The smallest overlap is a large value means we got stuck 
+    // between crate/wall. Resolve by pushing away crate.
+    if (abs(overlapX) > overlapThreshold) {
+      if (registry.breakables.has(wall)) {
+        Motion& crate_pos = registry.motions.get(wall);
+        crate_pos.velocity.x -= overlapX * overlapPushbackPercent;
+      }
+    }
+
     entity_position.position.x += overlapX;
+
+    if(registry.players.has(entity)) {
+      Player player_comp = registry.players.get(entity);
+      if (registry.positions.has(player_comp.collisionMesh)) {
+        registry.positions.get(player_comp.collisionMesh).position.x += overlapX;
+      }
+    }
+
     if (registry.motions.has(entity) && !registry.players.has(entity)) {
       registry.motions.get(entity).velocity.x = 0;
     }
   } else {
-    // Respective to the wall,
-    // If the entity is above the wall, then we need to push up left.
-    // If the entity is below the wall, then we need to push him down.
-    overlapY = (entity_position.position.y < wall_position.position.y)
-                   ? -1 * overlapY
-                   : overlapY;
+    // If the entity is above the wall, then we need to push up.
+    // If the entity is below the wall, then we need to push down.
+    overlapY = isAboveWall ? -1 * overlapY : overlapY;
+
+    // The smallest overlap is a large value means we got stuck 
+    // between crate/wall. Resolve by pushing away crate.
+    if (abs(overlapY) > overlapThreshold) {
+      if (registry.breakables.has(wall)) {
+        Motion& crate_pos = registry.motions.get(wall);
+        crate_pos.velocity.y -= overlapY * overlapPushbackPercent;
+      }
+    }
+
     entity_position.position.y += overlapY;
+
+    if(registry.players.has(entity)) {
+      Player player_comp = registry.players.get(entity);
+      if (registry.positions.has(player_comp.collisionMesh)) {
+        registry.positions.get(player_comp.collisionMesh).position.y += overlapY;
+      }
+    }
+    
     if (registry.motions.has(entity) && !registry.players.has(entity)) {
       registry.motions.get(entity).velocity.y = 0;
     }
