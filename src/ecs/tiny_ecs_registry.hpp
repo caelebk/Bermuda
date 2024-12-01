@@ -33,6 +33,7 @@ class ECSRegistry {
   ComponentContainer<PlayerCollisionMesh> playersCollisionMeshes;
   ComponentContainer<PlayerWeapon>        playerWeapons;
   ComponentContainer<PlayerProjectile>    playerProjectiles;
+  ComponentContainer<Explosion>           explosions;
   ComponentContainer<Inventory>           inventory;
   ComponentContainer<Key>                 keys;
   ComponentContainer<PlayerHUD>           playerHUD;
@@ -125,6 +126,7 @@ class ECSRegistry {
     registry_list.push_back(&playersCollisionMeshes);
     registry_list.push_back(&playerWeapons);
     registry_list.push_back(&playerProjectiles);
+    registry_list.push_back(&explosions);
     registry_list.push_back(&inventory);
     registry_list.push_back(&keys);
     registry_list.push_back(&playerHUD);

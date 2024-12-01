@@ -143,6 +143,10 @@ bool remove_all_entities() {
         registry.saveStatuses.entities.back());
   }
 
+  while (registry.explosions.entities.size() > 0) {
+    registry.remove_all_components_of(registry.explosions.entities.back());
+  }
+
   registry.stunned.clear();
   registry.knockedback.clear();
   registry.collisions.clear();

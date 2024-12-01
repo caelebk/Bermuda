@@ -52,6 +52,7 @@ class RenderSystem {
       textures_path("player/concussive.png"),
       textures_path("player/torpedo_gun.png"),
       textures_path("player/torpedo.png"),
+      textures_path("player/explosion.png"),
       textures_path("player/shrimp_gun.png"),
       textures_path("player/shrimp.png"),  // TODO: shrimp projectile needed,
                                            // this is for HUD

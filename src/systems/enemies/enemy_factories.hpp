@@ -28,6 +28,7 @@ bool checkEnemySpawnCollisions(struct Position enemyPos);
 #define JELLY_HEALTH_BAR_SCALE vec2(1.5f)
 #define JELLY_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 #define JELLY_DROP_CHANCE_0 0.5f
+#define JELLY_DROP_CHANCE_1 0.8f
 
 Entity createJellyPos(RenderSystem* renderer, vec2 position,
                       bool checkCollisions = true);
@@ -72,7 +73,7 @@ Entity respawnFish(RenderSystem* renderer, EntityState es);
 #define SHARK_HEALTH_SCALE vec2(1.4f)
 #define SHARK_HEALTH_BAR_SCALE vec2(1.5f)
 #define SHARK_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
-#define SHARK_DROP_CHANCE_0 0.15f
+#define SHARK_DROP_CHANCE_0 0.25f
 
 Entity createSharkPos(RenderSystem* renderer, vec2 position,
                       bool checkCollisions = true);
@@ -106,7 +107,7 @@ Entity respawnShark(RenderSystem* renderer, EntityState es);
 #define KRAB_HEALTH_SCALE vec2(1.4f)
 #define KRAB_HEALTH_BAR_SCALE vec2(1.5f)
 #define KRAB_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
-#define KRAB_DROP_CHANCE_0 0.3f
+#define KRAB_DROP_CHANCE_0 0.35f
 
 Entity createKrabPos(RenderSystem* renderer, vec2 position,
                      bool checkCollisions = true);

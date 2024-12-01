@@ -1,4 +1,6 @@
 #include "collision_util.hpp"
+#include <player_factories.hpp>
+#include <consumable_factories.hpp>
 
 // Returns the local bounding coordinates scaled by entity size
 vec2 get_bounding_box(const Position& position) {
@@ -173,4 +175,10 @@ vec2 find_closest_point(const Position& pos1, const Position& pos2) {
   }
 
   return closest_p;
+}
+
+Entity make_canister_explosion(RenderSystem* renderer, vec2 pos) {
+  return makeExplosion(
+      renderer, pos, EXPLOSION_DURATION,
+      CANISTER_EXPLOSION_BOUNDING_BOX * CANISTER_EXPLOSION_SCALE_FACTOR);
 }

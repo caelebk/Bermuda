@@ -400,6 +400,11 @@ void RenderSystem::draw() {
       drawTexturedMesh(enemy_proj, projection_2D);
     }
   }
+  for (Entity explosion : registry.explosions.entities) {
+    if (registry.renderRequests.has(explosion)) {
+      drawTexturedMesh(explosion, projection_2D);
+    }
+  }
   for (Entity playerHUDElement : registry.playerHUD.entities) {
     if (registry.renderRequests.has(playerHUDElement))
       drawTexturedMesh(playerHUDElement, projection_2D);

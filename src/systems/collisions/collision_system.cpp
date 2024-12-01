@@ -610,6 +610,8 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
       break;
     case PROJECTILES::TORPEDO:
       detectAndResolveExplosion(player_proj, enemy);
+      makeTorpedoExplosion(renderer,
+                           registry.positions.get(player_proj).position);
       break;
     case PROJECTILES::SHRIMP:
       /*detectAndResolveConeAOE(player_proj, enemy, SHRIMP_DAMAGE_ANGLE);*/
@@ -658,6 +660,8 @@ void CollisionSystem::resolveBreakablePlayerProjCollision(Entity breakable,
 
   if (playerproj_comp.type == PROJECTILES::TORPEDO) {
     detectAndResolveExplosion(player_proj, breakable);
+    makeTorpedoExplosion(renderer,
+                         registry.positions.get(player_proj).position);
   }
 }
 
@@ -680,6 +684,7 @@ void CollisionSystem::resolveCanisterPlayerProjCollision(Entity canister,
   oxygen.amount = OXYGEN_CANISTER_DAMAGE;
   detectAndResolveExplosion(canister, player_proj);
   // this is a canister, just delete it after
+  make_canister_explosion(renderer, registry.positions.get(canister).position);
   registry.remove_all_components_of(canister);
 
   if (registry.playerProjectiles.has(player_proj)) {
@@ -826,6 +831,8 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
     }
   } else {
     if (proj_component.type == PROJECTILES::TORPEDO) {
+      makeTorpedoExplosion(renderer,
+                           registry.positions.get(player_proj).position);
       detectAndResolveExplosion(player_proj, wall);
     }
     proj_motion.velocity     = vec2(0.f);

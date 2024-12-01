@@ -321,6 +321,10 @@ void LevelSystem::deactivate_current_room(bool save) {
     registry.remove_all_components_of(registry.bubbles.entities.back());
   }
 
+  while (registry.explosions.entities.size() > 0) {
+    registry.remove_all_components_of(registry.explosions.entities.back());
+  }
+
   while (registry.enemyProjectiles.entities.size() > 0) {
     Entity e = registry.enemyProjectiles.entities.back();
     registry.remove_all_components_of(e);

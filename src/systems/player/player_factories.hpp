@@ -95,10 +95,19 @@ Entity loadConcussive(RenderSystem* renderer);
 #define TORPEDO_SCALE_FACTOR vec2(0.07f)
 #define TORPEDO_BOUNDING_BOX vec2(420.f, 140.f)
 #define TORPEDO_RELATIVE_POS_FROM_GUN vec2(20.f, 0.f)
-#define TORPEDO_OXYGEN_COST -25.f
+#define TORPEDO_OXYGEN_COST -60.f
 #define TORPEDO_DAMAGE_RADIUS 150;
 
 Entity loadTorpedo(RenderSystem* renderer);
+
+#define TORPEDO_EXPLOSION_SCALE_FACTOR vec2(2.f)   // Twice the radius = diameter
+#define TORPEDO_EXPLOSION_BOUNDING_BOX vec2(150.f, 150.f)
+#define EXPLOSION_DURATION 100.f
+
+Entity makeTorpedoExplosion(RenderSystem* renderer, vec2 pos);
+
+Entity makeExplosion(RenderSystem* renderer, vec2 pos, float expiry_time,
+                     vec2 full_scale);
 
 //////////////////////////////////////////////////////////////
 // Shrimp

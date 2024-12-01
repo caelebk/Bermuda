@@ -181,6 +181,19 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       }
     }
 
+    // Torpedo Explosion VFX
+    for (Entity entity : registry.explosions.entities) {
+      Explosion& timer = registry.explosions.get(entity);
+      timer.timer += elapsed_ms_since_last_update;
+      if (timer.timer >= timer.expiry_time) {
+        registry.remove_all_components_of(entity);
+      } else {
+        Position& pos = registry.positions.get(entity);
+        pos.scale     = vec2(timer.timer / timer.expiry_time) * timer.full_scale;
+      }
+    }
+
+
     // Enemy Projectiles
     for (Entity entity : registry.enemyProjectiles.entities) {
       EnemyProjectile& timer = registry.enemyProjectiles.get(entity);

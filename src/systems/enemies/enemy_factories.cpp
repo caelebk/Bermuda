@@ -130,7 +130,7 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position,
   stun.duration = JELLY_STUN_MS;
 
   // assign drops
-  if (randomSuccess(JELLY_DROP_CHANCE_0)) {
+  if (randomSuccess(JELLY_DROP_CHANCE_1)) {
     Drop& drop = registry.drops.emplace(entity);
     if (randomSuccess(JELLY_DROP_CHANCE_0)) {
       drop.dropFn = createConcussiveDropPos;

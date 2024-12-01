@@ -37,11 +37,11 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos) {
       createLoadedGun(renderer, position.position, PROJECTILES::HARPOON);
 
   registry.renderRequests.insert(
-    entity, {TEXTURE_ASSET_ID::PLAYER1, EFFECT_ASSET_ID::PLAYER,
-              GEOMETRY_BUFFER_ID::SPRITE});
+      entity, {TEXTURE_ASSET_ID::PLAYER1, EFFECT_ASSET_ID::PLAYER,
+               GEOMETRY_BUFFER_ID::SPRITE});
 
-  auto collisionEntity = Entity();
-  Mesh& collisionMesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PLAYER);
+  auto  collisionEntity = Entity();
+  Mesh& collisionMesh   = renderer->getMesh(GEOMETRY_BUFFER_ID::PLAYER);
   registry.meshPtrs.emplace(collisionEntity, &collisionMesh);
 
   // Setting initial position values
@@ -53,7 +53,8 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos) {
   registry.playersCollisionMeshes.emplace(collisionEntity);
   // Uncomment to render the collision mesh.
   // registry.renderRequests.insert(
-  //     collisionEntity, {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::COLLISION_MESH,
+  //     collisionEntity, {TEXTURE_ASSET_ID::TEXTURE_COUNT,
+  //     EFFECT_ASSET_ID::COLLISION_MESH,
   //              GEOMETRY_BUFFER_ID::PLAYER});
 
   player.collisionMesh = collisionEntity;
@@ -81,7 +82,7 @@ Entity createLoadedGun(RenderSystem* renderer, vec2 playerPosition,
   position.scale     = GUN_SCALE_FACTOR * GUN_BOUNDING_BOX;
 
   // Setting initial motion values
-  Motion& motion = registry.motions.emplace(entity);
+  Motion& motion      = registry.motions.emplace(entity);
   motion.velocity     = {0.f, 0.f};
   motion.acceleration = {0, 0};
 
@@ -241,7 +242,7 @@ Entity loadConcussive(RenderSystem* renderer) {
   oxyCost.amount          = CONCUSSIVE_OXYGEN_COST;
 
   KnockBack& knockback = registry.knockbacks.emplace(entity);
-  knockback.duration = CONCUSSIVE_KNOCKBACK_DURATION;
+  knockback.duration   = CONCUSSIVE_KNOCKBACK_DURATION;
 
   return entity;
 }
@@ -270,7 +271,40 @@ Entity loadTorpedo(RenderSystem* renderer) {
   oxyCost.amount          = TORPEDO_OXYGEN_COST;
 
   AreaOfEffect& aoe = registry.aoe.emplace(entity);
-  aoe.radius = TORPEDO_DAMAGE_RADIUS;
+  aoe.radius        = TORPEDO_DAMAGE_RADIUS;
+
+  return entity;
+}
+
+Entity makeTorpedoExplosion(RenderSystem* renderer, vec2 pos) {
+  return makeExplosion(
+      renderer, pos, EXPLOSION_DURATION,
+      TORPEDO_EXPLOSION_BOUNDING_BOX * TORPEDO_EXPLOSION_SCALE_FACTOR);
+}
+
+Entity makeExplosion(RenderSystem* renderer, vec2 pos, float expiry_time,
+  vec2 full_scale) {
+  auto entity = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // Setting initial position values
+  Position& position = registry.positions.emplace(entity);
+  position.position  = pos;
+  position.scale     = vec2(0.f);
+
+  // Put into Explosions
+  Explosion& explosion  = registry.explosions.emplace(entity);
+  explosion.timer       = 0.f;
+  explosion.expiry_time = expiry_time;
+  explosion.full_scale = full_scale;
+
+  // Request Render
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::EXPLOSION, EFFECT_ASSET_ID::TEXTURED,
+               GEOMETRY_BUFFER_ID::SPRITE});
 
   return entity;
 }
@@ -367,25 +401,24 @@ void createOxygenTank(RenderSystem* renderer, Entity& player, vec2 pos) {
  * @param pos - determines position of dash indicator on screen
  ********************************************************************************/
 void createDashIndicator(RenderSystem* renderer, Entity& player, vec2 pos) {
-  auto dashIndicator     = Entity();
+  auto dashIndicator = Entity();
 
   // Store a reference to the potentially re-used mesh object
   Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(dashIndicator, &mesh);
 
   // Initialize the position, scale, and physics components
-  auto& posComp    = registry.positions.emplace(dashIndicator);
-  posComp.angle    = 0.f;
-  posComp.position = pos;
-  posComp.scale    = PLAYER_SCALE_FACTOR * PLAYER_BOUNDING_BOX * 0.85f;
+  auto& posComp         = registry.positions.emplace(dashIndicator);
+  posComp.angle         = 0.f;
+  posComp.position      = pos;
+  posComp.scale         = PLAYER_SCALE_FACTOR * PLAYER_BOUNDING_BOX * 0.85f;
   posComp.originalScale = PLAYER_SCALE_FACTOR * PLAYER_BOUNDING_BOX * 0.85f;
 
   registry.playerHUD.emplace(dashIndicator);
 
   registry.renderRequests.insert(
-      dashIndicator,
-      {TEXTURE_ASSET_ID::PLAYER_DASH, EFFECT_ASSET_ID::TEXTURED,
-       GEOMETRY_BUFFER_ID::SPRITE});
+      dashIndicator, {TEXTURE_ASSET_ID::PLAYER_DASH, EFFECT_ASSET_ID::TEXTURED,
+                      GEOMETRY_BUFFER_ID::SPRITE});
 
   if (registry.players.has(player)) {
     registry.players.get(player).dashIndicator = dashIndicator;

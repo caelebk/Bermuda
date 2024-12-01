@@ -10,3 +10,4 @@ bool circle_box_collides(const Position& position1, float radius,
                          const Position& position2);
 bool mesh_collides(Entity mesh, Entity other);
 vec2 find_closest_point(const Position& pos1, const Position& pos2);
+Entity make_canister_explosion(RenderSystem* renderer, vec2 pos);

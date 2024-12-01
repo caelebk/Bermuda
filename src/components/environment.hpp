@@ -79,6 +79,12 @@ struct Geyser {
   float bubble_timer;
 };
 
+struct Explosion {
+  float timer;
+  float expiry_time;
+  vec2  full_scale;
+};
+
 struct Bubble {};
 
 struct Breakable {

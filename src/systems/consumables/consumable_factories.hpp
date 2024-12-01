@@ -11,8 +11,11 @@
 #define OXYGEN_CANISTER_QTY 200.0  // heals
 #define OXYGEN_CANISTER_SCALE_FACTOR vec2(0.2f)
 #define OXYGEN_CANISTER_BOUNDING_BOX vec2(240.f, 112.f)
-#define OXYGEN_CANISTER_DAMAGE_RADIUS 150;
+#define OXYGEN_CANISTER_DAMAGE_RADIUS 120;
 #define OXYGEN_CANISTER_DAMAGE -75.0;
+
+#define CANISTER_EXPLOSION_SCALE_FACTOR vec2(2.f)  // Twice the radius = diameter
+#define CANISTER_EXPLOSION_BOUNDING_BOX vec2(120.f, 120.f)
 
 Entity createOxygenCanisterPos(RenderSystem* renderer, vec2 position,
                                bool checkCollisions = true);
