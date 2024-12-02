@@ -1050,7 +1050,7 @@ void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
     // The smallest overlap is a large value means we got stuck 
     // between crate/wall. Resolve by pushing away crate.
     if (abs(overlapX) > overlapThreshold) {
-      if (registry.breakables.has(wall)) {
+      if (registry.breakables.has(wall) && registry.motions.has(wall)) {
         Motion& crate_pos = registry.motions.get(wall);
         crate_pos.velocity.x -= overlapX * overlapPushbackPercent;
       }
@@ -1076,7 +1076,7 @@ void CollisionSystem::resolveStopOnWall(Entity wall, Entity entity) {
     // The smallest overlap is a large value means we got stuck 
     // between crate/wall. Resolve by pushing away crate.
     if (abs(overlapY) > overlapThreshold) {
-      if (registry.breakables.has(wall)) {
+      if (registry.breakables.has(wall) && registry.motions.has(wall)) {
         Motion& crate_pos = registry.motions.get(wall);
         crate_pos.velocity.y -= overlapY * overlapPushbackPercent;
       }

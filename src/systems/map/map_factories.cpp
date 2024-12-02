@@ -215,7 +215,14 @@ Entity createCratePos(RenderSystem* renderer, vec2 position,
   // assign drops
   if (randomSuccess(CRATE_DROP_CHANCE_0)) {
     Drop& drop  = registry.drops.emplace(entity);
-    drop.dropFn = CRATE_DROP_0;
+    float dropRNG = randomFloat(0.0f, 1.0f);
+    if(dropRNG >= 0.0 && dropRNG <= 0.5) {
+      drop.dropFn = CRATE_DROP_0;
+    } else if (dropRNG <= 0.75f) {
+      drop.dropFn = CRATE_DROP_1;
+    } else if (dropRNG <= 1.0f) {
+      drop.dropFn = CRATE_DROP_2;
+    }
   }
 
   return entity;

@@ -48,6 +48,7 @@ Entity respawnJelly(RenderSystem* renderer, EntityState es);
 #define FISH_HEALTH_SCALE vec2(1.4f)
 #define FISH_HEALTH_BAR_SCALE vec2(1.5f)
 #define FISH_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+#define FISH_DROP_CHANCE_0 0.3f
 
 Entity createFishPos(RenderSystem* renderer, vec2 position,
                      bool checkCollisions = true);
@@ -107,7 +108,7 @@ Entity respawnShark(RenderSystem* renderer, EntityState es);
 #define KRAB_HEALTH_SCALE vec2(1.4f)
 #define KRAB_HEALTH_BAR_SCALE vec2(1.5f)
 #define KRAB_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
-#define KRAB_DROP_CHANCE_0 0.35f
+#define KRAB_DROP_CHANCE_0 0.5f
 
 Entity createKrabPos(RenderSystem* renderer, vec2 position,
                      bool checkCollisions = true);
@@ -159,7 +160,7 @@ Entity launchUrchinNeedle(RenderSystem* renderer, vec2 position, float angle);
 #define SEAHORSE_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 #define SEAHORSE_FIRERATE 3000.f
 // TODO: balance this for M4
-#define SEAHORSE_DROP_CHANCE_0 0.2f
+#define SEAHORSE_DROP_CHANCE_0 0.3f
 
 Entity createSeahorsePos(RenderSystem* renderer, vec2 position,
                          bool checkCollisions = true);
@@ -199,6 +200,7 @@ Entity fireSeahorseBullet(RenderSystem* renderer, vec2 position,
 #define LOBSTER_HEALTH_SCALE vec2(1.4f)
 #define LOBSTER_HEALTH_BAR_SCALE vec2(1.5f)
 #define LOBSTER_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+#define LOBSTER_DROP_CHANCE_0 0.7f
 
 Entity createLobsterPos(RenderSystem* renderer, vec2 position,
                         bool checkCollisions = true);

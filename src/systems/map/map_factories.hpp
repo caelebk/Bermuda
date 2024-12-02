@@ -32,7 +32,9 @@ Entity respawnGeyser(RenderSystem* renderer, EntityState es);
 #define CRATE_MASS 20
 
 #define CRATE_DROP_0 createOxygenCanisterPos
-#define CRATE_DROP_CHANCE_0 0.25
+#define CRATE_DROP_1 createBonesPos
+#define CRATE_DROP_2 createNetDropPos
+#define CRATE_DROP_CHANCE_0 0.5
 
 Entity createCratePos(RenderSystem* renderer, vec2 position,
                       bool checkCollisions = true);

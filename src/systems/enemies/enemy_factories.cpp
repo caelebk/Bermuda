@@ -202,6 +202,15 @@ Entity createFishPos(RenderSystem* renderer, vec2 position,
     return Entity(0);
   }
 
+  if (randomSuccess(FISH_DROP_CHANCE_0)) {
+    Drop& drop = registry.drops.emplace(entity);
+    if (randomSuccess(FISH_DROP_CHANCE_0)) {
+      drop.dropFn = createConcussiveDropPos;
+    } else {
+      drop.dropFn = createNetDropPos;
+    }
+  }
+
   registry.positions.insert(entity, pos);
 
   // Store a reference to the potentially re-used mesh object
@@ -769,6 +778,11 @@ Entity createLobsterPos(RenderSystem* renderer, vec2 position,
   // make enemy and damage
   Deadly& d = registry.deadlys.emplace(entity);
   d.type    = ENTITY_TYPE::LOBSTER;
+
+  if (randomSuccess(LOBSTER_DROP_CHANCE_0)) {
+    Drop& drop  = registry.drops.emplace(entity);
+    drop.dropFn = createShrimpDropPos;
+  }
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = LOBSTER_DAMAGE;
