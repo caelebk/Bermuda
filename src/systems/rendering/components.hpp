@@ -80,7 +80,8 @@ enum class SOUND_ASSET_ID {
   END_SCREEN            = BOSS_INTRO + 1,
   NOTIFICATION          = END_SCREEN + 1,
   SAVE                  = NOTIFICATION + 1,
-  SOUND_COUNT           = SAVE + 1
+  SIREN                 = SAVE + 1,
+  SOUND_COUNT           = SIREN + 1
 };
 
 const int sound_count = (int)SOUND_ASSET_ID::SOUND_COUNT;
@@ -188,7 +189,9 @@ enum class TEXTURE_ASSET_ID {
   URCHIN_NEEDLE        = URCHIN + 1,
   SEAHORSE             = URCHIN_NEEDLE + 1,
   SEAHORSE_BULLET      = SEAHORSE + 1,
-  KRAB_BOSS            = SEAHORSE_BULLET + 1,
+  SIREN                = SEAHORSE_BULLET + 1,
+  SIREN_HEAL           = SIREN + 1,
+  KRAB_BOSS            = SIREN_HEAL + 1,
   KRAB_BOSS_CHASE      = KRAB_BOSS + 1,
   SHARKMAN0            = KRAB_BOSS_CHASE + 1,
   SHARKMAN1            = SHARKMAN0 + 1,

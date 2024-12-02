@@ -5,10 +5,7 @@
 #include "render_system.hpp"
 #include "respawn.hpp"
 
-enum class RangedEnemies {
-  URCHIN,
-  SEAHORSE
-};
+enum class RangedEnemies { URCHIN, SEAHORSE, SIREN };
 
 // anything that is deadly to the player
 struct Deadly {
@@ -16,12 +13,17 @@ struct Deadly {
 };
 
 struct EnemyProjectile {
-  bool has_timer = false;
+  bool  has_timer = false;
   float timer;
 };
 
+struct EnemySupport {
+  Entity user;
+  bool   ignores_user;
+};
+
 struct Boss {
-  ENTITY_TYPE type;
+  ENTITY_TYPE                        type;
   float                              curr_cd = 0.f;
   float                              ai_cd   = 0.f;
   float                              max_proj_count;

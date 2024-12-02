@@ -18,10 +18,10 @@ const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     LVL_1_PACKS = {createFishPos};
 
 const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_2_RAND_POS = {createOxygenCanisterPos, createCratePos,
-                      createCratePos,          createCratePos,
-                      createCratePos,          createSeahorsePos,
-                      createGeyserPos,         createFishPos};
+    LVL_2_RAND_POS = {
+        createOxygenCanisterPos, createCratePos, createCratePos,
+        createCratePos,          createCratePos, createSeahorsePos,
+        createGeyserPos,         createSharkPos, createSirenPos};
 
 const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     LVL_2_PACKS = {createSharkPos};

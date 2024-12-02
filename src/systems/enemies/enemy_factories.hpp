@@ -203,3 +203,34 @@ Entity fireSeahorseBullet(RenderSystem* renderer, vec2 position,
 Entity createLobsterPos(RenderSystem* renderer, vec2 position,
                         bool checkCollisions = true);
 Entity respawnLobster(RenderSystem* renderer, EntityState es);
+
+///////////////////////////////////////////////////////////////
+// Sirens
+///////////////////////////////////////////////////////////////
+#define SIREN_MS 100.0
+#define SIREN_SCALE_FACTOR vec2(0.2f)
+#define SIREN_BOUNDING_BOX vec2(596.f, 536.f)
+#define SIREN_HEALTH 125.0
+#define SIREN_MIN_DIR_CD 2000
+#define SIREN_MAX_DIR_CD 4000
+#define SIREN_HEALTH_SCALE vec2(1.4f)
+#define SIREN_HEALTH_BAR_SCALE vec2(1.5f)
+#define SIREN_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+#define SIREN_DROP_CHANCE_0 0.75f
+#define SIREN_FIRERATE 1500.f
+
+Entity createSirenPos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions = true);
+Entity respawnSiren(RenderSystem* renderer, EntityState es);
+
+///////////////////////////////////////////////////////////////
+// Siren Heal
+///////////////////////////////////////////////////////////////
+#define SIREN_HEAL_MS 750.0
+#define SIREN_HEAL_SCALE_FACTOR vec2(0.3f)
+#define SIREN_HEAL_BOUNDING_BOX vec2(112.f, 112.f)
+#define SIREN_HEAL_AMOUNT 10.0
+#define SIREN_HEAL_TIMER 5000.f
+
+Entity fireSirenHeal(RenderSystem* renderer, Entity& user, vec2 position,
+                     vec2 direction);

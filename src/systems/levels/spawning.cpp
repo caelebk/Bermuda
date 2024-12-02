@@ -6,10 +6,10 @@
 #include "tiny_ecs_registry.hpp"
 
 void execute_config_rand(
-    const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>>
-        &funcs,
-    RoomBuilder &room_builder, RenderSystem *renderer) {
-  for (const auto &func : funcs) {
+    const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>&
+                 funcs,
+    RoomBuilder& room_builder, RenderSystem* renderer) {
+  for (const auto& func : funcs) {
     vec2 loc;
     do {
       loc = room_builder.get_random_position();
@@ -19,10 +19,10 @@ void execute_config_rand(
 }
 
 void execute_config_rand_chance(
-    const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>>
-        &funcs,
-    RoomBuilder &room_builder, RenderSystem *renderer, float chance) {
-  for (const auto &func : funcs) {
+    const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>&
+                 funcs,
+    RoomBuilder& room_builder, RenderSystem* renderer, float chance) {
+  for (const auto& func : funcs) {
     if (randomSuccess(chance)) {
       vec2 loc;
       do {
@@ -96,6 +96,10 @@ bool remove_all_entities() {
         registry.enemyProjectiles.entities.back());
   }
 
+  while (registry.enemySupports.entities.size() > 0) {
+    registry.remove_all_components_of(registry.enemySupports.entities.back());
+  }
+
   while (registry.oxygenModifiers.entities.size() > 0) {
     registry.remove_all_components_of(registry.oxygenModifiers.entities.back());
   }
@@ -139,8 +143,7 @@ bool remove_all_entities() {
   }
 
   while (registry.saveStatuses.entities.size() > 0) {
-    registry.remove_all_components_of(
-        registry.saveStatuses.entities.back());
+    registry.remove_all_components_of(registry.saveStatuses.entities.back());
   }
 
   while (registry.explosions.entities.size() > 0) {

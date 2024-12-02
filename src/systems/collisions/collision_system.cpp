@@ -69,6 +69,25 @@ bool CollisionSystem::checkCircleCollision(Entity entity_i, Entity entity_j) {
   return false;
 }
 
+bool CollisionSystem::checkCircleBoxCollision(Entity circle_bound_entity,
+                                              Entity box_bound_entity) {
+  if (!registry.positions.has(circle_bound_entity) ||
+      !registry.positions.has(box_bound_entity)) {
+    return false;
+  }
+  Position& position_i = registry.positions.get(circle_bound_entity);
+  float     radius     = max(position_i.scale.x, position_i.scale.y) / 2.f;
+  Position& position_j = registry.positions.get(box_bound_entity);
+  if (circle_box_collides(position_i, radius, position_j)) {
+    registry.collisions.emplace_with_duplicates(circle_bound_entity,
+                                                box_bound_entity);
+    registry.collisions.emplace_with_duplicates(box_bound_entity,
+                                                circle_bound_entity);
+    return true;
+  }
+  return false;
+}
+
 void CollisionSystem::step(float elapsed_ms) {
   collision_detection();
 
@@ -104,13 +123,16 @@ void CollisionSystem::collision_detection() {
   // 2. Detect player collisions
   detectPlayerCollisions();
 
-  // 3. Detect mass collisions
+  // 3. Detect enemy support collisions
+  detectEnemySupportCollisions();
+
+  // 4. Detect mass collisions
   detectMassCollisions();
 
-  // 3. Detect wall collisions
+  // 5. Detect wall collisions
   detectWallCollisions();
 
-  // 4. Detect door collisions
+  // 6. Detect door collisions
   detectDoorCollisions();
 }
 
@@ -219,10 +241,36 @@ void CollisionSystem::detectPlayerCollisions() {
   }
 }
 
+void CollisionSystem::detectEnemySupportCollisions() {
+  ComponentContainer<Deadly>&      enemy_container = registry.deadlys;
+  ComponentContainer<EnemySupport> enemy_supp_container =
+      registry.enemySupports;
+
+  for (uint i = 0; i < enemy_supp_container.components.size(); i++) {
+    Entity entity_i = enemy_supp_container.entities[i];
+    if (!registry.positions.has(entity_i)) {
+      continue;
+    }
+
+    for (uint j = 0; j < enemy_container.size(); j++) {
+      Entity entity_j = enemy_container.entities[j];
+      if (registry.enemySupports.get(entity_i).ignores_user &&
+          entity_j == registry.enemySupports.get(entity_i).user)
+        continue;
+      if (!registry.oxygen.has(entity_j)) continue;
+      Oxygen& entity_j_oxygen = registry.oxygen.get(entity_j);
+      if (entity_j_oxygen.level >= entity_j_oxygen.capacity) continue;
+      checkCircleBoxCollision(entity_i, entity_j);
+    }
+  }
+}
+
 void CollisionSystem::detectWallCollisions() {
   ComponentContainer<Deadly>&         enemy_container = registry.deadlys;
   ComponentContainer<EnemyProjectile> enemy_proj_container =
       registry.enemyProjectiles;
+  ComponentContainer<EnemySupport> enemy_supp_container =
+      registry.enemySupports;
   ComponentContainer<ActiveWall>& wall_container = registry.activeWalls;
 
   for (uint i = 0; i < wall_container.components.size(); i++) {
@@ -239,6 +287,11 @@ void CollisionSystem::detectWallCollisions() {
     for (uint j = 0; j < enemy_proj_container.size(); j++) {
       Entity entity_j = enemy_proj_container.entities[j];
       checkBoxCollision(entity_i, entity_j);
+    }
+
+    for (uint j = 0; j < enemy_supp_container.size(); j++) {
+      Entity entity_j = enemy_supp_container.entities[j];
+      checkCircleBoxCollision(entity_j, entity_i);
     }
   }
 }
@@ -400,6 +453,10 @@ void CollisionSystem::routeEnemyCollisions(Entity enemy, Entity other) {
     resolveWallEnemyCollision(other, enemy);
     routed = true;
   }
+  if (registry.enemySupports.has(other)) {
+    resolveEnemyEnemySupportCollision(enemy, other);
+    routed = true;
+  }
 
   // if an enemy is acting as a projectile and hits something, it
   // is no longer acting as a projectile and goes back to its regular ai
@@ -441,6 +498,9 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
       resolveWallEnemyProjCollision(wall, other);
     }
   }
+  if (registry.enemySupports.has(other)) {
+    resolveWallEnemyProjCollision(wall, other);
+  }
 }
 
 void CollisionSystem::routeDoorCollisions(Entity door, Entity other) {
@@ -459,6 +519,13 @@ void CollisionSystem::routeDoorCollisions(Entity door, Entity other) {
   }
   if (registry.deadlys.has(other)) {
     resolveWallEnemyCollision(door, other);
+  }
+  if (registry.enemyProjectiles.has(other)) {
+    resolveWallEnemyProjCollision(door, other);
+  }
+  // same resolution as above, avoid "or" cond. in case this ever changes
+  if (registry.enemySupports.has(other)) {
+    resolveWallEnemyProjCollision(door, other);
   }
 }
 
@@ -645,6 +712,16 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
     playerproj_motion.velocity = vec2(0.0f, 0.0f);
     playerproj_comp.is_loaded  = true;
   }
+}
+
+void CollisionSystem::resolveEnemyEnemySupportCollision(Entity enemy,
+                                                        Entity enemy_support) {
+  // addDamageIndicatorTimer(enemy);
+  modifyOxygen(enemy, enemy_support);
+  registry.sounds.insert(Entity(), SOUND_ASSET_ID::SIREN);
+
+  // Assume the support entity should get thanos'd upon impact
+  registry.remove_all_components_of(enemy_support);
 }
 
 void CollisionSystem::resolveBreakablePlayerProjCollision(Entity breakable,

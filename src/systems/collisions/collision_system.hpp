@@ -5,6 +5,7 @@
 #include "ai_system.hpp"
 #include "audio_system.hpp"
 #include "boss_factories.hpp"
+#include "collision_util.hpp"
 #include "common.hpp"
 #include "components.hpp"
 #include "debuff.hpp"
@@ -19,15 +20,14 @@
 #include "player.hpp"
 #include "tiny_ecs.hpp"
 #include "tiny_ecs_registry.hpp"
-#include "collision_util.hpp"
 
 class CollisionSystem {
   private:
   RenderSystem* renderer;
-  LevelSystem* level;
+  LevelSystem*  level;
 
   /********************
-  COLLISION END DETECTION 
+  COLLISION END DETECTION
   *********************/
   void handle_collision_end();
 
@@ -41,10 +41,14 @@ class CollisionSystem {
   void detectWallCollisions();
   void detectMassCollisions();
   void detectDoorCollisions();
+  void detectEnemySupportCollisions();
 
   bool checkBoxCollision(Entity entity_i, Entity entity_j);
   bool checkCircleCollision(Entity entity_i, Entity entity_j);
-  bool checkPlayerMeshCollision(Entity entity_i, Entity entity_j, Entity collisionMesh);
+  bool checkCircleBoxCollision(Entity circle_bound_entity,
+                               Entity box_bound_entity);
+  bool checkPlayerMeshCollision(Entity entity_i, Entity entity_j,
+                                Entity collisionMesh);
 
   /********************
   COLLISION RESOLUTION
@@ -86,8 +90,12 @@ class CollisionSystem {
   // Enemy <-> Player Projectile
   void resolveEnemyPlayerProjCollision(Entity enemy, Entity player_proj);
 
-  // Breakable <-> Player Projectile
-  void resolveBreakablePlayerProjCollision(Entity breakable, Entity player_proj);
+  // Enemy <-> Enemy Support
+  void resolveEnemyEnemySupportCollision(Entity enemy, Entity enemy_support);
+
+      // Breakable <-> Player Projectile
+      void resolveBreakablePlayerProjCollision(Entity breakable,
+                                               Entity player_proj);
 
   // Breakable <-> Enemy Projectile
   void resolveBreakableEnemyProjCollision(Entity crate, Entity enemy_proj);
@@ -121,8 +129,9 @@ class CollisionSystem {
   ***********************************************************************/
 
   void detectAndResolveExplosion(Entity proj, Entity enemy);
-  
-  // Note: The actual angle window used is really 2 times the angle (position.angle += angle)
+
+  // Note: The actual angle window used is really 2 times the angle
+  // (position.angle += angle)
   void detectAndResolveConeAOE(Entity proj, Entity enemy, float angle);
 
   public:

@@ -80,8 +80,8 @@ void removeFromAI(Entity& e) {
  * @param pos
  * @return
  */
-bool can_see_player(Position& pos, Position& player_pos) {
-  vec2        direction   = player_pos.position - pos.position;
+bool can_see_entity(Position& pos, Position& entity_pos) {
+  vec2        direction   = entity_pos.position - pos.position;
   const float player_dist = dot(direction, direction);
   direction               = normalize(direction);
 
@@ -96,7 +96,7 @@ bool can_see_player(Position& pos, Position& player_pos) {
 
     const vec2  wall_dir_ent     = wall_pos.position - pos.position;
     const float wall_dist_ent    = dot(wall_dir_ent, wall_dir_ent);
-    const vec2  wall_dir_player  = wall_pos.position - player_pos.position;
+    const vec2  wall_dir_player  = wall_pos.position - entity_pos.position;
     const float wall_dist_player = dot(wall_dir_player, wall_dir_player);
 
     // wall is further than player, ignore
@@ -112,10 +112,10 @@ bool can_see_player(Position& pos, Position& player_pos) {
     float bottom = wall_bounds[3];
 
     // Calculate t for intersections on each axis
-    float t_min_x = (left - player_pos.position.x) / direction.x;
-    float t_max_x = (right - player_pos.position.x) / direction.x;
-    float t_min_y = (bottom - player_pos.position.y) / direction.y;
-    float t_max_y = (top - player_pos.position.y) / direction.y;
+    float t_min_x = (left - entity_pos.position.x) / direction.x;
+    float t_max_x = (right - entity_pos.position.x) / direction.x;
+    float t_min_y = (bottom - entity_pos.position.y) / direction.y;
+    float t_max_y = (top - entity_pos.position.y) / direction.y;
 
     // Sort t values on each axis
     float t1_x = min(t_min_x, t_max_x);
@@ -157,7 +157,7 @@ void choose_new_direction(Entity enemy, Entity other) {
   Boss& boss     = registry.bosses.get(enemy);
   // if enemy sees player during target mode, aim at player
   if (registry.trackPlayer.has(enemy) &&
-      can_see_player(registry.positions.get(enemy),
+      can_see_entity(registry.positions.get(enemy),
                      registry.positions.get(player)) &&
       distance <= registry.trackPlayer.get(enemy).spot_radius) {
     // turn red
@@ -437,7 +437,7 @@ void AISystem::do_track_player(float elapsed_ms) {
         tracker.active_track ? tracker.leash_radius : tracker.spot_radius;
 
     if (!in_range_of_player(entity_pos, player_pos, range) ||
-        !can_see_player(entity_pos, player_pos)) {
+        !can_see_entity(entity_pos, player_pos)) {
       if (tracker.active_track) {
         // printf("%d stopped tracking the player!\n", (unsigned int)e);
         createEmote(this->renderer, e, EMOTE::QUESTION);
@@ -516,7 +516,7 @@ void AISystem::do_track_player_ranged(float elapsed_ms) {
         tracker.active_track ? tracker.leash_radius : tracker.spot_radius;
 
     if (!in_range_of_player(entity_pos, player_pos, range) ||
-        !can_see_player(entity_pos, player_pos)) {
+        !can_see_entity(entity_pos, player_pos)) {
       if (tracker.active_track) {
         // printf("%d stopped tracking the player!\n", (unsigned int)e);
         createEmote(this->renderer, e, EMOTE::QUESTION);
@@ -588,30 +588,45 @@ void AISystem::do_projectile_firing(float elapsed_ms) {
     attrs.cooldown -= elapsed_ms;
 
     if (attrs.type == RangedEnemies::URCHIN) {
+      if (attrs.cooldown < 0.f) {
+        attrs.cooldown = attrs.default_cd;
+        registry.sounds.insert(enemy, Sound(SOUND_ASSET_ID::URCHIN));
+        handleUrchinFiring(renderer, registry.positions.get(enemy));
+      }
+    } else if (attrs.type == RangedEnemies::SEAHORSE) {
+      Position& enemy_pos  = registry.positions.get(enemy);
+      Position& player_pos = registry.positions.get(player);
+      if (can_see_entity(enemy_pos, player_pos)) {
+        vec2 direction = player_pos.position - enemy_pos.position;
+        if (direction.x > 0) {
+          enemy_pos.scale.x = abs(enemy_pos.scale.x) * -1;
+        } else {
+          enemy_pos.scale.x = abs(enemy_pos.scale.x);
+        }
         if (attrs.cooldown < 0.f) {
           attrs.cooldown = attrs.default_cd;
-          registry.sounds.insert(enemy, Sound(SOUND_ASSET_ID::URCHIN));
-          handleUrchinFiring(renderer, registry.positions.get(enemy));
+          registry.sounds.insert(enemy, Sound(SOUND_ASSET_ID::SEAHORSE));
+          fireSeahorseBullet(renderer, enemy_pos.position, direction);
         }
-      } else if (attrs.type == RangedEnemies::SEAHORSE) {
-        Position& enemy_pos  = registry.positions.get(enemy);
-        Position& player_pos = registry.positions.get(player);
-        if (can_see_player(enemy_pos, player_pos)) {
-          vec2 direction = player_pos.position - enemy_pos.position;
-          if (direction.x > 0) {
-            enemy_pos.scale.x = abs(enemy_pos.scale.x) * -1;
-          } else {
-            enemy_pos.scale.x = abs(enemy_pos.scale.x);
-          }
-          if (attrs.cooldown < 0.f) {
-            attrs.cooldown = attrs.default_cd;
-            registry.sounds.insert(enemy, Sound(SOUND_ASSET_ID::SEAHORSE));
-            fireSeahorseBullet(renderer, enemy_pos.position, direction);
-          }
-        } else if (attrs.cooldown < 0.f) {
-          attrs.cooldown = attrs.default_cd;
+      } else if (attrs.cooldown < 0.f) {
+        attrs.cooldown = attrs.default_cd;
+      }
+    } else if (attrs.type == RangedEnemies::SIREN && attrs.cooldown < 0.f) {
+      Position& enemy_pos = registry.positions.get(enemy);
+      for (Entity enemy_ally : registry.deadlys.entities) {
+        if (enemy_ally == enemy) continue;
+        if (!registry.oxygen.has(enemy_ally)) continue;
+        Oxygen& enemy_ally_oxygen = registry.oxygen.get(enemy_ally);
+        if (enemy_ally_oxygen.level >= enemy_ally_oxygen.capacity) continue;
+
+        Position& enemy_ally_pos = registry.positions.get(enemy_ally);
+        if (can_see_entity(enemy_pos, enemy_ally_pos)) {
+          vec2 direction = enemy_ally_pos.position - enemy_pos.position;
+          fireSirenHeal(renderer, enemy, enemy_pos.position, direction);
         }
       }
+      attrs.cooldown = attrs.default_cd;
+    }
   }
 }
 

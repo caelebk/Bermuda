@@ -32,5 +32,5 @@ class AISystem {
 bool is_tracking(Entity e);
 bool any_tracking(std::vector<Entity> entities);
 void choose_new_direction(Entity enemy, Entity other);
-bool can_see_player(Position &pos, Position &player_pos);
+bool can_see_entity(Position &pos, Position &entity_pos);
 void removeFromAI(Entity& e);

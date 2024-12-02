@@ -23,6 +23,7 @@ const std::unordered_map<
         {ENTITY_TYPE::URCHIN, respawnUrchin},
         {ENTITY_TYPE::SEAHORSE, respawnSeahorse},
         {ENTITY_TYPE::LOBSTER, respawnLobster},
+        {ENTITY_TYPE::SIREN, respawnSiren},
         {ENTITY_TYPE::BREAKABLE_CRATE, respawnCrate},
         {ENTITY_TYPE::METAL_CRATE, respawnMetalCrate},
         {ENTITY_TYPE::ROCK, respawnRock},

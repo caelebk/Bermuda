@@ -115,8 +115,8 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position,
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy
-  Deadly& d   = registry.deadlys.emplace(entity);
-  d.type = ENTITY_TYPE::JELLY;
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::JELLY;
 
   // Add stats
   auto& damage  = registry.oxygenModifiers.emplace(entity);
@@ -209,8 +209,8 @@ Entity createFishPos(RenderSystem* renderer, vec2 position,
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly& d   = registry.deadlys.emplace(entity);
-  d.type = ENTITY_TYPE::FISH;
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::FISH;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = FISH_DAMAGE;
@@ -303,8 +303,8 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position,
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly& d   = registry.deadlys.emplace(entity);
-  d.type = ENTITY_TYPE::SHARK;
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::SHARK;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = SHARK_DAMAGE;
@@ -404,8 +404,8 @@ Entity createKrabPos(RenderSystem* renderer, vec2 position,
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly& d   = registry.deadlys.emplace(entity);
-  d.type = ENTITY_TYPE::KRAB;
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::KRAB;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = KRAB_DAMAGE;
@@ -513,8 +513,8 @@ Entity createUrchinPos(RenderSystem* renderer, vec2 position,
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly& d   = registry.deadlys.emplace(entity);
-  d.type = ENTITY_TYPE::URCHIN;
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::URCHIN;
 
   // Initialize the position, scale, and physics components
   auto& motion        = registry.motions.emplace(entity);
@@ -640,8 +640,8 @@ Entity createSeahorsePos(RenderSystem* renderer, vec2 position,
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly& d   = registry.deadlys.emplace(entity);
-  d.type = ENTITY_TYPE::SEAHORSE;
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::SEAHORSE;
 
   // Initialize the position, scale, and physics components
   auto& motion        = registry.motions.emplace(entity);
@@ -767,8 +767,8 @@ Entity createLobsterPos(RenderSystem* renderer, vec2 position,
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly& d   = registry.deadlys.emplace(entity);
-  d.type = ENTITY_TYPE::LOBSTER;
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::LOBSTER;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = LOBSTER_DAMAGE;
@@ -832,6 +832,129 @@ Entity respawnLobster(RenderSystem* renderer, EntityState es) {
   if (diff < 0) {
     modifyOxygenAmount(entity, diff);
   }
+
+  return entity;
+}
+
+/////////////////////////////////////////////////////////////////
+// Sirens
+/////////////////////////////////////////////////////////////////
+/**
+ * @brief creates a siren at a specific position
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createSirenPos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions) {
+  // Reserve an entity
+  auto entity = Entity();
+
+  Position pos;
+  pos.angle    = 0.f;
+  pos.position = position;
+  pos.scale    = SIREN_SCALE_FACTOR * SIREN_BOUNDING_BOX;
+  if (checkCollisions && !checkEnemySpawnCollisions(pos)) {
+    // returns invalid entity, since id's start from 1
+    return Entity(0);
+  }
+  registry.positions.insert(entity, pos);
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // make enemy and damage
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::SIREN;
+
+  // Initialize the position, scale, and physics components
+  auto& motion        = registry.motions.emplace(entity);
+  motion.velocity     = {-SIREN_MS, 0};
+  motion.acceleration = {0, 0};
+
+  // ai
+  auto& wander         = registry.wanders.emplace(entity);
+  wander.active_dir_cd = 0;  // immediately picks a new direction
+  wander.change_dir_cd = getRandInt(SIREN_MIN_DIR_CD, SIREN_MAX_DIR_CD);
+
+  auto& shooter      = registry.shooters.emplace(entity);
+  shooter.type       = RangedEnemies::SIREN;
+  shooter.default_cd = SIREN_FIRERATE;
+  shooter.cooldown   = SIREN_FIRERATE;
+
+  // assign drops
+  if (randomSuccess(SIREN_DROP_CHANCE_0)) {
+    Drop& drop  = registry.drops.emplace(entity);
+    drop.dropFn = createOxygenCanisterPos;
+  }
+
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::SIREN, EFFECT_ASSET_ID::ENEMY,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  createDefaultHealthbar(renderer, entity, SIREN_HEALTH, SIREN_HEALTH_SCALE,
+                         SIREN_HEALTH_BAR_SCALE, SIREN_HEALTH_BOUNDING_BOX);
+  return entity;
+}
+
+/**
+ * @brief Respawns a Siren based on its entity state
+ *
+ * @param renderer
+ * @param es
+ * @return
+ */
+Entity respawnSiren(RenderSystem* renderer, EntityState es) {
+  Entity entity = createSirenPos(renderer, es.position.position, false);
+
+  // Restore State
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}
+
+Entity fireSirenHeal(RenderSystem* renderer, Entity& user, vec2 pos, vec2 direction) {
+  auto entity = Entity();
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // Setting initial position values
+  float     angle    = atan2(direction.y, direction.x);
+  Position& position = registry.positions.emplace(entity);
+  position.position  = pos;
+  position.scale     = SIREN_HEAL_SCALE_FACTOR * SIREN_HEAL_BOUNDING_BOX;
+  position.angle     = angle;
+
+  // Setting initial motion values
+  Motion& motion  = registry.motions.emplace(entity);
+  motion.velocity = {cos(angle) * SIREN_HEAL_MS, sin(angle) * SIREN_HEAL_MS};
+
+  OxygenModifier& oxyCost = registry.oxygenModifiers.emplace(entity);
+  oxyCost.amount          = SIREN_HEAL_AMOUNT;
+
+  EnemySupport& supportProj = registry.enemySupports.emplace(entity);
+  supportProj.ignores_user = true;
+  supportProj.user = user;
+
+  // Request Render
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::SIREN_HEAL, EFFECT_ASSET_ID::ENEMY,
+               GEOMETRY_BUFFER_ID::SPRITE});
 
   return entity;
 }

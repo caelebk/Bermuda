@@ -191,8 +191,8 @@ Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly& d   = registry.deadlys.emplace(entity);
-  d.type = ENTITY_TYPE::KRAB_BOSS;
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::KRAB_BOSS;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = KRAB_BOSS_DAMAGE;
@@ -272,8 +272,8 @@ Entity createSharkmanPos(RenderSystem* renderer, vec2 position,
   registry.meshPtrs.emplace(entity, &mesh);
 
   // make enemy and damage
-  Deadly& d   = registry.deadlys.emplace(entity);
-  d.type = ENTITY_TYPE::SHARKMAN;
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::SHARKMAN;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = SHARKMAN_DAMAGE;
