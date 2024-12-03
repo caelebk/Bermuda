@@ -13,6 +13,7 @@
 #include "level_factories.hpp"
 #include "level_spawn.hpp"
 #include "map_factories.hpp"
+#include "physics_system.hpp"
 #include "player_factories.hpp"
 #include "spawning.hpp"
 
@@ -376,6 +377,14 @@ void LevelSystem::move_player_to_door(Direction direction, Entity& exit_door) {
           Position& player_mesh_pos =
               registry.positions.get(player_comp.collisionMesh);
           player_mesh_pos.position = player_position.position;
+          if (registry.cursors.entities.size() > 0 &&
+              registry.positions.has(registry.cursors.entities[0])) {
+            Position& cursor_pos =
+                registry.positions.get(registry.cursors.entities[0]);
+            updateWepProjPos(cursor_pos.position);
+          } else {
+            updateWepProjPos(player_position.position);
+          }
         }
       }
     }
@@ -442,8 +451,36 @@ void LevelSystem::clear_all_state() {
 void LevelSystem::activate_from_save(std::string id) {
   // player should already be in the position we want them in so we can ignore
   // should also already be marked as visited
-  // RoomBuilder &room = level->get_room_by_editor_id(id);
-  // room.has_entered = true;
+  RoomBuilder& room = level->get_room_by_editor_id(id);
   set_current_room_editor_id(id);
-  activate_current_room();
+  activate_walls();
+  activate_floor();
+  spawn();  // boss would be respawned
+
+  if (room.is_tutorial_room) {
+    if (registry.deadlys.entities.size() >= 1) {
+      // jelly is alive, make it unlock the door
+      // fuck you
+      Entity jelly = registry.deadlys.entities[0];
+      if (registry.drops.has(jelly)) {
+        registry.drops.remove(jelly);
+      }
+      Drop& drop       = registry.drops.emplace(registry.deadlys.entities[0]);
+      drop.dropFn      = unlockTutorial;
+      room.has_entered = false;
+      activate_doors();
+      room.has_entered = true;
+    } else {
+      // jelly is dead
+      room.has_entered = true;
+      activate_doors();
+    }
+  } else if (room.is_boss_room && registry.bosses.entities.size() != 0) {
+    room.has_entered = false;
+    activate_doors();
+    room.has_entered = true;
+  } else {
+    room.has_entered = true;
+    activate_doors();
+  }
 }

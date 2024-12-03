@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <iostream>
 
+#include "boss_factories.hpp"
 #include "enemy_factories.hpp"
 #include "player_factories.hpp"
 #include "tiny_ecs_registry.hpp"
@@ -252,14 +253,49 @@ void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen) {
   entity_oxygen.level = 0;
 
   if (!registry.deathTimers.has(entity) && registry.players.has(entity)) {
+    // player death
     registry.deathTimers.insert(entity, {4000.f});
     registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_DEATH));
     registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_FLATLINE));
   } else if (!registry.deathTimers.has(entity) &&
              !registry.players.has(entity)) {
-    registry.deathTimers.emplace(entity);
-    if (!registry.sounds.has(entity) && registry.deadlys.has(entity)) {
-      registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::ENEMY_DEATH));
+    // enemy death
+    if (registry.bosses.has(entity) &&
+        registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU) {
+      // kill all tentacles
+      for (Entity tentacle : registry.deadlys.entities) {
+        if (!registry.bosses.has(tentacle)) {
+          registry.remove_all_components_of(tentacle);
+        }
+      }
+      // remove all projectiles
+      for (Entity projectile : registry.enemyProjectiles.entities) {
+        registry.remove_all_components_of(projectile);
+      }
+      // if cthulhu is angry, he dies, otherwise make him angry
+      Boss& cthulhu = registry.bosses.get(entity);
+      if (cthulhu.is_angry) {
+        // remove render and stop attacks to show its dead
+        registry.deathTimers.insert(entity, {3000.f});
+        registry.renderRequests.remove(entity);
+        registry.shooters.get(entity).cooldown = 10000;
+        if (!registry.sounds.has(entity)) {
+          registry.sounds.insert(Entity(),
+                                 Sound(SOUND_ASSET_ID::CTHULHU_DEATH, 5000));
+        }
+      } else {
+        // hack, bros ai is healing
+        cthulhu.in_transition = true;
+        cthulhu.curr_cd = 0;
+        cthulhu.ai_cd = CTHULHU_REGEN_RATE;
+        cthulhu.ai = std::vector<std::function<void()>>({addCthulhuRageAI});
+      }
+
+    } else {
+      registry.deathTimers.emplace(entity);
+      if (!registry.sounds.has(entity) && registry.deadlys.has(entity)) {
+        registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::ENEMY_DEATH));
+      }
     }
   }
 }

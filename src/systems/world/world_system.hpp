@@ -68,6 +68,7 @@ extern bool        is_start;
 extern bool        is_paused;
 extern bool        is_krab_cutscene;
 extern bool        is_sharkman_cutscene;
+extern bool        is_cthulhu_cutscene;
 extern bool        is_death;
 extern bool        is_end;
 extern Entity      overlay;

@@ -65,8 +65,7 @@ void createEmote(RenderSystem* renderer, Entity& e, EMOTE emote) {
   position.position =
       entityPos.position -
       vec2(0.f, entityPos.scale.y / 2 +
-                    EMOTE_POS);  // TODO: guesstimate on where the HP
-                                 // should be, update to proper position
+                    EMOTE_POS);
   position.angle         = 0.f;
   position.scale         = EMOTE_SCALE_FACTOR * EMOTE_BOUNDING_BOX;
   position.originalScale = EMOTE_SCALE_FACTOR * EMOTE_BOUNDING_BOX;
@@ -85,8 +84,7 @@ void createEmote(RenderSystem* renderer, Entity& e, EMOTE emote) {
 void updateEmotePos(Entity& enemy) {
   Position& enemyPos = registry.positions.get(enemy);
   Emoting&  emote =
-      registry.emoting.get(enemy);  // TODO: ensure no unexpected behaviour once
-                                    // collision handling is fully implemented
+      registry.emoting.get(enemy);
 
   Position& emotePos = registry.positions.get(emote.child);
   emotePos.position =

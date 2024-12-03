@@ -5,7 +5,16 @@
 #include "render_system.hpp"
 #include "respawn.hpp"
 
-enum class RangedEnemies { URCHIN, SEAHORSE, SIREN };
+enum class RangedEnemies {
+  URCHIN,
+  SEAHORSE,
+  SIREN,
+  CTHULHU_TENTACLE,
+  CTHULHU_FIREBALL,
+  CTHULHU_CANISTER,
+  CTHULHU_SHOCKWAVE,
+  CTHULHU_RAGE_PROJ
+};
 
 // anything that is deadly to the player
 struct Deadly {
@@ -13,8 +22,9 @@ struct Deadly {
 };
 
 struct EnemyProjectile {
-  bool  has_timer = false;
-  float timer;
+  ENTITY_TYPE type;
+  bool        has_timer = false;
+  float       timer;
 };
 
 struct EnemySupport {
@@ -29,6 +39,7 @@ struct Boss {
   float                              max_proj_count;
   float                              curr_proj_count = 0.f;
   bool                               is_angry        = false;
+  bool                               in_transition   = false;
   std::vector<std::function<void()>> ai;
 };
 

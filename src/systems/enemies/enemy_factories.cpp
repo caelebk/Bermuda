@@ -138,9 +138,7 @@ Entity createJellyPos(RenderSystem* renderer, vec2 position,
       drop.dropFn = createNetDropPos;
     }
   }
-
-  // physics and pos
-
+  
   registry.renderRequests.insert(
       entity, {TEXTURE_ASSET_ID::JELLY, EFFECT_ASSET_ID::ENEMY,
                GEOMETRY_BUFFER_ID::SPRITE});
@@ -204,11 +202,7 @@ Entity createFishPos(RenderSystem* renderer, vec2 position,
 
   if (randomSuccess(FISH_DROP_CHANCE_0)) {
     Drop& drop = registry.drops.emplace(entity);
-    if (randomSuccess(FISH_DROP_CHANCE_0)) {
-      drop.dropFn = createConcussiveDropPos;
-    } else {
-      drop.dropFn = createNetDropPos;
-    }
+    drop.dropFn = createConcussiveDropPos;
   }
 
   registry.positions.insert(entity, pos);
@@ -711,6 +705,7 @@ Entity launchUrchinNeedle(RenderSystem* renderer, vec2 pos, float angle) {
   oxyCost.amount          = URCHIN_NEEDLE_DAMAGE;
 
   EnemyProjectile& proj = registry.enemyProjectiles.emplace(entity);
+  proj.type             = ENTITY_TYPE::NEEDLE;
   proj.has_timer        = true;
   proj.timer            = URCHIN_NEEDLE_TIMER;
 
@@ -840,6 +835,7 @@ Entity fireSeahorseBullet(RenderSystem* renderer, vec2 pos, vec2 direction) {
   oxyCost.amount          = SEAHORSE_BULLET_DAMAGE;
 
   EnemyProjectile& proj = registry.enemyProjectiles.emplace(entity);
+  proj.type             = ENTITY_TYPE::BULLET;
   proj.has_timer        = true;
   proj.timer            = SEAHORSE_BULLET_TIMER;
 

@@ -11,8 +11,8 @@
 //////////////////////////////////////////////////////////////
 // Geyser
 //////////////////////////////////////////////////////////////
-#define GEYSER_QTY 15.0       // heals
-#define GEYSER_RATE_MS 500.0  // heals
+#define GEYSER_QTY 50.0       // heals
+#define GEYSER_RATE_MS 1250.0  // heal rate
 #define GEYSER_SCALE_FACTOR vec2(0.15f)
 #define GEYSER_BOUNDING_BOX vec2(329.f, 344.f)  // vec2(PNG_width, PNG_height)
 
@@ -49,6 +49,8 @@ Entity respawnCrate(RenderSystem* renderer, EntityState es);
 
 Entity createRockPos(RenderSystem* renderer, vec2 position,
                       bool checkCollisions = true);
+Entity createCthulhuRocksPos(RenderSystem* renderer, vec2 position,
+                              bool checkCollisions);
 Entity respawnRock(RenderSystem* renderer, EntityState es);
 
 #define METAL_CRATE_SCALE_FACTOR vec2(0.25f)

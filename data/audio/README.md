@@ -42,7 +42,17 @@ Sources for files:
 
 [boss](https://freesound.org/people/qubodup/sounds/222517/)
 
-[end_screen](https://freesound.org/people/PatrickLieberkind/sounds/414266/)
+[cthulhu_intro](https://freesound.org/people/jkerman/sounds/648480/)
+
+[cthulhu_angry](https://freesound.org/people/kp2494/sounds/486309/)
+
+[cthulhu_shockwave](https://freesound.org/people/BrainClaim/sounds/267070/)
+
+[cthulhu_death](https://freesound.org/people/bevibeldesign/sounds/366096/)
+
+[death_screen](https://freesound.org/people/PatrickLieberkind/sounds/414266/)
+
+[end_screen](https://freesound.org/people/smallclone/sounds/655997/)
 
 [notification](https://freesound.org/people/yfjesse/sounds/235911/)
 

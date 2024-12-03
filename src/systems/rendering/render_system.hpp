@@ -34,6 +34,7 @@ class RenderSystem {
       textures_path("overlays/pause_overlay.png"),
       textures_path("overlays/krab_overlay.png"),
       textures_path("overlays/sharkman_overlay.png"),
+      textures_path("overlays/cthulhu_overlay.png"),
       textures_path("overlays/death_overlay.png"),
       textures_path("overlays/end_overlay.png"),
       textures_path("player/infinity.png"),
@@ -123,6 +124,16 @@ class RenderSystem {
       textures_path("enemy/lobster/lobster.png"),
       textures_path("enemy/lobster/lobster_block.png"),
       textures_path("enemy/lobster/lobster_ram.png"),
+      textures_path("enemy/cthulhu/cthulhu_normal.png"),  // source: seekpng.com
+      textures_path("enemy/cthulhu/cthulhu_rage.png"),
+      textures_path("enemy/tentacle.png"),
+      textures_path("enemy/fireball.png"),
+      textures_path(
+          "enemy/rage_proj.png"),  // source:
+                                   // https://www.deviantart.com/venjix5/art/Green-Energy-Ball-16-alt-831898817
+      textures_path(
+          "enemy/shockwave.png"),  // source:
+                                   // https://www.unrealengine.com/marketplace/en-US/product/shockwave-pack
       textures_path("map_interactable/breakable_crate.png"),
       textures_path("map_interactable/metal_crate.png"),
       textures_path("consumables/oxygen_canister.png"),
@@ -215,6 +226,7 @@ extern bool is_start;
 extern bool is_paused;
 extern bool is_krab_cutscene;
 extern bool is_sharkman_cutscene;
+extern bool is_cthulhu_cutscene;
 extern bool is_death;
 extern bool is_end;
 extern bool room_transitioning;

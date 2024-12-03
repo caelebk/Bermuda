@@ -93,9 +93,9 @@ class CollisionSystem {
   // Enemy <-> Enemy Support
   void resolveEnemyEnemySupportCollision(Entity enemy, Entity enemy_support);
 
-      // Breakable <-> Player Projectile
-      void resolveBreakablePlayerProjCollision(Entity breakable,
-                                               Entity player_proj);
+  // Breakable <-> Player Projectile
+  void resolveBreakablePlayerProjCollision(Entity breakable,
+                                           Entity player_proj);
 
   // Breakable <-> Enemy Projectile
   void resolveBreakableEnemyProjCollision(Entity crate, Entity enemy_proj);

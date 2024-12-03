@@ -408,6 +408,35 @@ Entity createSharkmanCratesPos(RenderSystem* renderer, vec2 position,
                              false);
 }
 
+// create cthulhu's rocks
+Entity createCthulhuRocksPos(RenderSystem* renderer, vec2 position,
+                             bool checkCollisions) {
+  vec2  scale     = ROCK_SCALE_FACTOR * ROCK_BOUNDING_BOX;
+  float top_row   = 135;
+  float bot_row   = window_height_px - 235;
+  float row_gap   = 250;
+  float col_gap   = 425;
+  vec2  top_left  = {room_center.x - row_gap, top_row};
+  vec2  top_right = {room_center.x + row_gap, top_row};
+  vec2  bot_left  = {room_center.x - row_gap, bot_row};
+  vec2  bot_right = {room_center.x + row_gap, bot_row};
+  vec2  left      = {room_center.x - col_gap, room_center.y - scale.y / 2};
+  vec2  right     = {room_center.x + col_gap, room_center.y - scale.y / 2};
+
+  createRockPos(renderer, top_left, false);
+  createRockPos(renderer, top_left - vec2{scale.x, 0}, false);
+  createRockPos(renderer, top_right, false);
+  createRockPos(renderer, top_right + vec2{scale.x, 0}, false);
+  createRockPos(renderer, bot_left, false);
+  createRockPos(renderer, bot_left - vec2{scale.x, 0}, false);
+  createRockPos(renderer, bot_right, false);
+  createRockPos(renderer, bot_right + vec2{scale.x, 0}, false);
+  createRockPos(renderer, left, false);
+  createRockPos(renderer, left + vec2{0, scale.y}, false);
+  createRockPos(renderer, right, false);
+  return createRockPos(renderer, right + vec2{0, scale.y}, false);
+}
+
 /**
  * @brief creates a pressure plate at a specific position
  *

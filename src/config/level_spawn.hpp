@@ -37,8 +37,9 @@ const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
         createTutorial,
 };
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    CRAB_MINIBOSS = {createCrabBossPos,       createKrabPos,
+const std::vector<
+    std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
+    CRAB_MINIBOSS = {createInitCrabBossPos,   createKrabPos,
                      createKrabPos,           createKrabPos,
                      createKrabPos,           createKrabPos,
                      createKrabPos,           createOxygenCanisterPos,
@@ -50,6 +51,10 @@ const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
                          createSharkPos,        createSharkPos,
                          createSharkPos,        createSharkPos,
                          createSharkPos};
+
+const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> FINAL_BOSS = {
+  createCthulhuPos, createCthulhuRocksPos
+};
 
 const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     RED_KEY_SPAWN = {

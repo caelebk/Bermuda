@@ -284,8 +284,10 @@ bool updateInventory(RenderSystem* renderer, PROJECTILES type) {
       }
       inv.shrimp--;
       updateInventoryCounter(renderer, INVENTORY::SHRIMP);
-      // if inv.shrimp is 0 or less, it'll be handled in collision_system in
-      // resolveWallStop
+      if (!inv.shrimp) {
+        doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
+        changeSelectedCounterColour(INVENTORY::HARPOON);
+      }
       break;
   }
   // Debug Statements:

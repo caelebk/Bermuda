@@ -100,18 +100,17 @@ void LevelBuilder::mark_tutorial_room() {
   rooms[TUTORIAL_ROOM].is_tutorial_room = true;
 }
 
-void LevelBuilder::mark_miniboss_rooms() {
-  assert(MINIBOSS_ROOMS.size() == MINIBOSS_SPAWN_FUNCTION_GROUPS.size());
-  for (int i = 0; i < MINIBOSS_ROOMS.size(); i++) {
-    EditorID room            = std::to_string(MINIBOSS_ROOMS[i]);
+void LevelBuilder::mark_boss_rooms() {
+  assert(BOSS_ROOMS.size() == BOSS_SPAWN_FUNCTION_GROUPS.size());
+  for (int i = 0; i < BOSS_ROOMS.size(); i++) {
+    EditorID room            = std::to_string(BOSS_ROOMS[i]);
     rooms[room].is_boss_room = true;
     rooms[room].boss_spawn_function_groups.push_back(
-        MINIBOSS_SPAWN_FUNCTION_GROUPS[i]);
+        BOSS_SPAWN_FUNCTION_GROUPS[i]);
   }
-}
-
-void LevelBuilder::mark_final_boss_room() {
-  rooms[FINAL_BOSS_ROOM].is_boss_room = true;
+  EditorID room = "15";
+  rooms[room].is_boss_room = true;
+  rooms[room].boss_spawn_function_groups.push_back(FINAL_BOSS);
 }
 
 std::vector<int> LevelBuilder::get_random_door_positions(int num_doors, int min,
@@ -331,8 +330,7 @@ void LevelBuilder::generate_random_level() {
   // Also, mark important rooms.
   mark_difficulty_regions();
   mark_tutorial_room();
-  mark_miniboss_rooms();
-  mark_final_boss_room();
+  mark_boss_rooms();
 
   randomize_key_rooms();
   randomize_room_shapes();
@@ -342,8 +340,8 @@ void LevelBuilder::generate_random_level() {
 
 void LevelBuilder::mark_all_rooms_unvisited() {
   for (const auto& pair : rooms) {
-    RoomBuilder &room = get_room_by_editor_id(pair.first);
-    room.has_entered = false;
+    RoomBuilder& room = get_room_by_editor_id(pair.first);
+    room.has_entered  = false;
     room.saved_entities.clear();
   }
 }
@@ -539,8 +537,8 @@ void LevelBuilder::randomize_connections() {
   // Connect all the boss rooms together that delineate a new difficulty area.
   // The boss rooms are guaranteed to have available connections.
   int boss_room;
-  for (int i = 0; i < (int)MINIBOSS_ROOMS.size(); i++) {
-    boss_room = MINIBOSS_ROOMS[i];
+  for (int i = 0; i < (int)BOSS_ROOMS.size(); i++) {
+    boss_room = BOSS_ROOMS[i];
     rooms[std::to_string(boss_room)].connections[std::to_string(boss_room + 1)];
     rooms[std::to_string(boss_room + 1)].connections[std::to_string(boss_room)];
   }

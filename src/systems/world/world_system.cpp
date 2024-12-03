@@ -151,8 +151,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
   ScreenState& screen = registry.screenStates.components[0];
 
   bool is_frozen_state = is_intro || is_start || is_paused ||
-                         is_krab_cutscene || is_sharkman_cutscene || is_death ||
-                         is_end || room_transitioning;
+                         is_krab_cutscene || is_sharkman_cutscene ||
+                         is_cthulhu_cutscene || is_death || is_end ||
+                         room_transitioning;
 
   if (!is_frozen_state) {
     ////////////////////////////////////////////////////////
@@ -189,17 +190,20 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         registry.remove_all_components_of(entity);
       } else {
         Position& pos = registry.positions.get(entity);
-        pos.scale     = vec2(timer.timer / timer.expiry_time) * timer.full_scale;
+        pos.scale = vec2(timer.timer / timer.expiry_time) * timer.full_scale;
       }
     }
 
-
     // Enemy Projectiles
     for (Entity entity : registry.enemyProjectiles.entities) {
-      EnemyProjectile& timer = registry.enemyProjectiles.get(entity);
-      if (timer.has_timer) {
-        timer.timer -= elapsed_ms_since_last_update;
-        if (timer.timer < 0.f) {
+      EnemyProjectile& enemy_proj = registry.enemyProjectiles.get(entity);
+      if (enemy_proj.has_timer) {
+        enemy_proj.timer -= elapsed_ms_since_last_update;
+        if (enemy_proj.timer < 0.f) {
+          if (enemy_proj.type == ENTITY_TYPE::OXYGEN_CANISTER) {
+            createOxygenCanisterPos(
+                renderer, registry.positions.get(entity).position, false);
+          }
           registry.remove_all_components_of(entity);
         }
       }
@@ -224,16 +228,27 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       // progress timer
       DeathTimer& counter = registry.deathTimers.get(entity);
       counter.counter_ms -= elapsed_ms_since_last_update;
-      if (counter.counter_ms < min_counter_ms && entity == player) {
+      // player or cthulhu death trigger fade to black
+      bool is_cthulhu =
+          registry.bosses.has(entity) &&
+          registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU;
+      if (counter.counter_ms < min_counter_ms &&
+          (entity == player || is_cthulhu)) {
         min_counter_ms = counter.counter_ms;
       }
 
       if (counter.counter_ms < 0) {
-        if (entity == player) {
-          // show death overlay
+        if (entity == player || is_cthulhu) {
+          // show death/end overlay
           registry.deathTimers.remove(entity);
-          overlay               = createOverlay(renderer);
-          is_death              = true;
+          overlay = createOverlay(renderer);
+          if (entity == player) {
+            is_death = true;
+          } else {
+            is_end = true;
+            // remove cthulhu
+            registry.remove_all_components_of(entity);
+          }
           overlay_transitioning = true;
           return true;
         } else if (registry.drops.has(entity) &&
@@ -356,10 +371,56 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       registry.renderRequests.remove(overlay);
     }
     overlayState(TEXTURE_ASSET_ID::SHARKMAN_OVERLAY);
+  } else if (is_cthulhu_cutscene) {
+    if (!registry.positions.has(overlay)) {
+      overlay = createOverlay(renderer);
+    }
+
+    // play sound effect at start of transition
+    if (!registry.renderRequests.has(overlay)) {
+      registry.sounds.insert(overlay,
+                             Sound(SOUND_ASSET_ID::CTHULHU_INTRO, 5000));
+    }
+
+    if (room_transitioning) {
+      roomTransitionState(renderer, screen, level,
+                          elapsed_ms_since_last_update);
+    } else {
+      // start the timer when transition completes
+      overlay_timer = min(OVERLAY_TIMER_DURATION,
+                          overlay_timer + elapsed_ms_since_last_update);
+      if (overlay_timer >= OVERLAY_TIMER_DURATION) {
+        bool transition_complete =
+            darkenTransitionState(screen, elapsed_ms_since_last_update);
+        if (transition_complete) {
+          is_cthulhu_cutscene = false;
+          overlay_timer       = 0.f;
+          // TODO: cthulhuBossDialogue(renderer);
+        }
+      }
+    }
+
+    if (registry.renderRequests.has(overlay)) {
+      registry.renderRequests.remove(overlay);
+    }
+    overlayState(TEXTURE_ASSET_ID::CTHULHU_OVERLAY);
+  } else if (is_paused) {
+    if (overlay_transitioning) {
+      bool brighten_complete =
+          brightenTransitionState(screen, elapsed_ms_since_last_update);
+      if (brighten_complete) {
+        overlay_transitioning = false;
+      }
+    }
+    if (registry.renderRequests.has(overlay)) {
+      registry.renderRequests.remove(overlay);
+    }
+    overlayState(TEXTURE_ASSET_ID::PAUSE_OVERLAY);
   } else if (is_death) {
     // play sound effect at start of transition
     if (!registry.renderRequests.has(overlay)) {
-      registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::END_SCREEN, 10000));
+      registry.sounds.insert(overlay,
+                             Sound(SOUND_ASSET_ID::DEATH_SCREEN, 10000));
     }
     if (overlay_transitioning) {
       bool brighten_complete =
@@ -373,22 +434,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     }
     overlayState(TEXTURE_ASSET_ID::DEATH_OVERLAY);
   } else if (is_end) {
-    if (!registry.positions.has(overlay)) {
-      overlay = createOverlay(renderer);
+    // play sound effect at start of transition
+    if (!registry.renderRequests.has(overlay)) {
+      registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::END_SCREEN, 10000));
     }
-
-    if (room_transitioning) {
-      roomTransitionState(renderer, screen, level,
-                          elapsed_ms_since_last_update);
+    if (overlay_transitioning) {
+      bool brighten_complete =
+          brightenTransitionState(screen, elapsed_ms_since_last_update);
+      if (brighten_complete) {
+        overlay_transitioning = false;
+      }
     }
-    // TODO: adjust when final boss implemented
-    // if (overlay_transitioning) {
-    //   bool brighten_complete =
-    //       brightenTransitionState(screen, elapsed_ms_since_last_update);
-    //   if (brighten_complete) {
-    //     overlay_transitioning = false;
-    //   }
-    // }
     if (registry.renderRequests.has(overlay)) {
       registry.renderRequests.remove(overlay);
     }
@@ -520,13 +576,15 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
   // Help / Pause
   /////////////////////////////////////
   bool is_frozen_state = is_intro || is_start || is_paused ||
-                         is_krab_cutscene || is_sharkman_cutscene || is_death ||
-                         is_end || room_transitioning;
+                         is_krab_cutscene || is_sharkman_cutscene ||
+                         is_cthulhu_cutscene || is_death || is_end ||
+                         room_transitioning;
   bool cannot_pause_state = is_intro || is_start || is_krab_cutscene ||
-                            is_sharkman_cutscene || is_death || is_end ||
-                            room_transitioning;
+                            is_sharkman_cutscene || is_cthulhu_cutscene ||
+                            is_death || is_end || room_transitioning;
   bool cannot_reset_state = is_intro || is_start || is_krab_cutscene ||
-                            is_sharkman_cutscene || room_transitioning;
+                            is_sharkman_cutscene || is_cthulhu_cutscene ||
+                            room_transitioning;
 
   // ESC to close game (unconditional quit left commented for debugging)
   // if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -561,6 +619,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     } else if (is_krab_cutscene) {
       overlay_timer = OVERLAY_TIMER_DURATION;
     } else if (is_sharkman_cutscene) {
+      overlay_timer = OVERLAY_TIMER_DURATION;
+    } else if (is_cthulhu_cutscene) {
       overlay_timer = OVERLAY_TIMER_DURATION;
     }
   }
@@ -636,8 +696,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
  */
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
   bool is_frozen_state = is_intro || is_start || is_paused ||
-                         is_krab_cutscene || is_sharkman_cutscene || is_death ||
-                         is_end || room_transitioning;
+                         is_krab_cutscene || is_sharkman_cutscene ||
+                         is_cthulhu_cutscene || is_death || is_end ||
+                         room_transitioning;
   if (!is_frozen_state && !registry.stunned.has(player)) {
     player_mouse(renderer, button, action, mods, harpoon, harpoon_gun);
   }
@@ -645,8 +706,9 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
 
 void WorldSystem::on_mouse_scroll(double xOffset, double yOffset) {
   bool is_frozen_state = is_intro || is_start || is_paused ||
-                         is_krab_cutscene || is_sharkman_cutscene || is_death ||
-                         is_end || room_transitioning;
+                         is_krab_cutscene || is_sharkman_cutscene ||
+                         is_cthulhu_cutscene || is_death || is_end ||
+                         room_transitioning;
   if (!is_frozen_state) {
     player_scroll(xOffset, yOffset);
   }

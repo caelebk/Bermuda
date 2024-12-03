@@ -41,6 +41,7 @@ inline std::string fonts_path(const std::string& name) {return data_path() + "/f
 
 const int window_width_px = 1280;
 const int window_height_px = 720;
+const vec2 room_center = {window_width_px / 2 + 50, window_height_px / 2 - 30};
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f

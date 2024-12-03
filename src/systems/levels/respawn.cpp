@@ -39,6 +39,8 @@ const std::unordered_map<
         {ENTITY_TYPE::YELLOW_KEY, createYellowKeyRespawnFn},
         {ENTITY_TYPE::KRAB_BOSS, respawnCrabBoss},
         {ENTITY_TYPE::SHARKMAN, respawnSharkman},
+        {ENTITY_TYPE::CTHULHU, respawnCthulhu},
+        {ENTITY_TYPE::TENTACLE, respawnTentacle},
         {ENTITY_TYPE::KELP, respawnKelp},
         {ENTITY_TYPE::CORAL, respawnCoral},
         {ENTITY_TYPE::JUNK, respawnJunk},

@@ -49,13 +49,13 @@ void overlayState(TEXTURE_ASSET_ID overlayTextureID) {
  * @param textureID
  ********************************************************************************/
 bool isOverlayTexture(TEXTURE_ASSET_ID textureID) {
-  const unsigned int num_overlay_textures = 7;
+  const unsigned int num_overlay_textures = 8;
 
   TEXTURE_ASSET_ID overlay_textures[num_overlay_textures] = {
       TEXTURE_ASSET_ID::INTRO_OVERLAY,    TEXTURE_ASSET_ID::START_OVERLAY,
       TEXTURE_ASSET_ID::PAUSE_OVERLAY,    TEXTURE_ASSET_ID::KRAB_OVERLAY,
-      TEXTURE_ASSET_ID::SHARKMAN_OVERLAY, TEXTURE_ASSET_ID::DEATH_OVERLAY,
-      TEXTURE_ASSET_ID::END_OVERLAY};
+      TEXTURE_ASSET_ID::SHARKMAN_OVERLAY, TEXTURE_ASSET_ID::CTHULHU_OVERLAY,
+      TEXTURE_ASSET_ID::DEATH_OVERLAY,    TEXTURE_ASSET_ID::END_OVERLAY};
 
   std::vector<TEXTURE_ASSET_ID> overlayTexturesVector(
       overlay_textures, overlay_textures + num_overlay_textures);
@@ -85,13 +85,13 @@ void roomTransitionState(RenderSystem* renderer, ScreenState& screen,
     level->enter_room(roomTransition.door_connection);
     // show overlays
     if (level->current_room_editor_id == "5" && !krab_boss_encountered) {
-      is_krab_cutscene = true;
+      is_krab_cutscene      = true;
       krab_boss_encountered = true;
     } else if (level->current_room_editor_id == "10" && !sharkman_encountered) {
       is_sharkman_cutscene = true;
       sharkman_encountered = true;
     } else if (level->current_room_editor_id == "15") {
-      is_end = true;
+      is_cthulhu_cutscene = true;
     }
     registry.remove_all_components_of(rt_entity);
   } else if (screen.darken_screen_factor > 0.f &&

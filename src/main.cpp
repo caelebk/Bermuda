@@ -28,6 +28,7 @@ bool   is_start              = false;
 bool   is_paused             = false;
 bool   is_krab_cutscene      = false;
 bool   is_sharkman_cutscene  = false;
+bool   is_cthulhu_cutscene   = false;
 bool   is_death              = false;
 bool   is_end                = false;
 Entity overlay;
@@ -152,7 +153,8 @@ int main(int argc, char* argv[]) {
     world.step(elapsed_ms);
     bool is_frozen_state = is_intro || is_start || is_paused ||
                            is_krab_cutscene || is_sharkman_cutscene ||
-                           is_death || is_end || room_transitioning;
+                           is_cthulhu_cutscene || is_death || is_end ||
+                           room_transitioning;
     if (!is_frozen_state) {
       // Note: WorldSystem::step runs simply to update FPS counter, but is
       // mostly disabled

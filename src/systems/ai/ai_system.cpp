@@ -7,6 +7,7 @@
 
 #include "ai.hpp"
 #include "boids.hpp"
+#include "boss_factories.hpp"
 #include "collision_system.hpp"
 #include "collision_util.hpp"
 #include "enemy_factories.hpp"
@@ -70,6 +71,10 @@ void removeFromAI(Entity& e) {
 
   if (registry.trackPlayerRanged.has(e)) {
     registry.trackPlayerRanged.remove(e);
+  }
+
+  if (registry.shooters.has(e)) {
+    registry.shooters.remove(e);
   }
 }
 
@@ -201,6 +206,25 @@ void handleUrchinFiring(RenderSystem* renderer, Position& pos) {
                      1.5f * M_PI);
 }
 
+void handleCthulhuRageProjs(RenderSystem* renderer, Position& pos,
+                            float targetAngle) {
+  // shoot one proj at player, 8 in selectively random directions
+  shootRageProjectile(renderer, pos.position, targetAngle);
+
+  shootRageProjectile(renderer, pos.position, randomFloat(0, M_PI / 4));
+  shootRageProjectile(renderer, pos.position, randomFloat(M_PI / 4, M_PI / 2));
+  shootRageProjectile(renderer, pos.position,
+                      randomFloat(M_PI / 2, 3 * M_PI / 4));
+  shootRageProjectile(renderer, pos.position, randomFloat(3 * M_PI / 4, M_PI));
+  shootRageProjectile(renderer, pos.position, randomFloat(M_PI, 5 * M_PI / 4));
+  shootRageProjectile(renderer, pos.position,
+                      randomFloat(5 * M_PI / 4, 3 * M_PI / 2));
+  shootRageProjectile(renderer, pos.position,
+                      randomFloat(3 * M_PI / 2, 7 * M_PI / 4));
+  shootRageProjectile(renderer, pos.position,
+                      randomFloat(7 * M_PI / 4, 2 * M_PI));
+}
+
 void AISystem::do_boss_ai(float elapsed_ms) {
   for (Entity& b : registry.bosses.entities) {
     Boss& boss = registry.bosses.get(b);
@@ -212,7 +236,7 @@ void AISystem::do_boss_ai(float elapsed_ms) {
         sharkman_texture_num = 0.f;
       }
       auto& renderReq = registry.renderRequests.get(b);
-      // no, i do not want to use a switch
+      // switch? nah
       if (sharkman_texture_num < 1) {
         renderReq.used_texture = TEXTURE_ASSET_ID::SHARKMAN0;
       } else if (sharkman_texture_num < 2) {
@@ -558,9 +582,6 @@ void AISystem::do_track_player_ranged(float elapsed_ms) {
       }
     }
 
-    // TODO: make this generic for different projectiles, for now just create a
-    // fish
-
     // create a fish overlapping them
     Entity fish = createFishPos(this->renderer, entity_pos.position, false);
 
@@ -626,6 +647,73 @@ void AISystem::do_projectile_firing(float elapsed_ms) {
         }
       }
       attrs.cooldown = attrs.default_cd;
+    } else if (attrs.type == RangedEnemies::CTHULHU_TENTACLE) {
+      if (attrs.cooldown < 0.f) {
+        attrs.cooldown = attrs.default_cd;
+
+        if (registry.deadlys.entities.size() < CTHULHU_ENEMY_LIMIT) {
+          // create tentacle in 1 of 8 locations around cthulhu
+          Position&         enemy_pos     = registry.positions.get(enemy);
+          float             gap           = 30;
+          float             cthulhu_w_gap = abs(enemy_pos.scale.x) / 2 + gap;
+          float             cthulhu_h_gap = abs(enemy_pos.scale.y) / 2 + gap;
+          float             width         = 500;
+          float             height        = 180;
+          std::vector<vec2> spawn_locs    = {
+              enemy_pos.position + vec2(-width, -height),
+              enemy_pos.position + vec2(width, -height),
+              enemy_pos.position + vec2(-width, height),
+              enemy_pos.position + vec2(width, height),
+              enemy_pos.position + vec2(-cthulhu_w_gap, 0),
+              enemy_pos.position + vec2(cthulhu_w_gap, 0),
+
+          };
+          createTentaclePos(
+              renderer, spawn_locs[getRandInt(0, spawn_locs.size() - 1)], true);
+        } else {
+          // limit reached, change behaviour
+          if (registry.bosses.has(enemy)) {
+            Boss& boss   = registry.bosses.get(enemy);
+            boss.curr_cd = 0;
+            printf("enough tenties\n");
+          }
+        }
+      }
+    } else if (attrs.type == RangedEnemies::CTHULHU_FIREBALL) {
+      if (attrs.cooldown < 0.f) {
+        attrs.cooldown = attrs.default_cd;
+
+        Position& enemy_pos  = registry.positions.get(enemy);
+        Position& player_pos = registry.positions.get(player);
+        vec2      direction  = player_pos.position - enemy_pos.position;
+        shootFireball(renderer, enemy_pos.position, direction);
+      }
+    } else if (attrs.type == RangedEnemies::CTHULHU_CANISTER) {
+      if (attrs.cooldown < 0.f) {
+        attrs.cooldown = attrs.default_cd;
+
+        Position& enemy_pos  = registry.positions.get(enemy);
+        Position& player_pos = registry.positions.get(player);
+        vec2      direction  = player_pos.position - enemy_pos.position;
+        bool      is_rage    = registry.bosses.get(enemy).is_angry;
+        shootCanister(renderer, enemy_pos.position, direction, is_rage);
+      }
+    } else if (attrs.type == RangedEnemies::CTHULHU_SHOCKWAVE) {
+      if (attrs.cooldown < 0.f) {
+        attrs.cooldown      = attrs.default_cd;
+        Position& enemy_pos = registry.positions.get(enemy);
+        shootShockwave(renderer, enemy_pos.position);
+      }
+    } else if (attrs.type == RangedEnemies::CTHULHU_RAGE_PROJ) {
+      if (attrs.cooldown < 0.f) {
+        attrs.cooldown = attrs.default_cd;
+
+        Position& enemy_pos  = registry.positions.get(enemy);
+        Position& player_pos = registry.positions.get(player);
+        vec2      direction  = player_pos.position - enemy_pos.position;
+        handleCthulhuRageProjs(renderer, enemy_pos,
+                               atan2(direction.y, direction.x));
+      }
     }
   }
 }
@@ -705,7 +793,7 @@ void AISystem::update_lobster(float elapsed_ms, Entity lob) {
 }
 
 void AISystem::step(float elapsed_ms) {
-  // minibosses
+  // bosses
   if (registry.bosses.entities.size() > 0) {
     do_boss_ai(elapsed_ms);
   }

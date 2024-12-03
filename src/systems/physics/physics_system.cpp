@@ -5,6 +5,7 @@
 #include <world_system.hpp>
 
 #include "audio_system.hpp"
+#include "boss_factories.hpp"
 #include "consumable_utils.hpp"
 #include "debuff.hpp"
 #include "enemy_util.hpp"
@@ -29,11 +30,13 @@ void PhysicsSystem::step(float elapsed_ms) {
   if (registry.players.get(player).dashCooldownTimer > 0) {
     Player& player_comp = registry.players.get(player);
     player_comp.dashCooldownTimer -= elapsed_ms;
-    //change color intensity based on cooldown timer and original cooldown duration
+    // change color intensity based on cooldown timer and original cooldown
+    // duration
     if (player_comp.dashCooldownTimer <= 0) {
       registry.colors.get(player_comp.dashIndicator) = vec3(1.0f);
     } else {
-      float time_proportion = 1.0f - (player_comp.dashCooldownTimer / DASH_COOLDOWN_DURATION);
+      float time_proportion =
+          1.0f - (player_comp.dashCooldownTimer / DASH_COOLDOWN_DURATION);
       registry.colors.get(player_comp.dashIndicator) = vec3(time_proportion);
     }
   }
@@ -41,7 +44,8 @@ void PhysicsSystem::step(float elapsed_ms) {
   // Poof bubbles
   for (Entity entity : registry.bubbles.entities) {
     calculateVelocity(entity, lerp);
-    if (registry.motions.has(entity) && registry.motions.get(entity).velocity.y > 0) {
+    if (registry.motions.has(entity) &&
+        registry.motions.get(entity).velocity.y > 0) {
       registry.remove_all_components_of(entity);
     }
   }
@@ -55,7 +59,6 @@ void PhysicsSystem::step(float elapsed_ms) {
       calculateVelocity(entity, lerp);
     }
   }
-  
 
   // Update player velocity with lerp if player not dashing
   if (!registry.players.get(player).dashing) {
@@ -73,20 +76,27 @@ void PhysicsSystem::step(float elapsed_ms) {
     if (!debuff_entity_can_move(entity)) {
       motion.velocity = vec2(0.0f);
     }
-    
+
     if (debuff_entity_knockedback(entity)) {
       KnockedBack& knockedback = registry.knockedback.get(entity);
       motion.velocity          = knockedback.knocked_velocity;
     }
 
-    position.position += motion.velocity * lerp;
+    if (registry.enemyProjectiles.has(entity) &&
+        registry.enemyProjectiles.get(entity).type == ENTITY_TYPE::SHOCKWAVE) {
+      // shockwaves don't move, they just expand
+      position.scale += vec2(SHOCKWAVE_GROW_RATE) * lerp;
+    } else {
+      position.position += motion.velocity * lerp;
+    }
 
     if (registry.players.has(entity)) {
-      Player& player = registry.players.get(entity);
-      Position& player_mesh_position = registry.positions.get(player.collisionMesh);
+      Player&   player = registry.players.get(entity);
+      Position& player_mesh_position =
+          registry.positions.get(player.collisionMesh);
       player_mesh_position.position += motion.velocity * lerp;
     }
-    
+
     if (registry.oxygen.has(entity) && entity != player) {
       // make sure health bars follow moving enemies
       updateEnemyHealthBarPos(entity);
@@ -184,9 +194,9 @@ void updatePlayerDirection(vec2 mouse_pos) {
   bool mouse_left_face_right =
       player_pos.position.x > mouse_pos.x && player_pos.scale.x > 0;
   if (mouse_right_face_left || mouse_left_face_right) {
-
-    Player& player_comp = registry.players.get(player);
-    Position& player_mesh_pos = registry.positions.get(player_comp.collisionMesh);
+    Player&   player_comp = registry.players.get(player);
+    Position& player_mesh_pos =
+        registry.positions.get(player_comp.collisionMesh);
 
     player_mesh_pos.scale.x *= -1;
     player_pos.scale.x *= -1;
@@ -208,9 +218,9 @@ void setFiredProjVelo() {
   proj.is_loaded         = false;
   registry.positions.get(player).scale.x < 0 ? proj.is_flipped = true
                                                      : proj.is_flipped = false;
-  float   angle          = registry.positions.get(player_projectile).angle;
-  Motion& proj_motion    = registry.motions.get(player_projectile);
-  vec2&   proj_scale     = registry.positions.get(player_projectile).scale;
+  float   angle       = registry.positions.get(player_projectile).angle;
+  Motion& proj_motion = registry.motions.get(player_projectile);
+  vec2&   proj_scale  = registry.positions.get(player_projectile).scale;
   vec2&   proj_original_scale =
       registry.positions.get(player_projectile).originalScale;
   float direction = registry.positions.get(player).scale.x /
@@ -220,8 +230,9 @@ void setFiredProjVelo() {
       proj_motion.velocity = {SHRIMP_SPEED * cos(angle) * direction,
                               SHRIMP_SPEED * sin(angle) * direction};
       if (!registry.sounds.has(player_projectile)) {
-        registry.sounds.insert(player_projectile, Sound(SOUND_ASSET_ID::PROJECTILE_SHRIMP));
-      }  
+        registry.sounds.insert(player_projectile,
+                               Sound(SOUND_ASSET_ID::PROJECTILE_SHRIMP));
+      }
       break;
     case PROJECTILES::CONCUSSIVE:
       proj_scale = vec2(5.f) * proj_original_scale;
@@ -229,22 +240,26 @@ void setFiredProjVelo() {
         proj_scale.x = -proj_scale.x;
       }
       if (!registry.sounds.has(player_projectile)) {
-        registry.sounds.insert(player_projectile, Sound(SOUND_ASSET_ID::PROJECTILE_CONCUSSIVE));
+        registry.sounds.insert(player_projectile,
+                               Sound(SOUND_ASSET_ID::PROJECTILE_CONCUSSIVE));
       }
       break;
     case PROJECTILES::TORPEDO:
       if (!registry.sounds.has(player_projectile)) {
-        registry.sounds.insert(player_projectile, Sound(SOUND_ASSET_ID::PROJECTILE_TORPEDO));
-      }      
+        registry.sounds.insert(player_projectile,
+                               Sound(SOUND_ASSET_ID::PROJECTILE_TORPEDO));
+      }
       break;
     case PROJECTILES::NET:
       if (!registry.sounds.has(player_projectile)) {
-        registry.sounds.insert(player_projectile, Sound(SOUND_ASSET_ID::PROJECTILE_NET));
-      }       
+        registry.sounds.insert(player_projectile,
+                               Sound(SOUND_ASSET_ID::PROJECTILE_NET));
+      }
       break;
     default:
       if (!registry.sounds.has(player_projectile)) {
-        registry.sounds.insert(player_projectile, Sound(SOUND_ASSET_ID::PLAYER_OXYGEN_BLAST));
+        registry.sounds.insert(player_projectile,
+                               Sound(SOUND_ASSET_ID::PLAYER_OXYGEN_BLAST));
       }
       break;
   }
@@ -252,8 +267,6 @@ void setFiredProjVelo() {
     proj_motion.velocity = {HARPOON_SPEED * cos(angle) * direction,
                             HARPOON_SPEED * sin(angle) * direction};
   }
-
-
 }
 
 void setPlayerAcceleration() {
@@ -313,9 +326,9 @@ void calculatePlayerVelocity(float lerp) {
 
 void calculateVelocity(Entity entity, float lerp) {
   Motion& motion = registry.motions.get(entity);
-  
+
   motion.velocity += motion.acceleration * lerp;
-  
+
   if (abs(motion.velocity.x) < abs(motion.acceleration.x * lerp) &&
       motion.velocity.x * motion.acceleration.x > 0) {
     motion.velocity.x = 0;
@@ -369,9 +382,10 @@ void applyWaterFriction(Entity entity) {
   Motion& motion = registry.motions.get(entity);
 
   float water_friction = WATER_FRICTION;
-      // Keep this here just in case, but acceleration by friction is NOT proportional to mass, which is why we can use a constant
-      /*float(registry.masses.get(entity).mass) / float(PLAYER_MASS) *
-      WATER_FRICTION;*/
+  // Keep this here just in case, but acceleration by friction is NOT
+  // proportional to mass, which is why we can use a constant
+  /*float(registry.masses.get(entity).mass) / float(PLAYER_MASS) *
+  WATER_FRICTION;*/
 
   // Water friction should accelerate in the opposite direction of the player's
   // velocity. If the player isn't moving, friction has no effect

@@ -21,7 +21,6 @@ class AISystem {
   void do_lobster(float elapsed_ms, Entity lobster, Entity player);
   void update_lobster(float elapsed_ms, Entity lobster);
   bool in_range_of_player(Position &pos, Position &player_pos, float range);
-  void do_group_ai();
 
   float sharkman_texture_num = 0.f;
   public:

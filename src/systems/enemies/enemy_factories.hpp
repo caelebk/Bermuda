@@ -39,7 +39,7 @@ Entity respawnJelly(RenderSystem* renderer, EntityState es);
 //////////////////////////////////////////////////////////////
 #define FISH_MS 20.0
 #define FISH_DAMAGE -10.0
-#define FISH_ATK_SPD 1000.0
+#define FISH_ATK_SPD 500.0
 #define FISH_SCALE_FACTOR vec2(0.09f)
 #define FISH_BOUNDING_BOX vec2(512.f, 288.f)
 #define FISH_HEALTH 1.0
@@ -48,7 +48,7 @@ Entity respawnJelly(RenderSystem* renderer, EntityState es);
 #define FISH_HEALTH_SCALE vec2(1.4f)
 #define FISH_HEALTH_BAR_SCALE vec2(1.5f)
 #define FISH_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
-#define FISH_DROP_CHANCE_0 0.3f
+#define FISH_DROP_CHANCE_0 0.25f
 
 Entity createFishPos(RenderSystem* renderer, vec2 position,
                      bool checkCollisions = true);
@@ -59,7 +59,7 @@ Entity respawnFish(RenderSystem* renderer, EntityState es);
 //////////////////////////////////////////////////////////////
 
 #define SHARK_MS 60.0
-#define SHARK_DAMAGE -20.0
+#define SHARK_DAMAGE -25.0
 #define SHARK_ATK_SPD 1000.0
 #define SHARK_MIN_SCALE 0.1
 #define SHARK_MAX_SCALE 0.2
@@ -107,19 +107,10 @@ Entity createTurtlePos(RenderSystem* renderer, vec2 position,
                       bool checkCollisions = true);
 Entity respawnTurtle(RenderSystem* renderer, EntityState es);
 
-// //////////////////////////////////////////////////////////////
-// // Octopi
-// //////////////////////////////////////////////////////////////
-
-// #define OCTOPUS_OXYGEN 90.0
-// #define OCTOPUS_OXYGEN_SCALE vec2(175.f, 4.f)
-
-// int createOctopusHealthBar(RenderSystem *renderer, Entity enemy);
-
 ///////////////////////////////////////////////////////////////
 // Krabs
 ///////////////////////////////////////////////////////////////
-#define KRAB_MS 5.0
+#define KRAB_MS 10.0
 #define KRAB_DAMAGE -100.0
 #define KRAB_ATK_SPD 1000.0
 #define KRAB_MIN_SCALE 0.01
@@ -186,7 +177,6 @@ Entity launchUrchinNeedle(RenderSystem* renderer, vec2 position, float angle);
 #define SEAHORSE_HEALTH_BAR_SCALE vec2(1.5f)
 #define SEAHORSE_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 #define SEAHORSE_FIRERATE 3000.f
-// TODO: balance this for M4
 #define SEAHORSE_DROP_CHANCE_0 0.3f
 
 Entity createSeahorsePos(RenderSystem* renderer, vec2 position,

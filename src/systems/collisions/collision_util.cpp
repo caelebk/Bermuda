@@ -29,8 +29,7 @@ bool circle_collides(const Position& position1, const Position& position2) {
   const vec2  my_bonding_box    = get_bounding_box(position2) / 2.f;
   const float my_r_squared      = dot(my_bonding_box, my_bonding_box);
   const float r_squared         = max(other_r_squared, my_r_squared);
-  if (dist_squared < r_squared) return true;
-  return false;
+  return dist_squared < r_squared;
 }
 
 // Axis-Aligned Bounding Box Collision detection.
@@ -92,6 +91,24 @@ bool mesh_collides(Entity mesh, Entity other) {
 
   vec4 other_bb = get_bounds(other_pos);
 
+  // shockwave and canister explosions use circle mesh collision
+  bool is_shockwave =
+      registry.enemyProjectiles.has(other) &&
+      registry.enemyProjectiles.get(other).type == ENTITY_TYPE::SHOCKWAVE;
+  bool is_canister =
+      (registry.enemyProjectiles.has(other) &&
+       registry.enemyProjectiles.get(other).type ==
+           ENTITY_TYPE::OXYGEN_CANISTER) ||
+      (registry.consumables.has(other) &&
+       registry.consumables.get(other).type == ENTITY_TYPE::OXYGEN_CANISTER);
+  float radius = 0.f;
+  if (is_shockwave) {
+    radius = max(other_pos.scale.x, other_pos.scale.y) / 2;
+  } else if (is_canister && registry.aoe.has(other)) {
+    radius = registry.aoe.get(other).radius;
+  }
+  bool is_circle = is_shockwave || is_canister;
+
   // get transformations
   Transform transform;
   transform.translate(mesh_pos.position);
@@ -107,6 +124,7 @@ bool mesh_collides(Entity mesh, Entity other) {
     }
 
     std::vector<vec2> overlap;
+    std::vector<vec2> non_overlap;
     for (uint16_t idx = 0; idx < 3; idx++) {
       // get vertex
       ColoredVertex v = meshPtr->vertices[i + idx];
@@ -114,25 +132,50 @@ bool mesh_collides(Entity mesh, Entity other) {
       v.position.z = 1.f;
       v.position   = modelmatrix * v.position;
 
-      bool hor_local =
-          (v.position.x >= other_bb[0] && v.position.x <= other_bb[1]);
-      bool ver_local =
-          (v.position.y >= other_bb[2] && v.position.y <= other_bb[3]);
+      if (is_circle) {
+        vec2  v_point = v.position;
+        float dist_squared =
+            dot(v_point - other_pos.position, v_point - other_pos.position);
+        if (dist_squared <= radius * radius) {
+          return true;
+        } else {
+          non_overlap.push_back(v.position);
+        }
+      } else {
+        bool hor_local =
+            (v.position.x >= other_bb[0] && v.position.x <= other_bb[1]);
+        bool ver_local =
+            (v.position.y >= other_bb[2] && v.position.y <= other_bb[3]);
 
-      hor  = hor || hor_local;
-      vert = vert || ver_local;
+        hor  = hor || hor_local;
+        vert = vert || ver_local;
 
-      if (hor_local || ver_local) {
-        overlap.push_back(v.position);
+        if (hor_local || ver_local) {
+          overlap.push_back(v.position);
+        }
       }
     }
-    // is colliding with 1 vertice
+    // is colliding with 1 vertex
     if (overlap.size() == 0 || !hor || !vert) {
+      if (is_circle && non_overlap.size() == 3) {
+        // no vertex is in circle, check if midpoints are in circle
+        std::vector<vec2> midpoints = {
+            (non_overlap[0] + non_overlap[1]) / 2.f,
+            (non_overlap[1] + non_overlap[2]) / 2.f,
+            (non_overlap[0] + non_overlap[2]) / 2.f};
+        for (vec2& midpoint : midpoints) {
+          float dist_squared =
+              dot(midpoint - other_pos.position, midpoint - other_pos.position);
+          if (dist_squared <= radius * radius) {
+            return true;
+          }
+        }
+      }
       continue;
     }
 
     if (overlap.size() != 2) {
-      // this means that a single vertice is inside, or all 3 (the entire thing)
+      // this means that a single vertex is inside, or all 3 (the entire thing)
       // is inside
       return true;
     }

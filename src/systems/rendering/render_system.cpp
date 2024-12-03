@@ -88,9 +88,17 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat3& projection) {
                                            ? registry.attacked.get(player).timer
                                            : 0.0f);
       }
-      glUniform1f(angry_timer_uloc, registry.bosses.has(entity)
-                                        ? registry.bosses.get(entity).is_angry
-                                        : false);
+      // only do angry shader for sharkman
+      if (registry.bosses.has(entity) &&
+          registry.bosses.get(entity).type == ENTITY_TYPE::SHARKMAN) {
+        glUniform1f(angry_timer_uloc, registry.bosses.get(entity).is_angry);
+      } else {
+        glUniform1f(angry_timer_uloc, false);
+      }
+      // glUniform1f(angry_timer_uloc, registry.bosses.has(entity)
+      //                                   ?
+      //                                   registry.bosses.get(entity).is_angry
+      //                                   : false);
       gl_has_errors();
     } else if (render_request.used_effect == EFFECT_ASSET_ID::COMMUNICATIONS) {
       GLuint notification_timer_uloc =
@@ -426,8 +434,9 @@ void RenderSystem::draw() {
 
   // Render Fonts
   bool is_frozen_state = is_intro || is_start || is_paused ||
-                         is_krab_cutscene || is_sharkman_cutscene || is_death ||
-                         is_end || room_transitioning;
+                         is_krab_cutscene || is_sharkman_cutscene ||
+                         is_cthulhu_cutscene || is_death || is_end ||
+                         room_transitioning;
   if (!is_frozen_state) {
     for (Entity entity : registry.textRequests.entities) {
       if (!registry.positions.has(entity) || !registry.colors.has(entity))

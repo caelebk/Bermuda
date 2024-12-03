@@ -16,12 +16,12 @@
 #include "tiny_ecs.hpp"
 #include "tiny_ecs_registry.hpp"
 
-// Net Projectile Speed (To be balanced later)
+// Net Projectile Speed
 #define HARPOON_SPEED 200.0f
 #define SHRIMP_SPEED 500.0f
 
-// Max velocity (To be balanced later)
-#define MAX_PLAYER_SPEED 40.f
+// Max velocity
+#define MAX_PLAYER_SPEED 50.f
 #define MAX_GLIDE_SPEED MAX_PLAYER_SPEED * 3
 
 // Player Dash
@@ -30,7 +30,7 @@
 #define DASH_SPEED 300
 // NOTE: WATER_FRICTION SHOULD ALWAYS BE SMALLER THAN PLAYER_ACCELERATION
 
-// Velocity given by pressing movement keys (To be balanced later)
+// Velocity given by pressing movement keys
 #define PLAYER_ACCELERATION MAX_PLAYER_SPEED
 #define GLIDE_ACCELERATION PLAYER_ACCELERATION * 2
 
