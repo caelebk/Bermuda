@@ -194,9 +194,9 @@ bool player_scroll(double xOffset, double yOffset) {
   if (!yOffset) return false;
   int curr_wep_type = int(wep_type);
   if (yOffset > 0) {
-    curr_wep_type--;
-  } else if (yOffset < 0) {
     curr_wep_type++;
+  } else if (yOffset < 0) {
+    curr_wep_type--;
   }
   if (curr_wep_type == int(PROJECTILES::PROJ_COUNT)) {
     curr_wep_type = 0;
@@ -205,6 +205,21 @@ bool player_scroll(double xOffset, double yOffset) {
   }
 
   PROJECTILES new_wep_type = PROJECTILES(curr_wep_type);
+
+  Inventory& inv = registry.inventory.get(player);
+  if (new_wep_type == PROJECTILES::NET && !inv.nets) {
+    wep_type = PROJECTILES::NET;
+    return player_scroll(xOffset, yOffset);
+  } else if (new_wep_type == PROJECTILES::CONCUSSIVE && !inv.concussors) {
+    wep_type = PROJECTILES::CONCUSSIVE;
+    return player_scroll(xOffset, yOffset);
+  } else if (new_wep_type == PROJECTILES::TORPEDO && !inv.torpedos) {
+    wep_type = PROJECTILES::TORPEDO;
+    return player_scroll(xOffset, yOffset);
+  } else if (new_wep_type == PROJECTILES::SHRIMP && !inv.shrimp) {
+    wep_type = PROJECTILES::SHRIMP;
+    return player_scroll(xOffset, yOffset);
+  }
 
   if (new_wep_type == PROJECTILES::HARPOON) {
     doWeaponSwap(harpoon, harpoon_gun, PROJECTILES::HARPOON);
