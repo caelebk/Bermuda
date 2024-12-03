@@ -74,6 +74,7 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
   }
 
   entity_oxygen.level += deltaOxygen;
+  
   updateHealthBarRender(entity, entity_oxygen, deltaOxygen);
   updateOxygenLvlStatus(entity_oxygen);
   updateDeathStatus(entity, entity_oxygen);

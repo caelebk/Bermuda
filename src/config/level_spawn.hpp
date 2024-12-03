@@ -27,10 +27,10 @@ const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     LVL_2_PACKS = {createSharkPos};
 
 const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_3_RAND_POS = {createSharkPos,  createSharkPos, createSeahorsePos,
-                      createUrchinPos, createFishPos,  createCratePos,
-                      createCratePos,  createCratePos, createOxygenCanisterPos,
-                      createLobsterPos};
+    LVL_3_RAND_POS = {
+        createSharkPos,          createSeahorsePos, createUrchinPos,
+        createCratePos,          createCratePos,    createCratePos,
+        createOxygenCanisterPos, createLobsterPos,  createTurtlePos};
 
 const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
     TUTORIAL_JELLYFISH_MINIBOSS = {

@@ -48,7 +48,6 @@ bool CollisionSystem::checkPlayerMeshCollision(Entity entity_i, Entity entity_j,
   if (box_collides(position_i, position_j)) {
     if (mesh_collides(collisionMesh, entity_j)) {
       registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-      registry.collisions.emplace_with_duplicates(entity_j, entity_i);
       return true;
     }
   }
@@ -593,6 +592,11 @@ void CollisionSystem::resolvePlayerEnemyCollision(Entity player, Entity enemy) {
   handle_debuffs(player, enemy);
   addDamageIndicatorTimer(player);
   modifyOxygen(player, enemy);
+  if (registry.deadlys.get(enemy).type == ENTITY_TYPE::TURTLE) {
+    modifyOxygenAmount(enemy, -registry.oxygenModifiers.get(enemy).amount);
+    registry.sounds.insert(enemy, SOUND_ASSET_ID::TURTLE);
+    addDamageIndicatorTimer(enemy);
+  }
 }
 
 void CollisionSystem::resolvePlayerItemCollision(Entity player, Entity item) {
@@ -819,8 +823,14 @@ void CollisionSystem::detectAndResolveExplosion(Entity proj,
     }
 
     // remove to prevent infinite loop
-    registry.consumables.remove(canister_check);
-    resolveCanisterPlayerProjCollision(canister_check, proj);
+    Position&     playerproj_position = registry.positions.get(proj);
+    AreaOfEffect& playerproj_aoe      = registry.aoe.get(proj);
+    Position& canister_position = registry.positions.get(canister_check);
+    if (circle_box_collides(playerproj_position, playerproj_aoe.radius,
+                            canister_position)) {
+      registry.consumables.remove(canister_check);
+      resolveCanisterPlayerProjCollision(canister_check, proj);
+    }
   }
 }
 

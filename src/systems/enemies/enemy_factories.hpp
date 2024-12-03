@@ -80,6 +80,33 @@ Entity createSharkPos(RenderSystem* renderer, vec2 position,
                       bool checkCollisions = true);
 Entity respawnShark(RenderSystem* renderer, EntityState es);
 
+//////////////////////////////////////////////////////////////
+// Turtle (Bloodsuckers)
+//////////////////////////////////////////////////////////////
+
+#define TURTLE_MS 130.0
+#define TURTLE_DAMAGE -20.0
+#define TURTLE_ATK_SPD 1000.0
+#define TURTLE_MIN_SCALE 0.4
+#define TURTLE_MAX_SCALE 0.5
+#define TURTLE_BOUNDING_BOX vec2(200.f, 100.f)
+#define TURTLE_HEALTH 50.0
+#define TURTLE_MIN_DIR_CD 1000
+#define TURTLE_MAX_DIR_CD 8000
+#define TURTLE_TRACKING_CD 1000.f
+#define TURTLE_SPOT_RADIUS 1500.f
+#define TURTLE_LEASH_RADIUS 1500.f
+#define TURTLE_TRACKING_ACCELERATION 10.f
+#define TURTLE_HEALTH_SCALE vec2(1.4f)
+#define TURTLE_HEALTH_BAR_SCALE vec2(1.5f)
+#define TURTLE_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
+#define TURTLE_DROP_CHANCE_0 0.8f
+#define TURTLE_STARTING_HP_RATIO 0.6f
+
+Entity createTurtlePos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions = true);
+Entity respawnTurtle(RenderSystem* renderer, EntityState es);
+
 // //////////////////////////////////////////////////////////////
 // // Octopi
 // //////////////////////////////////////////////////////////////
@@ -117,7 +144,7 @@ Entity respawnKrab(RenderSystem* renderer, EntityState es);
 ///////////////////////////////////////////////////////////////
 // Sea Urchin
 ///////////////////////////////////////////////////////////////
-#define URCHIN_MS 50.0
+#define URCHIN_MS 180.0
 #define URCHIN_MIN_SCALE 0.4
 #define URCHIN_MAX_SCALE 0.5
 #define URCHIN_BOUNDING_BOX vec2(100.f, 100.f)

@@ -379,6 +379,113 @@ Entity respawnShark(RenderSystem* renderer, EntityState es) {
   return entity;
 }
 
+/////////////////////////////////////////////////////////////////
+// Turtle (Bloodsuckers)
+/////////////////////////////////////////////////////////////////
+/**
+ * @brief creates a turtle at a specific position sharks
+ *
+ * Turtles will be created with a random size
+ *
+ * @param renderer
+ * @param position
+ * @return
+ */
+Entity createTurtlePos(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions) {
+  // Reserve an entity
+  auto entity             = Entity();
+  vec2 TURTLE_SCALE_FACTOR =
+      vec2(randomFloat(TURTLE_MIN_SCALE, TURTLE_MAX_SCALE));
+
+  Position pos;
+  pos.angle    = 0.f;
+  pos.position = position;
+  pos.scale    = TURTLE_SCALE_FACTOR * TURTLE_BOUNDING_BOX;
+  if (checkCollisions && !checkEnemySpawnCollisions(pos)) {
+    // returns invalid entity, since id's start from 1
+    return Entity(0);
+  }
+
+  registry.positions.insert(entity, pos);
+
+  // Store a reference to the potentially re-used mesh object
+  Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+  registry.meshPtrs.emplace(entity, &mesh);
+
+  // make enemy and damage
+  Deadly& d = registry.deadlys.emplace(entity);
+  d.type    = ENTITY_TYPE::TURTLE;
+
+  auto& damage  = registry.oxygenModifiers.emplace(entity);
+  damage.amount = TURTLE_DAMAGE;
+
+  auto& modifyOxygenCd      = registry.modifyOxygenCd.emplace(entity);
+  modifyOxygenCd.default_cd = TURTLE_ATK_SPD;
+
+  // Initialize the position, scale, and physics components
+  auto& motion        = registry.motions.emplace(entity);
+  motion.velocity     = {-TURTLE_MS, 0};
+  motion.acceleration = {0, 0};
+
+  // ai
+  auto& wander         = registry.wanders.emplace(entity);
+  wander.active_dir_cd = 0;  // immediately picks a new direction
+  wander.change_dir_cd = getRandInt(TURTLE_MIN_DIR_CD, TURTLE_MAX_DIR_CD);
+
+  auto& tracking        = registry.trackPlayer.emplace(entity);
+  tracking.tracking_cd  = TURTLE_TRACKING_CD;
+  tracking.spot_radius  = TURTLE_SPOT_RADIUS;
+  tracking.leash_radius = TURTLE_LEASH_RADIUS;
+  tracking.acceleration = TURTLE_TRACKING_ACCELERATION;
+
+  // assign drops
+  Drop& drop = registry.drops.emplace(entity);
+  if (randomSuccess(TURTLE_DROP_CHANCE_0)) {
+    drop.dropFn = createOxygenCanisterPos;
+  } else {
+    drop.dropFn = createShrimpDropPos;
+  }
+
+  registry.renderRequests.insert(
+      entity, {TEXTURE_ASSET_ID::TURTLE, EFFECT_ASSET_ID::ENEMY,
+               GEOMETRY_BUFFER_ID::SPRITE});
+
+  createDefaultHealthbar(renderer, entity, TURTLE_HEALTH, TURTLE_HEALTH_SCALE,
+                         TURTLE_HEALTH_BAR_SCALE, TURTLE_HEALTH_BOUNDING_BOX);
+
+  modifyOxygenAmount(entity, -(1.f-TURTLE_STARTING_HP_RATIO) * TURTLE_HEALTH);
+
+  return entity;
+}
+
+/**
+ * @brief Respawns a Turtle based on its entity state
+ *
+ * @param renderer
+ * @param es
+ * @return
+ */
+Entity respawnTurtle(RenderSystem* renderer, EntityState es) {
+  Entity entity = createTurtlePos(renderer, es.position.position, false);
+
+  // Restore State
+  Position& pos     = registry.positions.get(entity);
+  pos.angle         = es.position.angle;
+  pos.scale         = es.position.scale;
+  pos.originalScale = es.position.originalScale;
+
+  Oxygen& o    = registry.oxygen.get(entity);
+  float   diff = es.oxygen - o.level;
+
+  // This will also update the health bar
+  if (diff < 0) {
+    modifyOxygenAmount(entity, diff);
+  }
+
+  return entity;
+}
+
 // /////////////////////////////////////////////////////////////////
 // // Krabs
 // /////////////////////////////////////////////////////////////////

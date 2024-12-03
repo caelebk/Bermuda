@@ -43,6 +43,7 @@ const std::array<std::string, sound_count> sound_names = {
 	"lobster_shield",
 	"urchin",
 	"seahorse",
+  "turtle",
 	"pressure_plate",
 	"boss",
 	"end_screen",
