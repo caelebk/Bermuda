@@ -316,6 +316,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     // play sound effect at start of transition
     if (!registry.renderRequests.has(overlay)) {
       registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::BOSS_INTRO, 10000));
+      registry.musics.insert(Entity(), MUSIC_ASSET_ID::KRAB_MUSIC);
     }
     if (room_transitioning) {
       roomTransitionState(renderer, screen, level,
@@ -346,7 +347,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     // play sound effect at start of transition
     if (!registry.renderRequests.has(overlay)) {
-      registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::BOSS_INTRO, 10000));
+      // registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::BOSS_INTRO, 10000));
+      registry.musics.insert(overlay, MUSIC_ASSET_ID::SHARK_ALERT);
     }
 
     if (room_transitioning) {
@@ -378,8 +380,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     // play sound effect at start of transition
     if (!registry.renderRequests.has(overlay)) {
-      registry.sounds.insert(overlay,
-                             Sound(SOUND_ASSET_ID::CTHULHU_INTRO, 5000));
+      if (!registry.sounds.has(overlay)) {
+        registry.sounds.insert(overlay,
+                        Sound(SOUND_ASSET_ID::CTHULHU_INTRO, 5000));
+      }
+      // pause music for sound effect (it'll play again when transition done)
+      if (!registry.musics.has(overlay)) {
+        registry.musics.insert(overlay, MUSIC_ASSET_ID::MUSIC_COUNT);
+      }
     }
 
     if (room_transitioning) {
@@ -396,6 +404,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
           is_cthulhu_cutscene = false;
           overlay_timer       = 0.f;
           // TODO: cthulhuBossDialogue(renderer);
+          if (!registry.musics.has(overlay)) {
+            registry.musics.insert(overlay, MUSIC_ASSET_ID::CTHULHU_P1_MUSIC);
+          }
         }
       }
     }
@@ -434,6 +445,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     }
     overlayState(TEXTURE_ASSET_ID::DEATH_OVERLAY);
   } else if (is_end) {
+    //turn off music
+    registry.musics.insert(Entity(), MUSIC_ASSET_ID::MUSIC_COUNT);
     // play sound effect at start of transition
     if (!registry.renderRequests.has(overlay)) {
       registry.sounds.insert(overlay, Sound(SOUND_ASSET_ID::END_SCREEN, 10000));
@@ -553,6 +566,8 @@ void WorldSystem::restart_game() {
   // spawn at random places in the room
 
   level->activate_starting_room();
+
+  registry.musics.insert(Entity(), MUSIC_ASSET_ID::INTRO_MUSIC);
 }
 
 /**

@@ -1,4 +1,4 @@
-This is just so we know where the audio files came from. None of these are permanent sounds.
+This is to credit audio files.
 
 Sources for files:
 
@@ -59,3 +59,21 @@ Sources for files:
 [save](https://freesound.org/people/Scrampunk/sounds/345299/)
 
 [siren](https://freesound.org/people/EminYILDIRIM/sounds/563662/)
+
+[krab_music](https://opengameart.org/content/underwater-theme-0)
+
+[level2_music](https://opengameart.org/content/underwater-theme)
+
+[level3_music](https://opengameart.org/content/underwater-theme-ii)
+
+[shark_alert](https://opengameart.org/content/round-1multiple-tracks)
+
+[pickup](https://freesound.org/people/KeshaFilm/sounds/471834)
+
+[hitmarker](https://freesound.org/people/JanKoehl/sounds/85599/)
+
+[sharkman](https://opengameart.org/content/monster-snarls)
+
+[cthulu_music](https://opengameart.org/content/random-gods-dark-and-silent)
+
+[cthulu2_music](https://opengameart.org/content/demon-lord)

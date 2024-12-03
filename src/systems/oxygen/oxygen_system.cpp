@@ -28,7 +28,6 @@ void depleteOxygen(Entity& entity) {
   updateDeathStatus(entity, entity_oxygen);
 
   if (registry.players.has(entity) && !registry.deathTimers.has(entity)) {
-    registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_DEPLETE));
     if (registry.lowOxygen.has(entity_oxygen.oxygenBar)) {
       registry.sounds.insert(Entity(),
                              Sound(SOUND_ASSET_ID::PLAYER_FAST_HEART));
@@ -83,9 +82,13 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
   // play hurt sound if player is damaged, not dashing, AND not dead
   if (registry.players.has(entity) &&
       !registry.playerWeapons.has(oxygenModifier) &&
-      !registry.deathTimers.has(entity) && oxyModAmount <= 0 &&
+      !registry.deathTimers.has(entity) &&
       !registry.players.get(entity).dashing && !registry.sounds.has(entity)) {
-    registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::PLAYER_HURT));
+    if (oxyModAmount <= 0) {
+      registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::PLAYER_HURT));
+    } else {
+      registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::PLAYER_DEPLETE));
+    }
   }
 
   if (registry.breakables.has(entity) && !registry.sounds.has(entity)) {
@@ -105,7 +108,7 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
       if (metal) {
         registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::METAL_CRATE_HIT));
       } else {
-        registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::CRATE_DEATH));
+        registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::CRATE_HIT));
       }
     }
   }
@@ -257,9 +260,11 @@ void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen) {
     registry.deathTimers.insert(entity, {4000.f});
     registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_DEATH));
     registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PLAYER_FLATLINE));
+    //cheat code for pausing music
+    registry.musics.insert(Entity(), MUSIC_ASSET_ID::MUSIC_COUNT);
   } else if (!registry.deathTimers.has(entity) &&
              !registry.players.has(entity)) {
-    // enemy death
+    // cthulu death
     if (registry.bosses.has(entity) &&
         registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU) {
       // kill all tentacles
@@ -280,7 +285,7 @@ void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen) {
         registry.renderRequests.remove(entity);
         registry.shooters.get(entity).cooldown = 10000;
         if (!registry.sounds.has(entity)) {
-          registry.sounds.insert(Entity(),
+          registry.sounds.insert(entity,
                                  Sound(SOUND_ASSET_ID::CTHULHU_DEATH, 5000));
         }
       } else {
@@ -289,12 +294,21 @@ void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen) {
         cthulhu.curr_cd = 0;
         cthulhu.ai_cd = CTHULHU_REGEN_RATE;
         cthulhu.ai = std::vector<std::function<void()>>({addCthulhuRageAI});
+        //pause music during his transition to phase 2.
+        registry.musics.insert(Entity(), MUSIC_ASSET_ID::MUSIC_COUNT);
       }
-
     } else {
       registry.deathTimers.emplace(entity);
       if (!registry.sounds.has(entity) && registry.deadlys.has(entity)) {
         registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::ENEMY_DEATH));
+      }
+      if (registry.bosses.has(entity)) {
+        Boss& boss = registry.bosses.get(entity);
+        if (boss.type == ENTITY_TYPE::KRAB_BOSS) {
+          registry.musics.insert(Entity(), MUSIC_ASSET_ID::INTRO_MUSIC);
+        } else if (boss.type == ENTITY_TYPE::SHARKMAN) {
+          registry.musics.insert(Entity(), MUSIC_ASSET_ID::LVL2_MUSIC);
+        }
       }
     }
   }

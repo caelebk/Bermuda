@@ -54,12 +54,21 @@ const std::array<std::string, sound_count> sound_names = {
 	"end_screen",
 	"notification",
 	"save",
-	"siren"
+	"siren",
+	"pickup",
+	"hitmarker",
+	"sharkman",
 };
 
 //order matters
 const std::array<std::string, music_count> music_names = {
-	"music",
+	"intro_music",
+	"shark_alert",
+	"level2_music",
+	"krab_music",
+	"level3_music",
+	"cthulhu_music",
+	"cthulhu2_music",
 };
 
 class AudioSystem

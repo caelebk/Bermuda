@@ -156,6 +156,10 @@ void addSharkmanTarget() {
   tracking.tracking_cd  = SHARKMAN_TRACKING_CD;
   tracking.spot_radius  = SHARKMAN_SPOT_RADIUS;
   tracking.leash_radius = SHARKMAN_SPOT_RADIUS;
+
+  if (!registry.sounds.has(b)) {
+    registry.sounds.insert(b, Sound(SOUND_ASSET_ID::SHARKMAN));
+  }
   printf("WATCH OUT WATCH OUT WATCH O-\n");
 }
 
@@ -271,7 +275,9 @@ void addCthulhuRageAI() {
     boss.ai      = std::vector<std::function<void()>>(
         {addCthulhuShockwaves, addCthulhuRageProjectiles, addCthulhuTentacles,
               addCthulhuFireballs, addCthulhuCanisters, addCthulhuCanisters});
-
+    if (!registry.musics.has(b)) {
+      registry.musics.insert(b, MUSIC_ASSET_ID::CTHULHU_P2_MUSIC);
+    }
     printf("RAGE STRONGER RAHHH\n");
   }
 }

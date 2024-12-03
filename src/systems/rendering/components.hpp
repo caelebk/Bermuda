@@ -87,12 +87,24 @@ enum class SOUND_ASSET_ID {
   NOTIFICATION          = END_SCREEN + 1,
   SAVE                  = NOTIFICATION + 1,
   SIREN                 = SAVE + 1,
-  SOUND_COUNT           = SIREN + 1
+  PICKUP                = SIREN + 1,
+  HITMARKER             = PICKUP + 1,
+  SHARKMAN              = HITMARKER + 1,
+  SOUND_COUNT           = SHARKMAN + 1
 };
 
 const int sound_count = (int)SOUND_ASSET_ID::SOUND_COUNT;
 
-enum class MUSIC_ASSET_ID { MUSIC1 = 0, MUSIC_COUNT = MUSIC1 + 1 };
+enum class MUSIC_ASSET_ID { 
+  INTRO_MUSIC = 0,
+  SHARK_ALERT = INTRO_MUSIC + 1,
+  LVL2_MUSIC = SHARK_ALERT + 1,
+  KRAB_MUSIC = LVL2_MUSIC + 1,
+  LVL3_MUSIC = KRAB_MUSIC + 1,
+  CTHULHU_P1_MUSIC = LVL3_MUSIC + 1,
+  CTHULHU_P2_MUSIC = CTHULHU_P1_MUSIC + 1,
+  MUSIC_COUNT = CTHULHU_P2_MUSIC + 1 
+};
 
 const int music_count = (int)MUSIC_ASSET_ID::MUSIC_COUNT;
 /**

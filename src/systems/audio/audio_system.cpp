@@ -54,7 +54,7 @@ void AudioSystem::init() {
   }
 
   // Initial background music
-  Mix_PlayMusic(music_map[MUSIC_ASSET_ID::MUSIC1], -1);
+  Mix_PlayMusic(music_map[MUSIC_ASSET_ID::INTRO_MUSIC], -1);
   fprintf(stderr, "Loaded music\n");
 }
 
@@ -78,8 +78,13 @@ void AudioSystem::step(float elapsed_ms) {
 
   for (Entity entity : registry.musics.entities) {
     Music music = registry.musics.get(entity);
-    // This replaces the current looping background music.
-    Mix_PlayMusic(music_map[music.id], -1);
+    //cheat code for pausing music
+    if (music.id == MUSIC_ASSET_ID::MUSIC_COUNT) {
+      Mix_PauseMusic();
+    } else {
+      // This replaces the current looping background music.
+      Mix_PlayMusic(music_map[music.id], -1);
+    }
   }
   registry.musics.clear();
 }

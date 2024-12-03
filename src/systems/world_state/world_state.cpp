@@ -82,6 +82,8 @@ void roomTransitionState(RenderSystem* renderer, ScreenState& screen,
   } else if (screen.darken_screen_factor >= 1.f &&
              registry.roomTransitions.has(rt_entity)) {
     RoomTransition& roomTransition = registry.roomTransitions.get(rt_entity);
+    //grab room id before it gets updated to next room.
+    std::string prev_room_id = level->current_room_editor_id;
     level->enter_room(roomTransition.door_connection);
     // show overlays
     if (level->current_room_editor_id == "5" && !krab_boss_encountered) {
@@ -92,7 +94,21 @@ void roomTransitionState(RenderSystem* renderer, ScreenState& screen,
       sharkman_encountered = true;
     } else if (level->current_room_editor_id == "15") {
       is_cthulhu_cutscene = true;
-    }
+    } else if (prev_room_id == "5" && 
+                std::stoi(roomTransition.door_connection.room_id) > 5 && 
+                std::stoi(roomTransition.door_connection.room_id) < 10) {
+      registry.musics.insert(Entity(), MUSIC_ASSET_ID::LVL2_MUSIC);
+    } else if (prev_room_id == "10" && 
+                std::stoi(roomTransition.door_connection.room_id) > 10 && 
+                std::stoi(roomTransition.door_connection.room_id) < 15) {
+      registry.musics.insert(Entity(), MUSIC_ASSET_ID::LVL3_MUSIC);
+    } else if (roomTransition.door_connection.room_id == "5" &&
+               std::stoi(prev_room_id) > 5) {
+      registry.musics.insert(Entity(), MUSIC_ASSET_ID::INTRO_MUSIC);
+    } else if (roomTransition.door_connection.room_id == "10" &&
+               std::stoi(prev_room_id) > 10) {
+      registry.musics.insert(Entity(), MUSIC_ASSET_ID::LVL2_MUSIC);
+    } 
     registry.remove_all_components_of(rt_entity);
   } else if (screen.darken_screen_factor > 0.f &&
              !registry.roomTransitions.has(rt_entity)) {

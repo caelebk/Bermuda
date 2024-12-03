@@ -613,7 +613,9 @@ void CollisionSystem::resolvePlayerEnemyCollision(Entity player, Entity enemy) {
   modifyOxygen(player, enemy);
   if (registry.deadlys.get(enemy).type == ENTITY_TYPE::TURTLE) {
     modifyOxygenAmount(enemy, -registry.oxygenModifiers.get(enemy).amount);
-    registry.sounds.insert(enemy, SOUND_ASSET_ID::TURTLE);
+    if (!registry.sounds.has(enemy)) {
+      registry.sounds.insert(enemy, SOUND_ASSET_ID::TURTLE);
+    }
     addDamageIndicatorTimer(enemy);
   }
 }
@@ -717,6 +719,9 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
 
   switch (playerproj_comp.type) {
     case PROJECTILES::HARPOON:
+      if (!registry.sounds.has(player_proj)) {
+        registry.sounds.insert(player_proj, Sound(SOUND_ASSET_ID::HITMARKER));
+      }
       break;
     case PROJECTILES::NET:
       if (!is_cthulhu) {
@@ -788,7 +793,9 @@ void CollisionSystem::resolveEnemyEnemySupportCollision(Entity enemy,
                                                         Entity enemy_support) {
   // addDamageIndicatorTimer(enemy);
   modifyOxygen(enemy, enemy_support);
-  registry.sounds.insert(Entity(), SOUND_ASSET_ID::SIREN);
+  if (!registry.sounds.has(enemy)) {
+    registry.sounds.insert(enemy, SOUND_ASSET_ID::SIREN);
+  }
 
   // Assume the support entity should get thanos'd upon impact
   registry.remove_all_components_of(enemy_support);
@@ -1104,6 +1111,10 @@ void CollisionSystem::resolveWallEnemyCollision(Entity wall, Entity enemy) {
           is_tracking(enemy)) {
         modifyOxygenAmount(enemy, SHARKMAN_SELF_DMG);
         modifyOxygenAmount(wall, SHARKMAN_SELF_DMG);
+        if (!registry.sounds.has(wall)) {
+          registry.sounds.insert(wall,
+                        Sound(SOUND_ASSET_ID::METAL_CRATE_DEATH));
+        }
         Motion& motion = registry.motions.get(enemy);
         float   speed  = sqrt(dot(motion.velocity, motion.velocity));
         motion.velocity =

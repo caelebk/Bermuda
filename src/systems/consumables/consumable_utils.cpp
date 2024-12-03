@@ -15,6 +15,11 @@ bool handle_consumable_collisions(Entity& player, Entity& consumable,
     return false;
   }
 
+  if (!registry.sounds.has(consumable)) {
+    //needs to be Entity() because all components get removed at the end for consumable.
+    registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::PICKUP));
+  }
+
   // TODO: add more affects M2+
   if (registry.weaponDrops.has(consumable)) {
     INVENTORY  type = registry.weaponDrops.get(consumable).type;

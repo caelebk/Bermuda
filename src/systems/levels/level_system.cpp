@@ -452,6 +452,12 @@ void LevelSystem::activate_from_save(std::string id) {
   // player should already be in the position we want them in so we can ignore
   // should also already be marked as visited
   RoomBuilder& room = level->get_room_by_editor_id(id);
+  float value = std::atoi(id.c_str());
+  if (value > 5) {
+    registry.musics.insert(Entity(), MUSIC_ASSET_ID::LVL2_MUSIC);
+  } else if (value > 10) {
+    registry.musics.insert(Entity(), MUSIC_ASSET_ID::LVL3_MUSIC);
+  }
   set_current_room_editor_id(id);
   activate_walls();
   activate_floor();
