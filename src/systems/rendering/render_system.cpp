@@ -327,6 +327,11 @@ void RenderSystem::draw() {
     if (registry.renderRequests.has(floor))
       drawTexturedMesh(floor, projection_2D);
   }
+  for (Entity ambient : registry.ambient.entities) {
+    if (registry.positions.has(ambient)) {
+      drawTexturedMesh(ambient, projection_2D);
+    }
+  }
   for (Entity interactable : registry.interactable.entities) {
     if (registry.renderRequests.has(interactable))
       drawTexturedMesh(interactable, projection_2D);
@@ -347,11 +352,6 @@ void RenderSystem::draw() {
   for (Entity door : registry.activeDoors.entities) {
     if (registry.renderRequests.has(door))
       drawTexturedMesh(door, projection_2D);
-  }
-  for (Entity ambient : registry.ambient.entities) {
-    if (registry.positions.has(ambient)) {
-      drawTexturedMesh(ambient, projection_2D);
-    }
   }
   for (Entity item : registry.items.entities) {
     if (registry.renderRequests.has(item))
