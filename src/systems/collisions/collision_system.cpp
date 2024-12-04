@@ -1352,10 +1352,6 @@ void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
       keyLockedDialogue(renderer);
       return;
     } else if (doorConnection.locked && doorConnection.objective == Objective::PRESSURE_PLATE) {
-      // No clue why, but this breaks if I change it to plateLockedDialogue, so I just changed keyLockedDialogue, LOL.
-      keyLockedDialogue(renderer);
-      return;
-    } else if (doorConnection.locked && doorConnection.objective == Objective::PRESSURE_PLATE) {
       plateLockedDialogue(renderer);
       return;
     }
