@@ -55,6 +55,7 @@ void AudioSystem::init() {
 
   // Initial background music
   Mix_PlayMusic(music_map[MUSIC_ASSET_ID::INTRO_MUSIC], -1);
+  Mix_VolumeMusic(35);
   fprintf(stderr, "Loaded music\n");
 }
 

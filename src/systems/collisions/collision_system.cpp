@@ -875,7 +875,9 @@ void CollisionSystem::resolveCanisterPlayerProjCollision(Entity canister,
   OxygenModifier& oxygen = registry.oxygenModifiers.get(canister);
   oxygen.amount          = OXYGEN_CANISTER_DAMAGE;
   detectAndResolveExplosion(canister, player_proj);
-  make_canister_explosion(renderer, registry.positions.get(canister).position);
+  if (registry.positions.has(canister)) {
+    make_canister_explosion(renderer, registry.positions.get(canister).position);
+  }
   registry.remove_all_components_of(canister);
 
   if (registry.playerProjectiles.has(player_proj)) {

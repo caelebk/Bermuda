@@ -451,10 +451,16 @@ void LevelSystem::activate_from_save(std::string id) {
   // should also already be marked as visited
   RoomBuilder& room = level->get_room_by_editor_id(id);
   float value = std::atoi(id.c_str());
-  if (value > 5) {
+  if (value == 5) {
+    registry.musics.insert(Entity(), MUSIC_ASSET_ID::KRAB_MUSIC);
+  } else if (value > 5 && value < 10) {
     registry.musics.insert(Entity(), MUSIC_ASSET_ID::LVL2_MUSIC);
-  } else if (value > 10) {
+  } else if (value == 10) {
+    registry.musics.insert(Entity(), MUSIC_ASSET_ID::SHARK_ALERT);
+  } else if (value > 10 && value < 15) {
     registry.musics.insert(Entity(), MUSIC_ASSET_ID::LVL3_MUSIC);
+  } else if (value == 15) {
+    registry.musics.insert(Entity(), MUSIC_ASSET_ID::CTHULHU_P1_MUSIC);
   }
   set_current_room_editor_id(id);
   activate_walls();

@@ -588,6 +588,10 @@ Entity respawnCthulhuPhase2(RenderSystem* renderer, EntityState es) {
   registry.renderRequests.get(entity).used_texture =
       TEXTURE_ASSET_ID::CTHULHU_RAGE;
 
+  if (!registry.musics.has(entity)) {
+    registry.musics.insert(entity, MUSIC_ASSET_ID::CTHULHU_P2_MUSIC);
+  }
+
   boss.is_angry = true;
   boss.curr_cd  = 0;  // reset cd
   boss.ai_cd    = CTHULHU_AI_CD;
@@ -610,6 +614,10 @@ Entity respawnCthulhuTrans(RenderSystem* renderer, EntityState es) {
   // hack, bros ai is healing
   registry.renderRequests.get(entity).used_texture =
       TEXTURE_ASSET_ID::CTHULHU_RAGE;
+  
+  if (!registry.musics.has(entity)) {
+    registry.musics.insert(entity, MUSIC_ASSET_ID::MUSIC_COUNT);
+  }
 
   boss.is_angry      = true; // no need to replay audio
   boss.curr_cd       = 0;
