@@ -750,12 +750,12 @@ void AISystem::do_lobster(float elapsed_ms, Entity lobster, Entity player) {
     return;
   }
 
-  // Position& player_pos   = registry.positions.get(player);
-  // float     lob_velocity = sqrt(dot(lob_motion.velocity, lob_motion.velocity));
-  // vec2      player_dir   = normalize(player_pos.position - lob_pos.position);
+  Position& player_pos   = registry.positions.get(player);
+  float     lob_velocity = sqrt(dot(lob_motion.velocity, lob_motion.velocity));
+  vec2      player_dir   = normalize(player_pos.position - lob_pos.position);
 
-  // lob_motion.velocity     = player_dir * lob_comp.ram_speed;
-  // lob_motion.acceleration = player_dir * lob_motion.acceleration;
+  lob_motion.velocity     = player_dir * lob_comp.ram_speed;
+  lob_motion.acceleration = player_dir * lob_motion.acceleration;
 }
 
 void AISystem::update_lobster(float elapsed_ms, Entity lob) {
