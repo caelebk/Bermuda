@@ -13,7 +13,7 @@
 //////////////////////////////////////////////////////////////
 #define PLAYER_SCALE_FACTOR vec2(0.12f)
 #define PLAYER_BOUNDING_BOX vec2(599.f, 540.f)  // vec2(PNG_width, PNG_height)
-#define PLAYER_OXYGEN 1000000.f
+#define PLAYER_OXYGEN 1000.f
 #define PLAYER_OXYGEN_SCALE_FACTOR vec2(0.7f)
 #define PLAYER_OXYGEN_TANK_SCALE_FACTOR vec2(0.8f)
 #define PLAYER_OXYGEN_BOUNDING_BOX vec2(100.f, 500.f)

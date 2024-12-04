@@ -94,8 +94,10 @@ class RenderSystem {
       textures_path("map_interactable/locked_blue_v.png"),
       textures_path("map_interactable/locked_red_h.png"),
       textures_path("map_interactable/locked_red_v.png"),
-      textures_path("map_interactable/boss_doorway_h.png"), // source: https://frodoundead.itch.io/skull-bones
-      textures_path("map_interactable/boss_doorway_v.png"), // ibidem
+      textures_path(
+          "map_interactable/boss_doorway_h.png"),  // source:
+                                                   // https://frodoundead.itch.io/skull-bones
+      textures_path("map_interactable/boss_doorway_v.png"),  // ibidem
       textures_path("map_interactable/doorway_h.png"),
       textures_path("map_interactable/doorway_v.png"),
       textures_path("enemy/jellyfish.png"),
@@ -111,7 +113,9 @@ class RenderSystem {
       textures_path("enemy/turtle.png"),
       textures_path("enemy/seahorse.png"),
       textures_path("enemy/seahorse_bullet.png"),
-      textures_path("enemy/siren.png"),
+      textures_path(
+          "enemy/siren.png"),  // inspired by
+                               // https://www.tumblr.com/bakubabes-and-ramble
       textures_path("enemy/siren_heal.png"),
       textures_path("enemy/krab_boss.png"),  // source: Vecteezy.com
       textures_path("enemy/krab_boss_chase.png"),

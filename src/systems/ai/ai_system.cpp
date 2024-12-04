@@ -697,12 +697,14 @@ void AISystem::do_projectile_firing(float elapsed_ms) {
         vec2      direction  = player_pos.position - enemy_pos.position;
         bool      is_rage    = registry.bosses.get(enemy).is_angry;
         shootCanister(renderer, enemy_pos.position, direction, is_rage);
+        cthulhuCanisterDialogue(renderer);
       }
     } else if (attrs.type == RangedEnemies::CTHULHU_SHOCKWAVE) {
       if (attrs.cooldown < 0.f) {
         attrs.cooldown      = attrs.default_cd;
         Position& enemy_pos = registry.positions.get(enemy);
         shootShockwave(renderer, enemy_pos.position);
+        cthulhuShockwaveDialogue(renderer);
       }
     } else if (attrs.type == RangedEnemies::CTHULHU_RAGE_PROJ) {
       if (attrs.cooldown < 0.f) {

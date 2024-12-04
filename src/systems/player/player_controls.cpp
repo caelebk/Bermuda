@@ -418,18 +418,24 @@ void handleWeaponSwapping(RenderSystem* renderer, int key) {
   if (key == GLFW_KEY_3 && inv.concussors && player_projectile != concussive) {
     doWeaponSwap(concussive, concussive_gun, PROJECTILES::CONCUSSIVE);
     changeSelectedCounterColour(INVENTORY::CONCUSSIVE);
+  } else if (key == GLFW_KEY_3 && !inv.concussors && player_projectile != concussive) {
+    weaponSwitchingDisabledDialogue(renderer);
   }
 
   // Switch to Torpedo
   if (key == GLFW_KEY_4 && inv.torpedos && player_projectile != torpedo) {
     doWeaponSwap(torpedo, torpedo_gun, PROJECTILES::TORPEDO);
     changeSelectedCounterColour(INVENTORY::TORPEDO);
+  } else if (key == GLFW_KEY_4 && !inv.torpedos && player_projectile != torpedo) {
+    weaponSwitchingDisabledDialogue(renderer);
   }
 
   // Switch to Pistol Shrimp
   if (key == GLFW_KEY_5 && inv.shrimp && player_projectile != shrimp) {
     doWeaponSwap(shrimp, shrimp_gun, PROJECTILES::SHRIMP);
     changeSelectedCounterColour(INVENTORY::SHRIMP);
+  } else if (key == GLFW_KEY_5 && !inv.shrimp && player_projectile != shrimp) {
+    weaponSwitchingDisabledDialogue(renderer);
   }
 }
 

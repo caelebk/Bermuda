@@ -347,7 +347,8 @@ bool isKeyCollected(Objective keyType) {
     case Objective::YELLOW_KEY:
       return playerInventory.yellowKey;
     default:
-      // Return true as a fallback case, since it's probably better to break the doors than softlock the player.
+      // Return true as a fallback case, since it's probably better to break the
+      // doors than softlock the player.
       return true;
   }
 }
@@ -481,10 +482,6 @@ void multiFireDialogue(RenderSystem* renderer) {
   createDialogue(renderer, MULTI_FIRE_LINE1, MULTI_FIRE_LINE2);
 }
 
-void darkRoomDialogue(RenderSystem* renderer) {
-  createDialogue(renderer, DARK_ROOM_LINE1, DARK_ROOM_LINE2);
-}
-
 void krabBossDialogue(RenderSystem* renderer) {
   createDialogue(renderer, KRAB_BOSS_LINE1, KRAB_BOSS_LINE2);
 }
@@ -493,12 +490,24 @@ void sharkmanBossDialogue(RenderSystem* renderer) {
   createDialogue(renderer, SHARK_BOSS_LINE1, SHARK_BOSS_LINE2);
 }
 
+void cthulhuBossDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, CTHULHU_BOSS_LINE1, CTHULHU_BOSS_LINE2);
+}
+
+void cthulhuCanisterDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, CTHULHU_CANISTER_LINE1, CTHULHU_CANISTER_LINE2);
+}
+
+void cthulhuShockwaveDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, CTHULHU_SHOCKWAVE_LINE1, CTHULHU_SHOCKWAVE_LINE2);
+}
+
 void keyLockedDialogue(RenderSystem* renderer) {
   createDialogue(renderer, KEY_LOCKED_LINE1, KEY_LOCKED_LINE2);
 }
 
 void plateLockedDialogue(RenderSystem* renderer) {
-  createDialogue(renderer, PLATE_LOCKED_LINE1, PLATE_LOCKED_LINE1);
+  createDialogue(renderer, PLATE_LOCKED_LINE1, PLATE_LOCKED_LINE2);
 }
 
 void bossLockedDialogue(RenderSystem* renderer) {

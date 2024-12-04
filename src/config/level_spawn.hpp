@@ -79,6 +79,10 @@ const std::vector<SpawnFunctionWrapper>
     SpawnFunctionWrapper(createSeahorsePos, 1.0f, 0),
     SpawnFunctionWrapper(createSeahorsePos, 0.25f, 0),
 
+    // Siren
+    SpawnFunctionWrapper(createSirenPos, 1.0f, 0),
+    SpawnFunctionWrapper(createSirenPos, 0.5f, 0),
+
     // Fish
     SpawnFunctionWrapper(createFishPos, 1.0f, 0),
 
@@ -111,7 +115,6 @@ const std::vector<SpawnFunctionWrapper>
 
     // Seahorses
     SpawnFunctionWrapper(createSeahorsePos, 1.0f, 0),
-    SpawnFunctionWrapper(createSeahorsePos, 1.0f, 0),
 
     // Sharks
     SpawnFunctionWrapper(createSharkPos, 1.0f, 0),
@@ -121,7 +124,15 @@ const std::vector<SpawnFunctionWrapper>
     SpawnFunctionWrapper(createUrchinPos, 1.0f, 0),
 
     // Lobsters
+    SpawnFunctionWrapper(createLobsterPos, 1.0f, 0),
     SpawnFunctionWrapper(createLobsterPos, 0.25f, 0),
+
+    // Siren
+    SpawnFunctionWrapper(createSirenPos, 1.0f, 0),
+
+    // Succ
+    SpawnFunctionWrapper(createTurtlePos, 1.0f, 0),
+    SpawnFunctionWrapper(createTurtlePos, 1.0f, 0),
 
     // Ambient
     SpawnFunctionWrapper(createKelpPos, 1.0f, 0),

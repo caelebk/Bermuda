@@ -136,10 +136,6 @@ void collectShrimpDialogue(RenderSystem* renderer);
 #define OVER_COLLECT_LINE2 "I don't even know how I acquired that many..."
 void overCollectDialogue(RenderSystem* renderer);
 
-#define DARK_ROOM_LINE1 "It's dark in this part of the caves."
-#define DARK_ROOM_LINE2 "It will be difficult to see without lugging this light source around."
-void darkRoomDialogue(RenderSystem* renderer);       // TODO: call on enter dark room
-
 #define KRAB_BOSS_LINE1 "That is not the shadow from before, but those are pieces of our submarine."
 #define KRAB_BOSS_LINE2 "Better not get backed into a corner, this crab is !@#$%&* HUGE."
 void krabBossDialogue(RenderSystem* renderer); 
@@ -148,8 +144,20 @@ void krabBossDialogue(RenderSystem* renderer);
 #define SHARK_BOSS_LINE2 "I wonder how hard it'll be for it to stop if it's charging straight at me..."
 void sharkmanBossDialogue(RenderSystem* renderer); 
 
+#define CTHULHU_BOSS_LINE1 "That's the !@#$%&* thing that attacked us in the first place..."
+#define CTHULHU_BOSS_LINE2 "It's time to avenge my crew."
+void cthulhuBossDialogue(RenderSystem* renderer); 
+
+#define CTHULHU_CANISTER_LINE1 "That thing is throwing oxygen canisters..."
+#define CTHULHU_CANISTER_LINE2 "If they don't hit anything, I could use them once they stop moving."
+void cthulhuCanisterDialogue(RenderSystem* renderer); 
+
+#define CTHULHU_SHOCKWAVE_LINE1 "That shockwave is bone shattering..."
+#define CTHULHU_SHOCKWAVE_LINE2 "If I don't hide behind something, I'm going to suffer the brunt of it."
+void cthulhuShockwaveDialogue(RenderSystem* renderer); 
+
 #define KEY_LOCKED_LINE1 "This door is closed."
-#define KEY_LOCKED_LINE2 "It appears I need to find a matching key, or activate the pressure plate."
+#define KEY_LOCKED_LINE2 "It appears I need to find a matching key."
 void keyLockedDialogue(RenderSystem* renderer);
 
 #define PLATE_LOCKED_LINE1 "It won't budge."
@@ -157,8 +165,8 @@ void keyLockedDialogue(RenderSystem* renderer);
 void plateLockedDialogue(RenderSystem* renderer);    // TODO: call on door collide
 
 #define BOSS_LOCKED_LINE1 "I can't leave now!"
-#define BOSS_LOCKED_LINE2 "Maybe I can squeeze through the bars, but not while fighting this thing."
-void bossLockedDialogue(RenderSystem* renderer);     // TODO: change dialogue when door render updates are implemented
+#define BOSS_LOCKED_LINE2 "I need to take this thing out once and for all."
+void bossLockedDialogue(RenderSystem* renderer);    
 
 #define TUTORIAL_LOCKED_LINE1 "This door isn't open."
 #define TUTORIAL_LOCKED_LINE2 "Maybe I can squeeze through the bars, but first let me kill this jellyfish."
@@ -166,7 +174,7 @@ void tutorialLockedDialogue(RenderSystem* renderer); // TODO: change dialogue wh
 
 #define LOCKED_IN_LINE1 "The door locked behind me!"
 #define LOCKED_IN_LINE2 "If I use the pressure plate in both rooms it should stay open forever..."
-void doorLockedBehindMeDialogue(RenderSystem* renderer); // TODO: change dialogue when door render updates are implemented
+void doorLockedBehindMeDialogue(RenderSystem* renderer); 
 
 //////////////////////////////////////////////////////////////
 // Notifications

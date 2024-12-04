@@ -404,7 +404,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         if (transition_complete) {
           is_cthulhu_cutscene = false;
           overlay_timer       = 0.f;
-          // TODO: cthulhuBossDialogue(renderer);
+          cthulhuBossDialogue(renderer);
           if (!registry.musics.has(overlay)) {
             registry.musics.insert(overlay, MUSIC_ASSET_ID::CTHULHU_P1_MUSIC);
           }

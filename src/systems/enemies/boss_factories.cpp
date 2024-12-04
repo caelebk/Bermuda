@@ -290,6 +290,9 @@ Entity createTutorial(RenderSystem* renderer, vec2 position,
   vec2 canisterPos = {window_width_px - 332.f, window_height_px - 250.f};
   createOxygenCanisterPos(renderer, canisterPos, checkCollisions);
 
+  vec2 explodingCanisterPos = {window_width_px / 2 + 41.f, 58.f};
+  createOxygenCanisterPos(renderer, explodingCanisterPos, checkCollisions);
+
   vec2 geyserPos = {window_width_px - 220.f, window_height_px - 265.f};
   createGeyserPos(renderer, geyserPos, checkCollisions);
 
