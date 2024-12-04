@@ -1066,15 +1066,17 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
 void CollisionSystem::resolveWallEnemyProjCollision(Entity wall,
                                                     Entity enemy_proj) {
   // canister projectiles explode on walls
-  if (registry.enemyProjectiles.get(enemy_proj).type ==
-      ENTITY_TYPE::OXYGEN_CANISTER) {
-    detectAndResolveExplosion(enemy_proj, wall);
-    make_canister_explosion(renderer,
-                            registry.positions.get(enemy_proj).position);
-  } else if (registry.enemyProjectiles.get(enemy_proj).type ==
-             ENTITY_TYPE::SHOCKWAVE) {
-    // what is a wall collision rahhhhh
-    return;
+  if (!registry.enemySupports.has(enemy_proj)) {
+    if (registry.enemyProjectiles.get(enemy_proj).type ==
+        ENTITY_TYPE::OXYGEN_CANISTER) {
+      detectAndResolveExplosion(enemy_proj, wall);
+      make_canister_explosion(renderer,
+                              registry.positions.get(enemy_proj).position);
+    } else if (registry.enemyProjectiles.get(enemy_proj).type ==
+              ENTITY_TYPE::SHOCKWAVE) {
+      // what is a wall collision rahhhhh
+      return;
+    }
   }
   registry.remove_all_components_of(enemy_proj);
 }
