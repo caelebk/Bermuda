@@ -4,91 +4,202 @@
 #include "consumable_factories.hpp"
 #include "enemy_factories.hpp"
 #include "map_factories.hpp"
+#include "level_util.hpp"
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    EMPTY = {};
+// SpawnFunctionWrapper(<spawn function>, <probability to spawn>, <pack size>)
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_1_RAND_POS = {createOxygenCanisterPos, createCratePos, createCratePos,
-                      createCratePos,          createCratePos, createCratePos,
-                      createGeyserPos,         createSharkPos, createKrabPos,
-                      createFishPos,           createJellyPos, createJellyPos};
+const std::vector<SpawnFunctionWrapper> EMPTY = {};
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_1_PACKS = {createFishPos};
+const std::vector<SpawnFunctionWrapper>
+  LVL_1 = {
+    // Packs
+    SpawnFunctionWrapper(createFishPos, 1.0f, 10),
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_2_RAND_POS = {
-        createOxygenCanisterPos, createCratePos, createCratePos,
-        createCratePos,          createCratePos, createSeahorsePos,
-        createGeyserPos,         createSharkPos, createSirenPos};
+    // Oxygen Canisters
+    SpawnFunctionWrapper(createOxygenCanisterPos, 0.8f, 0),
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_2_PACKS = {createSharkPos};
+    // Crates
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 0.5f, 0),
+    SpawnFunctionWrapper(createCratePos, 0.5f, 0),
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_3_RAND_POS = {
-        createSharkPos,          createSeahorsePos, createUrchinPos,
-        createCratePos,          createCratePos,    createCratePos,
-        createOxygenCanisterPos, createLobsterPos,  createTurtlePos};
+    // Geysers
+    SpawnFunctionWrapper(createGeyserPos, 1.0f, 0),
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    TUTORIAL_JELLYFISH_MINIBOSS = {
-        createTutorial,
+    // Krabs
+    SpawnFunctionWrapper(createKrabPos, 1.0f, 0),
+    SpawnFunctionWrapper(createKrabPos, 0.5f, 0),
+
+    // Jellies
+    SpawnFunctionWrapper(createJellyPos, 1.0f, 0),
+    SpawnFunctionWrapper(createJellyPos, 1.0f, 0),
+    SpawnFunctionWrapper(createJellyPos, 0.5f, 0),
+
+    // Sharks
+    SpawnFunctionWrapper(createSharkPos, 1.0f, 0),
+    SpawnFunctionWrapper(createSharkPos, 0.5f, 0),
+
+    // Ambient
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createJunkPos, 1.0f, 0),
+    SpawnFunctionWrapper(createJunkPos, 1.0f, 0),
+    SpawnFunctionWrapper(createShellPos, 1.0f, 0),
+    SpawnFunctionWrapper(createShellPos, 1.0f, 0),
+    SpawnFunctionWrapper(createShellPos, 1.0f, 0),
+    SpawnFunctionWrapper(createCoralPos, 1.0f, 0),
+    SpawnFunctionWrapper(createCoralPos, 1.0f, 0),
+    SpawnFunctionWrapper(createCoralPos, 1.0f, 0),
+  };
+
+const std::vector<SpawnFunctionWrapper>
+  LVL_2 = {
+    // Sharks
+    SpawnFunctionWrapper(createSharkPos, 1.0f, 5),
+    
+    // Oxygen Canisters
+    SpawnFunctionWrapper(createOxygenCanisterPos, 1.0f, 0),
+
+    // Crates
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+
+    // Geysers
+    SpawnFunctionWrapper(createGeyserPos, 0.33f, 0),
+    
+    // Seahorse
+    SpawnFunctionWrapper(createSeahorsePos, 1.0f, 0),
+    SpawnFunctionWrapper(createSeahorsePos, 0.25f, 0),
+
+    // Fish
+    SpawnFunctionWrapper(createFishPos, 1.0f, 0),
+
+    // Ambient
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createBonesPos, 1.0f, 0),
+    SpawnFunctionWrapper(createJunkPos, 1.0f, 0),
+    SpawnFunctionWrapper(createJunkPos, 1.0f, 0),
+    SpawnFunctionWrapper(createShellPos, 1.0f, 0),
+    SpawnFunctionWrapper(createShellPos, 1.0f, 0),
+    SpawnFunctionWrapper(createBonesPos, 1.0f, 0),
+    SpawnFunctionWrapper(createCoralPos, 1.0f, 0),
+    SpawnFunctionWrapper(createCoralPos, 1.0f, 0),
+  };
+
+const std::vector<SpawnFunctionWrapper>
+  LVL_3 = {
+    // Oxygen Canisters
+    SpawnFunctionWrapper(createOxygenCanisterPos, 1.0f, 0),
+
+    // Crates
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+    SpawnFunctionWrapper(createCratePos, 1.0f, 0),
+
+    // Seahorses
+    SpawnFunctionWrapper(createSeahorsePos, 1.0f, 0),
+    SpawnFunctionWrapper(createSeahorsePos, 1.0f, 0),
+
+    // Sharks
+    SpawnFunctionWrapper(createSharkPos, 1.0f, 0),
+    SpawnFunctionWrapper(createSharkPos, 1.0f, 0),
+
+    // Urchins
+    SpawnFunctionWrapper(createUrchinPos, 1.0f, 0),
+
+    // Lobsters
+    SpawnFunctionWrapper(createLobsterPos, 0.25f, 0),
+
+    // Ambient
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createKelpPos, 1.0f, 0),
+    SpawnFunctionWrapper(createBonesPos, 1.0f, 0),
+    SpawnFunctionWrapper(createBonesPos, 1.0f, 0),
+    SpawnFunctionWrapper(createBonesPos, 1.0f, 0),
+    SpawnFunctionWrapper(createJunkPos, 1.0f, 0),
+    SpawnFunctionWrapper(createJunkPos, 1.0f, 0),
+    SpawnFunctionWrapper(createShellPos, 1.0f, 0),
+    SpawnFunctionWrapper(createShellPos, 1.0f, 0),
+    SpawnFunctionWrapper(createBonesPos, 1.0f, 0),
+    SpawnFunctionWrapper(createCoralPos, 1.0f, 0),
+  };
+
+const std::vector<SpawnFunctionWrapper> FINAL_BOSS = {
+  SpawnFunctionWrapper(createCthulhuPos, 1.0f, 0),
+  SpawnFunctionWrapper(createCthulhuRocksPos, 1.0f, 0),
 };
 
-const std::vector<
-    std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    CRAB_MINIBOSS = {createInitCrabBossPos,   createKrabPos,
-                     createKrabPos,           createKrabPos,
-                     createKrabPos,           createKrabPos,
-                     createKrabPos,           createOxygenCanisterPos,
-                     createOxygenCanisterPos, createOxygenCanisterPos,
-                     createOxygenCanisterPos};
-
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    SHARKMAN_MINIBOSS = {createInitSharkmanPos, createSharkmanCratesPos,
-                         createSharkPos,        createSharkPos,
-                         createSharkPos,        createSharkPos,
-                         createSharkPos};
-
-const std::vector<std::function<Entity(RenderSystem *r, vec2 p, bool b)>> FINAL_BOSS = {
-  createCthulhuPos, createCthulhuRocksPos
+const std::vector<SpawnFunctionWrapper> TUTORIAL_JELLYFISH_MINIBOSS = { 
+    SpawnFunctionWrapper(createTutorial, 1.0f, 0)
 };
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    RED_KEY_SPAWN = {
-        createRedKeyPos,
-};
+const std::vector<SpawnFunctionWrapper>
+    CRAB_MINIBOSS = {
+        // Oxygen Canisters
+        SpawnFunctionWrapper(createOxygenCanisterPos, 1.0f, 0),
+        SpawnFunctionWrapper(createOxygenCanisterPos, 1.0f, 0),
+        SpawnFunctionWrapper(createOxygenCanisterPos, 1.0f, 0),
+        SpawnFunctionWrapper(createOxygenCanisterPos, 1.0f, 0),
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    BLUE_KEY_SPAWN = {
-        createBlueKeyPos,
-};
+        // Krabs
+        SpawnFunctionWrapper(createKrabPos, 1.0f, 0),
+        SpawnFunctionWrapper(createKrabPos, 1.0f, 0),
+        SpawnFunctionWrapper(createKrabPos, 1.0f, 0),
+        SpawnFunctionWrapper(createKrabPos, 1.0f, 0),
+        SpawnFunctionWrapper(createKrabPos, 1.0f, 0),
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    YELLOW_KEY_SPAWN = {
-        createYellowKeyPos,
-};
-
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_1_AMBIENT{
-        createKelpPos,  createKelpPos,  createKelpPos,  createKelpPos,
-        createKelpPos,  createJunkPos,  createJunkPos,  createShellPos,
-        createShellPos, createShellPos, createCoralPos, createCoralPos,
-        createCoralPos,
+        // Krab Boss
+        SpawnFunctionWrapper(createCrabBossPos, 1.0f, 0),
     };
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_2_AMBIENT{
-        createKelpPos,  createKelpPos,  createKelpPos,  createKelpPos,
-        createBonesPos, createJunkPos,  createJunkPos,  createShellPos,
-        createShellPos, createBonesPos, createCoralPos, createCoralPos,
-    };
+const std::vector<SpawnFunctionWrapper>
+  SHARKMAN_MINIBOSS = {
+      // Crates
+      SpawnFunctionWrapper(createSharkmanCratesPos, 1.0f, 0),
 
-const std::vector<std::function<Entity(RenderSystem* r, vec2 p, bool b)>>
-    LVL_3_AMBIENT{
-        createKelpPos,  createKelpPos,  createBonesPos, createBonesPos,
-        createBonesPos, createJunkPos,  createJunkPos,  createShellPos,
-        createShellPos, createBonesPos, createCoralPos,
-    };
+      // Sharks
+      SpawnFunctionWrapper(createSharkPos, 1.0f, 0),
+      SpawnFunctionWrapper(createSharkPos, 1.0f, 0),
+      SpawnFunctionWrapper(createSharkPos, 1.0f, 0),
+      SpawnFunctionWrapper(createSharkPos, 1.0f, 0),
+      SpawnFunctionWrapper(createSharkPos, 1.0f, 0),
+
+      // Sharkman
+      SpawnFunctionWrapper(createInitSharkmanPos, 1.0f, 0),
+      SpawnFunctionWrapper(createCrabBossPos, 0.001f, 0),
+  };
+
+  
+
+const SpawnFunctionWrapper RED_KEY_SPAWN = {
+    SpawnFunctionWrapper(createRedKeyPos, 1.0f, 0)
+};
+
+const SpawnFunctionWrapper BLUE_KEY_SPAWN = {
+    SpawnFunctionWrapper(createBlueKeyPos, 1.0f, 0)
+};
+
+const SpawnFunctionWrapper YELLOW_KEY_SPAWN = {
+    SpawnFunctionWrapper(createYellowKeyPos, 1.0f, 0)
+};
+
+const SpawnFunctionWrapper ROCK_SPAWN = {
+    SpawnFunctionWrapper(createRockPos, 1.0f, 0)
+};
+
+const SpawnFunctionWrapper PRESSURE_PLATE_SPAWN = {
+    SpawnFunctionWrapper(createPressurePlatePos, 1.0f, 0)
+};

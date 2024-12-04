@@ -464,7 +464,7 @@ Entity createPressurePlatePos(RenderSystem* renderer, vec2 position,
   Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
   registry.meshPtrs.emplace(entity, &mesh);
 
-  // make consumable
+  // Make consumable
   Interactable& i = registry.interactable.emplace(entity);
   i.type          = ENTITY_TYPE::PRESSURE_PLATE;
 

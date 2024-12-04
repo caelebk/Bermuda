@@ -118,12 +118,7 @@ void roomTransitionState(RenderSystem* renderer, ScreenState& screen,
   } else if (screen.darken_screen_factor <= 0.f &&
              !registry.roomTransitions.has(rt_entity)) {
     room_transitioning = false;
-    if (level->current_room_editor_id != "0" &&
-        level->current_room_editor_id != "5" &&
-        level->current_room_editor_id != "10" &&
-        level->current_room_editor_id != "15") {
-      enemyRoomDialogue(renderer);
-    }
+    level->dialogue_function(); // runs a delayed computation assigned in level_system
   }
 }
 

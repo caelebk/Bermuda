@@ -14,8 +14,9 @@ struct Consumable {
 
 // anything the player can pick up, perm
 struct Item {
-  INVENTORY item;
+  Objective item;
   ENTITY_TYPE type;
+  std::function<Entity(RenderSystem *renderer, EntityState es)> respawnFn;
 };
 
 // drops when entity is dead

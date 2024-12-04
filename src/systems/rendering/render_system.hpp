@@ -94,6 +94,8 @@ class RenderSystem {
       textures_path("map_interactable/locked_blue_v.png"),
       textures_path("map_interactable/locked_red_h.png"),
       textures_path("map_interactable/locked_red_v.png"),
+      textures_path("map_interactable/boss_doorway_h.png"), // source: https://frodoundead.itch.io/skull-bones
+      textures_path("map_interactable/boss_doorway_v.png"), // ibidem
       textures_path("map_interactable/doorway_h.png"),
       textures_path("map_interactable/doorway_v.png"),
       textures_path("enemy/jellyfish.png"),

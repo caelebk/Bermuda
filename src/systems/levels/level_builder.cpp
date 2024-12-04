@@ -18,9 +18,51 @@ RoomBuilder& LevelBuilder::get_room_by_editor_id(EditorID s_id) {
   return rooms[s_id];
 };
 
-LevelBuilder& LevelBuilder::connect(Direction direction, EditorID r_id,
-                                    EditorID d1_id, EditorID r2_id,
-                                    EditorID d2_id) {
+void LevelBuilder::randomize_door_objective(EditorID& r1_id, EditorID& r2_id, DoorConnection& door_connection_1, DoorConnection& door_connection_2) {
+  RoomBuilder& room_1 = rooms[r1_id];
+  RoomBuilder& room_2 = rooms[r2_id];
+
+  std::mt19937 rng = getGlobalRNG();
+
+  std::shuffle(room_1.objectives.begin(), room_1.objectives.end(), rng);
+  if (door_connection_1.assigned == false && door_connection_2.assigned == false) {
+    for (size_t i = 0; i < room_1.objectives.size(); i++) {
+      Objective& random_objective = room_1.objectives[i];
+
+      // Pressure plate logic. Must be available in both rooms.
+      if (
+        random_objective == Objective::PRESSURE_PLATE
+        && std::find(room_2.objectives.begin(), room_2.objectives.end(), Objective::PRESSURE_PLATE) != room_2.objectives.end()
+        ) {
+        room_1.spawn_wrappers.push_back(PRESSURE_PLATE_SPAWN);
+        room_2.spawn_wrappers.push_back(PRESSURE_PLATE_SPAWN);
+        room_1.spawn_wrappers.push_back(ROCK_SPAWN);
+        room_2.spawn_wrappers.push_back(ROCK_SPAWN);
+        std::cout << "assigned pressure plates to rooms: " << r1_id << " and " << r2_id << std::endl;
+
+        // Restrict ourselves to one pressure plate per room.
+        room_1.objectives.erase(std::remove(room_1.objectives.begin(), room_1.objectives.end(), Objective::PRESSURE_PLATE), room_1.objectives.end());
+        room_2.objectives.erase(std::remove(room_2.objectives.begin(), room_2.objectives.end(), Objective::PRESSURE_PLATE), room_2.objectives.end());
+
+        door_connection_1.objective = Objective::PRESSURE_PLATE;
+        door_connection_2.objective = Objective::PRESSURE_PLATE;
+        break;
+      } else {
+        continue;
+      }      
+
+      // Assign if we're good.
+      door_connection_1.objective = random_objective;
+      door_connection_2.objective = random_objective;
+    }
+    
+    door_connection_1.assigned = true;
+    door_connection_2.assigned = true;
+  }
+}
+
+void LevelBuilder::connect(Direction direction, EditorID r_id, EditorID d1_id,
+                           EditorID r2_id, EditorID d2_id) {
   RoomBuilder& room_1 = rooms[r_id];
   RoomBuilder& room_2 = rooms[r2_id];
   Entity&      door_1 = room_1.doors[d1_id];
@@ -42,55 +84,38 @@ LevelBuilder& LevelBuilder::connect(Direction direction, EditorID r_id,
 
     std::mt19937 rng = getGlobalRNG();
 
-    // If the door is marked as possibly having key types and neither are boss
-    // rooms, then possibly mark this door connection as that color. Shuffle the
-    // keys so we don't bias towards the first colour enumeration. Don't bother
-    // locking them, because doors are locked and unlocked dynamically on entry
-    // into a room.
-    if (!rooms[r_id].is_boss_room && !rooms[r2_id].is_boss_room) {
-      std::vector<INVENTORY> key_doors_copy = room_1.key_doors;
-      std::shuffle(key_doors_copy.begin(), key_doors_copy.end(), rng);
-      for (int i = 0; i < key_doors_copy.size(); i++) {
-        INVENTORY key = key_doors_copy[i];
-        if (getRandInt(0, 100) < LOCKED_DOOR_PROBABILITY) {
-          door_connection_1.key = key;
-          door_connection_2.key = key;
-          break;
-        }
-      }
+    if (!rooms[r_id].is_boss_room && rooms[r2_id].is_boss_room) { // only add the objective on the connecting door
+      door_connection_1.objective = Objective::BOSS;
+      door_connection_2.objective = Objective::BOSS;
+    } else {
+      randomize_door_objective(r_id, r2_id, door_connection_1, door_connection_2);
     }
   } else {
-    if (registry.doorConnections.has(door_1) &&
-        registry.doorConnections.has(door_2)) {
-      DoorConnection& door_connection_1 = registry.doorConnections.get(door_1);
-      DoorConnection& door_connection_2 = registry.doorConnections.get(door_2);
-      door_connection_1.key             = door_connection_2.key;
-      door_connection_2.key             = door_connection_1.key;
+    if (registry.doorConnections.has(door_1) && registry.doorConnections.has(door_2)) {
+      DoorConnection& door_connection1 = registry.doorConnections.get(door_1);
+      DoorConnection& door_connection2 = registry.doorConnections.get(door_2);
+      door_connection1.objective = door_connection2.objective;
+      door_connection2.objective = door_connection1.objective;
     }
   }
-
-  return *this;
 };
 
 void LevelBuilder::mark_difficulty_regions() {
-  assert(ROOM_CLUSTERS.size() == ROOM_CLUSTER_SPAWN_FUNCTION_GROUPS.size());
-  assert(ROOM_CLUSTERS.size() ==
-         ROOM_CLUSTER_PACK_SPAWN_FUNCTION_GROUPS.size());
-
+  assert(ROOM_CLUSTERS.size() == ROOM_SPAWN_WRAPPERS.size());
   int room_index = 0;
 
   for (unsigned int i = 0; i < ROOM_CLUSTERS.size(); i++) {
     int rooms_in_cluster = ROOM_CLUSTERS[i];
 
-    // Assign the current spawn function to all rooms in the current cluster.
+    // Assign the current spawn function to all rooms in the current cluster, and also
+    // assign the room name.
     for (int j = 0; j < rooms_in_cluster; j++) {
-      EditorID room = std::to_string(room_index);
-      rooms[room].room_spawn_function_groups.push_back(
-          ROOM_CLUSTER_SPAWN_FUNCTION_GROUPS[i]);
-      rooms[room].room_ambient_function_groups.push_back(
-          ROOM_CLUSTER_AMBIENT_FUNCTION_GROUPS[i]);
-      rooms[room].room_pack_spawn_function_groups.push_back(
-          ROOM_CLUSTER_PACK_SPAWN_FUNCTION_GROUPS[i]);
+      std::string room_name;
+      EditorID room_id = std::to_string(room_index);
+      RoomBuilder& room = rooms[room_id];
+
+      room.name = room_name.append(std::to_string(i)).append("-").append(std::to_string(room_index));
+      room.spawn_wrappers = ROOM_SPAWN_WRAPPERS[i];
       room_index++;
     }
   }
@@ -101,16 +126,15 @@ void LevelBuilder::mark_tutorial_room() {
 }
 
 void LevelBuilder::mark_boss_rooms() {
-  assert(BOSS_ROOMS.size() == BOSS_SPAWN_FUNCTION_GROUPS.size());
-  for (int i = 0; i < BOSS_ROOMS.size(); i++) {
-    EditorID room            = std::to_string(BOSS_ROOMS[i]);
+  assert(MINIBOSS_ROOMS.size() == MINIBOSS_SPAWN_WRAPPERS.size());
+  for (int i = 0; i < MINIBOSS_ROOMS.size(); i++) {
+    EditorID room            = std::to_string(MINIBOSS_ROOMS[i]);
     rooms[room].is_boss_room = true;
-    rooms[room].boss_spawn_function_groups.push_back(
-        BOSS_SPAWN_FUNCTION_GROUPS[i]);
+    rooms[room].spawn_wrappers = MINIBOSS_SPAWN_WRAPPERS[i];
   }
   EditorID room = "15";
   rooms[room].is_boss_room = true;
-  rooms[room].boss_spawn_function_groups.push_back(FINAL_BOSS);
+  rooms[room].spawn_wrappers = FINAL_BOSS;
 }
 
 std::vector<int> LevelBuilder::get_random_door_positions(int num_doors, int min,
@@ -184,9 +208,8 @@ void LevelBuilder::build_wall_with_random_doors(
   }
 };
 
-void LevelBuilder::randomize_key_rooms() {
-  assert(KEYS.size() == KEY_SPAWN_FUNCTIONS.size());
-
+void LevelBuilder::randomize_keys() {
+  assert(KEYS.size() == KEY_SPAWN_WRAPPERS.size());
   std::mt19937 rng = getGlobalRNG();
 
   // Randomly sample rooms to place our keys in. Skip the first and last rooms,
@@ -219,8 +242,7 @@ void LevelBuilder::randomize_key_rooms() {
     }
     key_rooms.push_back(key_room);
     std::cout << "key room: " << key_room << std::endl;
-    rooms[key_room].room_fixed_spawn_function_groups.push_back(
-        KEY_SPAWN_FUNCTIONS[i]);
+    rooms[key_room].spawn_wrappers.push_back(KEY_SPAWN_WRAPPERS[i]);
   }
 
   for (int i = 0; i < (int)indices.size(); i++) {
@@ -242,19 +264,38 @@ void LevelBuilder::randomize_key_rooms() {
       int      key_room_number = std::stoi(key_room_id);
 
       if (i >= indices[j]) {
-        rooms[room_id].key_doors.push_back(KEYS[j]);
+        rooms[room_id].objectives.push_back(KEYS[j]);
       }
     }
   }
+}
+
+void LevelBuilder::randomize_pressure_plates() {
+  int i = 0;
+  for (const EditorID& id : traversal) {
+    if (!rooms[id].is_boss_room && i != 0) {
+      // Weight the probability vector of objectives so we actually get a few pressure plates every now and then, otherwise the keys
+      // dominate and you can get runs with no pressure plates.
+      rooms[id].objectives.push_back(Objective::PRESSURE_PLATE);
+      rooms[id].objectives.push_back(Objective::PRESSURE_PLATE);
+      rooms[id].objectives.push_back(Objective::PRESSURE_PLATE);
+    }
+    i++;
+  }
+}
+
+void LevelBuilder::randomize_objectives() {
+  randomize_keys();
+  randomize_pressure_plates();
 
   // Debug
-  for (const auto& room_id : traversal) {
-    const RoomBuilder& room = rooms[room_id];
-    std::cout << "room: " << room_id << std::endl;
-    for (const auto& key : room.key_doors) {
-      std::cout << (int)key << std::endl;
-    }
-  }
+  // for (const auto& room_id : traversal) {
+  //   const RoomBuilder& room = rooms[room_id];
+  //   std::cout << "room: " << room_id << std::endl;
+  //   for (const auto& objective : room.objectives) {
+  //     std::cout << (int)objective << std::endl;
+  //   }
+  // }
 }
 
 void LevelBuilder::randomize_room_shapes() {
@@ -265,37 +306,51 @@ void LevelBuilder::randomize_room_shapes() {
 
     RoomBuilder& current_room = get_room_by_editor_id(room_id);
 
-    // west
-    build_wall_with_random_doors(
-        Direction::WEST, room_id, MAX_Y_UNITS, Y_1U,
-        [&](int segment) { current_room.up(segment); },
-        [&](EditorID door_id, int door_size) {
-          current_room.door(door_id, door_size);
-        });
+    if (current_room.is_tutorial_room) {
+      // Fix the door placement. We need to change this as well as the door we already generated for the other room.
+      EditorID& first_room = traversal[0]; // this is guaranteed
 
-    // north
-    build_wall_with_random_doors(
-        Direction::SOUTH, room_id, MAX_X_UNITS, X_1U,
-        [&](int segment) { current_room.right(segment); },
-        [&](EditorID door_id, int door_size) {
-          current_room.door(door_id, door_size);
-        });
+      // Also sneakily edit the other room.
+      RoomBuilder& other_room = get_room_by_editor_id(first_room);
+      other_room.connections[room_id] = Direction::SOUTH;
 
-    // east
-    build_wall_with_random_doors(
-        Direction::EAST, room_id, MAX_Y_UNITS, Y_1U,
-        [&](int segment) { current_room.down(segment); },
-        [&](EditorID door_id, int door_size) {
-          current_room.door(door_id, door_size);
-        });
+      // Generate the door ID we'll use.
+      std::string door_id;
+      door_id.append(first_room).append("_").append(std::to_string(Direction::NORTH));
+      current_room.up(Y_10U).right(X_20U).down(Y_10U).left(X_6U).door(door_id, DOOR_SIZE * X_1U).left(X_13U);
+    } else {
+      // west
+      build_wall_with_random_doors(
+          Direction::WEST, room_id, MAX_Y_UNITS, Y_1U,
+          [&](int segment) { current_room.up(segment); },
+          [&](EditorID door_id, int door_size) {
+            current_room.door(door_id, door_size);
+          });
 
-    // south
-    build_wall_with_random_doors(
-        Direction::NORTH, room_id, MAX_X_UNITS, X_1U,
-        [&](int segment) { current_room.left(segment); },
-        [&](EditorID door_id, int door_size) {
-          current_room.door(door_id, door_size);
-        });
+      // north
+      build_wall_with_random_doors(
+          Direction::SOUTH, room_id, MAX_X_UNITS, X_1U,
+          [&](int segment) { current_room.right(segment); },
+          [&](EditorID door_id, int door_size) {
+            current_room.door(door_id, door_size);
+          });
+
+      // east
+      build_wall_with_random_doors(
+          Direction::EAST, room_id, MAX_Y_UNITS, Y_1U,
+          [&](int segment) { current_room.down(segment); },
+          [&](EditorID door_id, int door_size) {
+            current_room.door(door_id, door_size);
+          });
+
+      // south
+      build_wall_with_random_doors(
+          Direction::NORTH, room_id, MAX_X_UNITS, X_1U,
+          [&](int segment) { current_room.left(segment); },
+          [&](EditorID door_id, int door_size) {
+            current_room.door(door_id, door_size);
+          });
+    }
   }
 }
 
@@ -324,18 +379,24 @@ void LevelBuilder::connect_doors() {
 // Note since we transition when moving spaces, these graphs don't have to be
 // planar.
 void LevelBuilder::generate_random_level() {
+  printf("start\n");
   randomize_connections();
+  printf("after random connect\n");
   randomize_connection_directions();
+  printf("after random directions\n");
 
   // Also, mark important rooms.
   mark_difficulty_regions();
   mark_tutorial_room();
   mark_boss_rooms();
 
-  randomize_key_rooms();
+  randomize_objectives();
+  printf("after random objectives\n");
   randomize_room_shapes();
+  printf("after random room shapes\n");
 
   connect_doors();
+  printf("after connect doors\n");
 }
 
 void LevelBuilder::mark_all_rooms_unvisited() {
@@ -502,7 +563,7 @@ void LevelBuilder::randomize_connections() {
       // Again, since the boss room should be sparse, decrement max_connections
       // by one.
       int num_connections =
-          getRandInt(0, max_connections - 1 - rooms[room_id].connections.size());
+          getRandInt(0, max_connections - rooms[room_id].connections.size() - 1);
 
       while (num_connections > 0) {
         int      other_room;
@@ -511,6 +572,7 @@ void LevelBuilder::randomize_connections() {
         do {
           other_room    = random_path[getRandInt(0, normal_rooms)];
           other_room_id = std::to_string(other_room);
+          std::cout << other_room_id << std::endl;
         } while (
             // Discard this candidate other room if any of these are true:
             // 1. It is equal to the connectee room.
@@ -537,8 +599,8 @@ void LevelBuilder::randomize_connections() {
   // Connect all the boss rooms together that delineate a new difficulty area.
   // The boss rooms are guaranteed to have available connections.
   int boss_room;
-  for (int i = 0; i < (int)BOSS_ROOMS.size(); i++) {
-    boss_room = BOSS_ROOMS[i];
+  for (int i = 0; i < (int)MINIBOSS_ROOMS.size(); i++) {
+    boss_room = MINIBOSS_ROOMS[i];
     rooms[std::to_string(boss_room)].connections[std::to_string(boss_room + 1)];
     rooms[std::to_string(boss_room + 1)].connections[std::to_string(boss_room)];
   }

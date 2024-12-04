@@ -3,6 +3,7 @@
 #include "level_factories.hpp"
 #include "random.hpp"
 #include "room_builder.hpp"
+#include "spawning.hpp"
 
 RoomBuilder::RoomBuilder(): pointer({0, 0}) {
   this->entity = entity;
@@ -93,6 +94,14 @@ vec2 RoomBuilder::get_updated_left_position(int magnitude) {
   return {pointer.x - magnitude, pointer.y};
 }
 
+void RoomBuilder::respawn(RenderSystem* renderer) {
+  while (saved_entities.size() > 0) {
+    EntitySave es = saved_entities.back();
+    es.respawn(renderer);
+    saved_entities.pop_back();
+  }
+}
+
 RoomBuilder& RoomBuilder::up(int magnitude) {
   direction = [this](int magnitude) -> vec2 {
     return this->get_updated_up_position(magnitude);
@@ -133,14 +142,6 @@ std::vector<EditorID> RoomBuilder::get_connections_with_direction(Direction dire
   }
 
   return connected_rooms;
-}
-
-std::vector<Entity> RoomBuilder::get_doors() {
-  std::vector<Entity> ret;
-  for (auto& pair : doors) {
-    ret.push_back(pair.second);
-  }
-  return ret;
 }
 
 bool RoomBuilder::is_in_room(vec2& position) {
@@ -198,6 +199,22 @@ vec2 RoomBuilder::rejection_sample() {
     }
   };
 };
+
+void RoomBuilder::spawn(RenderSystem* renderer) {
+  if (has_entered) {
+    respawn(renderer);
+  } else {
+    for (const auto& spawn_wrapper : spawn_wrappers) {
+      if (spawn_wrapper.pack_size == 0) { // if the spawn wrapper is not a pack...
+        // We have to cast these to vectors for the spawn function signatures.
+        execute_config_rand_chance({spawn_wrapper.spawn_function}, *this, renderer, spawn_wrapper.probability);
+      } else {
+        execute_pack_spawning({spawn_wrapper.spawn_function}, *this, renderer, spawn_wrapper.pack_size);
+      }
+    }
+  }
+  has_entered = true;
+}
 
 vec2 RoomBuilder::get_random_position() {
   return rejection_sample();

@@ -115,10 +115,28 @@ void CollisionSystem::handle_collision_end() {
         registry.sounds.insert(entity, Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
       }
       registry.pressurePlates.get(entity).active = false;
+      // Connect to an available door, if we haven't yet.
+      // Exploits the fact that there's only 1 PP per room.
+      for (Entity& entity : registry.activeDoors.entities) {
+        if (registry.doorConnections.has(entity)) {
+          DoorConnection& door_connection = registry.doorConnections.get(entity);
+          if (door_connection.objective == Objective::PRESSURE_PLATE) {
+            door_connection.locked = true;
+
+            // change the sprite
+            if (registry.renderRequests.has(entity)) {
+              registry.renderRequests.remove(entity);
+
+              level->assign_door_sprite(entity, door_connection);
+            }
+          }
+        }
+      }
       registry.renderRequests.get(entity).used_texture =
           TEXTURE_ASSET_ID::PRESSURE_PLATE_OFF;
     }
   }
+
 }
 
 /***********************************
@@ -628,12 +646,12 @@ void CollisionSystem::resolvePlayerItemCollision(Entity player, Entity item) {
   // will add a key if this is in fact one
   if (registry.items.has(item)) {
     Item&     i     = registry.items.get(item);
-    INVENTORY color = i.item;
+    Objective color = i.item;
 
     // We need to route this somewhere because the collect functions take a
     // renderer and this class doesn't have one. Probably doesn't belong in
     // LevelSystem, but it's 2:06 am.
-    level->collect_key(color);
+    level->collect_key(i.item);
   }
   registry.remove_all_components_of(item);
 }
@@ -690,6 +708,21 @@ void CollisionSystem::resolvePlayerInteractableCollision(Entity player,
       registry.renderRequests.get(interactable).used_texture =
           TEXTURE_ASSET_ID::PRESSURE_PLATE_ON;
       registry.pressurePlates.get(interactable).active = true;
+      for (Entity& entity : registry.activeDoors.entities) {
+        if (registry.doorConnections.has(entity)) {
+          DoorConnection& door_connection = registry.doorConnections.get(entity);
+          if (door_connection.objective == Objective::PRESSURE_PLATE) {
+            door_connection.locked = false;
+
+            // change the sprite
+            if (registry.renderRequests.has(entity)) {
+              registry.renderRequests.remove(entity);
+
+              level->assign_door_sprite(entity, door_connection);
+            }
+          }
+        }
+      }
       if (!registry.sounds.has(interactable)) {
         registry.sounds.insert(interactable,
                                Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
@@ -1063,6 +1096,24 @@ void CollisionSystem::resolveMassInteractableCollision(Entity mass,
         registry.sounds.insert(interactable,
                                Sound(SOUND_ASSET_ID::PRESSURE_PLATE));
       }
+
+      // Connect to an available door, if we haven't yet.
+      // Exploits the fact that there's only 1 PP per room.
+      for (Entity& entity : registry.activeDoors.entities) {
+        if (registry.doorConnections.has(entity)) {
+          DoorConnection& door_connection = registry.doorConnections.get(entity);
+          if (door_connection.objective == Objective::PRESSURE_PLATE) {
+            door_connection.locked = false;
+
+            // change the sprite
+            if (registry.renderRequests.has(entity)) {
+              registry.renderRequests.remove(entity);
+
+              level->assign_door_sprite(entity, door_connection);
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -1280,7 +1331,6 @@ void CollisionSystem::resolveMassCollision(Entity wall, Entity other) {
 }
 
 void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
-  // If the door is locked, ignore it.
   if (registry.doorConnections.has(door)) {
     DoorConnection& doorConnection = registry.doorConnections.get(door);
     DoorConnection& otherDoorConnection =
@@ -1289,13 +1339,18 @@ void CollisionSystem::resolveDoorPlayerCollision(Entity door, Entity player) {
                         otherDoorConnection.room_id == "10" ||
                         otherDoorConnection.room_id == "15";
 
+    // If the door is locked, ignore it.
     if (doorConnection.locked && is_boss_room) {
       bossLockedDialogue(renderer);
       return;
     } else if (doorConnection.locked && otherDoorConnection.room_id == "0") {
       tutorialLockedDialogue(renderer);
       return;
-    } else if (doorConnection.locked) {
+    } else if (doorConnection.locked && (doorConnection.objective == Objective::RED_KEY || doorConnection.objective == Objective::BLUE_KEY || doorConnection.objective == Objective::YELLOW_KEY)) {
+      keyLockedDialogue(renderer);
+      return;
+    } else if (doorConnection.locked && doorConnection.objective == Objective::PRESSURE_PLATE) {
+      // No clue why, but this breaks if I change it to plateLockedDialogue, so I just changed keyLockedDialogue, LOL.
       keyLockedDialogue(renderer);
       return;
     }

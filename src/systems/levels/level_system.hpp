@@ -8,6 +8,7 @@
 
 #include "respawn.hpp"
 #include "level_builder.hpp"
+#include "player_hud.hpp"
 
 Direction get_opposite_direction(Direction direction);
 
@@ -20,11 +21,10 @@ private:
 
     void set_current_room_editor_id(std::string room_editor_id);
 
-    void spawn_miniboss();
     void spawn();
 
     void activate_walls();
-    void lock_doors(Entity& door, DoorConnection& door_connection);
+    void recalculate_current_room_locks(Entity& door, DoorConnection& door_connection);
     void activate_doors();
     void activate_floor();
     void activate_current_room();
@@ -38,10 +38,16 @@ public:
     
     LevelBuilder* level;
 
+    std::function<void()> dialogue_function = [this](){tutorialRoomDialogue(renderer);}; 
+
     std::string current_room_editor_id;
 
     void init(RenderSystem* renderer, LevelBuilder* level);
+
+    void assign_door_sprite(Entity& door, DoorConnection& door_connection);
     
+    void set_dialogue(DoorConnection& door_connection);
+
     // Switches to the room pointed at the given DoorConnection.
     void enter_room(DoorConnection& door_connection);
 
@@ -51,5 +57,5 @@ public:
     void activate_from_save(std::string id);
     void clear_all_state();
 
-    void collect_key(INVENTORY color);
+    void collect_key(Objective color);
 };

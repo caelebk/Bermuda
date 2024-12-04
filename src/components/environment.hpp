@@ -45,15 +45,14 @@ struct Space {
 };
 
 struct DoorConnection {
-  Direction direction;
-
-  // Disgusting hack; nothing else uses this, so it's safe. Will change in future PR since we need to account for other objectives
-  // like pressure plates too.
-  INVENTORY key = INVENTORY::PROJ_COUNT;
-  bool locked = false;
-
   std::string room_id;
   Entity exit_door;
+  Direction direction;
+
+  // Gameplay related data.
+  Objective objective = Objective::NONE;
+  bool assigned = false;
+  bool locked = false;
 };
 
 struct RoomTransition {
@@ -70,7 +69,7 @@ struct Interactable {
 
 struct PressurePlate {
   bool active;
-  float mass_activation = 30;
+  float mass_activation = 20;
 };
 
 struct Floor {};

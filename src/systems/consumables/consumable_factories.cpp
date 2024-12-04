@@ -138,6 +138,31 @@ Entity unlockBossDoors(RenderSystem* renderer, vec2 position,
   for (auto& door_connection : registry.doorConnections.components) {
     door_connection.locked = false;
   }
+  for (auto& entity : registry.activeDoors.entities) {
+    if (registry.renderRequests.has(entity) && registry.doorConnections.has(entity) && registry.positions.has(entity)) {
+      registry.renderRequests.remove(entity);
+
+      Position&       door_position   = registry.positions.get(entity);
+      DoorConnection& door_connection = registry.doorConnections.get(entity);
+
+      TEXTURE_ASSET_ID texture;
+      if (door_connection.direction == Direction::SOUTH || door_connection.direction == Direction::WEST) {
+        door_position.angle = M_PI;
+      }
+      if (door_connection.direction == Direction::NORTH || door_connection.direction == Direction::SOUTH) {
+        texture = TEXTURE_ASSET_ID::DOORWAY_H;
+      } else {
+        texture = TEXTURE_ASSET_ID::DOORWAY_V;
+      }
+
+      registry.renderRequests.insert(entity, {texture, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE});
+
+      if (!registry.sounds.has(entity)) {
+        registry.sounds.insert(entity, SOUND_ASSET_ID::PRESSURE_PLATE);
+      }
+    }
+  }
   createGeyserPos(renderer, position, false);
   return Entity(0);
 }
@@ -146,7 +171,32 @@ Entity unlockBossDoors(RenderSystem* renderer, vec2 position,
 Entity unlockTutorial(RenderSystem* renderer, vec2 position,
                        bool checkCollisions) {
   for (auto& door_connection : registry.doorConnections.components) {
-    door_connection.locked = false;
+    door_connection.locked = false;  
+  }
+  for (auto& entity : registry.activeDoors.entities) {
+    if (registry.renderRequests.has(entity) && registry.doorConnections.has(entity) && registry.positions.has(entity)) {
+      registry.renderRequests.remove(entity);
+
+      Position&       door_position   = registry.positions.get(entity);
+      DoorConnection& door_connection = registry.doorConnections.get(entity);
+
+      TEXTURE_ASSET_ID texture;
+      if (door_connection.direction == Direction::SOUTH || door_connection.direction == Direction::WEST) {
+        door_position.angle = M_PI;
+      }
+      if (door_connection.direction == Direction::NORTH || door_connection.direction == Direction::SOUTH) {
+        texture = TEXTURE_ASSET_ID::DOORWAY_H;
+      } else {
+        texture = TEXTURE_ASSET_ID::DOORWAY_V;
+      }
+
+      registry.renderRequests.insert(entity, {texture, EFFECT_ASSET_ID::TEXTURED,
+                                            GEOMETRY_BUFFER_ID::SPRITE});
+      
+      if (!registry.sounds.has(entity)) {
+        registry.sounds.insert(entity, SOUND_ASSET_ID::PRESSURE_PLATE);
+      }
+    }
   }
   return Entity(0);
 }
@@ -184,7 +234,7 @@ Entity createRedKeyPos(RenderSystem* renderer, vec2 position,
 
   // make item
   Item &i = registry.items.emplace(entity);
-  i.item = INVENTORY::RED_KEY;
+  i.item = Objective::RED_KEY;
   EntityState es;
   i.type = ENTITY_TYPE::RED_KEY;
 
@@ -235,7 +285,7 @@ Entity createBlueKeyPos(RenderSystem* renderer, vec2 position, bool checkCollisi
 
   // make consumable
   Item &i = registry.items.emplace(entity);
-  i.item = INVENTORY::BLUE_KEY;
+  i.item = Objective::BLUE_KEY;
   EntityState es;
   i.type = ENTITY_TYPE::BLUE_KEY;
 
@@ -286,7 +336,7 @@ Entity createYellowKeyPos(RenderSystem* renderer, vec2 position, bool checkColli
 
   // make consumable
   Item &i = registry.items.emplace(entity);
-  i.item = INVENTORY::YELLOW_KEY;
+  i.item = Objective::YELLOW_KEY;
   EntityState es;
   i.type = ENTITY_TYPE::YELLOW_KEY;
 

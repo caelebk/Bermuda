@@ -331,22 +331,23 @@ void collectYellowKey(RenderSystem* renderer) {
  *
  * @param keyType
  ********************************************************************************/
-bool isKeyCollected(INVENTORY keyType) {
+bool isKeyCollected(Objective keyType) {
   if (!registry.inventory.has(player)) {
     printf("Player has no inventory\n");
     return false;
   }
   Inventory& playerInventory = registry.inventory.get(player);
   switch (keyType) {
-    case INVENTORY::RED_KEY:
+    case Objective::RED_KEY:
       return playerInventory.redKey;
 
-    case INVENTORY::BLUE_KEY:
+    case Objective::BLUE_KEY:
       return playerInventory.blueKey;
 
-    case INVENTORY::YELLOW_KEY:
+    case Objective::YELLOW_KEY:
       return playerInventory.yellowKey;
     default:
+      // Return true as a fallback case, since it's probably better to break the doors than softlock the player.
       return true;
   }
 }
@@ -495,11 +496,17 @@ void sharkmanBossDialogue(RenderSystem* renderer) {
 void keyLockedDialogue(RenderSystem* renderer) {
   createDialogue(renderer, KEY_LOCKED_LINE1, KEY_LOCKED_LINE2);
 }
+
 void plateLockedDialogue(RenderSystem* renderer) {
   createDialogue(renderer, PLATE_LOCKED_LINE1, PLATE_LOCKED_LINE1);
 }
+
 void bossLockedDialogue(RenderSystem* renderer) {
   createDialogue(renderer, BOSS_LOCKED_LINE1, BOSS_LOCKED_LINE2);
+}
+
+void doorLockedBehindMeDialogue(RenderSystem* renderer) {
+  createDialogue(renderer, LOCKED_IN_LINE1, LOCKED_IN_LINE2);
 }
 
 void tutorialLockedDialogue(RenderSystem* renderer) {

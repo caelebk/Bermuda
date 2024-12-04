@@ -124,6 +124,8 @@ int main(int argc, char* argv[]) {
   LevelBuilder level_builder = LevelBuilder();
   level_builder.generate_random_level();
 
+  init_save_system(&level_builder, &level, &renderer);
+
   // initialize the main systems
   init_save_system(&level_builder, &level, &renderer);
   level.init(&renderer, &level_builder);

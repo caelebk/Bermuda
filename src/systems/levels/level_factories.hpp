@@ -9,14 +9,13 @@
 #define MAX_DOORS_PER_WALL 2
 
 // The keys that can actually spawn during a level.
-const std::vector<INVENTORY> KEYS = {INVENTORY::RED_KEY, INVENTORY::BLUE_KEY,
-                                     INVENTORY::YELLOW_KEY};
+const std::vector<Objective> KEYS = {Objective::RED_KEY, Objective::BLUE_KEY, Objective::YELLOW_KEY};
 // The spawn functions for the keys.
-const std::vector<SpawnFunctionGroup> KEY_SPAWN_FUNCTIONS = {
-    RED_KEY_SPAWN, BLUE_KEY_SPAWN, YELLOW_KEY_SPAWN};
-// The probability of a door spawning as locked via any available key, as a
-// percentage.
-const int LOCKED_DOOR_PROBABILITY = 75;
+const std::vector<SpawnFunctionWrapper> KEY_SPAWN_WRAPPERS = {RED_KEY_SPAWN, BLUE_KEY_SPAWN, YELLOW_KEY_SPAWN};
+// The probability of a door spawning as locked via any unlock condition.
+// const int LOCKED_DOOR_PROBABILITY = 50;
+// The probability of a pressure plate possibly spawning in a room.
+const int PRESSURE_PLATE_PROBABILITY = 100;
 
 const EditorID STARTING_ROOM   = "0";
 const EditorID TUTORIAL_ROOM   = "0";
@@ -27,14 +26,10 @@ const EditorID FINAL_BOSS_ROOM = "15";
 const std::vector<int> ROOM_CLUSTERS = {1, 5, 5, 5}; // 16 rooms total.
 // This vector controls index-wise the spawn function groups of the levels you defined in the above line, i.e the first (tutorial level) 
 // spawns nothing, the next spawns LVL_1 enemies, etc. Must have size == to ROOM_CLUSTERS.size().
-const std::vector<SpawnFunctionGroup> ROOM_CLUSTER_SPAWN_FUNCTION_GROUPS = {EMPTY, LVL_1_RAND_POS, LVL_2_RAND_POS, LVL_3_RAND_POS};
-const std::vector<SpawnFunctionGroup> ROOM_CLUSTER_AMBIENT_FUNCTION_GROUPS = {EMPTY, LVL_1_AMBIENT, LVL_2_AMBIENT, LVL_3_AMBIENT};
-const std::vector<SpawnFunctionGroup> ROOM_CLUSTER_PACK_SPAWN_FUNCTION_GROUPS = {EMPTY, LVL_1_PACKS, LVL_2_PACKS, EMPTY};
+const std::vector<std::vector<SpawnFunctionWrapper>> ROOM_SPAWN_WRAPPERS = {EMPTY, LVL_1, LVL_2, LVL_3};
 
-const std::vector<int> BOSS_ROOMS = {0, 5, 10};
-// This vector controls index-wise the spawn function groups of miniboss rooms
-// you defined in the above line, i.e the first (tutorial level) spawns the
-// tutorial boss, the next spawns the giant crab, etc. Must have size == to
-// BOSS_ROOMS.size().
-const std::vector<SpawnFunctionGroup> BOSS_SPAWN_FUNCTION_GROUPS = {
-    TUTORIAL_JELLYFISH_MINIBOSS, CRAB_MINIBOSS, SHARKMAN_MINIBOSS};
+const std::vector<int> MINIBOSS_ROOMS = {0, 5, 10};
+// This vector controls index-wise the spawn function groups of miniboss rooms you defined in the above line, i.e the first (tutorial level) 
+// spawns the tutorial boss, the next spawns the giant crab, etc. Must have size == to MINIBOSS_ROOMS.size().
+const std::vector<std::vector<SpawnFunctionWrapper>> MINIBOSS_SPAWN_WRAPPERS = {TUTORIAL_JELLYFISH_MINIBOSS, CRAB_MINIBOSS, SHARKMAN_MINIBOSS};
+const std::vector<std::vector<SpawnFunctionWrapper>> FINAL_BOSS_SPAWN_WRAPPER = {FINAL_BOSS};

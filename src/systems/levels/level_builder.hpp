@@ -57,13 +57,14 @@ Direction get_opposite_direction(Direction direction);
 /**
  * Deals only with the building of levels.
  */
-class LevelBuilder {
-  private:
-  // std::unordered_map<std::string, RoomBuilder> rooms;
-  std::vector<EditorID> traversal;  // An ordered list of the guaranteed path
-                                    // from the start to end of this level.
+class LevelBuilder
+{
+private:
+    std::vector<EditorID> traversal; // An ordered list of the guaranteed path from the start to end of this level.
 
-  void connect_doors();
+    void randomize_door_objective(EditorID& r1_id, EditorID& r2_id, DoorConnection& door_connection_1, DoorConnection& door_connection_2);
+    void connect(Direction direction, EditorID r1_id, EditorID d1_id, EditorID r2_id, EditorID d2_id);
+    void connect_doors();
 
   void mark_difficulty_regions();
   void mark_tutorial_room();
@@ -74,32 +75,23 @@ class LevelBuilder {
       std::function<void(int)>              draw_segment,
       std::function<void(std::string, int)> draw_door);
 
-  std::vector<int> get_random_door_positions(int num_doors, int min, int max);
-  int count_edges_with_direction(EditorID room, Direction direction);
+    std::vector<int> get_random_door_positions(int num_doors, int min, int max);
+    int count_edges_with_direction(EditorID room, Direction direction);
+    
+    // These functions assign the possibility of the room spawning an objective.
+    void randomize_keys();
+    void randomize_pressure_plates();
+    void randomize_objectives();
 
-  void randomize_key_rooms();
-  void randomize_room_shapes();
-  void randomize_connection_directions();
-  void randomize_connections();
-
-  public:
-  /**
-   * Returns the RoomBuilder for a room, making a new one if one under the given
-   * key does not exist.
-   * @param s_id: the room's key.
-   */
-  RoomBuilder& get_room_by_editor_id(EditorID s_id);
-
-  /**
-   * Connects two doors together.
-   * @param direction: the wall that the first door is on.
-   * @param r1_id: the first room's key.
-   * @param d1_id: the door in the first room's key.
-   * @param r2_id: the second room's key.
-   * @param d1_id: the door in the second room's key.
-   */
-  LevelBuilder& connect(Direction direction, EditorID r1_id, EditorID d1_id,
-                        EditorID r2_id, EditorID d2_id);
+    void randomize_room_shapes();
+    void randomize_connection_directions();
+    void randomize_connections();
+public:
+    /**
+     * Returns the RoomBuilder for a room, making a new one if one under the given key does not exist.
+     * @param s_id: the room's key.
+     */
+    RoomBuilder &get_room_by_editor_id(EditorID s_id);
 
   /**
    * Generates a randomized level.

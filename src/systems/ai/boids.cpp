@@ -149,7 +149,7 @@ static void do_tracking_surround(Group& g) {
   const mat2 rotN45 = mat2(0.7071, 0.7071, -0.7071, 0.7071);
 
   int behaviour_counter = 0;
-  int behaviour_count   = 3;
+  // int behaviour_count   = 3;
 
   const Position& player_pos = registry.positions.get(player);
   for (Entity e : g.members) {

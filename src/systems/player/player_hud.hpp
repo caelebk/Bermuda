@@ -2,6 +2,7 @@
 
 #include "abilities.hpp"
 #include "common.hpp"
+#include "level_util.hpp"
 #include "physics.hpp"
 #include "player.hpp"
 #include "render_system.hpp"
@@ -66,8 +67,8 @@ void collectBlueKey(RenderSystem* renderer);
 // collect yellow key
 void collectYellowKey(RenderSystem* renderer);
 
-// is the corresponding key currently collected
-bool isKeyCollected(INVENTORY keyType);
+// if the given objective is a key, return true if the corresponding key currently collected
+bool isKeyCollected(Objective keyType);
 
 //////////////////////////////////////////////////////////////
 // Communications
@@ -147,21 +148,25 @@ void krabBossDialogue(RenderSystem* renderer);
 #define SHARK_BOSS_LINE2 "I wonder how hard it'll be for it to stop if it's charging straight at me..."
 void sharkmanBossDialogue(RenderSystem* renderer); 
 
-#define KEY_LOCKED_LINE1 "This door isn't open."
-#define KEY_LOCKED_LINE2 "It appears I need to find a matching key."
+#define KEY_LOCKED_LINE1 "This door is closed."
+#define KEY_LOCKED_LINE2 "It appears I need to find a matching key, or activate the pressure plate."
 void keyLockedDialogue(RenderSystem* renderer);
 
-#define PLATE_LOCKED_LINE1 "This door isn't open."
+#define PLATE_LOCKED_LINE1 "It won't budge."
 #define PLATE_LOCKED_LINE2 "Maybe the pressure plate I saw earlier will open the door."
 void plateLockedDialogue(RenderSystem* renderer);    // TODO: call on door collide
 
-#define BOSS_LOCKED_LINE1 "This door isn't open."
+#define BOSS_LOCKED_LINE1 "I can't leave now!"
 #define BOSS_LOCKED_LINE2 "Maybe I can squeeze through the bars, but not while fighting this thing."
 void bossLockedDialogue(RenderSystem* renderer);     // TODO: change dialogue when door render updates are implemented
 
 #define TUTORIAL_LOCKED_LINE1 "This door isn't open."
 #define TUTORIAL_LOCKED_LINE2 "Maybe I can squeeze through the bars, but first let me kill this jellyfish."
 void tutorialLockedDialogue(RenderSystem* renderer); // TODO: change dialogue when door render updates are implemented
+
+#define LOCKED_IN_LINE1 "The door locked behind me!"
+#define LOCKED_IN_LINE2 "If I use the pressure plate in both rooms it should stay open forever..."
+void doorLockedBehindMeDialogue(RenderSystem* renderer); // TODO: change dialogue when door render updates are implemented
 
 //////////////////////////////////////////////////////////////
 // Notifications
@@ -171,6 +176,11 @@ void tutorialLockedDialogue(RenderSystem* renderer); // TODO: change dialogue wh
 
 // update visual notification timers
 void update_notification_timers(float elapsed_ms_since_last_update);
+
+//////////////////////////////////////////////////////////////
+// Room Indicator
+//////////////////////////////////////////////////////////////
+#define ROOM_INDICATOR_POS vec2(window_width_px - 25.f, window_height_px - 11.f)
 
 //////////////////////////////////////////////////////////////
 // Globals

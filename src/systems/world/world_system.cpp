@@ -22,6 +22,7 @@
 #include "text_factories.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "world_state.hpp"
+#include "saving_system.hpp"
 
 // stlib
 #include <GLFW/glfw3.h>

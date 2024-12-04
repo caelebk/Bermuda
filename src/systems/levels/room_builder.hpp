@@ -26,6 +26,8 @@ class RoomBuilder {
     vec2 get_updated_right_position(int magnitude);
     vec2 get_updated_left_position(int magnitude);
 
+    void respawn(RenderSystem* renderer);
+
     vec2 rejection_sample();
   public:
       Entity entity; // the room under construction.
@@ -34,20 +36,19 @@ class RoomBuilder {
       std::unordered_map<EditorID, Entity> doors; // the doors inherent to this room.
       std::unordered_map<EditorID, Direction> connections; // the connections inherent to this room.
 
+      std::string name; // the human-readable name of this room
+
       // A bunch of boolean flags.
       bool has_entered = false;
       bool is_tutorial_room = false;
       bool is_boss_room = false;
 
-      std::vector<INVENTORY> key_doors;
-      // room_spawn_functions are always ran when you enter a room for the first time.
-      std::vector<SpawnFunctionGroup> room_spawn_function_groups;
-      std::vector<SpawnFunctionGroup> room_ambient_function_groups;
-      std::vector<SpawnFunctionGroup> room_pack_spawn_function_groups;
-      std::vector<SpawnFunctionGroup> room_fixed_spawn_function_groups;
-      // boss_spawn_functions are only ran if is_boss_room is true.
-      std::vector<SpawnFunctionGroup> boss_spawn_function_groups;
-      
+      // possible objectives for the room.
+      std::vector<Objective> objectives = { Objective::NONE };
+
+      // Functions to be called when entering a room for the first time.
+      std::vector<SpawnFunctionWrapper> spawn_wrappers;
+
       std::vector<EntitySave> saved_entities; // the entities inherent to this room.
 
       RoomBuilder();
@@ -58,9 +59,9 @@ class RoomBuilder {
       RoomBuilder &right(int magnitude = 0);
       RoomBuilder &door(EditorID s_id, int magnitude = 0);
 
-      std::vector<EditorID> get_connections_with_direction(Direction direction);
-      std::vector<Entity> get_doors();
+      void spawn(RenderSystem* renderer);
 
       bool is_in_room(vec2 &position);
+      std::vector<EditorID> get_connections_with_direction(Direction direction);
       vec2 get_random_position();
   };
