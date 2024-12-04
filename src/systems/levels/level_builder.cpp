@@ -30,28 +30,30 @@ void LevelBuilder::randomize_door_objective(EditorID& r1_id, EditorID& r2_id, Do
       Objective& random_objective = room_1.objectives[i];
 
       // Pressure plate logic. Must be available in both rooms.
-      if (
-        random_objective == Objective::PRESSURE_PLATE
-        && std::find(room_2.objectives.begin(), room_2.objectives.end(), Objective::PRESSURE_PLATE) != room_2.objectives.end()
-        ) {
-        room_1.spawn_wrappers.push_back(PRESSURE_PLATE_SPAWN);
-        room_2.spawn_wrappers.push_back(PRESSURE_PLATE_SPAWN);
-        room_1.spawn_wrappers.push_back(ROCK_SPAWN);
-        room_2.spawn_wrappers.push_back(ROCK_SPAWN);
-        std::cout << "assigned pressure plates to rooms: " << r1_id << " and " << r2_id << std::endl;
+      if (random_objective == Objective::PRESSURE_PLATE) {
+        if (std::find(room_2.objectives.begin(), room_2.objectives.end(), Objective::PRESSURE_PLATE) != room_2.objectives.end()) {
+          room_1.spawn_wrappers.push_back(PRESSURE_PLATE_SPAWN);
+          room_2.spawn_wrappers.push_back(PRESSURE_PLATE_SPAWN);
+          room_1.spawn_wrappers.push_back(ROCK_SPAWN);
+          room_2.spawn_wrappers.push_back(ROCK_SPAWN);
+          std::cout << "assigned pressure plates to rooms: " << r1_id << " and " << r2_id << std::endl;
 
-        // Restrict ourselves to one pressure plate per room.
-        room_1.objectives.erase(std::remove(room_1.objectives.begin(), room_1.objectives.end(), Objective::PRESSURE_PLATE), room_1.objectives.end());
-        room_2.objectives.erase(std::remove(room_2.objectives.begin(), room_2.objectives.end(), Objective::PRESSURE_PLATE), room_2.objectives.end());
+          // Restrict ourselves to one pressure plate per room.
+          room_1.objectives.erase(std::remove(room_1.objectives.begin(), room_1.objectives.end(), Objective::PRESSURE_PLATE), room_1.objectives.end());
+          room_2.objectives.erase(std::remove(room_2.objectives.begin(), room_2.objectives.end(), Objective::PRESSURE_PLATE), room_2.objectives.end());
 
-        door_connection_1.objective = Objective::PRESSURE_PLATE;
-        door_connection_2.objective = Objective::PRESSURE_PLATE;
-        break;
-      } else {
-        continue;
-      }      
+          door_connection_1.objective = Objective::PRESSURE_PLATE;
+          door_connection_2.objective = Objective::PRESSURE_PLATE;
+          break;
+        } else {
+          continue;
+        }      
+      }
 
       // Assign if we're good.
+      if (random_objective == Objective::RED_KEY || random_objective == Objective::BLUE_KEY || random_objective == Objective::YELLOW_KEY) {
+        printf("key\n");
+      }
       door_connection_1.objective = random_objective;
       door_connection_2.objective = random_objective;
     }
