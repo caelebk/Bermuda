@@ -74,7 +74,7 @@ void modifyOxygen(Entity& entity, Entity& oxygenModifier) {
   }
 
   entity_oxygen.level += deltaOxygen;
-  
+
   updateHealthBarRender(entity, entity_oxygen, deltaOxygen);
   updateOxygenLvlStatus(entity_oxygen);
   updateDeathStatus(entity, entity_oxygen);
@@ -266,7 +266,9 @@ void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen) {
              !registry.players.has(entity)) {
     // cthulu death
     if (registry.bosses.has(entity) &&
-        registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU) {
+        ((registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU_PHASE1) ||
+         (registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU_PHASE2) ||
+         (registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU_TRANS))) {
       // kill all tentacles
       for (Entity tentacle : registry.deadlys.entities) {
         if (!registry.bosses.has(tentacle)) {
@@ -290,9 +292,13 @@ void updateDeathStatus(Entity& entity, Oxygen& entity_oxygen) {
         }
       } else {
         // hack, bros ai is healing
-        cthulhu.in_transition = true;
-        cthulhu.curr_cd = 0;
-        cthulhu.ai_cd = CTHULHU_REGEN_RATE;
+        if (registry.deadlys.has(entity)) {
+          Deadly& d = registry.deadlys.get(entity);
+          d.type    = ENTITY_TYPE::CTHULHU_TRANS;
+        }
+        cthulhu.type          = ENTITY_TYPE::CTHULHU_TRANS;
+        cthulhu.curr_cd       = 0;
+        cthulhu.ai_cd         = CTHULHU_REGEN_RATE;
         cthulhu.ai = std::vector<std::function<void()>>({addCthulhuRageAI});
         //pause music during his transition to phase 2.
         registry.musics.insert(Entity(), MUSIC_ASSET_ID::MUSIC_COUNT);

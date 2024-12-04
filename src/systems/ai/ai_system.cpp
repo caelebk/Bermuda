@@ -90,9 +90,8 @@ bool can_see_entity(Position& pos, Position& entity_pos) {
   const float player_dist = dot(direction, direction);
   direction               = normalize(direction);
 
-  // iterate through all walls since its equally as hard to determine if the
-  // wall is between or not
-  for (Entity w : registry.activeWalls.entities) {
+  // iterate through all breakables since walls are constant
+  for (Entity w : registry.breakables.entities) {
     if (!registry.positions.has(w)) {
       continue;
     }
@@ -138,7 +137,7 @@ bool can_see_entity(Position& pos, Position& entity_pos) {
       continue;
     }
 
-    // debug, turns walls in between to the player texture
+    // debug, turns walls in between to the jelly texture
     // registry.renderRequests.remove(w);
     // registry.renderRequests.insert(
     // w, {TEXTURE_ASSET_ID::JELLY, EFFECT_ASSET_ID::TEXTURED,

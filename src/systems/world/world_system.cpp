@@ -232,7 +232,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
       // player or cthulhu death trigger fade to black
       bool is_cthulhu =
           registry.bosses.has(entity) &&
-          registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU;
+          (registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU_TRANS ||
+           registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU_PHASE1 ||
+           registry.bosses.get(entity).type == ENTITY_TYPE::CTHULHU_PHASE2);
+
       if (counter.counter_ms < min_counter_ms &&
           (entity == player || is_cthulhu)) {
         min_counter_ms = counter.counter_ms;

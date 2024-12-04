@@ -55,8 +55,9 @@ class RenderSystem {
       textures_path("player/torpedo.png"),
       textures_path("player/explosion.png"),
       textures_path("player/shrimp_gun.png"),
-      textures_path("player/shrimp.png"),  // TODO: shrimp projectile needed,
-                                           // this is for HUD
+      textures_path(
+          "player/shrimp.png"),  // inspired by:
+                                 // https://www.artstation.com/artwork/g0Q3zG
       textures_path("consumables/red_key.png"),
       textures_path("consumables/blue_key.png"),
       textures_path("consumables/yellow_key.png"),
@@ -71,19 +72,33 @@ class RenderSystem {
           "map_non_interactable/tutorial_floor.png"),  // partial source:
                                                        // Vecteezy.com
       textures_path("map_non_interactable/floor.png"),
-      textures_path("map_non_interactable/anchor.png"),
-      textures_path("map_non_interactable/bag.png"),
-      textures_path("map_non_interactable/bones.png"),
-      textures_path("map_non_interactable/bones1.png"),
-      textures_path("map_non_interactable/bottle.png"),
+      textures_path(
+          "map_non_interactable/anchor.png"),  // source:
+                                               // https://create.vista.com/vectors/icon-with-iron-anchor/
+      textures_path(
+          "map_non_interactable/bag.png"),  // source:
+                                            // https://www.gettyimages.ca/detail/illustration/plastic-bag-royalty-free-illustration/451573859?adppopup=true
+      textures_path(
+          "map_non_interactable/bones.png"),  // source:
+                                              // https://www.cleanpng.com/png-pile-of-bones-skeleton-bones-pile-scattered-pile-o-8142370/7.html
+      textures_path(
+          "map_non_interactable/bones1.png"),  // source:
+                                               // https://www.freepik.com/premium-ai-image/cartoon-bone_334442552.htm
+      textures_path(
+          "map_non_interactable/bottle.png"),  // source:
+                                               // https://pngtree.com/freepng/plastic-bottle-cartoon-illustration_7262953.html
       textures_path("map_non_interactable/coral1.png"),
       textures_path("map_non_interactable/coral2.png"),
       textures_path("map_non_interactable/seaweed1.png"),
-      textures_path("map_non_interactable/shell1.png"),
+      textures_path(
+          "map_non_interactable/shell1.png"),  // shells source:
+                                               // https://www.clipartmax.com/middle/m2i8d3d3N4d3A0N4_seashell-pin-png-cartoon-seashell-png/
       textures_path("map_non_interactable/shell2.png"),
       textures_path("map_non_interactable/shell3.png"),
       textures_path("map_non_interactable/tire.png"),
-      textures_path("map_non_interactable/seaweed1.png"),
+      textures_path(
+          "map_non_interactable/seaweed1.png"),  // source:
+                                                 // https://pngtree.com/free-foods-clipart/kelp
       textures_path("map_non_interactable/seaweed1.png"),
 
       textures_path("map_interactable/locked_door_h.png"),
@@ -100,8 +115,10 @@ class RenderSystem {
       textures_path("map_interactable/boss_doorway_v.png"),  // ibidem
       textures_path("map_interactable/doorway_h.png"),
       textures_path("map_interactable/doorway_v.png"),
-      textures_path("enemy/jellyfish.png"),
-      textures_path("enemy/fish0.png"),
+      textures_path("enemy/jellyfish.png"),  // source: Vecteezy.com
+      textures_path(
+          "enemy/fish0.png"),  // all fishes source:
+                               // https://snowdingo.itch.io/pixel-fishes
       textures_path("enemy/fish1.png"),
       textures_path("enemy/fish2.png"),
       textures_path("enemy/fish3.png"),
@@ -111,15 +128,22 @@ class RenderSystem {
       textures_path("enemy/urchin.png"),
       textures_path("enemy/urchin_needle.png"),
       textures_path("enemy/turtle.png"),
-      textures_path("enemy/seahorse.png"),
-      textures_path("enemy/seahorse_bullet.png"),
+      textures_path(
+          "enemy/seahorse.png"),  // source:
+                                  // https://www.freepik.com/premium-vector/pixel-art-illustration-seahorse-pixelated-seahorse-ocean-seahorse-icon-pixelated_80858279.htm
+      textures_path(
+          "enemy/seahorse_bullet.png"),  // source:
+                                         // https://www.pngitem.com/middle/bwmTmm_8-bit-bullet-png-transparent-png/
       textures_path(
           "enemy/siren.png"),  // inspired by
                                // https://www.tumblr.com/bakubabes-and-ramble
       textures_path("enemy/siren_heal.png"),
-      textures_path("enemy/krab_boss.png"),  // source: Vecteezy.com
+      textures_path(
+          "enemy/krab_boss.png"),  // krabs and krab boss source: Vecteezy.com
       textures_path("enemy/krab_boss_chase.png"),
-      textures_path("enemy/sharkman/sharkman0.png"),
+      textures_path(
+          "enemy/sharkman/sharkman0.png"),  // sharkman source:
+                                            // https://www.deviantart.com/h20dynamo/art/Shark-Man-Pixel-Animation-722233181
       textures_path("enemy/sharkman/sharkman1.png"),
       textures_path("enemy/sharkman/sharkman2.png"),
       textures_path("enemy/sharkman/sharkman3.png"),
@@ -132,17 +156,25 @@ class RenderSystem {
       textures_path("enemy/lobster/lobster_ram.png"),
       textures_path("enemy/cthulhu/cthulhu_normal.png"),  // source: seekpng.com
       textures_path("enemy/cthulhu/cthulhu_rage.png"),
-      textures_path("enemy/tentacle.png"),
-      textures_path("enemy/fireball.png"),
+      textures_path(
+          "enemy/tentacle.png"),  // original source:
+                                  // https://www.pixilart.com/draw/tentacle-0dbf4493af56288
+      textures_path("enemy/fireball.png"),  // extracted from cthulhu source
       textures_path(
           "enemy/rage_proj.png"),  // source:
                                    // https://www.deviantart.com/venjix5/art/Green-Energy-Ball-16-alt-831898817
       textures_path(
           "enemy/shockwave.png"),  // source:
                                    // https://www.unrealengine.com/marketplace/en-US/product/shockwave-pack
-      textures_path("map_interactable/breakable_crate.png"),
-      textures_path("map_interactable/metal_crate.png"),
-      textures_path("consumables/oxygen_canister.png"),
+      textures_path(
+          "map_interactable/breakable_crate.png"),  // source:
+                                                    // https://www.freepik.com/premium-vector/cartoon-crate-icon-isolated-vector-graphic-illustration-pixel-art-icon-game-assets-bi-sprite_26690845.htm
+      textures_path(
+          "map_interactable/metal_crate.png"),  // source:
+                                                // https://static.wikia.nocookie.net/portalworldsgame/images/a/a7/Metal_Plate.png/revision/latest?cb=20190611100746
+      textures_path(
+          "consumables/oxygen_canister.png"),  // source:
+                                               // https://opensea.io/assets/ethereum/0x9680223f7069203e361f55fefc89b7c1a952cdcc/380
       textures_path("map_interactable/geyser.png"),
       textures_path("map_interactable/geyser_bubble.png"),
       textures_path("map_interactable/pressure_plate/pressure_on.png"),

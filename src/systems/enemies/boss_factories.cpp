@@ -207,8 +207,10 @@ static void addCthulhuCanisters() {
 
   auto& shooter      = registry.shooters.emplace(b);
   shooter.type       = RangedEnemies::CTHULHU_CANISTER;
-  shooter.cooldown   = CTHULHU_CANISTER_FIRERATE;
-  shooter.default_cd = CTHULHU_CANISTER_FIRERATE;
+  shooter.cooldown   = boss.is_angry ? CTHULHU_RAGE_CANISTER_FIRERATE
+                                     : CTHULHU_CANISTER_FIRERATE;
+  shooter.default_cd = boss.is_angry ? CTHULHU_RAGE_CANISTER_FIRERATE
+                                     : CTHULHU_CANISTER_FIRERATE;
 
   printf("TAKE THIS!\n");
 }
@@ -255,7 +257,6 @@ void addCthulhuRageAI() {
   // heal cthulhu to full, then change ai
   Oxygen& oxygen = registry.oxygen.get(b);
   if (oxygen.level < CTHULHU_HEALTH) {
-    boss.in_transition = true;
     if (!boss.is_angry) {
       if (registry.renderRequests.has(b)) {
         registry.renderRequests.get(b).used_texture =
@@ -268,11 +269,14 @@ void addCthulhuRageAI() {
     }
     modifyOxygenAmount(b, CTHULHU_REGEN_AMT);
   } else {
-    oxygen.level = CTHULHU_HEALTH;
-    boss.in_transition = false;
-    boss.curr_cd = 0;  // reset cd
-    boss.ai_cd   = CTHULHU_AI_CD;
-    boss.ai      = std::vector<std::function<void()>>(
+    if (registry.deadlys.has(b)) {
+      registry.deadlys.get(b).type = ENTITY_TYPE::CTHULHU_PHASE2;
+    }
+    oxygen.level       = CTHULHU_HEALTH;
+    boss.type          = ENTITY_TYPE::CTHULHU_PHASE2;
+    boss.curr_cd       = 0;  // reset cd
+    boss.ai_cd         = CTHULHU_AI_CD;
+    boss.ai            = std::vector<std::function<void()>>(
         {addCthulhuShockwaves, addCthulhuRageProjectiles, addCthulhuTentacles,
               addCthulhuFireballs, addCthulhuCanisters, addCthulhuCanisters});
     if (!registry.musics.has(b)) {
@@ -524,7 +528,7 @@ Entity createCthulhuPos(RenderSystem* renderer, vec2 position,
 
   // make enemy and damage
   Deadly& d = registry.deadlys.emplace(entity);
-  d.type    = ENTITY_TYPE::CTHULHU;
+  d.type    = ENTITY_TYPE::CTHULHU_PHASE1;
 
   auto& damage  = registry.oxygenModifiers.emplace(entity);
   damage.amount = CTHULHU_DAMAGE;
@@ -533,7 +537,7 @@ Entity createCthulhuPos(RenderSystem* renderer, vec2 position,
   modifyOxygenCd.default_cd = CTHULHU_ATK_SPD;
 
   Boss& boss = registry.bosses.emplace(entity);
-  boss.type  = ENTITY_TYPE::CTHULHU;
+  boss.type  = ENTITY_TYPE::CTHULHU_PHASE1;
 
   addCthulhuTentacles();
 
@@ -568,6 +572,49 @@ Entity respawnCthulhu(RenderSystem* renderer, EntityState es) {
   if (diff < 0) {
     modifyOxygenAmount(entity, diff);
   }
+
+  return entity;
+}
+
+Entity respawnCthulhuPhase2(RenderSystem* renderer, EntityState es) {
+  Entity entity = respawnCthulhu(renderer, es);
+
+  // Restore State
+  Deadly& d  = registry.deadlys.get(entity);
+  d.type     = ENTITY_TYPE::CTHULHU_PHASE2;
+  Boss& boss = registry.bosses.get(entity);
+  boss.type  = ENTITY_TYPE::CTHULHU_PHASE2;
+
+  registry.renderRequests.get(entity).used_texture =
+      TEXTURE_ASSET_ID::CTHULHU_RAGE;
+
+  boss.is_angry = true;
+  boss.curr_cd  = 0;  // reset cd
+  boss.ai_cd    = CTHULHU_AI_CD;
+  boss.ai       = std::vector<std::function<void()>>(
+      {addCthulhuShockwaves, addCthulhuRageProjectiles, addCthulhuTentacles,
+             addCthulhuFireballs, addCthulhuCanisters, addCthulhuCanisters});
+
+  return entity;
+}
+
+Entity respawnCthulhuTrans(RenderSystem* renderer, EntityState es) {
+  Entity entity = respawnCthulhu(renderer, es);
+
+  // Restore State
+  Deadly& d  = registry.deadlys.get(entity);
+  d.type     = ENTITY_TYPE::CTHULHU_TRANS;
+  Boss& boss = registry.bosses.get(entity);
+  boss.type  = ENTITY_TYPE::CTHULHU_TRANS;
+
+  // hack, bros ai is healing
+  registry.renderRequests.get(entity).used_texture =
+      TEXTURE_ASSET_ID::CTHULHU_RAGE;
+
+  boss.is_angry      = true; // no need to replay audio
+  boss.curr_cd       = 0;
+  boss.ai_cd         = CTHULHU_REGEN_RATE;
+  boss.ai            = std::vector<std::function<void()>>({addCthulhuRageAI});
 
   return entity;
 }

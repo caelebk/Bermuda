@@ -36,10 +36,7 @@ struct Boss {
   ENTITY_TYPE                        type;
   float                              curr_cd = 0.f;
   float                              ai_cd   = 0.f;
-  float                              max_proj_count;
-  float                              curr_proj_count = 0.f;
   bool                               is_angry        = false;
-  bool                               in_transition   = false;
   std::vector<std::function<void()>> ai;
 };
 

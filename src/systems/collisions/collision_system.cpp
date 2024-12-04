@@ -519,14 +519,11 @@ void CollisionSystem::routeWallCollisions(Entity wall, Entity other) {
   }
   if (registry.enemyProjectiles.has(other)) {
     ENTITY_TYPE type = registry.enemyProjectiles.get(other).type;
-    // what is a wall collision rahhhhh
-    if (type == ENTITY_TYPE::SHOCKWAVE) {
-      return;
-    }
 
     if (registry.breakables.has(wall)) {
       // too cool an attack to be stopped by a wall
-      if (type == ENTITY_TYPE::FIREBALL || type == ENTITY_TYPE::RAGE_PROJ) {
+      if (type == ENTITY_TYPE::FIREBALL || type == ENTITY_TYPE::RAGE_PROJ ||
+          type == ENTITY_TYPE::SHOCKWAVE) {
         return;
       }
       resolveBreakableEnemyProjCollision(wall, other);
@@ -679,12 +676,9 @@ void CollisionSystem::resolvePlayerEnemyProjCollision(Entity player,
   addDamageIndicatorTimer(player);
   modifyOxygen(player, enemy_proj);
 
-  // canisters "explode" to hurt player in aoe,
-  // but since this is a direct hit, no explosion needed
-  // but for consistency show the effects
   if (registry.enemyProjectiles.get(enemy_proj).type ==
       ENTITY_TYPE::OXYGEN_CANISTER) {
-    registry.sounds.insert(Entity(), Sound(SOUND_ASSET_ID::EXPLOSION));
+    detectAndResolveExplosion(enemy_proj, player);
     make_canister_explosion(renderer,
                             registry.positions.get(enemy_proj).position);
   }
@@ -702,7 +696,6 @@ void CollisionSystem::resolvePlayerInteractableCollision(Entity player,
   if (registry.deathTimers.has(player)) {
     return;
   }
-  // TODO: add more affects M2+
   if (registry.pressurePlates.has(interactable)) {
     if (!registry.pressurePlates.get(interactable).active) {
       registry.renderRequests.get(interactable).used_texture =
@@ -744,9 +737,13 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
   Motion& playerproj_motion = registry.motions.get(player_proj);
 
   // cthulhu takes no damage in transition, cannot be stunned
-  bool is_cthulhu = registry.bosses.has(enemy) &&
-      registry.bosses.get(enemy).type == ENTITY_TYPE::CTHULHU;
-  if (!is_cthulhu || !registry.bosses.get(enemy).in_transition) {
+  bool is_cthulhu =
+      registry.bosses.has(enemy) &&
+      (registry.bosses.get(enemy).type == ENTITY_TYPE::CTHULHU_TRANS ||
+       registry.bosses.get(enemy).type == ENTITY_TYPE::CTHULHU_PHASE1 ||
+       registry.bosses.get(enemy).type == ENTITY_TYPE::CTHULHU_PHASE2);
+  if (!is_cthulhu ||
+      registry.bosses.get(enemy).type != ENTITY_TYPE::CTHULHU_TRANS) {
     modifyOxygen(enemy, player_proj);
   }
 
@@ -776,11 +773,11 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
       /*detectAndResolveConeAOE(player_proj, enemy, SHRIMP_DAMAGE_ANGLE);*/
       // shrimps dont pierce if they hit a boss
       if (registry.bosses.has(enemy)) {
-        Inventory& inventory = registry.inventory.get(player);
-        bool check_wep_swap = player_projectile != player_proj;
+        Inventory& inventory      = registry.inventory.get(player);
+        bool       check_wep_swap = player_projectile != player_proj;
 
         playerproj_motion.velocity = vec2(0.0f, 0.0f);
-        playerproj_comp.is_loaded = true;
+        playerproj_comp.is_loaded  = true;
 
         if (check_wep_swap) {
           destroyGunOrProjectile(player_proj);
@@ -814,7 +811,7 @@ void CollisionSystem::resolveEnemyPlayerProjCollision(Entity enemy,
       choose_new_direction(enemy, player_proj);
     }
   }
-  
+
   if (playerproj_comp.type != PROJECTILES::CONCUSSIVE &&
       playerproj_comp.type != PROJECTILES::SHRIMP) {
     playerproj_motion.velocity = vec2(0.0f, 0.0f);
@@ -918,8 +915,8 @@ void CollisionSystem::detectAndResolveExplosion(Entity proj,
                               enemy_position)) {
         // cthulhu cannot take damage in transition
         if (!registry.bosses.has(enemy_check) ||
-            registry.bosses.get(enemy_check).type != ENTITY_TYPE::CTHULHU ||
-            !registry.bosses.get(enemy_check).in_transition) {
+            registry.bosses.get(enemy_check).type !=
+                ENTITY_TYPE::CTHULHU_TRANS) {
           modifyOxygen(enemy_check, proj);
           addDamageIndicatorTimer(enemy_check);
         }
@@ -941,7 +938,7 @@ void CollisionSystem::detectAndResolveExplosion(Entity proj,
     }
   }
   // canister explosions hurt the player
-  if (is_canister && registry.positions.has(player)) {
+  if (is_canister && registry.positions.has(player) && player != hit_entity) {
     Position& player_position = registry.positions.get(player);
 
     if (circle_box_collides(playerproj_position, playerproj_aoe.radius,
@@ -967,7 +964,7 @@ void CollisionSystem::detectAndResolveExplosion(Entity proj,
       continue;
     }
 
-    // ignore if explosion did not touch canister
+    // blow up any canisters in explosion radius
     Position& canister_position = registry.positions.get(canister_check);
     if (circle_box_collides(playerproj_position, playerproj_aoe.radius,
                             canister_position)) {
@@ -1069,12 +1066,15 @@ void CollisionSystem::resolveWallPlayerProjCollision(Entity wall,
 void CollisionSystem::resolveWallEnemyProjCollision(Entity wall,
                                                     Entity enemy_proj) {
   // canister projectiles explode on walls
-  if (registry.enemyProjectiles.has(enemy_proj) &&
-      registry.enemyProjectiles.get(enemy_proj).type ==
-          ENTITY_TYPE::OXYGEN_CANISTER) {
+  if (registry.enemyProjectiles.get(enemy_proj).type ==
+      ENTITY_TYPE::OXYGEN_CANISTER) {
     detectAndResolveExplosion(enemy_proj, wall);
     make_canister_explosion(renderer,
                             registry.positions.get(enemy_proj).position);
+  } else if (registry.enemyProjectiles.get(enemy_proj).type ==
+             ENTITY_TYPE::SHOCKWAVE) {
+    // what is a wall collision rahhhhh
+    return;
   }
   registry.remove_all_components_of(enemy_proj);
 }

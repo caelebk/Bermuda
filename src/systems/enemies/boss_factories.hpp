@@ -10,8 +10,12 @@
 #include "tiny_ecs.hpp"
 #include "tiny_ecs_registry.hpp"
 
+// Create the tutorial
+Entity createTutorial(RenderSystem* renderer, vec2 position,
+                      bool checkCollisions);
+
 //////////////////////////////////////////////////////////////
-// Crab Boss
+// KRAB BOSS
 //////////////////////////////////////////////////////////////
 #define KRAB_BOSS_MS 50.0
 #define KRAB_BOSS_DAMAGE -300.0
@@ -31,9 +35,6 @@
 #define KRAB_BOSS_HEALTH_BOUNDING_BOX vec2(50.f, 5.f)
 #define KRAB_BOSS_AI_CD 5000
 
-// Create the tutorial
-Entity createTutorial(RenderSystem* renderer, vec2 position,
-                      bool checkCollisions);
 Entity createCrabBossPos(RenderSystem* renderer, vec2 position,
                          bool checkCollisions = true);
 Entity createInitCrabBossPos(RenderSystem* renderer, vec2 position,
@@ -86,20 +87,23 @@ void   addSharkmanTarget();
 #define CTHULHU_ENEMY_LIMIT 9  // 8 + itself
 
 #define CTHULHU_FIREBALL_FIRERATE 1200.0
-#define CTHULHU_RAGE_FIREBALL_FIRERATE 800.0
+#define CTHULHU_RAGE_FIREBALL_FIRERATE 600.0
 
 #define CTHULHU_CANISTER_MS 100.0
 #define CTHULHU_CANISTER_TIMER 2500.f
-#define CTHULHU_RAGE_CANISTER_MS 250.0
-#define CTHULHU_RAGE_CANISTER_TIMER 1120.f
 #define CTHULHU_CANISTER_FIRERATE 1500.0
+#define CTHULHU_RAGE_CANISTER_MS 200.0
+#define CTHULHU_RAGE_CANISTER_TIMER 1475.f
+#define CTHULHU_RAGE_CANISTER_FIRERATE 1000.0
 
 #define CTHULHU_WAVE_FIRERATE 2000.0
-#define CTHULHU_FRENZY_FIRERATE 750.0
+#define CTHULHU_FRENZY_FIRERATE 500.0
 
 Entity createCthulhuPos(RenderSystem* renderer, vec2 position,
                         bool checkCollisions = true);
 Entity respawnCthulhu(RenderSystem* renderer, EntityState es);
+Entity respawnCthulhuPhase2(RenderSystem* renderer, EntityState es);
+Entity respawnCthulhuTrans(RenderSystem* renderer, EntityState es);
 Entity shootCanister(RenderSystem* renderer, vec2 position, vec2 direction,
                      bool is_angry);
 void   addCthulhuRageAI();
@@ -143,8 +147,8 @@ Entity shootFireball(RenderSystem* renderer, vec2 position, vec2 direction);
 //////////////////////////////////////////////////////////////
 #define SHOCKWAVE_GROW_RATE 500.0
 #define SHOCKWAVE_BOUNDING_BOX vec2(799.f, 769.f)
-#define SHOCKWAVE_DAMAGE -200.0
-#define SHOCKWAVE_TIMER 2500.f
+#define SHOCKWAVE_DAMAGE -300.0
+#define SHOCKWAVE_TIMER 1500.f
 
 Entity shootShockwave(RenderSystem* renderer, vec2 position);
 
