@@ -7,7 +7,7 @@ Bermuda is an underwater roguelike where survival hinges on managing your oxygen
 ### Credits:
 - Andy Li [@andyyyli](https://github.com/AndyyyLi)
 - Bob Pham [@bob-pham](https://github.com/bob-pham)
-- Brandon Yih
+- Brandon Yih [@byih221](https://github.com/byih221)
 - Caeleb Koharjo [@caelebk](https://github.com/caelebk)
 - David Sopheap [@gmdvdsp](https://github.com/gmdvdsp)
 - Tony Zhang [@TonyZhang1112](https://github.com/TonyZhang1112)
