@@ -4,6 +4,14 @@ All you have left is an oxygen tank, an atmospheric diving suit, and a harpoon g
   
 Bermuda is an underwater roguelike where survival hinges on managing your oxygen supply. Dive deep into procedurally generated challenges, evade dangers, and explore the depths. Built entirely on a custom game engine developed from scratch using `C++`, `OpenGL`, `CMake`, and `SDL2`.
 
+### Credits:
+- Andy Li [@andyyyli](https://github.com/AndyyyLi)
+- Bob Pham [@bob-pham](https://github.com/bob-pham)
+- Brandon Yih
+- Caeleb Koharjo [@caelebk](https://github.com/caelebk)
+- David Sopheap [@gmdvdsp](https://github.com/gmdvdsp)
+- Tony Zhang [@TonyZhang1112](https://github.com/TonyZhang1112)
+
 # Requirements
 Most of the requirements have been included as header libaries. The follow may or may not need to be installed
 
@@ -44,6 +52,8 @@ make
 ```shell
 ./bermuda
 ```
+
+* Not for MacOS: Do not build/run using Rosetta
 
 # Gallery
 **Starting Screen**
